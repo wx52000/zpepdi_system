@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.ProjectWorkDayDao">
+
+  <resultMap id="tecWorkday" type="com.zpepdi.eureka_client.entity.ProjectExcelTec">
+    <result column="id" property="id" jdbcType="INTEGER"/>
+    <result column="number" property="number" jdbcType="VARCHAR"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="min" jdbcType="VARCHAR"/>
+    <result column="max"  jdbcType="VARCHAR"/>
+    <collection property="list" javaType="ARRAYLIST" ofType="map" column="id = id ,min = min, max= max"
+                select="statisticByDate">
+    </collection>
+  </resultMap>
+  <insert id="setProWorkDay">
+        insert into project_workday
+            (project_id, manage, `tec`, backup)
+        values
+          (#{project_id}, #{manage}, #{tec}, #{backup})
+      on duplicate key update
+        manage = values(manage),
+    tec = values(tec),
+    backup = values(backup)
+  </insert>
+  <update id="setTecWorkDay">
+    insert into workday_tec
+    (project_id, volume_tec, `amount`)
+    values
+    <foreach collection="list" item="item" separator=",">
+      <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="item.ratio != null and item.ratio != ''">
+          #{id}, #{item.name}, #{item.workday}
+        </if>
+      </trim>
+    </foreach>
+    on duplicate key update
+    amount = values(amount)
+  </update>
+  <update id="setBackupWorkDay">
+    insert into workday_backup
+    (project_id, volume_tec, `workday`, `date`)
+    values
+    <foreach collection="list" item="item" separator=",">
+      <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="item.workday != null and item.workday != ''">
+          #{id}, #{item.name}, #{item.workday}, #{date}
+        </if>
+      </trim>
+    </foreach>
+    on duplicate key update
+    workday = values(workday)
+  </update>
+  <update id="setTecVolumeRatio">
+    insert into tec_ratio(project_id, tec, designer, checker, principal, headman)
+    values 
+    <foreach collection="list" item="item" separator=",">
+      (#{item.project_id}, #{item.tec}, #{item.designer}/100, #{item.checker}/100,
+       #{item.principal}/100, #{item.headman}/100)
+    </foreach>
+    on duplicate key update
+    designer = values(designer),
+    checker = values(checker),
+    principal = values(principal),
+    headman = values(headman)
+  </update>
+  <insert id="setUserWorkDay">
+    insert into workday_user
+    (project_id, `user`, `ratio`,`type` )
+    values
+    <foreach collection="list" item="item" separator=",">
+      <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="item.ratio != null and item.ratio != ''">
+          #{id}, #{item.name}, #{item.ratio}/100 , #{type}
+        </if>
+      </trim>
+    </foreach>
+    on duplicate key update
+    ratio = values(ratio)
+  </insert>
+  <select id="queryProWorkDay" resultType="java.util.Map">
+    select manage, tec, backup
+    from project_workday
+    where project_id = #{id}
+  </select>
+  <select id="queryTecWorkDay" resultType="java.util.Map">
+    select volume_tec as `name` , amount as `value`
+    from workday_tec
+    where project_id = #{id}
+   </select>
+  <select id="queryUsedTecWorkDay" resultType="java.util.Map">
+    SELECT DISTINCT
+      v.tec,
+      SUM( v.workday ) AS used,
+      wt.amount AS have,
+      wb.workday as `backup`
+    FROM
+      volume v
+        LEFT JOIN project_workday pw ON v.project_id = pw.project_id
+        LEFT JOIN workday_tec wt ON wt.volume_tec = v.tec
+        LEFT JOIN workday_backup wb ON wt.volume_tec = wb.volume_tec
+    WHERE
+      v.project_id = #{id}
+    GROUP BY
+      v.tec
+  </select>
+  <select id="queryTecWorkDayAmount" resultType="java.util.Map">
+    select v.tec as `name` , wt.amount
+    from volume v
+		LEFT JOIN workday_tec wt on v.tec = wt.volume_tec
+		                                   and wt.project_id = v.project_id
+		WHERE
+		v.project_id = #{id}
+		GROUP BY v.tec
+  </select>
+
+  <select id="queryUsableBackupWorkday" resultType="java.lang.Double">
+    SELECT
+      p.`backup` - SUM( workday )
+    FROM
+      project_workday p LEFT JOIN
+      workday_backup wb on p.project_id = wb.project_id
+    WHERE
+      p.project_id = #{id}
+  </select>
+
+  <select id="queryBackupWorkDayAmount" resultType="java.util.Map">
+      select v.tec as `name` , wb.workday, wb.date
+      from volume v
+             LEFT JOIN workday_backup wb on v.tec = wb.volume_tec
+                                             and wb.project_id = v.project_id
+                                             and wb.date = #{date}
+      WHERE
+        v.project_id = #{id}
+      GROUP BY v.tec
+  </select>
+  <select id="queryReserveWorkDayRatio" resultType="java.util.Map">
+    select v.tec as `name` , wt.workday as workday
+    from volume v
+           LEFT JOIN workday_backup wt on v.tec = wt.volume_tec and wt.project_id = v.project_id
+    WHERE
+      v.project_id = #{id}
+    GROUP BY v.tec
+  </select>
+  <select id="statisticAll" resultMap="tecWorkday">
+    select id,`number`, `name`, #{min} as `min`, #{max} as `max`
+    from project
+    where spider = 0
+  </select>
+    <select id="statistic" resultType="java.util.Map">
+      SELECT DISTINCT
+        v.tec,
+        SUM( v.workday ) AS used,
+        ( pw.tec * wt.ratio ) AS have,
+        wb.workday as `backup`,
+        count(v.id) as `count`,
+        ROUND((SUM( v.workday )/(IFNULL(( pw.tec * wt.ratio ),0)+ IFNULL(wb.workday,0))),2) as ratio
+      FROM
+        volume v
+          LEFT JOIN project_workday pw ON v.project_id = pw.project_id
+          LEFT JOIN workday_tec wt ON wt.volume_tec = v.tec and wt.project_id = v.project_id
+          LEFT JOIN workday_backup wb ON wt.volume_tec = wb.volume_tec and wb.project_id = v.project_id
+      WHERE
+        v.project_id = #{id}
+      GROUP BY
+        v.tec
+    </select>
+  <select id="everyoneAll" resultType="java.util.Map">
+    SELECT DISTINCT
+      *,
+      (
+          IFNULL( p.workday_p, 0 ) + IFNULL( d.workday_d, 0 ) + IFNULL( c.workday_c, 0 )) AS workday_sum
+    FROM
+      (
+        SELECT u.id,u.`name`,u.username
+        FROM user u,
+             volume v
+        WHERE  (
+            v.actual_principal = u.name
+            or v.checker = u.name
+            or v.designer = u.name)
+          AND v.proofreading_date &gt;= #{min}
+          AND v.proofreading_date &lt;= #{max}
+      ) as u LEFT JOIN (
+        SELECT DISTINCT
+          u.id,
+          COUNT(v.id) as amount_p,
+          SUM(
+            IFNULL( v.workday, 0 )) * tr.principal as workday_p
+        FROM
+          volume v,
+          `user` u,
+          tec_ratio tr
+        WHERE
+              u.`name` = v.actual_principal
+          AND tr.tec = u.tid
+          AND v.proofreading_date &gt;= #{min}
+          AND v.proofreading_date &lt;= #{max}
+        GROUP BY
+          v.actual_principal
+      ) AS p ON u.id = p.id
+             LEFT JOIN
+      (
+        SELECT DISTINCT
+          u.id,
+          COUNT(v.id) as amount_d,
+          SUM(
+            IFNULL( v.workday, 0 )) * tr.designer as workday_d
+        FROM
+          volume v,
+          `user` u,
+          tec_ratio tr
+        WHERE
+              u.`name` = v.designer
+          AND tr.tec = u.tid
+          AND v.proofreading_date &gt;= #{min}
+          AND v.proofreading_date &lt;= #{max}
+        GROUP BY
+          v.designer
+      ) AS d on u.id = d.id
+             LEFT JOIN
+      (
+        SELECT DISTINCT
+          u.id,
+          COUNT(v.id) as amount_c,
+          SUM(
+            IFNULL( v.workday, 0 )) * tr.checker as workday_c
+        FROM
+          volume v,
+          `user` u,
+          tec_ratio tr
+        WHERE
+              u.`name` = v.checker
+          AND tr.tec = u.tid
+          AND v.proofreading_date &gt;= #{min}
+          AND v.proofreading_date &lt;= #{max}
+        GROUP BY
+          v.checker
+      ) AS c on u.id = c.id
+    GROUP BY u.id
+  </select>
+  <select id="everyone" resultType="java.util.Map">
+    SELECT DISTINCT
+    *,
+    (
+        IFNULL( p1.workday_p1, 0 ) + IFNULL( d1.workday_d1, 0 ) + IFNULL( c1.workday_c1, 0 )) AS workday_sum1,
+    (
+        IFNULL( p2.workday_p2, 0 ) + IFNULL( d2.workday_d2, 0 ) + IFNULL( c2.workday_c2, 0 )) AS workday_sum2,
+    (
+        IFNULL( p.workday_p, 0 ) + IFNULL( d.workday_d, 0 ) + IFNULL( c.workday_c, 0 )) AS workday_sum
+    FROM
+    (
+    SELECT u.id,u.`name`,u.username
+    FROM user u,
+    volume v
+    WHERE v.project_id = #{id} and (
+    v.actual_principal = u.name
+    or v.checker = u.name
+    or v.designer = u.name)
+    ) as u LEFT JOIN
+    (
+    SELECT DISTINCT
+    u.id,
+    COUNT(v.id) as amount_p,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.principal as workday_p
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    v.project_id = #{id}
+    AND u.`name` = v.actual_principal
+    AND tr.tec = u.tid
+    GROUP BY
+    v.actual_principal
+    ) AS p on u.id = p.id
+    LEFT JOIN
+    (
+    SELECT DISTINCT
+    u.id,
+    COUNT(v.id) as amount_d,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.designer as workday_d
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    v.project_id = #{id}
+    AND u.`name` = v.designer
+    AND tr.tec = u.tid
+    GROUP BY
+    v.designer
+    ) AS d on u.id = d.id
+    LEFT JOIN
+    (
+    SELECT DISTINCT
+    u.id,
+    COUNT(v.id) as amount_c,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.checker as workday_c
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    v.project_id = #{id}
+    AND u.`name` = v.checker
+    AND tr.tec = u.tid
+    GROUP BY
+    v.checker
+    ) AS c on u.id = c.id
+    LEFT JOIN (
+    SELECT DISTINCT
+    u.id,
+    COUNT(v.id) as amount_p1,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.principal as workday_p1
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    v.project_id = #{id}
+    AND u.`name` = v.actual_principal
+    AND tr.tec = u.tid
+    AND v.proofreading_date &gt;= #{thisMonth}
+    AND v.proofreading_date &lt; #{nextMonth}
+    GROUP BY
+    v.actual_principal
+    ) AS p1 ON p.id = p1.id
+    LEFT JOIN
+    (
+    SELECT DISTINCT
+    u.id,
+    COUNT(v.id) as amount_d1,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.designer as workday_d1
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    v.project_id = #{id}
+    AND u.`name` = v.designer
+    AND tr.tec = u.tid
+    AND v.proofreading_date &gt;= #{thisMonth}
+    AND v.proofreading_date &lt; #{nextMonth}
+    GROUP BY
+    v.designer
+    ) AS d1 on d1.id = d.id
+    LEFT JOIN
+    (
+    SELECT DISTINCT
+    u.id,
+    COUNT(v.id) as amount_c1,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.checker as workday_c1
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    v.project_id = #{id}
+    AND u.`name` = v.checker
+    AND tr.tec = u.tid
+    AND v.proofreading_date &gt;= #{thisMonth}
+    AND v.proofreading_date &lt; #{nextMonth}
+    GROUP BY
+    v.checker
+    ) AS c1 on c1.id = c.id
+    LEFT JOIN (
+    SELECT DISTINCT
+    u.id,
+    COUNT(v.id) as amount_p2,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.principal as workday_p2
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    v.project_id = #{id}
+    AND u.`name` = v.actual_principal
+    AND tr.tec = u.tid
+    AND v.proofreading_date &gt;= #{lastMonth}
+    AND v.proofreading_date &lt; #{thisMonth}
+    GROUP BY
+    v.actual_principal
+    ) AS p2 ON p.id = p2.id
+    LEFT JOIN
+    (
+    SELECT DISTINCT
+    u.id,
+    COUNT(v.id) as amount_d2,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.designer as workday_d2
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    v.project_id = #{id}
+    AND u.`name` = v.designer
+    AND tr.tec = u.tid
+    AND v.proofreading_date &gt;= #{lastMonth}
+    AND v.proofreading_date &lt; #{thisMonth}
+    GROUP BY
+    v.designer
+    ) AS d2 on d2.id = d.id
+    LEFT JOIN
+    (
+    SELECT DISTINCT
+    u.id,
+    COUNT(v.id) as amount_c2,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.checker as workday_c2
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    v.project_id = #{id}
+    AND u.`name` = v.checker
+    AND tr.tec = u.tid
+    AND v.proofreading_date &gt;= #{lastMonth}
+    AND v.proofreading_date &lt; #{thisMonth}
+    GROUP BY
+    v.checker
+    ) AS c2 on c1.id = c.id
+    GROUP BY u.id
+  </select>
+  <select id="personal" resultType="java.util.Map">
+    SELECT DISTINCT
+    *,
+    (
+    IFNULL( p.workday_p, 0 ) + IFNULL( d.workday_d, 0 ) + IFNULL( c.workday_c, 0 )) AS workday_sum
+    FROM
+    (
+    SELECT DISTINCT
+    p.id,p.number,p.`name`
+    FROM
+    project p,
+    volume v
+    WHERE
+    v.project_id = p.id
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+    AND ( v.actual_principal = #{name} OR v.designer = #{name} OR v.checker = #{name} )
+    ) AS u
+    LEFT JOIN (
+    SELECT DISTINCT
+    u.id,
+    COUNT( v.id ) AS amount_p,
+    v.project_id,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.principal AS workday_p
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    u.`name` = v.actual_principal
+    AND u.`name` = #{name}
+    AND tr.tec = u.tid
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+    GROUP BY
+    v.project_id
+    ) AS p ON u.id = p.project_id
+    LEFT JOIN (
+    SELECT DISTINCT
+    u.id,
+    v.project_id,
+    COUNT( v.id ) AS amount_d,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.designer AS workday_d
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    u.`name` = v.designer
+    AND u.`name` = #{name}
+    AND tr.tec = u.tid
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+    GROUP BY
+    v.project_id
+    ) AS d ON u.id = d.project_id
+    LEFT JOIN (
+    SELECT DISTINCT
+    u.id,
+    v.project_id,
+    COUNT( v.id ) AS amount_c,
+    SUM(
+    IFNULL( v.workday, 0 )) * tr.checker AS workday_c
+    FROM
+    volume v,
+    `user` u,
+    tec_ratio tr
+    WHERE
+    u.`name` = v.checker
+    AND u.`name` = #{name}
+    AND tr.tec = u.tid
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+    GROUP BY
+    v.project_id
+    ) AS c ON u.id = c.project_id
+    GROUP BY
+    u.id
+  </select>
+  <select id="queryTecVolumeRatio" resultType="java.util.Map">
+    SELECT
+      t.id,
+      v.tec,
+    p.name,
+      v.project_id,
+      IFNULL( t.designer, d.designer ) * 100 AS designer,
+      IFNULL( t.checker, d.checker )* 100 AS checker,
+      IFNULL( t.principal, d.principal )* 100 AS principal,
+      IFNULL( t.headman, d.headman )* 100 AS headman
+    FROM
+      `user` u,
+        project p,
+      volume v
+        LEFT JOIN tec_ratio t ON v.project_id = t.project_id
+        AND v.tec = t.tec,
+      default_ratio d
+    WHERE
+      u.id = #{id}
+      AND FIND_IN_SET(
+            u.`name`,
+            REPLACE ( v.principal, ";", "," ))
+      AND d.id = 1
+    and p.id = v.project_id
+    GROUP BY
+      v.project_id , v.tec
+  </select>
+</mapper>

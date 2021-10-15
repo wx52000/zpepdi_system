@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: feign-service
+#  redis:
+#    port: 6379
+#    jedis:
+#      pool:
+#        max-wait: 100000
+#        max-idle: 30
+#        max-active: 100
+#    timeout: 5000
+  security:
+    user:
+      name: 7499
+      password: 7499
+  main:
+    allow-bean-definition-overriding: true
+#  cloud:
+#    gateway:
+#      globalcors:
+#        corsConfigurations:
+#          '[/**]':
+#            allowedOrigins: "docs.spring.io"
+#            allowedMethods:
+#              - ALL
+
+security:
+  oauth2:
+    client:
+      client-id: feign-server
+      client-secret: zpepdi7499
+      user-authorization-uri: http://localhost:9100/oauth/authorize
+      access-token-uri: http://localhost:9100/token/login
+    resource:
+      id: feign-server
+      user-info-uri: http://localhost:9100/oauth/check_token
+      jwt:
+        key-uri: http://localhost:9100/oauth/token_key
+        key-value: dev
+    authorization:
+      check-token-access: http://localhost:9100/oauth/check_token
+
+
+server:
+  port: 9999
+
+debug: true
+
+feign:
+  hystrix:
+    enabled: true #在Feign中开启Hystrix
+    command:
+      default:
+        execution:
+          timeout:
+            enabled: true
+          isolation:
+            thread:
+              timeoutInMilliseconds: 5000
+  compression:
+    request:
+      enabled: false #是否对请求进行GZIP压缩
+      mime-types: text/xml,application/xml,application/json #指定压缩的请求数据类型
+      min-request-size: 2048 #超过该大小的请求会被压缩
+    response:
+      enabled: false #是否对响应进行GZIP压缩
+logging:
+  level: #修改日志级别
+    com.jourwon.springcloud.service: debug
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    # 注册到Eureka的注册中心
+    register-with-eureka: true
+    # 获取注册实例列表
+    fetch-registry: true
+    service-url:
+      # 配置注册中心地址
+      defaultZone: http://localhost:9000/eureka/
+

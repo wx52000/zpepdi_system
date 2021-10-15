@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zpepdi.eureka_client.dao.DepartmentDao">
+    <insert id="add" parameterType="department" useGeneratedKeys="true" keyProperty="id">
+        insert into department(`name`)
+        values (#{name})
+    </insert>
+    <delete id="del">
+        delete
+        from department
+        where id = #{id}
+    </delete>
+    <select id="query" resultType="com.zpepdi.eureka_client.entity.Department">
+        select *
+        from department
+    </select>
+    <select id="queryName" resultType="java.lang.Integer">
+        select id
+        from department
+        where name = #{name}
+    </select>
+    <select id="selectByTec" resultType="java.lang.Integer">
+        select did
+        from technology
+        where id = #{id}
+    </select>
+    <select id="queryNotUser" resultType="com.zpepdi.eureka_client.entity.Department">
+        select *
+        from department d
+        where exists (
+        select u.id
+        from `user` u
+        where u.did = d.id)
+    </select>
+</mapper>

@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.VolumeDao">
+    <insert id="addFormPro">
+        <foreach collection="volumes" item="item" separator=",">
+        insert into volume
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="item.pid != null and item.pid != ''">
+                project_id,
+            </if>
+            <if test="item.number != null and item.number != ''">
+                `number`,
+            </if>
+            <if test="item.name != null and item.name != ''">
+                `name`,
+            </if>
+            <if test="item.grade != null and item.grade != ''">
+                grade,
+            </if>
+            <if test="item.tecId != null and item.tecId != ''">
+                tec_id,
+            </if>
+            <if test="item.plannedPublicationDate != null and item.plannedPublicationDate != ''">
+                planned_publication_date,
+            </if>
+        </trim>
+        value
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="item.pid != null and item.pid != ''">
+                #{item.pid},
+            </if>
+            <if test="item.number != null and item.number != ''">
+                #{item.number},
+            </if>
+            <if test="item.name != null and item.name != ''">
+                #{item.name },
+            </if>
+            <if test="item.grade != null and item.grade != ''">
+                #{item.grade},
+            </if>
+            <if test="item.tecId != null and item.tecId != ''">
+                #{item.tecId },
+            </if>
+            <if test="item.plannedPublicationDate != null and item.plannedPublicationDate != ''">
+                #{item.plannedPublicationDate}
+            </if>
+            </trim>
+        </foreach>
+    </insert>
+    <insert id="add" parameterType="volume" useGeneratedKeys="true" keyProperty="id">
+        insert into volume
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pid != null and pid != ''">
+                `project_id`,
+            </if>
+            <if test="number != null and number != ''">
+                `number`,
+            </if>
+            <if test="name != null and name != ''">
+                `name`,
+            </if>
+            <if test="grade != null and grade != ''">
+                grade,
+            </if>
+            <if test="tecId != null and tecId != ''">
+                tec_id,
+            </if>
+            <if test="plannedPublicationDate != null and plannedPublicationDate != ''">
+                planned_publication_date,
+            </if>
+            <if test="professionalDate != null and professionalDate != ''">
+                professional_date,
+            </if>
+            <if test="withdrawalDate != null and withdrawalDate != ''">
+                withdrawal_date,
+            </if>
+            <if test="creator != null and creator != ''">
+                creator,
+            </if>
+            <if test="creatorDate != null and creatorDate != ''">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="pid != null and pid != ''">
+            #{pid},
+        </if>
+        <if test="number != null and number != ''">
+            #{number},
+        </if>
+        <if test="name != null and name != ''">
+            #{name},
+        </if>
+        <if test="grade != null and grade != ''">
+            #{grade},
+        </if>
+        <if test="tecId != null and tecId != ''">
+            #{tecId},
+        </if>
+        <if test="plannedPublicationDate != null and plannedPublicationDate != ''">
+            #{plannedPublicationDate},
+        </if>
+        <if test="professionalDate != null and professionalDate != ''">
+            #{professionalDate},
+        </if>
+        <if test="withdrawalDate != null and withdrawalDate != ''">
+            #{withdrawalDate},
+        </if>
+            <if test="creator != null and creator != ''">
+                #{creator},
+            </if>
+            <if test="creatorDate != null and creatorDate != ''">
+                #{creatorDate},
+            </if>
+
+        </trim>
+    </insert>
+    <insert id="addExcelVolume" parameterType="excelProject">
+        <selectKey resultType="integer" keyProperty="vid" order="AFTER">
+            select id
+            from volume
+            where `number` = #{number}
+        </selectKey>
+       insert ignore into volume
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pid != null and pid != ''">
+                `project_id`,
+            </if>
+            <if test="number != null and number != ''">
+                `number`,
+            </if>
+            <if test="volumeName != null and volumeName != ''">
+                `name`,
+            </if>
+            <if test="grade != null and grade != ''">
+                grade,
+            </if>
+            <if test="tid != null and tid != ''">
+                tec_id,
+            </if>
+            <if test="plannedPublicationDate != null and plannedPublicationDate != ''">
+                planned_publication_date,
+            </if>
+            <if test="actualPublicationDate != null and actualPublicationDate != ''">
+                actual_publication_date,
+            </if>
+            <if test="professionalDate != null and professionalDate != ''">
+                professional_date,
+            </if>
+            <if test="withdrawalDate != null and withdrawalDate != ''">
+                withdrawal_date,
+            </if>
+            <if test="checkerCompletionDate != null and checkerCompletionDate != ''">
+                checker_date,
+            </if>
+            <if test="principalCompletionDate != null and principalCompletionDate != ''">
+                principal_date,
+            </if>
+            <if test="headmanCompletionDate != null and headmanCompletionDate != ''">
+                headman_date,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pid != null and pid != ''">
+                #{pid},
+            </if>
+            <if test="number != null and number != ''">
+                #{number},
+            </if>
+            <if test="volumeName != null and volumeName != ''">
+                #{volumeName},
+            </if>
+            <if test="grade != null and grade != ''">
+                #{grade},
+            </if>
+            <if test="tid != null and tid != ''">
+                #{tid},
+            </if>
+            <if test="plannedPublicationDate != null and plannedPublicationDate != ''">
+                #{plannedPublicationDate},
+            </if>
+            <if test="actualPublicationDate != null and actualPublicationDate != ''">
+                #{actualPublicationDate},
+            </if>
+            <if test="professionalDate != null and professionalDate != ''">
+                #{professionalDate},
+            </if>
+            <if test="withdrawalDate != null and withdrawalDate != ''">
+                #{withdrawalDate},
+            </if>
+            <if test="checkerCompletionDate != null and checkerCompletionDate != ''">
+                #{checkerCompletionDate},
+            </if>
+            <if test="principalCompletionDate != null and principalCompletionDate != ''">
+                #{principalCompletionDate},
+            </if>
+            <if test="headmanCompletionDate != null and headmanCompletionDate != ''">
+                #{headmanCompletionDate},
+            </if>
+        </trim>
+    </insert>
+    <insert id="setReason">
+        insert volume_reason(volume_id,reason,`date`)
+        values (#{id}, #{reason}, now())
+        on duplicate key update
+        reason = values(reason),
+        `date` = values(`date`)
+    </insert>
+    <insert id="setWorkday" parameterType="hashmap">
+        insert volume_workday(volume_id, `state`, workday, ratio_state)
+        values (#{id}, #{state}, #{workday}, 0)
+        ON DUPLICATE KEY UPDATE
+        workday = values(workday)
+    </insert>
+    <insert id="setWorkdayLog" parameterType="hashmap">
+        insert volume_workday_log(user_id, volume_id, `date`, workday, this_grant, `type`, `old`)
+        values (#{userId}, #{map.id}, now(), #{map.workday}, #{map.thisGrant}, #{map.type}, #{map.old})
+    </insert>
+    <insert id="setWorkdayHigh" parameterType="hashmap">
+        insert volume_workday(volume_id, `state`, workday,
+            ratio_state, principal, designer, checker, headman)
+        values (#{id}, #{state}, #{workday},1, #{principal}/100, #{designer}/100, #{checker}/100, #{headman}/100)
+        ON DUPLICATE KEY UPDATE
+        workday = values(workday),
+        principal = values(principal),
+        designer = values(designer),
+        checker = values(checker),
+        headman = values(headman)
+    </insert>
+    <update id="setWorkdayGrant">
+        insert volume_workday_high(volume_id, `grant`,`date`)
+        values (#{id}, #{grant}, #{date})
+        ON DUPLICATE KEY UPDATE
+        `grant` = values(`grant`)
+    </update>
+    <update id="upd">
+        update volume
+        <set>
+        <if test="number != null and number !=''">
+            `number`  = #{number},
+        </if>
+        <if test="name != null and name !=''">
+            `name`  = #{name},
+        </if>
+        <if test="grade != null and grade !=''">
+            `grade`  = #{grade},
+        </if>
+        <if test="tecId != null and tecId !=''">
+            `tec_id`  = #{tecId},
+        </if>
+        <if test="plannedPublicationDate != null and plannedPublicationDate !=''">
+            `planned_publication_date`  = #{plannedPublicationDate},
+        </if>
+        <if test="actualPublicationDate != null and actualPublicationDate !=''">
+            `actual_publication_date`  = #{actualPublicationDate},
+        </if>
+        <if test="professionalDate != null and professionalDate !=''">
+            `professional_date`  = #{professionalDate},
+        </if>
+        <if test="withdrawalDate != null and withdrawalDate !=''">
+            `withdrawal_date`  = #{withdrawalDate},
+        </if>
+        <if test="shotDate != null and shotDate !=''">
+            `shot_date`  = #{shotDate} ,
+        </if>
+        <if test="completeDate != null and completeDate !=''">
+            `complete_time`  = #{completeDate} ,
+        </if>
+            <if test="headmanDate != null and headmanDate !=''">
+                `headman_date`  = #{headmanDate} ,
+            </if>
+            <if test="checkerDate != null and checkerDate !=''">
+                `checker_date`  = #{checkerDate} ,
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="queryById" resultType="java.util.Map">
+        select *
+        from
+        volume v LEFT JOIN
+        (select  vu.volume_id , u.name
+        from volume_user vu,
+        `user` u
+        where vu.volume_id = #{id}
+        and u.id = vu.user_id
+        and power_id = 4 ) as designer ON v.id = designer.volume_id LEFT JOIN
+        (select  vu.volume_id , u.name
+        from volume_user vu,
+        `user` u
+        where vu.volume_id = #{id}
+        and u.id = vu.user_id
+        and power_id = 5 ) as checker ON designer.volume_id = checker.volume_id,
+        technology t
+        where v.id = #{id}
+        and t.id = v.tec_id
+    </select>
+  <select id="queryByProjectId" resultType="java.util.Map" parameterType="map">
+    SELECT
+    *
+    FROM
+    volume
+    where  project_id = #{id}
+    <if test="minDate != null and minDate != ''">
+    and ( ( planned_publication_date &gt;= #{minDate}
+    and planned_publication_date &lt;= #{maxDate})
+    or ( shot_date &gt;= #{minDate}
+      and shot_date &lt;= #{maxDate})
+    or (planned_shot_date &gt;= #{minDate}
+      and planned_shot_date &lt;= #{maxDate})
+    or (proofreading_date &gt;= #{minDate}
+        and proofreading_date &lt;= #{maxDate})
+    or (complete_time &gt;= #{minDate}
+      and complete_time &lt;= #{maxDate} ))
+    </if>
+  </select>
+    <select id="queryVolume" resultType="java.util.Map">
+    <if test="user != null and user !=''">
+    SELECT
+      v.id,
+      v.`name`,
+      v.number,
+      v.designer,
+      v.checker,
+      v.principal,
+      v.state,
+       v.rollId,
+       p.general,
+      p.`name` as projectName
+    FROM
+      project p,
+      volume v
+    WHERE
+      p.id = v.project_id
+      AND (
+        v.checker = #{user}
+        OR v.designer = #{user}
+        OR ( v.principal = #{user}
+        AND v.principal NOT LIKE "%;%" )
+      OR ((
+          SUBSTRING_INDEX( v.principal, "", 1 )= #{user}
+          OR SUBSTRING_INDEX( v.principal, ";",- 1 )= #{user})
+    AND v.principal LIKE "%;%")
+    	OR ( p.general = #{user} AND p.general NOT LIKE "%;%" )
+      OR ((
+          SUBSTRING_INDEX( p.general, "", 1 )= #{user}
+          OR SUBSTRING_INDEX( p.general, ";",- 1 )= #{user}
+          )
+        AND p.general LIKE "%;%"
+        )
+	  )
+    </if>
+	  <if test="user != null and volume != null and user !='' and volume !=''">
+      union distinct
+    </if>
+    <if test="volume != null and volume !=''">
+      SELECT
+      v.id,
+      v.`name`,
+      v.number,
+      v.designer,
+      v.checker,
+      v.principal,
+      v.rollId,
+      v.state,
+      p.general,
+      p.`name` as projectName
+      FROM
+      project p,
+      volume v
+      WHERE
+      p.id = v.project_id
+      AND (
+      v.number like "%"#{volume}"%"
+      or v.name like "%"#{volume}"%"
+      )
+    </if>
+    </select>
+    <select id="queryByNumber" resultType="java.util.Map">
+      SELECT
+        pid,
+        projectName,
+        director,
+        general,
+        id,
+        number,
+        volumeName,
+        dep,
+        tec,
+        state,
+        principal,
+        designer,
+        checker,
+        workday,
+        planned_start_date,
+        planned_shot_date,
+        shot_date,
+        proofreading_date,
+        formId,
+        wfInstId,
+        rollId,
+        planned_publication_date,
+        actual_publication_date,
+        complete_time,
+        GROUP_CONCAT( role ) as role,
+        DATE_FORMAT( planned_shot_date, "%Y-%m" )
+      FROM
+        (
+          SELECT DISTINCT
+            p.id AS pid,
+            p.NAME AS projectName,
+            p.director,
+            p.general,
+            v.id AS id,
+            v.number,
+            v.NAME AS volumeName,
+            v.dep,
+            v.tec,
+            v.state,
+            v.principal,
+            v.designer,
+            v.checker,
+            v.workday,
+            v.planned_start_date,
+            v.planned_shot_date,
+            v.shot_date,
+            v.proofreading_date,
+            v.formId,
+            v.wfInstId,
+            v.rollId,
+            v.planned_publication_date,
+            v.actual_publication_date,
+            v.complete_time,
+            1 AS role
+          FROM
+            project p,
+            volume v
+          WHERE
+            v.project_id = p.id
+            AND FIND_IN_SET(
+            #{name},
+            REPLACE ( v.principal, ";", "," ))
+            AND FIND_IN_SET(
+            SUBSTRING_INDEX(#{number},"+",1),
+            REPLACE ( v.number, "+", "," ))
+          UNION
+          SELECT DISTINCT
+            p.id AS pid,
+            p.NAME AS projectName,
+            p.director,
+            p.general,
+            v.id AS id,
+            v.number,
+            v.NAME AS volumeName,
+            v.dep,
+            v.tec,
+            v.state,
+            v.principal,
+            v.designer,
+            v.checker,
+            v.workday,
+            v.planned_start_date,
+            v.planned_shot_date,
+            v.shot_date,
+            v.proofreading_date,
+            v.formId,
+            v.wfInstId,
+            v.rollId,
+            v.planned_publication_date,
+            v.actual_publication_date,
+            v.complete_time,
+            2 AS role
+          FROM
+            project p,
+            volume v
+          WHERE
+            v.project_id = p.id
+            AND v.designer = #{name}
+            AND FIND_IN_SET(
+            SUBSTRING_INDEX(#{number},"+",1),
+            REPLACE ( v.number, "+", "," ))
+          union
+          SELECT DISTINCT
+            p.id AS pid,
+            p.NAME AS projectName,
+            p.director,
+            p.general,
+            v.id AS id,
+            v.number,
+            v.NAME AS volumeName,
+            v.dep,
+            v.tec,
+            v.state,
+            v.principal,
+            v.designer,
+            v.checker,
+            v.workday,
+            v.planned_start_date,
+            v.planned_shot_date,
+            v.shot_date,
+            v.proofreading_date,
+            v.formId,
+            v.wfInstId,
+            v.rollId,
+            v.planned_publication_date,
+            v.actual_publication_date,
+            v.complete_time,
+            3 AS role
+          FROM
+            project p,
+            volume v
+          WHERE
+            v.project_id = p.id
+            AND v.checker = #{name}
+            AND FIND_IN_SET(
+            SUBSTRING_INDEX(#{number},"+",1),
+            REPLACE( v.number, "+","," ))
+        ) AS dataTable
+      where number &lt;&gt; #{number}
+      GROUP BY
+        number
+    </select>
+  <select id="queryByDate" resultType="java.util.Map">
+    SELECT
+      p.number as pNumber,p.`name` as pName ,v.*
+    FROM project p,
+         volume v
+    WHERE p.id = v.project_id
+      and p.spider = 0
+      and v.proofreading_date &gt;= #{min}
+      and v.proofreading_date &lt;= #{max}
+  </select>
+  <select id="personalVolume" resultType="java.util.Map">
+    SELECT DISTINCT
+    v.*,
+    p.number as pNumber,
+    p.`name` as pName
+    FROM
+    volume v,
+    project p
+    WHERE
+    v.actual_principal = #{name}
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+    and p.id = v.project_id UNION
+    SELECT DISTINCT
+    v.*,
+    p.number as pNumber,
+    p.`name` as pName
+    FROM
+    volume v,
+    project p
+    WHERE
+    v.designer = #{name}
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+      and p.id = v.project_id UNION
+    SELECT DISTINCT
+    v.*,
+    p.number as pNumber,
+    p.`name` as pName
+    FROM
+    volume v,
+    project p
+    WHERE
+    v.checker = #{name}
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+      and p.id = v.project_id
+  </select>
+    <select id="queryVolumeWorkday" resultType="java.util.Map">
+        SELECT
+            id,
+            workday,
+            sumGrant,
+            IFNUll(`grant`,0) as `grant`,
+            IFNUll(workday* IFNULL( ratio, 0.6 ),0) - `grant` AS usable,
+            IFNULL( principal, principal1 ) AS principal,
+            IFNULL( designer, designer1 ) AS designer,
+            IFNULL( checker, checker1 ) AS checker,
+            IFNULL( headman, headman1 ) AS headman
+        FROM
+            (
+                SELECT
+                    v.id,
+                    w.workday,
+                    IFNUll(h.`grant`,0) as `grant`,
+                    SUM(h1.`grant`) as sumGrant,
+                    p.ratio,
+                        w.principal*100 as principal,
+                    w.designer*100 as designer,
+                    w.checker*100 as checker,
+                    w.headman*100 as headman,
+                    t.principal*100 AS principal1,
+                    t.designer*100 AS designer1,
+                    t.checker*100 AS checker1,
+                    t.headman*100 AS headman1
+                FROM
+                    volume v
+                        LEFT JOIN volume_workday w ON v.id = w.volume_id
+                        LEFT JOIN volume_workday_high h on v.id = h.volume_id and h.date = #{date}
+                        LEFT JOIN volume_workday_high h1 on v.id = h1.volume_id
+                        LEFT JOIN tec_ratio t ON v.tec = t.tec
+                        LEFT JOIN project_workday_ratio p ON v.project_id = p.project_id
+                WHERE
+                    v.id = #{id}
+            ) AS m
+    </select>
+    <select id="queryUsableWorkday" resultType="java.util.Map">
+        SELECT
+            IFNULL( SUM( w.workday ), 0 ) AS used,
+            IFNULL( wt.amount, 0 ) AS amount,
+            v.state
+        FROM
+            volume v
+                LEFT JOIN volume_workday w ON w.volume_id IN ( SELECT id FROM volume WHERE v.tec = tec AND v.project_id = project_id ),
+            workday_tec wt
+        WHERE
+            v.id = #{id}
+          AND wt.project_id = v.project_id
+          AND v.tec = wt.volume_tec
+    </select>
+</mapper>

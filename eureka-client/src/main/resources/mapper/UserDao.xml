@@ -1,0 +1,2651 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zpepdi.eureka_client.dao.UserDao">
+    <resultMap  id="tecUser" type="technology">
+        <result column="tid" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <collection property="list" javaType="ARRAYLIST"
+                    column="tid" select="getPrincipal"/>
+    </resultMap>
+    <resultMap  id="GroupUser" type="java.util.Map">
+      <result column="id" property="id" jdbcType="INTEGER"/>
+      <result column="label" property="label" jdbcType="VARCHAR"/>
+      <result column="vid" property="vid" jdbcType="VARCHAR"/>
+      <collection property="group" javaType="ARRAYLIST"
+                  column="id=id,vid= vid" select="getGroup"/>
+    </resultMap>
+  <resultMap  id="GroupUser1" type="java.util.Map">
+    <result column="id" property="id" jdbcType="INTEGER"/>
+    <result column="label" property="label" jdbcType="VARCHAR"/>
+    <result column="vid" property="vid" jdbcType="VARCHAR"/>
+    <collection property="group" javaType="ARRAYLIST"
+                column="id=id,vid= vid" select="getGroup1"/>
+  </resultMap>
+    <insert id="add" parameterType="user" useGeneratedKeys="true" keyProperty="id">
+        insert into user(pid , did , tid , `name` , username , paw , grade)
+        values (#{pid} , #{did} , #{tid} , #{name} , #{username} ,AES_ENCRYPT("1234",'zpepdi') , #{grade})
+    </insert>
+    <insert id="addExcel" parameterType="list" useGeneratedKeys="true" keyProperty="id">
+        insert into user(pid , did , tid , `name` , username ,grade)
+        value
+        <foreach collection="list" index="index" item="item" separator=",">
+        ( 4, #{item.department} , #{item.technology} , #{item.name} , #{item.username} , #{item.grade})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        did = values(did),
+        tid = values(tid),
+        grade = values(grade)
+    </insert>
+    <update id="upd">
+        update `user`
+        <set>
+            <if test="pid != null and pid !='' and pid>=0 " >
+                pid = #{pid},
+            </if>
+            <if test="did != null and did !=''">
+                did = #{did},
+            </if>
+            <if test="tid != null and tid !=''">
+                tid = #{tid},
+            </if>
+        </set>
+        <where> id = #{id}
+        </where>
+    </update>
+    <update id="paw">
+        update user
+        set paw = AES_ENCRYPT(#{paw},'zpepdi') , paw_state = 1
+        where id = #{id}
+    </update>
+    <update id="pwdReset">
+        update user
+        set paw = AES_ENCRYPT("1234",'zpepdi') , paw_state = 0
+        where id = #{id}
+    </update>
+    <delete id="del">
+        delete u , s
+        from  `user` u
+        left  join  grade_score s on u.id = s.score_id
+        where u.id = #{id}
+    </delete>
+    <select id="queryById" resultType="com.zpepdi.eureka_client.entity.User">
+        select u.id, u.name, u.did, u.tid, u.pid, d.name as department,grade,
+               t.name as technology, p.name as `position`, u.username,
+               u.paw_state
+        from `user` u,
+             department d,
+             technology t,
+             `position` p
+        where u.id = #{id}
+        and u.did = d.id
+        and u.tid = t.id
+        and u.pid = p.id
+    </select>
+    <select id="query" resultType="java.util.Map" parameterType="user">
+      select u.id , u.name , u.username, u.grade, d.name as department ,
+      t.name as technology  ,p.`name` as `position`
+      from `user` u
+      left join `position` p on p.id = u.pid,
+      technology t,
+      department d
+      where
+            u.tid = t.id
+      and u.did = d.id
+        <if test="name != null and name != ''">
+        and u.name like concat("%",#{name},"%")
+        </if>
+        <if test="username != null and username != ''">
+            and u.username like concat("%",#{username},"%")
+        </if>
+      GROUP BY u.id
+    </select>
+    <select id="queryByTid" resultType="java.util.Map">
+        select id , `name` , username
+        from  `user`
+        where tid = #{id}
+    </select>
+    <select id="queryNotScore" resultType="java.util.Map" parameterType="user">
+        select u.id , u.name , username , d.name as department , t.name as technology,
+        IFNULL (s.grade_id, 0 ) as selected
+        from  `user` u left join
+        grade_score s on u.id = score_id and s.grade_id = #{id},
+        department d,
+        technology t
+        where
+        u.id &lt;&gt; #{id}
+        and d.id = u.did
+        and t.id = u.tid
+        <if test="dIds != null and dIds != ''">
+            and d.id in
+            <foreach collection="dIds" item="item" separator="," close=")" open="(">
+                #{item}
+            </foreach>
+        </if>
+        <if test="tIds != null and tIds != ''">
+            and t.id in
+            <foreach collection="tIds" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="name != null and name !=''">
+        and u.name like BINARY concat("%",#{name},"%")
+        </if>
+        <if test="username != null and username != ''">
+        and u.username like concat("%",#{username},"%")
+        </if>
+    </select>
+    <select id="queryByUsername" resultType="java.lang.Integer" parameterType="list">
+    select id
+    from user
+    where username in
+        <foreach collection="list" item="user" index="index" open="(" separator="," close=")">
+        #{user.username}
+        </foreach>
+    </select>
+    <select id="queryByTec" resultType="java.util.Map">
+        select id as `value` , `name` as label
+        from
+        `user`
+        where tid = #{id}
+    </select>
+    <select id="queryPrincipal" resultType="map" >
+    SELECT DISTINCT
+        pt.tec_id AS tid,
+        pu.user_id AS uid
+    FROM
+        project_tec pt
+        LEFT JOIN (
+        SELECT
+            u.tid,
+            pu.project_id,
+            pu.user_id
+        FROM
+            project_user pu,
+            `user` u
+        WHERE
+            pu.power_id = 2
+            AND pu.user_id = u.id
+        ) AS pu on pt.project_id = pu.project_id and pt.tec_id = pu.tid
+    WHERE
+        pt.project_id = #{id}
+    </select>
+    <select id="queryByName" resultType="java.util.Map">
+        select id  , `name`
+        from
+        `user`
+        where `name` like concat("%",#{name},"%")
+        union distinct
+        select id  , `name`
+        from
+        `user`
+        where `username` like concat("%",#{name},"%")
+    </select>
+    <select id="selectByName" resultType="java.lang.Integer">
+        select id
+        from `user`
+        where `name` = #{name}
+    </select>
+  <select id="queryNotSelf" resultType="java.util.Map">
+        select distinct u.id , u.name as name, u.username ,
+        d.name as department , t.name as technology ,
+        us.designer , us.personal , us.coordinate
+        from `user` u left join
+        user_score us on us.grade_id = #{id} and u.id = us.score_id ,
+        department d,
+        technology t
+        where u.id &lt;&gt; #{id}
+        and u.did = d.id
+        and u.tid = t.id
+        and not exists(
+        select id
+        from score_manage sm
+        where sm.score_id = #{id}
+        and sm.scored_id = u.id
+        and sm.state = 1
+    )
+    <if test="selectName != null and selectName != ''">
+      and (u.name like concat("%",#{selectName},"%")
+      or u.username like concat("%",#{selectName},"%"))
+    </if>
+  </select>
+  <select id="queryByGAndP" resultType="java.util.Map">
+    select *
+    from (
+    SELECT
+    v.designer AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    13 as role
+    FROM
+    volume v,
+    project p,
+    `USER` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.`name` = v.designer
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND FIND_IN_SET(#{name},REPLACE (p.general, ";", "," ))
+    AND ((
+    v.shot_date != ""
+    AND ( v.planned_start_date >= #{sqlDate} OR v.start_date >= #{sqlDate} OR v.shot_date >= #{sqlDate} OR
+    v.actual_publication_date >= #{sqlDate} ))
+    OR ( v.shot_date = "" AND v.start_date != "" )) UNION
+    SELECT
+    principal AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    13 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (p.general, ";", "," ))
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = v.principal
+    AND v.principal NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    13 as role
+    FROM
+    volume v,
+    project p,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND FIND_IN_SET(#{name},REPLACE (p.general, ";", "," ))
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";", 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";",- 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    13 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND FIND_IN_SET(#{name},REPLACE (p.general, ";", "," ))
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";",- 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    p.general AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    13 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (p.general, ";", "," ))
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = p.general
+    AND p.general NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    13 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (p.general, ";", "," ))
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", 1 )
+    AND p.general LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", - 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    13 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (p.general, ";", "," ))
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", - 1 )
+    AND p.general LIKE "%;%" union
+    SELECT
+    v.designer AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    14 as role
+    FROM
+    volume v,
+    project p,
+    `USER` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.`name` = v.designer
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND p.id in (
+    SELECT
+    project_id
+    FROM
+    volume
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (principal, ";", "," ))
+    )
+    AND ((
+    v.shot_date != ""
+    AND ( v.planned_start_date >= #{sqlDate} OR v.start_date >= #{sqlDate} OR v.shot_date >= #{sqlDate} OR
+    v.actual_publication_date >= #{sqlDate} ))
+    OR ( v.shot_date = "" AND v.start_date != "" )) UNION
+    SELECT
+    principal AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    14 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id in (
+    SELECT
+    project_id
+    FROM
+    volume
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (principal, ";", "," ))
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = v.principal
+    AND v.principal NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    14 as role
+    FROM
+    volume v,
+    project p,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND p.id in (
+    SELECT
+    project_id
+    FROM
+    volume
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (principal, ";", "," ))
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";", 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";",- 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    14 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND p.id in (
+    SELECT
+    project_id
+    FROM
+    volume
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (principal, ";", "," ))
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";",- 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    p.general AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    14 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id in (
+    SELECT
+    project_id
+    FROM
+    volume
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (principal, ";", "," ))
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = p.general
+    AND p.general NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    14 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id in (
+    SELECT
+    project_id
+    FROM
+    volume
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (principal, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", 1 )
+    AND p.general LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", - 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    14 as role
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id in (
+    SELECT
+    project_id
+    FROM
+    volume
+    WHERE
+    FIND_IN_SET(#{name},REPLACE (principal, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", - 1 )
+    AND p.general LIKE "%;%"
+    union
+    select
+    u.name AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate,
+    13 as role
+    from
+    score_manage sm,
+    `user` u left join
+    user_score us on u.id = score_id and grade_id = #{id},
+    department d,
+    technology t
+    where
+    sm.score_id = #{id}
+    and sm.scored_id = u.id
+    and u.did = d.id
+    and u.tid = t.id
+    and sm.state = 0
+    ) as d
+    <where>
+    not exists(
+        select id
+        from score_manage sm
+        where sm.score_id = #{id}
+        and sm.scored_id = d.id
+        and sm.state = 1
+      )
+      <if test="selectName != null and selectName != ''">
+      and(  d.name like concat("%",#{selectName},"%")
+        or
+        d.username like concat("%",#{selectName},"%"))
+      </if>
+    </where>
+    group by  d.username
+  </select>
+  <select id="queryToupd" resultType="java.util.Map">
+    select u.id , u.name , u.username , u.grade , d.name as department , t.name as technology , p.name as power
+        from `user` u,
+        technology t ,
+        power p ,
+        department d
+        where u.pid = p.id
+        and u.tid = t.id
+        and u.did = d.id
+        and u.id = #{id}
+  </select>
+  <select id="queryPosition" resultType="java.util.Map">
+    select up.id , p.id as `position` , p.name, up.department_id , d.`name` as dep
+    from `position` p,
+		user_position up	LEFT JOIN
+    department d on d.id = up.department_id
+    where
+    p.id = up.position_id
+    and up.user_id = #{id}
+  </select>
+  <select id="queryNotAppraise" resultType="com.zpepdi.eureka_client.entity.UserOut">
+SELECT DISTINCT
+	u.id,
+	u.`name`,
+	username,
+	d.NAME AS department,
+	t.NAME AS technology
+FROM
+	`user` u,
+	department d,
+	technology t,
+	(
+	SELECT
+		principal AS `name`
+	FROM
+		volume v
+	WHERE
+		v.planned_start_date >= #{sqlDate}
+		OR v.start_date >= #{sqlDate}
+		OR v.shot_date >= #{sqlDate}
+		OR v.actual_publication_date >= #{sqlDate}
+		OR ( v.shot_date = "" AND v.start_date != "" ) UNION
+	SELECT
+		SUBSTRING_INDEX( v.principal, ";", 1 ) AS `name`
+	FROM
+		volume v
+	WHERE
+		v.planned_start_date >= #{sqlDate}
+		OR v.start_date >= #{sqlDate}
+		OR v.shot_date >= #{sqlDate}
+		OR v.actual_publication_date >= #{sqlDate}
+		OR ( v.shot_date = "" AND v.start_date != "" ) UNION
+	SELECT
+		SUBSTRING_INDEX( v.principal, ";", - 1 ) AS `name`
+	FROM
+		volume v
+	WHERE
+		v.planned_start_date >= #{sqlDate}
+		OR v.start_date >= #{sqlDate}
+		OR v.shot_date >= #{sqlDate}
+		OR v.actual_publication_date >= #{sqlDate}
+		OR ( v.shot_date = "" AND v.start_date != "" ) UNION
+	SELECT
+		general AS `name`
+	FROM
+		project UNION
+	SELECT
+		SUBSTRING_INDEX( general, ";",- 1 ) AS `name`
+	FROM
+		project UNION
+	SELECT
+		SUBSTRING_INDEX( general, ";",- 1 ) AS `name`
+	FROM
+		project
+	) AS human,
+	( SELECT DISTINCT user_id FROM user_position ) AS up
+WHERE
+	( u.`name` = human.`name` OR u.id = up.user_id )
+	AND u.did = d.id
+	AND u.tid = t.id
+	and not EXISTS(
+	SELECT  id
+	FROM user_score us
+	WHERE u.id = us.grade_id)
+  </select>
+  <select id="queryNotScored" resultType="com.zpepdi.eureka_client.entity.UserOut">
+    select u.`name` , username , d.name as department ,t.name as technology
+    from `user` u,
+    department d,
+    technology t
+    where
+     u.did = d.id
+    and u.tid = t.id
+    and not exists (select id
+    from user_score s
+    where u.id = s.score_id
+    )
+    <if test="dIds != null and dIds != ''">
+      and d.id in
+      <foreach collection="dIds" item="item" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="tIds != null and tIds != ''">
+      and t.id in
+      <foreach collection="tIds" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+    </if>
+    <if test="selectName != null and selectName != ''">
+      order by ${selectName}
+    </if>
+    <if test="selectType == 1">
+      desc
+    </if>
+    </select>
+  <select id="queryNotTecApp" resultType="com.zpepdi.eureka_client.entity.UserOut">
+    select u.`name` , username , d.name as department ,t.name as technology
+    from `user` u,
+    department d,
+    technology t
+    where
+    u.grade = 1
+    and u.did = d.id
+    and u.tid = t.id
+    and not exists (select id
+    from tec_score s
+    where u.id = s.grade_id
+    )
+    <if test="dIds != null and dIds != ''">
+      and d.id in
+      <foreach collection="dIds" item="item" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="tIds != null and tIds != ''">
+      and t.id in
+      <foreach collection="tIds" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+    </if>
+    <if test="selectName != null and selectName != ''">
+      order by ${selectName}
+    </if>
+    <if test="selectType == 1">
+      desc
+    </if>
+  </select>
+  <select id="queryAppriseAll" resultType="java.util.Map">
+    SELECT DISTINCT
+      u.id,
+      u.`name`,
+      username,
+        d.id as did,
+        t.id as tid,
+      d.NAME AS department,
+      t.NAME AS technology
+    FROM
+      `user` u,
+      department d,
+      technology t,
+      (
+        SELECT
+          principal AS `name`
+        FROM
+          volume v
+        WHERE
+          v.planned_start_date >= #{sqlDate}
+           OR v.start_date >= #{sqlDate}
+           OR v.shot_date >= #{sqlDate}
+           OR v.actual_publication_date >= #{sqlDate}
+           OR ( v.shot_date = "" AND v.start_date != "" ) UNION
+        SELECT
+          SUBSTRING_INDEX( v.principal, ";", 1 ) AS `name`
+        FROM
+          volume v
+        WHERE
+          v.planned_start_date >= #{sqlDate}
+           OR v.start_date >= #{sqlDate}
+           OR v.shot_date >= #{sqlDate}
+           OR v.actual_publication_date >= #{sqlDate}
+           OR ( v.shot_date = "" AND v.start_date != "" ) UNION
+        SELECT
+          SUBSTRING_INDEX( v.principal, ";", - 1 ) AS `name`
+        FROM
+          volume v
+        WHERE
+          v.planned_start_date >= #{sqlDate}
+           OR v.start_date >= #{sqlDate}
+           OR v.shot_date >= #{sqlDate}
+           OR v.actual_publication_date >= #{sqlDate}
+           OR ( v.shot_date = "" AND v.start_date != "" ) UNION
+        SELECT
+          general AS `name`
+        FROM
+          project UNION
+        SELECT
+          SUBSTRING_INDEX( general, ";",- 1 ) AS `name`
+        FROM
+          project UNION
+        SELECT
+          SUBSTRING_INDEX( general, ";",- 1 ) AS `name`
+        FROM
+          project
+      ) AS human,
+      ( SELECT DISTINCT user_id FROM user_position ) AS up
+    WHERE
+      ( u.`name` = human.`name` OR u.id = up.user_id )
+      AND u.did = d.id
+      AND u.tid = t.id
+  </select>
+  <select id="queryAppraise" resultType="com.zpepdi.eureka_client.entity.UserOut">
+    select distinct u.`name` , username , d.name as department ,t.name as technology
+    from `user` u,
+    department d,
+    technology t,
+		user_score us
+    where
+     u.did = d.id
+    and u.tid = t.id
+    and us.grade_id = u.id
+    </select>
+  <select id="queryGrade" resultType="java.lang.String">
+    SELECT `name`
+    FROM `user` u
+    WHERE
+      EXISTS (
+        SELECT	id
+        FROM
+          volume
+        WHERE
+          FIND_IN_SET(u.name,REPLACE (`principal`, ";", "," )) UNION
+        SELECT id
+        FROM
+          project
+        WHERE
+          FIND_IN_SET(u.name,REPLACE (`general`, ";", "," )))
+    ORDER BY username
+  </select>
+  <select id="queryAll" resultType="java.util.Map">
+    SELECT id , `name`
+    FROM `user`
+    ORDER BY username
+  </select>
+  <select id="queryByT" resultType="java.util.Map">
+    select concat_ws("-",t.did, t.id ,u.id ) as id,
+     concat_ws("-",t.did, t.id) as pid,
+     u.name as label
+     from `user` u,
+     technology t
+     where t.id = #{id}
+     and u.tid = t.id
+     <if test="mode == 0 ">
+       AND EXISTS (
+       SELECT	id
+       FROM
+       volume
+       WHERE
+       FIND_IN_SET(u.name,REPLACE (`principal`, ";", "," )) UNION
+       SELECT id
+       FROM
+       project
+       WHERE
+       FIND_IN_SET(u.name,REPLACE (`general`, ";", "," )))
+     </if>
+  </select>
+  <select id="queryByTAndState" resultType="java.util.Map">
+    select concat_ws("-",t.did, t.id ,u.id ) as id,
+           u.name as label, sm.state as state
+    from
+    technology t,
+    `user` u LEFT JOIN
+    score_manage sm on u.id = sm.scored_id and sm.score_id = #{id}
+    where t.id = #{tid}
+    and u.tid = t.id
+  </select>
+  <select id="queryByTAndGroup" resultMap="GroupUser">
+    select
+           u.name as label , u.id as id,
+           case when #{vid} Is Null then Null
+            else #{vid} end as vid
+    from
+      technology t,
+      `user` u
+    where t.id = #{tid}
+      and u.tid = t.id
+  </select>
+  <select id="getGroup" resultType="java.lang.Integer">
+    select distinct v.user_id
+    from virtual_leader v
+    where  `group` = (select `group`
+                      from virtual_leader
+                      where user_id = #{id}
+                        and virtual_id = #{vid})
+      and virtual_id = #{vid}
+      and v.user_id &lt;&gt; #{id}
+  </select>
+  <select id="queryByTAndGroup1" resultMap="GroupUser1">
+    select
+      u.name as label , u.id as id,
+      case when #{vid} Is Null then Null
+           else #{vid} end as vid
+    from
+      technology t,
+      `user` u
+    where t.id = #{tid}
+      and u.tid = t.id
+  </select>
+  <select id="getGroup1" resultType="java.lang.Integer">
+    select distinct v.user_id
+    from activity_leader v
+    where  `group` = (select `group`
+                      from activity_leader
+                      where user_id = #{id}
+                        and activity_id = #{vid})
+      and activity_id = #{vid}
+      and v.user_id &lt;&gt; #{id}
+  </select>
+  <select id="queryLimits" resultType="java.util.Map">
+    SELECT
+      u.id AS uid,
+      u.grade,
+      u.did AS did,
+      p.`name` AS `position`,
+      p.limits,
+      d.`name` AS department,
+      d.branch
+    FROM
+      `user` u
+      LEFT JOIN user_position up ON u.id = up.user_id
+      LEFT JOIN position p ON p.id = up.position_id
+      LEFT JOIN department d ON d.id = up.department_id
+    WHERE
+      u.id = #{id}
+    ORDER BY
+      p.`limits`
+      LIMIT 1
+  </select>
+  <select id="queryByDirector" resultType="java.util.Map">
+    select
+    u.name AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    from
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    where
+    d.id in ${branch}
+    AND u.id &lt;&gt; #{id}
+    and d.id= u.did
+    and u.tid = t.id
+    union
+    SELECT
+    v.designer AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    volume v,
+    project p,
+    `USER` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.`name` = v.designer
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND (
+      FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+    )
+    AND ((
+    v.shot_date != ""
+    AND ( v.planned_start_date >= #{sqlDate} OR v.start_date >= #{sqlDate} OR v.shot_date >= #{sqlDate} OR v.actual_publication_date >= #{sqlDate} ))
+    OR ( v.shot_date = "" AND v.start_date != "" )) UNION
+    SELECT
+    principal AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+
+     (
+         FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+         or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = v.principal
+    AND v.principal NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    volume v,
+    project p,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND (
+        FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+        or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";", 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";",- 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND (
+        FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+        or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";",- 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    p.general AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    (
+        FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+        or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = p.general
+    AND p.general NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    (
+        FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+        or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", 1 )
+    AND p.general LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", - 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    (
+        FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+        or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", - 1 )
+    AND p.general LIKE "%;%"
+  </select>
+  <select id="queryByManager" resultType="java.util.Map">
+    select *
+    from (select
+    u.name AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    from
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    where
+    d.id = #{did}
+    AND u.id &lt;&gt; #{id}
+    and d.id= u.did
+    and u.tid = t.id
+    union
+    SELECT
+    v.designer AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    volume v,
+    project p,
+    `USER` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.`name` = v.designer
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND (
+    FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND ((
+    v.shot_date != ""
+    AND ( v.planned_start_date >= #{sqlDate} OR v.start_date >= #{sqlDate} OR v.shot_date >= #{sqlDate} OR v.actual_publication_date >= #{sqlDate} ))
+    OR ( v.shot_date = "" AND v.start_date != "" )) UNION
+    SELECT
+    principal AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+
+     (
+    FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = v.principal
+    AND v.principal NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    volume v,
+    project p,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND (
+    FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";", 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";",- 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";",- 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    p.general AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = p.general
+    AND p.general NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", 1 )
+    AND p.general LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", - 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", - 1 )
+    AND p.general LIKE "%;%"
+    union
+    select
+    u.name AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    from
+    score_manage sm,
+    `user` u left join
+    user_score us on u.id = score_id and grade_id = #{id},
+    department d,
+    technology t
+    where
+    sm.score_id = #{id}
+    and sm.scored_id = u.id
+    and u.did = d.id
+    and u.tid = t.id
+    and sm.state = 0
+    ) as d
+    <where>
+      not exists(
+      select id
+      from score_manage sm
+      where sm.score_id = #{id}
+      and sm.scored_id = d.id
+      and sm.state = 1
+      )
+    <if test="selectName != null and selectName != ''">
+      and (d.name like concat("%",#{selectName},"%")
+      or
+        d.username like concat("%",#{selectName},"%"))
+    </if>
+  </where>
+  </select>
+  <select id="queryByHeadman" resultType="java.util.Map">
+    select *
+    from (
+   select
+    u.name AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    from
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    where
+    t.id = #{tid}
+    AND u.id &lt;&gt; #{id}
+    and d.id= u.did
+    and u.tid = t.id
+    union
+        SELECT
+    v.designer AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    volume v,
+    project p,
+    `USER` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.`name` = v.designer
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND (
+    v.principal = #{name}
+
+    OR SUBSTRING_INDEX( v.principal, ";", 1 )= #{name}
+
+    OR SUBSTRING_INDEX( v.principal, ";",-1 )= #{name}
+
+    OR p.general = #{name}
+
+    OR SUBSTRING_INDEX( p.general, ";", 1 )= #{name}
+
+    OR SUBSTRING_INDEX( p.general, ";",-1 )= #{name}
+
+    )
+    AND ((
+    v.shot_date != ""
+    AND ( v.planned_start_date >= #{sqlDate} OR v.start_date >= #{sqlDate} OR v.shot_date >= #{sqlDate} OR v.actual_publication_date >= #{sqlDate} ))
+    OR ( v.shot_date = "" AND v.start_date != "" )) UNION
+    SELECT
+    principal AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+
+     (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = v.principal
+    AND v.principal NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    volume v,
+    project p,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";", 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( v.principal, ";",- 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";",- 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+    p.general AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = p.general
+    AND p.general NOT LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", 1 )
+    AND p.general LIKE "%;%" UNION
+    SELECT
+    SUBSTRING_INDEX( p.general, ";", - 1 ) AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    FROM
+    project p,
+    volume v,
+    `user` u
+    LEFT JOIN user_score us ON us.grade_id = #{id}
+    AND u.id = us.score_id,
+    department d,
+    technology t
+    WHERE
+    (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND p.id = v.project_id
+    AND u.id &lt;&gt; #{id}
+    AND u.did = d.id
+    AND u.tid = t.id
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", - 1 )
+    AND p.general LIKE "%;%"
+    union
+    select
+    u.name AS `name`,
+    u.id,
+    u.username,
+    d.name AS department,
+    t.name AS technology,
+    us.designer,
+    us.personal,
+    us.coordinate
+    from
+    score_manage sm,
+    `user` u left join
+    user_score us on u.id = score_id and grade_id = #{id},
+    department d,
+    technology t
+    where
+    sm.score_id = #{id}
+    and sm.scored_id = u.id
+    and u.did = d.id
+    and u.tid = t.id
+    and sm.state = 0
+    ) as d
+    <where>
+      not exists(
+      select id
+      from score_manage sm
+      where sm.score_id = #{id}
+      and sm.scored_id = d.id
+      and sm.state = 1
+      )
+      <if test="selectName != null and selectName != ''">
+        and (d.name like concat("%",#{selectName},"%")
+        or
+        d.username like concat("%",#{selectName},"%"))
+      </if>
+    </where>
+  </select>
+  <select id="queryByGAndPList" resultType="java.lang.String">
+  select mark
+  from (
+    SELECT
+      u.id, CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      volume v,
+      project p,
+      `USER` u
+    WHERE
+      p.id = v.project_id
+      AND u.`name` = v.designer
+      AND u.id &lt;&gt;#{id}
+    AND (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND ((
+    v.shot_date != ""
+    AND (
+    v.planned_start_date >= #{sqlDate} OR v.start_date >= #{sqlDate} OR v.shot_date >= #{sqlDate} OR v.actual_publication_date >= #{sqlDate} ))
+    OR ( v.shot_date = "" AND v.start_date != "" )) UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+          FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+          or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND u.`name` = v.principal
+		AND v.principal NOT LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      volume v,
+      project p,
+      `user` u
+    WHERE
+      p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND (
+        FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+        or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";", 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND (
+        FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+        or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";",- 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND u.`name` = p.general
+		AND p.general NOT LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", 1 )
+		AND p.general LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+     FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+    or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", - 1 )
+		AND p.general LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      score_manage sm,
+      `user` u
+    WHERE
+      sm.score_id = #{id}
+      AND sm.scored_id = u.id
+      AND sm.state = 0) as d
+    where
+    not exists(
+    select id
+    from score_manage sm
+    where sm.score_id = #{id}
+    and sm.scored_id = d.id
+    and sm.state = 1
+    )
+  </select>
+  <select id="queryNotSelfList" resultType="java.lang.String">
+    select distinct CONCAT_WS("-",u.did,u.tid,u.id)
+    from `user` u
+    where u.id &lt;&gt; #{id}
+      and not exists(
+      select id
+      from score_manage sm
+      where sm.score_id = #{id}
+        and sm.scored_id = u.id
+        and sm.state = 1
+      )
+  </select>
+  <select id="queryByManagerList" resultType="java.lang.String">
+    select mark
+    from(
+          SELECT
+            u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+          FROM
+            `user` u department d
+          WHERE
+            d.id = #{did}
+
+            AND u.id &lt;&gt;#{id}
+
+    AND d.id = u.did UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      volume v,
+      project p,
+      `USER` u
+    WHERE
+      p.id = v.project_id
+      AND u.`name` = v.designer
+      AND u.id &lt;&gt;#{id}
+
+    AND (
+            FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+       or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND ((
+    v.shot_date != ""
+    AND (
+    v.planned_start_date >= #{sqlDate} OR v.start_date >= #{sqlDate} OR v.shot_date >= #{sqlDate} OR v.actual_publication_date >= #{sqlDate} ))
+
+    OR ( v.shot_date = "" AND v.start_date != "" )) UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+            FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+       or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+
+    AND u.`name` = v.principal
+		AND v.principal NOT LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      volume v,
+      project p,
+      `user` u
+    WHERE
+      p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+
+    AND (
+            FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+       or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";", 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+
+    AND (
+            FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+       or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";",- 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+            FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+       or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+
+    AND u.`name` = p.general
+		AND p.general NOT LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+            FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+       or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", 1 )
+		AND p.general LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+            FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+       or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", - 1 )
+		AND p.general LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      score_manage sm,
+      `user` u
+    WHERE
+      sm.score_id = #{id}
+
+      AND sm.scored_id = u.id
+      AND sm.state = 0
+          ) as d
+    where
+
+  </select>
+  <select id="queryByHeadmanList" resultType="java.lang.String">
+    SELECT
+      mark
+    FROM
+      (
+        SELECT
+          u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+        FROM
+          `user` u,
+          technology t
+        WHERE
+          t.id = #{tid}
+
+          AND u.id &lt;&gt;#{id}
+          AND u.tid = t.id UNION
+        SELECT
+          u.id
+        FROM
+          volume v,
+          project p,
+          `USER` u
+        WHERE
+          p.id = v.project_id
+          AND u.`name` = v.designer
+          AND u.id &lt;&gt;#{id}
+    AND (
+            FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+            or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND ((
+    v.shot_date != ""
+    AND (
+    v.planned_start_date >= #{sqlDate} OR v.start_date >= #{sqlDate} OR v.shot_date >= #{sqlDate} OR v.actual_publication_date >= #{sqlDate} ))
+
+    OR ( v.shot_date = "" AND v.start_date != "" )) UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+          FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+          or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND u.`name` = v.principal
+			AND v.principal NOT LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      volume v,
+      project p,
+      `user` u
+    WHERE
+      p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND (
+        FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+        or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";", 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND (
+        FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+        or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+    )
+    AND u.`name` = SUBSTRING_INDEX( v.principal, ";",- 1 )
+    AND v.principal LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+          FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+          or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND u.`name` = p.general
+			AND p.general NOT LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+          FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+          or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", 1 )
+			AND p.general LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      project p,
+      volume v,
+      `user` u
+    WHERE
+      (
+          FIND_IN_SET(#{name},REPLACE (`general`, ";", "," ))
+          or FIND_IN_SET(#{name},REPLACE (`principal`, ";", "," ))
+
+        )
+      AND p.id = v.project_id
+      AND u.id &lt;&gt;#{id}
+    AND u.`name` = SUBSTRING_INDEX( p.general, ";", - 1 )
+			AND p.general LIKE "%;%" UNION
+    SELECT
+      u.id,CONCAT_WS("-",u.did,u.tid,u.id) as mark
+    FROM
+      score_manage sm,
+      `user` u
+    WHERE
+      sm.score_id = #{id}
+      AND sm.scored_id = u.id
+      AND sm.state = 0
+      ) AS d
+    WHERE
+      NOT EXISTS (
+      SELECT
+      id
+      FROM
+      score_manage sm
+      WHERE
+      sm.score_id = #{id}
+      AND sm.scored_id = d.id
+      AND sm.state = 1
+      )
+  </select>
+    <select id="workdayById" resultType="java.util.Map">
+        SELECT
+            ifnull(SUM( designer),0) as desigern,
+            ifnull(SUM( checker ),0) as checker,
+            ifnull(SUM( principal),0) as principal,
+            ifnull(SUM( headman ),0) as headman
+        FROM
+            (
+                SELECT
+                    CASE
+                        role
+                        WHEN 1 THEN
+                            workday * designer
+                        END AS designer,
+                    CASE
+                        role
+                        WHEN 2 THEN
+                            workday * checker
+                        END AS checker,
+                    CASE
+                        role
+                        WHEN 3 THEN
+                            workday * principal
+                        END AS principal,
+                    CASE
+                        role
+                        WHEN 4 THEN
+                            workday * headman
+                        END AS headman
+                FROM
+                    (
+                        SELECT
+                            id,
+                            project_id,
+                            1 AS role
+                        FROM
+                            volume
+                        WHERE
+                            designer = #{name} UNION
+                        SELECT
+                            id,
+                            project_id,
+                            2 AS role
+                        FROM
+                            volume
+                        WHERE
+                            checker = #{name} UNION
+                        SELECT
+                            id,
+                            project_id,
+                            3 AS role
+                        FROM
+                            volume
+                        WHERE
+                            principal = #{name} UNION
+                        SELECT
+                            id,
+                            project_id,
+                            4 AS role
+                        FROM
+                            volume
+                        WHERE
+                            headman = #{name}
+                    ) AS v,
+                    (
+                        SELECT
+                            v.id,
+                            v.tec,
+                            w.workday,
+                            IFNULL(
+                                    w.designer,
+                                    IFNULL( t.designer, d.designer )) AS designer,
+                            IFNULL(
+                                    w.checker,
+                                    IFNULL( t.checker, d.checker )) AS checker,
+                            IFNULL(
+                                    w.principal,
+                                    IFNULL( t.principal, d.principal )) AS principal,
+                            IFNULL(
+                                    w.headman,
+                                    IFNULL( t.headman, d.headman )) AS headman
+                        FROM
+                            volume_workday w,
+                            volume v
+                                LEFT JOIN tec_ratio t ON v.project_id = t.project_id
+                                AND v.tec = t.tec,
+                            default_ratio d
+                        WHERE
+                            v.id = w.volume_id
+                          AND w.state = 1
+                          AND w.date = #{date}
+                          AND d.id = 1
+                    ) AS w
+                WHERE
+                    w.id = v.id
+                GROUP BY
+                    v.role
+            ) AS t
+    </select>
+    <select id="workdayHighById" resultType="java.util.Map">
+        SELECT
+            ifnull(SUM(h.`grant`),0) as designer
+        FROM
+            volume v,
+            volume_workday_high h
+        WHERE
+            h.date = #{date}
+          AND h.volume_id = v.id
+          AND v.designer = #{name}
+    </select>
+    <select id="workdayHighState3ById" resultType="java.util.Map">
+        SELECT
+            ifnull(SUM( designer-`grant` ),0) as desigern,
+            ifnull(SUM( checker ), 0) as checker,
+            ifnull(SUM( principal ), 0) as principal,
+            ifnull(SUM( headman ), 0) as headman
+        FROM
+            (
+                SELECT
+                    CASE
+                        role
+                        WHEN 1 THEN
+                            workday * designer
+                        END AS designer,
+                    CASE
+                        role
+                        WHEN 2 THEN
+                            workday * checker
+                        END AS checker,
+                    CASE
+                        role
+                        WHEN 3 THEN
+                            workday * principal
+                        END AS principal,
+                    CASE
+                        role
+                        WHEN 4 THEN
+                            workday * headman
+                        END AS headman,
+                    SUM(h.`grant`) as `grant`
+                FROM
+                    (
+                        SELECT
+                            id,
+                            project_id,
+                            1 AS role
+                        FROM
+                            volume
+                        WHERE
+                            designer = #{name} UNION
+                        SELECT
+                            id,
+                            project_id,
+                            2 AS role
+                        FROM
+                            volume
+                        WHERE
+                            checker = #{name} UNION
+                        SELECT
+                            id,
+                            project_id,
+                            3 AS role
+                        FROM
+                            volume
+                        WHERE
+                            principal = #{name} UNION
+                        SELECT
+                            id,
+                            project_id,
+                            4 AS role
+                        FROM
+                            volume
+                        WHERE
+                            headman = #{name}
+                    ) AS v LEFT JOIN
+                    volume_workday_high h on v.id = h.volume_id,
+                    (
+                        SELECT
+                            v.id,
+                            v.tec,
+                            w.workday,
+                            IFNULL(
+                                    w.designer,
+                                    IFNULL( t.designer, d.designer )) AS designer,
+                            IFNULL(
+                                    w.checker,
+                                    IFNULL( t.checker, d.checker )) AS checker,
+                            IFNULL(
+                                    w.principal,
+                                    IFNULL( t.principal, d.principal )) AS principal,
+                            IFNULL(
+                                    w.headman,
+                                    IFNULL( t.headman, d.headman )) AS headman
+                        FROM
+                            volume_workday w,
+                            volume v
+                                LEFT JOIN tec_ratio t ON v.project_id = t.project_id
+                                AND v.tec = t.tec,
+                            default_ratio d
+                        WHERE
+                            v.id = w.volume_id
+                          AND w.state = 3
+                          AND w.date = #{date}
+                          AND d.id = 1
+                    ) AS w
+                WHERE
+                    w.id = v.id
+                GROUP BY
+                    v.id , v.role
+            ) AS t
+    </select>
+    <select id="workdayBackup" resultType="java.lang.Double">
+        SELECT
+            ifnull(SUM( workday ),0)
+        FROM
+            workday_backup_user
+        WHERE
+            user_id = #{id}
+          AND date = #{date}
+    </select>
+    <select id="workdayVirtual" resultType="java.lang.Double">
+        SELECT
+            ifnull(SUM( workday ),0)
+        FROM
+            virtual_workday
+        WHERE
+            user_id = #{id}
+          AND date = #{date}
+    </select>
+    <select id="workdayActivity" resultType="java.lang.Double">
+        SELECT
+            ifnull(SUM( workday ),0)
+        FROM
+            activity_workday
+        WHERE
+            user_id = #{id}
+          AND date = #{date}
+    </select>
+    <select id="workdayLogById" resultType="java.util.Map">
+        SELECT
+            v.principal,
+            w.workday,
+            1 AS type,
+            v.`number`
+        FROM
+            volume_workday w,
+            (
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    designer = #{name} UNION
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    checker = #{name} UNION
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    actual_principal = #{name} UNION
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    headman = #{name}
+            ) AS v
+        WHERE
+            w.volume_id = v.id
+          AND w.state = 1
+          AND w.date = #{date} UNION
+        SELECT
+            v.principal,
+            h.`grant` AS workday,
+            2 AS type,
+            v.`number`
+        FROM
+            volume_workday w,
+            volume_workday_high h,
+            (
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    designer = #{name} UNION
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    checker = #{name} UNION
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    actual_principal = #{name} UNION
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    headman = #{name}
+            ) AS v
+        WHERE
+            w.volume_id = v.id
+          AND h.date = #{date}
+          AND w.volume_id = h.volume_id UNION
+        SELECT
+            v.principal,
+            (
+                w.workday - SUM( h.`grant` )) AS workday,
+            3 AS type,
+            v.`number`
+        FROM
+            volume_workday w
+                LEFT JOIN volume_workday_high h ON w.volume_id = h.volume_id,
+            (
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    designer = #{name} UNION
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    checker = #{name} UNION
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    actual_principal = #{name} UNION
+                SELECT
+                    id,
+                    number,
+                    principal
+                FROM
+                    volume
+                WHERE
+                    headman = #{name}
+            ) AS v
+        WHERE
+            w.volume_id = v.id
+          AND w.state = 3
+          AND w.date = #{date} UNION
+        SELECT
+            u.`name`,
+            w.workday,
+            4 AS type,
+            p.`number` AS number
+        FROM
+            workday_backup_user w,
+            `user` u,
+            project p
+        WHERE
+            u.id = w.issuer_id
+          AND w.date = #{date}
+          AND w.user_id = #{id}
+          AND w.project_id = p.id UNION
+        SELECT
+            u.`name`,
+            w.workday,
+            5 AS type,
+            p.`number` AS number
+        FROM
+            virtual_workday w,
+            `user` u,
+            virtual_project p
+        WHERE
+            u.id = w.issuer_id
+          AND w.date = #{date}
+          AND w.user_id = #{id}
+          AND w.virtual_id = p.id UNION
+        SELECT
+            u.`name`,
+            w.workday,
+            6 AS type,
+            p.`number` AS number
+        FROM
+            activity_workday w,
+            `user` u,
+            activity p
+        WHERE
+            u.id = w.issuer_id
+          AND w.date = #{date}
+          AND w.user_id = #{id}
+          AND w.activity_id = p.id
+    </select>
+
+
+</mapper>
