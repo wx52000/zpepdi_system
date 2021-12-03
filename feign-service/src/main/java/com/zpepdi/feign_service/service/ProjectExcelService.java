@@ -1,41 +1,39 @@
 package com.zpepdi.feign_service.service;
 
-import com.zpepdi.feign_service.entity.Project;
-import com.zpepdi.feign_service.entity.ProjectExcelTec;
-import com.zpepdi.feign_service.fallback.ProjectExcelFallbackService;
-import com.zpepdi.feign_service.fallback.ProjectFallbackService;
-import com.zpepdi.feign_service.result.Result;
+import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
 
-@FeignClient(value = "EUREKA-CLIENT", fallback = ProjectExcelFallbackService.class)
+@FeignClient(value = "EUREKA-CLIENT")
 public interface ProjectExcelService {
 
-//    @RequestMapping("projectExcel/statisticAll")
-//    Result statisticAll(HttpServletResponse response, HttpServletRequest request);
-//
-//    @RequestMapping("projectExcel/statistic")
-//    Result statistic(HttpServletResponse response, HttpServletRequest request);
-//
-//    @RequestMapping("projectExcel/everyoneAll")
-//    Result everyoneAll(HttpServletResponse response, HttpServletRequest request);
-//
-//    @RequestMapping("projectExcel/everyone")
-//    Result everyone(HttpServletResponse response, HttpServletRequest request);
-//
-//    @RequestMapping("projectExcel/volumeAll")
-//    Result volumeAll(HttpServletResponse response, HttpServletRequest request);
-//
-//    @RequestMapping("projectExcel/volume")
-//    Result volume(HttpServletResponse response, HttpServletRequest request);
-//
-//    @RequestMapping("projectExcel/personal")
-//    Result personal(HttpServletResponse response, HttpServletRequest request);
-//
-//    @RequestMapping("projectExcel/personalVolume")
-//    Result personalVolume(HttpServletResponse response, HttpServletRequest request);
+    @RequestMapping("projectExcel/statisticAll")
+    Response statisticAll(@RequestParam("date") String min);
+
+    @RequestMapping("projectExcel/statistic")
+    Response statistic(@RequestParam("id")Integer id);
+
+    @RequestMapping("projectExcel/everyoneAll")
+    Response everyoneAll(@RequestParam("date")String date);
+
+    @RequestMapping("projectExcel/everyone")
+    Response everyone(@RequestParam("id")Integer id);
+
+    @RequestMapping("projectExcel/volumeAll")
+    Response volumeAll(@RequestParam("date")String date);
+
+    @RequestMapping("projectExcel/volume")
+    Response volume(@RequestParam("id")Integer id);
+
+    @RequestMapping("projectExcel/personal")
+    Response personal(@RequestHeader("userId") Integer id);
+
+    @RequestMapping("projectExcel/personalVolume")
+    Response personalVolume(@RequestHeader("userId") Integer id,
+                            @RequestParam("minDay")String min,@RequestParam("maxDay")String max);
 }

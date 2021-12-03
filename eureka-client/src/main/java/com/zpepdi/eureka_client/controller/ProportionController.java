@@ -10,7 +10,7 @@ import com.zpepdi.eureka_client.service.ProportionService;
 
 @RestController
 @RequestMapping("proportion")
-public class ProportionController {
+public class   ProportionController {
 
     private ProportionService proportionService;
 

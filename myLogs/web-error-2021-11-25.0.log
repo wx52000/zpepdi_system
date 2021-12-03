@@ -1,0 +1,16 @@
+2021-11-25 10:25:51.253 [Thread-44] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1637807151250, current=DOWN, previous=UP]
+2021-11-25 10:27:01.659 [restartedMain] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9001 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9001 or configure this application to listen on another port.
+
+2021-11-25 10:58:08.873 [Thread-34] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1637809088870, current=DOWN, previous=UP]

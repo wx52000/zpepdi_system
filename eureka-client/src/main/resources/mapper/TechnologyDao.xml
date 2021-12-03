@@ -98,5 +98,9 @@
         where u.tid = t.id
         )
     </select>
+    <select id="queryAll" resultType="com.zpepdi.eureka_client.entity.Technology">
+        select id, `name`
+        from technology
+    </select>
 
 </mapper>

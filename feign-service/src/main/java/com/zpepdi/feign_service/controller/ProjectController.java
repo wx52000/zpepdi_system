@@ -59,8 +59,8 @@ public class ProjectController {
   }
 
     @RequestMapping("queryById")
-    public Result queryById(@RequestHeader Integer id){
-        return projectService.queryById(id);
+    public Result queryById(@UserId Integer userId, @RequestHeader Integer id){
+        return projectService.queryById(userId,id);
     }
 
     @RequestMapping("queryHumanToBackup")

@@ -28,9 +28,13 @@ public interface ProjectDao {
 
     List<Map<String,Object>> queryHumanToBackup(@Param("userId")Integer id, @Param("map")Map<String,Object> map);
 
-    String queryUsedBackup(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
+    Map<String,Object> queryUsed(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
 
-    String queryBackupAmountByMajor(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
+    Map<String,Object> queryUsedManage(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
+
+    String queryAmountByMajor(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
+
+    void distributeTecWorkday(Map map);
 
     void setWorkdayBackup(@Param("userId") Integer userId,
                           @Param("list") List<Map<String, Object>> list, @Param("date") String date);

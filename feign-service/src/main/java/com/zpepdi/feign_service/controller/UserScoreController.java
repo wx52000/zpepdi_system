@@ -1,5 +1,6 @@
 package com.zpepdi.feign_service.controller;
 
+import com.zpepdi.feign_service.annotation.UserId;
 import com.zpepdi.feign_service.entity.PartParam;
 import com.zpepdi.feign_service.entity.User;
 import com.zpepdi.feign_service.entity.UserScore;
@@ -44,8 +45,8 @@ public class UserScoreController {
     }
 
     @RequestMapping("appraise")
-    public Result appraise(@RequestBody List<UserScore> list){
-        return userScoreService.appraise(list);
+    public Result appraise(@UserId Integer userId, @RequestBody UserScore userScore){
+        return userScoreService.appraise(userId,userScore);
     }
 
     @RequestMapping("queryScore")

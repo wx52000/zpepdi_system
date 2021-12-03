@@ -2,6 +2,9 @@ package com.zpepdi.eureka_client.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zpepdi.eureka_client.dao.RangeDao;
+import com.zpepdi.eureka_client.tools.DateUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.zpepdi.eureka_client.dao.DepartmentDao;
@@ -14,6 +17,7 @@ import com.zpepdi.eureka_client.entity.UserOut;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.UserService;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -22,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private UserDao userDao;
     private DepartmentDao departmentDao;
     private TechnologyDao technologyDao;
+    private RangeDao rangeDao;
     @Autowired
     public void setDepartmentDao(DepartmentDao departmentDao){
       this.departmentDao = departmentDao;
@@ -33,6 +38,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     public void setUserDao(UserDao userDao){
         this.userDao = userDao;
+    }
+    @Autowired
+    public void setRangeDao(RangeDao rangeDao){
+        this.rangeDao = rangeDao;
     }
 
 
@@ -74,19 +83,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result information(Integer id) {
-        Calendar calendar = Calendar.getInstance();
-        String date = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1);
+        //当前月
+        String date = DateUtils.getDateMonth();
         Map<String,Object> map = new HashMap<>();
         User user = userDao.queryById(id);
+        //多线程方式获取数据
         List<Callable<Map<String,Object>>> callables = new ArrayList<>();
+        // 查询正常发放工时
         callables.add(()-> userDao.workdayById(user.getName(),date));
+        // 提前发放工时
         callables.add(()-> userDao.workdayHighById(user.getName(),date));
+        // 提前发放卷册完成后剩余工时发放
         callables.add(()-> userDao.workdayHighState3ById(user.getName(),date));
         ThreadPoolExecutor executor = new ThreadPoolExecutor(3,5,
                 1000, TimeUnit.MILLISECONDS, new SynchronousQueue<>());
         List<Future<Map<String,Object>>> futures;
         map.put("user",user);
         Map<String,Double> map1 = new HashMap<>();
+        //  根据卷册中所处角色获得工时
         map1.put("designer",0.0);
         map1.put("checker",0.0);
         map1.put("principal",0.0);
@@ -95,12 +109,8 @@ public class UserServiceImpl implements UserService {
             futures = executor.invokeAll(callables);
             String s[] = {"designer", "checker", "principal", "headman"};
             for (Future<Map<String,Object>> future : futures){
-
                 Map<String,Object> result = new HashMap<>(future.get());
-                System.out.println("******************************");
-                System.out.println(result);
-                System.out.println(result.get("designer"));
-                if                            (!result.isEmpty()) {
+                if(!result.isEmpty()) {
                     for (String s1 : s){
                         if (result.get(s1) != null){
                             map1.put(s1,map1.get(s1) + Double.parseDouble(result.get(s1).toString()));
@@ -108,12 +118,15 @@ public class UserServiceImpl implements UserService {
                     }
                 }
             }
+//            备用工时
             executor.execute(()->{
                 map.put("backup",userDao.workdayBackup(id,date));
             });
+//            调研项目工时
             executor.execute(()->{
                 map.put("virtual",userDao.workdayVirtual(id,date));
             });
+//            活动工时
             executor.execute(()->{
                 map.put("activity",userDao.workdayActivity(id,date));
             });
@@ -137,13 +150,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Result workdayLog(Map<String, Object> map) {
+        int id = Integer.parseInt(map.get("id").toString());
+        User user = userDao.queryById(id);
+        return Result.ok(userDao.workdayLogById(id,map.get("date").toString(),user.getName()));
+    }
+
+    @Override
     public List<Map> query(User user) {
         return userDao.query(user);
     }
 
     @Override
     public Result workday(String date) {
-        return null;
+        return Result.ok(userDao.workday(date));
     }
 
     @Override
@@ -168,35 +188,44 @@ public class UserServiceImpl implements UserService {
         return userDao.queryByTid(id);
     }
 
+    //未使用
   @Override
   public PageInfo<Map> queryNotSelf(User user) {
-      User user1 = userDao.queryById(user.getId());
-      if (user1.getGrade() == 1) {
-        PageHelper.startPage(user.getPageIndex(), user.getPageSize(), true);
-        PageInfo<Map> pageInfo = new PageInfo<>(userDao.queryNotSelf(user));
-        return pageInfo;
-      }else
+//      User user1 = userDao.queryById(user.getId());
+//      if (user1.getGrade() == 1) {
+//        PageHelper.startPage(user.getPageIndex(), user.getPageSize(), true);
+//        PageInfo<Map> pageInfo = new PageInfo<>(userDao.queryNotSelf(user));
+//        return pageInfo;
+//      }else
         return null;
   }
 
   @Override
-  public Result queryToScore(User user) {
-    Map map = userDao.queryLimits(user.getId());
-    if (Integer.valueOf(map.get("grade").toString()) == 1) {
-      if (map.get("limits") == null) {
-        return Result.ok(userDao.queryByGAndP(user));
-      } else if (Integer.valueOf(map.get("limits").toString()) == 0 || Integer.valueOf(map.get("limits").toString()) == 1) {
-        return Result.ok(userDao.queryNotSelf(user));
-      }
+  public Result queryToScore(Integer id, Map<String,Object> map) {
+    Map map1 = userDao.queryLimits(id);
+    Calendar calendar = Calendar.getInstance();
+    int day = calendar.get(Calendar.DAY_OF_MONTH);
+    if (day <= 15) {
+        calendar.add(Calendar.MONTH, -4);
+    }else {
+        calendar.add(Calendar.MONTH, -3);
+    }
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+    String date = sdf.format(calendar.getTime());
+    date = date + "-" + "1";
+    map.put("id",id);
+    map.put("date", date);
+    int pid = Integer.parseInt(map1.get("pid").toString());
+    if (map1.get("grade").equals(1)) {
+        if (pid == 1 || pid == 2 || pid == 3) {
+            return Result.ok(userDao.queryNotSelf(map));
+        }
       //经理
-      else if (Integer.valueOf(map.get("limits").toString()) == 2) {
-        return Result.ok(userDao.queryByManager(user));
+      else if (pid == 4) {
+          return Result.ok(userDao.queryByManager(map));
       }
-      //组长
-      else if (Integer.valueOf(map.get("limits").toString()) == 3) {
-        return Result.ok(userDao.queryByHeadman(user));
-      } else
-        return Result.ok(userDao.queryByGAndP(user));
+      else
+        return Result.ok(userDao.queryByGAndP(map));
     }else
       return Result.build(1001,"暂无打分权限");
   }
@@ -204,21 +233,16 @@ public class UserServiceImpl implements UserService {
   @Override
   public Result queryScoreList(User user) {
     Map map = userDao.queryLimits(user.getId());
-    if (Integer.valueOf(map.get("grade").toString()) == 1) {
-      if (map.get("limits") == null) {
-        return Result.ok(userDao.queryByGAndPList(user));
-      } else if (Integer.valueOf(map.get("limits").toString()) == 0 || Integer.valueOf(map.get("limits").toString()) == 1) {
-        return Result.ok(userDao.queryNotSelfList(user));
+    if (Integer.parseInt(map.get("grade").toString()) == 1) {
+        if (Integer.parseInt(map.get("limits").toString()) == 0 || Integer.parseInt(map.get("limits").toString()) == 1) {
+            return Result.ok(userDao.queryNotSelfList(user));
       }
       //经理
-      else if (Integer.valueOf(map.get("limits").toString()) == 2) {
+      else if (Integer.parseInt(map.get("limits").toString()) == 2) {
         return Result.ok(userDao.queryByManagerList(user));
       }
-      //组长
-      else if (Integer.valueOf(map.get("limits").toString()) == 3) {
-        return Result.ok(userDao.queryByHeadmanList(user));
-      } else
-        return Result.ok(userDao.queryByGAndP(user));
+      else
+        return Result.ok(userDao.queryByGAndPList(user));
     }else
       return Result.ok(null);
   }
@@ -298,8 +322,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void paw(User user) {
-        userDao.paw(user);
+    public void paw(Integer id,User user) {
+        userDao.paw(id,user);
     }
 
     @Override

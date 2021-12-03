@@ -2,6 +2,7 @@ package com.zpepdi.eureka_client.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,9 @@ public class NewsController {
     this.newsService = newsService;
     }
 
+    @Value("${server.port}")
+    private volatile String port;
+
     @RequestMapping("count")
   public Result count(@RequestHeader Integer id){
     return newsService.newsCount(id);
@@ -25,5 +29,10 @@ public class NewsController {
   @RequestMapping("query")
   public Result query(@RequestHeader Integer id){
     return newsService.query(id);
+  }
+
+  @RequestMapping("test")
+  public Result test(){
+    return Result.ok(port);
   }
 }

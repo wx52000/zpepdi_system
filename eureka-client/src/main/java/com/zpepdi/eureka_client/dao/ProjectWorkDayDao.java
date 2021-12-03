@@ -21,11 +21,20 @@ public interface ProjectWorkDayDao {
   //查询分配的工时，用于修改
   List<Map> queryTecWorkDayAmount(Integer id);
 
+  Double queryUsableManageWorkday(Integer id);
+
+  Double queryUsedManageWorkdayByDate(@Param("id") Integer id, @Param("date") String date);
+
   Double queryUsableBackupWorkday(Integer id);
   List<Map> queryBackupWorkDayAmount(Map<String,String> map);
   List<Map> queryReserveWorkDayRatio(@Param("id") Integer id);
   //修改项目分配工时
   void setProWorkDay(Map map);
+
+  void setProWorkDayDistribut(Map map);
+
+  void setManageWorkday(@Param("id") Integer id, @Param("map")Map<String,Object> map);
+
   void setTecWorkDay(@Param("id")Integer id,
                      @Param("list") List<Map> list);
   void setBackupWorkDay(@Param("id")Integer id,
@@ -34,15 +43,18 @@ public interface ProjectWorkDayDao {
                      @Param("list") List<Map> list,
                      @Param("type") Integer type);
 
-  List<ProjectExcelTec> statisticAll(@Param("min") String min, @Param("max") String max);
+  List<ProjectExcelTec> statisticAll(String date);
+
+  List<Map<String,String>> statisticByDate(@Param("id")Integer id, @Param("date")String date);
 
   List<Map<String,String>> statistic(Integer id);
 
-  List<Map<String,String>> everyoneAll(Map map);
+  List<Map<String,String>> everyoneAll(String date);
 
   List<Map<String,String>> everyone(Map map);
 
-  List<Map<String,String>> personal(Map map);
+  List<Map<String,String>> workdayByProject(List<String> list);
+
 
   List<Map<String,Object>> queryTecVolumeRatio(Integer id);
 

@@ -1,5 +1,10 @@
 package com.zpepdi.eureka_client.config;
 
+import com.zpepdi.eureka_client.service.*;
+import com.zpepdi.eureka_client.tools.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.spi.LoggerFactoryBinder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.context.annotation.Configuration;
@@ -7,10 +12,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import com.zpepdi.eureka_client.service.GradeScoreService;
-import com.zpepdi.eureka_client.service.GradeTecService;
-import com.zpepdi.eureka_client.service.TecScoreService;
-import com.zpepdi.eureka_client.service.UserScoreService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.concurrent.Executors;
 
 //定时任务，用于清空评价表
@@ -25,10 +27,13 @@ import java.util.concurrent.Executors;
 @EnableScheduling
 public class ScheduledConfig implements SchedulingConfigurer {
 
+    private static Logger logger = LoggerFactory.getLogger(ScheduledConfig.class);
+
     private GradeScoreService gradeScoreService;
     private GradeTecService gradeTecService;
     private UserScoreService userScoreService;
     private TecScoreService tecScoreService;
+    private VolumeService volumeService;
 
     //此处为每月自动更新时间
     public static final Integer setDay = 25;
@@ -51,6 +56,10 @@ public class ScheduledConfig implements SchedulingConfigurer {
     public void setTecScoreService(TecScoreService tecScoreService){
         this.tecScoreService = tecScoreService;
     }
+    @Autowired
+    public  void setVolumeService(VolumeService volumeService){
+        this.volumeService = volumeService;
+    }
     @Scheduled(cron = setTime)
     public void  reset(){
         userScoreService.backups();
@@ -59,6 +68,15 @@ public class ScheduledConfig implements SchedulingConfigurer {
         tecScoreService.delete();
       System.out.println("运行定时重置任务");
     }
+
+
+    @Scheduled(cron = "0 0 6 * * ?")
+    public void  WorkdayState() {
+        logger.info("**************************************"+ "工时状态改变");
+        volumeService.setWorkdayState(DateUtils.getDateMonth(),0,1);
+        volumeService.setWorkdayState(DateUtils.getDateMonth(),2,3);
+    }
+
 
   @Scheduled(cron = "0 0 0 * * ?")
   public void  spider(){

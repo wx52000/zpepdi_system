@@ -10,6 +10,13 @@ spring:
 
     static-path-pattern: /excel/**
 
+  security:
+    user:
+      name: 7499
+      password: 7499
+  main:
+    allow-bean-definition-overriding: true
+
   resources:
     static-locations: file:D://excel/
   datasource:
@@ -27,6 +34,22 @@ spring:
   aop:
     auto: true
     proxy-target-class: true
+
+security:
+  oauth2:
+    client:
+      client-id: eureka-client
+      client-secret: zpepdi7499
+      user-authorization-uri: http://localhost:9100/oauth/authorize
+      access-token-uri: http://localhost:9100/token/login
+    resource:
+      id: eureka-client
+      user-info-uri: http://localhost:9100/oauth/check_token
+      jwt:
+        key-uri: http://localhost:9100/oauth/token_key
+        key-value: dev
+    authorization:
+      check-token-access: http://localhost:9100/oauth/check_token
 
 server:
   port: 9001

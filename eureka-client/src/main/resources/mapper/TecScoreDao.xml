@@ -4,16 +4,11 @@
     <insert id="appraise" parameterType="list">
         insert into tec_score(grade_id , tec_id , designer , personal , coordinate , `month` , `year` ,`date`)
         value
-        <foreach collection="list" item="item" index="index" separator=",">
-            (#{item.gradeId} , #{item.tecId} , #{item.designer} ,#{item.personal} ,#{item.coordinate} ,#{month} ,#{year}, #{item.date})
-        </foreach>
+            (#{tec.gradeId} , #{tec.tecId} , #{tec.designer} ,#{tec.personal} ,#{tec.coordinate} ,#{month} ,#{year},current_timestamp())
         ON DUPLICATE KEY UPDATE
         designer = values(designer),
         personal = values(personal),
-        coordinate = values(coordinate),
-        `month` = values(`month`),
-        `year` = values(`year`),
-        `date` = values(`date`)
+        coordinate = values(coordinate)
     </insert>
     <update id="backups">
         insert into tec_score_backups(grade_id , tec_id , designer , personal , coordinate , `month` , `year` , `date`)

@@ -16,7 +16,7 @@ public interface TecScoreService {
 
     Map queryByScoreId(User user);
 
-    void appraise(@Param("list") List<TecScore> list);
+    void appraise(Integer id,  TecScore tecScore);
 
     List<Map> queryScore(User user);
 

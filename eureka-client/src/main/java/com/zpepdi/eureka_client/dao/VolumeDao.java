@@ -21,7 +21,7 @@ public interface VolumeDao {
 
     List<Map<String,String>> queryByProjectId(Map map);
 
-    List<Map<String,String>> queryByDate(Map map);
+    List<Map<String,String>> queryByDate(String date);
 
     void upd(Volume volume);
 
@@ -39,7 +39,13 @@ public interface VolumeDao {
 
     void setWorkday(Map<String,String> map);
 
+    void setWorkdayState(@Param("date") String date,@Param("old")Integer old, @Param("now")Integer now);
+
     Map<String,String> queryVolumeWorkday(Map<String,String> map);
+
+    List<Map<String,String>> queryVolumeWorkdayLog(Map<String,String> map);
+
+    List<Map<String,String>> queryBackupWorkdayLog(Map<String,String> map);
 
     Map<String,Object> queryUsableWorkday(Integer id);
 

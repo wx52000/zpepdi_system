@@ -60,6 +60,9 @@ public class User {
     private String queryStart;
 
     private String QueryEnd;
+
+    private Integer pawState;
+
     public User() {
     }
 
@@ -297,4 +300,12 @@ public class User {
   public void setQueryEnd(String queryEnd) {
     QueryEnd = queryEnd;
   }
+
+    public Integer getPawState() {
+        return pawState;
+    }
+
+    public void setPawState(Integer pawState) {
+        this.pawState = pawState;
+    }
 }

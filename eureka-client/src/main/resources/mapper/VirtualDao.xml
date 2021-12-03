@@ -49,10 +49,10 @@
     workday = values(workday)
   </insert>
   <insert id="addUser">
-    insert into virtual_user(user_id,virtual_id,`role`,`state`)
+    insert into virtual_user(user_id,virtual_id,`role`,`state`, `tid`)
     values
     <foreach collection="list" item="item" separator=",">
-    ( #{item.id} , #{id} ,#{item.role}, 1)
+    ( #{item.id} , #{id} ,#{item.role}, 1, #{item.tid})
     </foreach>
     on duplicate key update
     `role` = values(`role`),
@@ -87,10 +87,11 @@
       #{item.id}
     </foreach>
   </update>
-  <select id="queryRole" resultType="java.util.Map">
-    select vl.user_id as id, u.name as `name`, vw.workday
+    <select id="queryRole" resultType="java.util.Map">
+    select vl.user_id as id, u.name as `name`, vw.workday, t.name as tec,t.id as tid
     from  virtual_user vl
-    LEFT JOIN vu_workday vw on vl.id = vw.vu_id and vw.date = #{map.month},
+    LEFT JOIN vu_workday vw on vl.id = vw.vu_id and vw.date = #{map.month}
+    left join technology t on vl.tid = t.id,
          `user` u
     where u.id = vl.user_id
     and  virtual_id = #{map.id}
@@ -138,15 +139,17 @@
       vp.`name`,
       vp.number,
       vp.workday,
-      vp.create_user as createUser,
+      vp.create_user AS createUser,
       GROUP_CONCAT( u.NAME SEPARATOR ";" ) AS `general`,
-      vp.create_date AS createDate
+      vp.create_date AS createDate,
+      GROUP_CONCAT( vl.role SEPARATOR ";" ) AS `role`
     FROM
       virtual_project vp
-        LEFT JOIN virtual_user vl ON vp.id = vl.virtual_id
-        LEFT JOIN `user` u on u.id = vl.user_id
-    where
-    vl.user_id = #{id}
+        LEFT JOIN virtual_user vl ON vp.id = vl.virtual_id and vl.state = 1
+        LEFT JOIN `user` u ON u.id = vl.user_id
+        AND vl.role = 1
+    WHERE
+        vl.virtual_id IN ( SELECT virtual_id FROM virtual_user WHERE user_id = #{id} )
     GROUP BY
       vp.id
   </select>

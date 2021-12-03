@@ -13,6 +13,8 @@ public class DateUtils {
 
     public static String DATE_FORMAT_CHINESE = "yyyy年M月d日";
 
+    public static String DATE_MONTH = "yyyy-MM";
+
     /**
      * 获取当前日期
      *
@@ -55,6 +57,12 @@ public class DateUtils {
         datestr = df.format(date);
         return datestr;
     }
+
+    public static  String getDateMonth(){
+      Date date = new Date();
+      SimpleDateFormat df = new SimpleDateFormat(DateUtils.DATE_MONTH);
+      return df.format(date);
+    };
 
     /**
      * 将字符串日期转换为日期格式

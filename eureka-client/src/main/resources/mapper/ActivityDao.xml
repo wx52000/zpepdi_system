@@ -11,7 +11,7 @@
   <insert id="setProject" keyProperty="id" useGeneratedKeys="true" keyColumn="id">
     insert into activity
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="number != null">
+      <if test="number != null and number != ''">
         `number`,
       </if>
       <if test="name != null">
@@ -38,7 +38,7 @@
     </trim>
     values
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="number != null">
+      <if test="number != null and number != ''">
         #{number},
       </if>
       <if test="name != null">
@@ -67,10 +67,10 @@
     workday = values(workday)
   </insert>
   <insert id="addUser">
-    insert into activity_user(user_id,activity_id,`role`,workday, `state`)
+    insert into activity_user(user_id,activity_id,`role`,workday, `state`, tid)
     values
     <foreach collection="list" item="item" separator=",">
-      ( #{item.id} , #{id} ,#{item.role}, #{item.workday}, 1)
+      ( #{item.id} , #{id} ,#{item.role}, #{item.workday}, 1, #{item.tid})
     </foreach>
     on duplicate key update
     `role` = values(`role`),
@@ -139,18 +139,23 @@
       vp.workday,
       GROUP_CONCAT( u.NAME SEPARATOR ";" ) AS general,
       vp.create_user AS createUser,
-      vp.create_date AS createDate
+      vp.create_date AS createDate,
+      GROUP_CONCAT( vl.role SEPARATOR ";" ) AS role
     FROM
       activity vp
         LEFT JOIN activity_user vl ON vp.id = vl.activity_id
-        LEFT JOIN `user` u ON u.id = vl.user_id
-      where vl.user_id = #{id}
+        LEFT JOIN `user` u ON u.id = vl.user_id and vl.role = 1
+      where
+        vl.activity_id in (
+        SELECT activity_id FROM activity_user WHERE user_id = #{id} )
     GROUP BY
       vp.id
   </select>
   <select id="queryByRole" resultType="java.util.Map">
-    select u.name, u.id, vu.workday
-    from activity_user vu,
+    select u.name, u.id, vu.workday,t.id as tid,
+           t.name as tec
+    from activity_user vu
+           left join technology t on vu.tid = t.id,
          `user` u
     where activity_id = #{id}
       and `role` = #{role}

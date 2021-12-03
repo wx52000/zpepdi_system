@@ -1,5 +1,6 @@
 package com.zpepdi.eureka_client.controller;
 
+import com.zpepdi.eureka_client.annotation.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,6 +20,11 @@ public class TechnologyController {
         this.technologyService = technologyService;
     }
 
+    @RequestMapping("queryAll")
+    public Result queryAll(){
+        return Result.ok(technologyService.queryAll());
+    }
+
     @RequestMapping("query")
     public Result query(@RequestHeader Integer id){
         return Result.ok(technologyService.query(id));
@@ -28,10 +34,10 @@ public class TechnologyController {
     public Result queryNotUser() {
       return Result.ok(technologyService.queryNotUser());
     }
-
+//打分专业
     @RequestMapping("evaluate")
-    public Result evaluate(@RequestHeader Integer id) {
-      return Result.ok(technologyService.evaluate(id));
+    public Result evaluate(@UserId Integer userId) {
+      return Result.ok(technologyService.evaluate(userId));
     }
 
     @RequestMapping("add")

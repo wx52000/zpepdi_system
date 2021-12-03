@@ -1,6 +1,7 @@
 package com.zpepdi.eureka_client.service.impl;
 
 
+import com.zpepdi.eureka_client.service.ProjectWorkDayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import com.zpepdi.eureka_client.tools.Time;
 
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -26,6 +28,7 @@ public class ProjectServiceImpl implements ProjectService {
     private VolumeDao volumeDao;
     private VolumeUserDao volumeUserDao;
     private DepartmentDao departmentDao;
+    private  ProjectWorkDayDao projectWorkDayDao;
     @Autowired
     public void setProjectDao(ProjectDao projectDao){
         this.projectDao = projectDao;
@@ -62,6 +65,12 @@ public class ProjectServiceImpl implements ProjectService {
     public void  setDepartmentDao(DepartmentDao departmentDao){
         this.departmentDao = departmentDao;
     }
+    @Autowired
+    public void setProjectWorkDayDao(ProjectWorkDayDao projectWorkDayDao) {
+        this.projectWorkDayDao = projectWorkDayDao;
+    }
+
+
     @Override
     public void add(Project project) {
         projectDao.add(project);
@@ -126,13 +135,6 @@ public class ProjectServiceImpl implements ProjectService {
         excelProject.setTid(technology.getId());
       }
     }
-//        if (excelProject.getPrincipal() != null){
-//            User user = new User();
-//            user.setName(excelProject.getPrincipal());
-//            user.setTid(excelProject.getTid());
-//            excelProject.setPrincipalId(userDao.selectByName(user));
-//            projectUserDao.addPrincipal(excelProject);
-//        }
     if (excelProject.getPlannedPublicationDate() != null && excelProject.getPlannedPublicationDate() != "") {
       if (StringUtils.isInteger(excelProject.getPlannedPublicationDate())) {
         excelProject.setPlannedPublicationDate(Time.timeToDate(excelProject.getPlannedPublicationDate()));
@@ -145,99 +147,104 @@ public class ProjectServiceImpl implements ProjectService {
     }
     return  newUser;
   }
-//        if (excelProject.getProfessionalDate() != null && excelProject.getProfessionalDate() !="") {
-//            if (StringUtils.isInteger(excelProject.getProfessionalDate())){
-//            excelProject.setProfessionalDate(Time.timeToDate(excelProject.getProfessionalDate()));
-//            }
-//        }
-//        if (excelProject.getWithdrawalDate() != null && excelProject.getWithdrawalDate() !="") {
-//            if (StringUtils.isInteger(excelProject.getWithdrawalDate())) {
-//                excelProject.setWithdrawalDate(Time.timeToDate(excelProject.getWithdrawalDate()));
-//            }
-//        }
-//        if (excelProject.getCheckerCompletionDate() != null && excelProject.getCheckerCompletionDate() !="") {
-//            if (StringUtils.isInteger(excelProject.getCheckerCompletionDate())) {
-//                excelProject.setCheckerCompletionDate(Time.timeToDate(excelProject.getCheckerCompletionDate()));
-//            }
-//        }
-//        if (excelProject.getPrincipalCompletionDate() != null && excelProject.getPrincipalCompletionDate() !="") {
-//            if (StringUtils.isInteger(excelProject.getPrincipalCompletionDate())) {
-//                excelProject.setPrincipalCompletionDate(Time.timeToDate(excelProject.getPrincipalCompletionDate()).toString());
-//            }
-//        }
-//        if (excelProject.getHeadmanCompletionDate() != null && excelProject.getHeadmanCompletionDate() !="") {
-//            if (StringUtils.isInteger(excelProject.getHeadmanCompletionDate())) {
-//                excelProject.setHeadmanCompletionDate(Time.timeToDate(excelProject.getHeadmanCompletionDate()).toString());
-//            }
-//        }
-//        volumeDao.addExcelVolume(excelProject);
-//        if (excelProject.getDesigner() != null && excelProject.getDesigner() !=""){
-//            User user = new User();
-//            user.setTid(excelProject.getTid());
-//            user.setName(excelProject.getDesigner());
-//            Integer designerId = userDao.selectByName(user);
-//            if (designerId != null) {
-//                excelProject.setDesignerId(designerId);
-//            }else {
-//                user.setPid(4);
-//                user.setDid(departmentDao.selectByTec(user.getTid()));
-//                user.setUsername(StringUtils.generateString(3) + Time.getDate());
-//                user.setPaw("1234");
-//                if (user.getDid() == null){
-//                    user.setDid();
-//                }
-//                userDao.add(user);
-//                Map map = new HashMap();
-//                map.put("username" , user.getUsername());
-//                map.put("name", user.getName());
-//                newUser.add(map) ;
-//                excelProject.setDesignerId(user.getId());
-//            }
-//            volumeUserDao.addExcelDesigner(excelProject);
-//        }
-//        if (excelProject.getChecker() != null && excelProject.getChecker() !=""){
-//            User user = new User();
-//            user.setTid(excelProject.getTid());
-//            user.setName(excelProject.getChecker());
-//            Integer checkerId = userDao.selectByName(user);
-//            if (checkerId != null) {
-//                excelProject.setCheckerId(checkerId);
-//            }else {
-//                user.setPid(4);
-//                user.setDid(departmentDao.selectByTec(user.getTid()));
-//                user.setUsername(StringUtils.generateString(3)+ Time.getDate());
-//                user.setPaw("1234");
-//                userDao.add(user);
-//                Map map = new HashMap();
-//                map.put("username" , user.getUsername());
-//                map.put("name", user.getName());
-//                newUser.add(map) ;
-//                excelProject.setCheckerId(user.getId());
-//            }
-//            volumeUserDao.addExcelChecker(excelProject);
-//        }
 
-//        return newUser;
-//    }
+    @Override
+    public Map queryById(Integer userId ,Integer id) {
+        User user = userDao.queryById(userId);
+        Map map = projectDao.queryById(id);
+        if (map.get("general").toString().contains(user.getName()) || user.getPid() == 1 || user.getPid() == 3){
+            map.put("show", true);
+        }
+        return map;
+    }
 
     @Override
     public Map queryById(Integer id) {
-        Map map = projectDao.queryById(id);
-        return map;
+        return projectDao.queryById(id);
     }
 
     @Override
     public Result queryHumanToBackup(Integer userId, Map<String,Object> map) {
         Map<String,Object> objectMap = new HashMap<>();
-        objectMap.put("amount",projectDao.queryBackupAmountByMajor(userId,map));
-        objectMap.put("used",projectDao.queryUsedBackup(userId,map));
+        objectMap.put("amount",projectDao.queryAmountByMajor(userId,map));
+        objectMap.put("used",projectDao.queryUsed(userId,map));
+        objectMap.put("usedManage",projectDao.queryUsedManage(userId,map));
         objectMap.put("list",projectDao.queryHumanToBackup(userId,map));
         return Result.ok(objectMap);
     }
 
     @Override
+    public Result distributeTecWorkday(Integer userId, Map<String,Object> map) {
+        String amount = projectDao.queryAmountByMajor(userId, map);
+        Map map1 = projectDao.queryUsed(userId, map);
+        double manage = 0;
+        double volume = 0;
+        if (map.get("manage") != null && map.get("manage") != ""){
+            manage = Double.parseDouble(map.get("manage").toString());
+        }else {
+            manage = Double.parseDouble(map1.get("manage").toString());
+        }
+        if (map.get("volume") != null && map.get("volume") != ""){
+            volume = Double.parseDouble(map.get("volume").toString());
+        }else {
+            volume = Double.parseDouble(map1.get("volume").toString());
+        }
+        double used = Double.parseDouble(map1.get("used").toString());
+        if (Double.parseDouble(amount) >= (manage + volume + used)) {
+            projectDao.distributeTecWorkday(map);
+        }else {
+            return Result.build(500,"超出工时上限");
+        }
+        return Result.ok();
+    }
+
+    @Override
+    public Result setManageByMajor(Integer userId, Map<String,Object> map) {
+        Map<String,Object> map1 = projectDao.queryUsed(userId,map);
+        if (map1 == null){
+            return Result.build(500,"未设置管理工时总数");
+        }
+        double manage = Double.parseDouble(map1.get("manage").toString());
+        double used = 0;
+        Map<String,Object> map2 = projectDao.queryUsedManage(userId,map);
+        if (map2 != null) {
+            used = Double.parseDouble(map2.get("usedManage").toString());
+        }
+        double todayManage = 0;
+        if (map.get("todayManage") != null && map.get("todayManage") != "") {
+            todayManage = Double.parseDouble(map.get("todayManage").toString());
+        }
+        if (manage >= (used + todayManage)){
+            projectWorkDayDao.setManageWorkday(userId,map);
+        }else {
+            return Result.build(500,"超出工时上限");
+        }
+        return Result.ok();
+    }
+
+    @Override
     public Result setWorkdayBackup(Integer userId, List<Map<String, Object>> list,String date) {
-        projectDao.setWorkdayBackup(userId,list,date);
+        Map<String,Object> map = new HashMap();
+        map.put("id", list.get(0).get("project_id"));
+        String amount = projectDao.queryAmountByMajor(userId, map);
+        Map map1 = projectDao.queryUsed(userId, map);
+        double old;
+        double num = 0;
+        double used = 0;
+        double manage = 0;
+        double volume = 0;
+        old = list.stream().filter(m -> m.get("old") != null && m.get("old") != "").mapToDouble(m -> Double.parseDouble(m.get("old").toString())).sum();
+        num = list.stream().filter(m -> m.get("workday") != null && m.get("workday") != "").mapToDouble(m -> Double.parseDouble(m.get("workday").toString())).sum();
+        if (map1 != null){
+            manage  = Double.parseDouble(map1.get("manage").toString());
+            volume  = Double.parseDouble(map1.get("volume").toString());
+            used  = Double.parseDouble(map1.get("used").toString());
+        }
+        if (Double.parseDouble(amount) >= (manage + volume + used + num - old)) {
+            projectDao.setWorkdayBackup(userId, list, date);
+        }else {
+            return Result.build(500,"超出工时上限");
+        }
         new Thread(() -> projectDao.setWorkdayBackupLog(userId, list, date)).start();
         return Result.ok();
     }

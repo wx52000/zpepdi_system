@@ -27,6 +27,11 @@ public class TechnologyServiceImpl implements TechnologyService {
     }
 
     @Override
+    public List<Technology> queryAll() {
+        return technologyDao.queryAll();
+    }
+
+    @Override
     public List<Technology> query(Integer id) {
         return technologyDao.query(id);
     }

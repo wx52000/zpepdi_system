@@ -63,6 +63,16 @@ public class  UserController {
       return userService.workdayLogById(userId);
     }
 
+    @RequestMapping("workdayLog")
+    public Result workdayLog(@RequestBody Map<String,Object> map){
+      return userService.workdayLog(map);
+    }
+
+    @RequestMapping("workday")
+    public Result workday(@RequestHeader("queryDate") String queryDate){
+      return  userService.workday(queryDate);
+    }
+
     @RequestMapping("queryToupd")
     public Result queryToupd(@RequestHeader Integer id){
       return userService.queryToupd(id);
@@ -79,8 +89,8 @@ public class  UserController {
     }
 
     @RequestMapping("queryToScore")
-    public Result queryToScore(@RequestBody User user){
-      return userService.queryToScore(user);
+    public Result queryToScore(@UserId Integer userId,@RequestBody Map<String,Object> map){
+      return userService.queryToScore(userId,map);
     }
 
     @RequestMapping("queryScoreList")
@@ -128,8 +138,8 @@ public class  UserController {
     }
 
     @RequestMapping("paw")
-    public Result paw(@RequestBody User user){
-        return userService.paw(user);
+    public Result paw(@UserId Integer id,@RequestBody User user){
+        return userService.paw(id,user);
     }
     //普通树
     @RequestMapping("userAll")

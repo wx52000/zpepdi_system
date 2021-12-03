@@ -23,7 +23,7 @@ public interface TechnologyService {
     Result queryNotUser();
 
     @RequestMapping("technology/evaluate")
-    Result evaluate(@RequestHeader("id") Integer id);
+    Result evaluate(@RequestHeader("userId") Integer userId);
 
     @RequestMapping("technology/add")
     Result add(@RequestBody Technology technology);

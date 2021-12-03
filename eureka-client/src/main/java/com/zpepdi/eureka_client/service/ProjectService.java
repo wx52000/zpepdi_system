@@ -23,9 +23,15 @@ public interface ProjectService {
 
     List<Map> addExcel(ExcelProject excelProject) throws ParseException;
 
+    Map queryById(Integer userId,Integer id);
+
     Map queryById(Integer id);
 
     Result queryHumanToBackup(Integer userId, Map<String,Object> map);
+
+    Result distributeTecWorkday(Integer id , Map<String,Object> map);
+
+    Result setManageByMajor(Integer id , Map<String,Object> map);
 
     Result setWorkdayBackup(Integer userId, List<Map<String,Object>> list, String date);
     //管理员查询

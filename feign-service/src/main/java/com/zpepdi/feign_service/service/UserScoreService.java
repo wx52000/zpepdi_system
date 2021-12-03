@@ -6,6 +6,7 @@ import com.zpepdi.feign_service.fallback.UserScoreFallbackService;
 import com.zpepdi.feign_service.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +30,7 @@ public interface UserScoreService {
     Result selectByGradeId(@RequestBody User user);
 
     @RequestMapping("userScore/appraise")
-    Result appraise(@RequestBody List<UserScore> list);
+    Result appraise(@RequestHeader("userId")Integer id, @RequestBody UserScore userScore);
 
     @RequestMapping("userScore/queryScore")
     Result queryScore(@RequestBody User user);

@@ -1,6 +1,7 @@
 package com.zpepdi.eureka_client.excel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,6 @@ public class ExcelOutData {
       list1.add(o.get("have"));
       list1.add(o.get("backup"));
       list1.add(o.get("used"));
-      list1.add(o.get("ratio"));
       lists.add(list1);
     });
     return lists;
@@ -40,6 +40,9 @@ public class ExcelOutData {
       list1.add(o.get("principal"));
       list1.add(o.get("designer"));
       list1.add(o.get("checker"));
+      list1.add(o.get("actual_principal"));
+      list1.add(o.get("workday"));
+      list1.add(o.get("workday_state"));
       list1.add(o.get("planned_start_date"));
       list1.add(o.get("start_date"));
       list1.add(o.get("planned_shot_date"));
@@ -57,36 +60,37 @@ public class ExcelOutData {
     List<List<String>> lists = new ArrayList<>();
     list.stream().forEach((Map<String,String> o) ->{
       List<String> list1 = new ArrayList<>();
-      if (mode == 0 || mode == 1){
+      if (mode == 1){
       list1.add(o.get("username"));
       list1.add(o.get("name"));
       }else if (mode == 2){
         list1.add(o.get("number"));
         list1.add(o.get("name"));
       }
-      if (mode == 0) {
-        list1.add(o.get("amount_p2"));
-        list1.add(o.get("amount_d2"));
-        list1.add(o.get("amount_c2"));
-        list1.add(o.get("workday_p2"));
-        list1.add(o.get("workday_d2"));
-        list1.add(o.get("workday_c2"));
-        list1.add(o.get("workday_sum2"));
-        list1.add(o.get("amount_p1"));
-        list1.add(o.get("amount_d1"));
-        list1.add(o.get("amount_c1"));
-        list1.add(o.get("workday_p1"));
-        list1.add(o.get("workday_d1"));
-        list1.add(o.get("workday_c1"));
-        list1.add(o.get("workday_sum1"));
-      }
       list1.add(o.get("amount_p"));
       list1.add(o.get("amount_d"));
       list1.add(o.get("amount_c"));
-      list1.add(o.get("workday_p"));
-      list1.add(o.get("workday_d"));
-      list1.add(o.get("workday_c"));
-      list1.add(o.get("workday_sum"));
+//      list1.add(o.get("workday_p"));
+//      list1.add(o.get("workday_d"));
+//      list1.add(o.get("workday_c"));
+//      list1.add(o.get("workday_sum"));
+      lists.add(list1);
+    });
+    return lists;
+  }
+
+  public static List<List<String>> personal(List<Map<String,Object>> list){
+    Map<String,String> map = new HashMap<>();
+    map.put("0","未发放");
+    map.put("1","已发放");
+    map.put("2","部分发放");
+    List<List<String>> lists = new ArrayList<>();
+    list.stream().forEach((Map<String,Object> o) ->{
+      List<String> list1 = new ArrayList<>();
+      list1.add(o.get("principal").toString());
+      list1.add(o.get("workday").toString());
+      list1.add(map.get(o.get("type").toString()));
+      list1.add(o.get("number").toString());
       lists.add(list1);
     });
     return lists;

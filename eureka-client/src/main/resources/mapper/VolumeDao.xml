@@ -209,10 +209,12 @@
         `date` = values(`date`)
     </insert>
     <insert id="setWorkday" parameterType="hashmap">
-        insert volume_workday(volume_id, `state`, workday, ratio_state)
-        values (#{id}, #{state}, #{workday}, 0)
+        insert volume_workday(volume_id, `state`, workday, ratio_state, `date`)
+        values (#{id}, #{state}, #{workday}, 0, #{date})
         ON DUPLICATE KEY UPDATE
-        workday = values(workday)
+        workday = values(workday),
+        date = values(date)
+
     </insert>
     <insert id="setWorkdayLog" parameterType="hashmap">
         insert volume_workday_log(user_id, volume_id, `date`, workday, this_grant, `type`, `old`)
@@ -277,7 +279,23 @@
         </set>
         where id = #{id}
     </update>
-
+    <update id="setWorkdayState">
+        UPDATE volume_workday
+        SET `state` = #{now},
+            `date` = #{date}
+        WHERE
+            `state` = 0
+          AND volume_id IN (
+            SELECT
+                v.id
+            FROM
+                project p,
+                volume v
+            WHERE
+                p.spider = #{old}
+              AND p.id = v.project_id
+              AND v.state IN ( "待送出版", "正在出版", "待送业主", "已完成", "院交出" ))
+    </update>
     <select id="queryById" resultType="java.util.Map">
         select *
         from
@@ -299,11 +317,45 @@
         and t.id = v.tec_id
     </select>
   <select id="queryByProjectId" resultType="java.util.Map" parameterType="map">
-    SELECT
-    *
-    FROM
-    volume
-    where  project_id = #{id}
+      SELECT
+      v.id,
+      v.number,
+      v.name,
+      v.tec,
+      v.dep,
+      v.state,
+      v.principal,
+      v.chief,
+      v.designer,
+      v.checker,
+      v.headman,
+      planned_start_date,
+      planned_publication_date,
+      actual_publication_date,
+      professional_date,
+      withdrawal_date,
+      planned_shot_date,
+      shot_date,
+      professional_date,
+      complete_time,
+      actual_principal,
+      w.workday,
+      CASE
+      w.state
+      WHEN 0 THEN
+      '未发放'
+      WHEN 1 THEN
+      '已发放'
+      WHEN 2 THEN
+      '部分发放'
+      WHEN 3 THEN
+      '已发放'
+      END AS workday_state
+      FROM
+      volume v
+      LEFT JOIN volume_workday w ON v.id = w.volume_id
+      WHERE
+      v.project_id = #{id}
     <if test="minDate != null and minDate != ''">
     and ( ( planned_publication_date &gt;= #{minDate}
     and planned_publication_date &lt;= #{maxDate})
@@ -411,12 +463,12 @@
         (
           SELECT DISTINCT
             p.id AS pid,
-            p.NAME AS projectName,
+            p.name AS projectName,
             p.director,
             p.general,
             v.id AS id,
             v.number,
-            v.NAME AS volumeName,
+            v.name AS volumeName,
             v.dep,
             v.tec,
             v.state,
@@ -449,12 +501,12 @@
           UNION
           SELECT DISTINCT
             p.id AS pid,
-            p.NAME AS projectName,
+            p.name AS projectName,
             p.director,
             p.general,
             v.id AS id,
             v.number,
-            v.NAME AS volumeName,
+            v.name AS volumeName,
             v.dep,
             v.tec,
             v.state,
@@ -485,12 +537,12 @@
           union
           SELECT DISTINCT
             p.id AS pid,
-            p.NAME AS projectName,
+            p.name AS projectName,
             p.director,
             p.general,
             v.id AS id,
             v.number,
-            v.NAME AS volumeName,
+            v.name AS volumeName,
             v.dep,
             v.tec,
             v.state,
@@ -524,14 +576,47 @@
         number
     </select>
   <select id="queryByDate" resultType="java.util.Map">
-    SELECT
-      p.number as pNumber,p.`name` as pName ,v.*
-    FROM project p,
-         volume v
-    WHERE p.id = v.project_id
-      and p.spider = 0
-      and v.proofreading_date &gt;= #{min}
-      and v.proofreading_date &lt;= #{max}
+      SELECT
+          v.id,
+          v.number,
+          v.name,
+          v.tec,
+          v.dep,
+          v.state,
+          v.principal,
+          v.chief,
+          v.designer,
+          v.checker,
+          v.headman,
+          planned_start_date,
+          planned_publication_date,
+          actual_publication_date,
+          professional_date,
+          withdrawal_date,
+          planned_shot_date,
+          shot_date,
+          professional_date,
+          complete_time,
+          actual_principal,
+          w.workday,
+          CASE
+              w.state
+              WHEN 0 THEN
+                  '未发放'
+              WHEN 1 THEN
+                  '已发放'
+              WHEN 2 THEN
+                  '部分发放'
+              WHEN 3 THEN
+                  '已发放'
+              END AS workday_state
+      FROM
+          volume v
+              LEFT JOIN volume_workday w ON v.id = w.volume_id
+      WHERE
+          p.id = v.project_id
+        AND p.spider = 0
+    and DATE_FORMAT(proofreading_date,'%Y-%m' ) = #{date}
   </select>
   <select id="personalVolume" resultType="java.util.Map">
     SELECT DISTINCT
@@ -576,51 +661,104 @@
             id,
             workday,
             sumGrant,
-            IFNUll(`grant`,0) as `grant`,
-            IFNUll(workday* IFNULL( ratio, 0.6 ),0) - `grant` AS usable,
-            IFNULL( principal, principal1 ) AS principal,
-            IFNULL( designer, designer1 ) AS designer,
-            IFNULL( checker, checker1 ) AS checker,
-            IFNULL( headman, headman1 ) AS headman
+            IFNUll( `grant`, 0 ) AS `grant`,
+            IFNUll( workday * IFNULL( ratio, 0.6 ), 0 ) - `grant` AS usable,
+            IFNULL( IFNULL( principal, principal1 ), principal2 )* 100 AS principal,
+            IFNULL( IFNULL( designer, designer1 ), designer2 )* 100 AS designer,
+            IFNULL( IFNULL( checker, checker1 ), checker2 )* 100 AS checker,
+            IFNULL( IFNULL( headman, headman1 ), headman2 )* 100 AS headman
         FROM
             (
                 SELECT
                     v.id,
                     w.workday,
-                    IFNUll(h.`grant`,0) as `grant`,
-                    SUM(h1.`grant`) as sumGrant,
+                    IFNUll( h.`grant`, 0 ) AS `grant`,
+                    SUM( h1.`grant` ) AS sumGrant,
                     p.ratio,
-                        w.principal*100 as principal,
-                    w.designer*100 as designer,
-                    w.checker*100 as checker,
-                    w.headman*100 as headman,
-                    t.principal*100 AS principal1,
-                    t.designer*100 AS designer1,
-                    t.checker*100 AS checker1,
-                    t.headman*100 AS headman1
+                    w.principal AS principal,
+                    w.designer AS designer,
+                    w.checker AS checker,
+                    w.headman AS headman,
+                    t.principal AS principal1,
+                    t.designer AS designer1,
+                    t.checker AS checker1,
+                    t.headman AS headman1,
+                    d.principal AS principal2,
+                    d.designer AS designer2,
+                    d.checker AS checker2,
+                    d.headman AS headman2
                 FROM
                     volume v
                         LEFT JOIN volume_workday w ON v.id = w.volume_id
-                        LEFT JOIN volume_workday_high h on v.id = h.volume_id and h.date = #{date}
-                        LEFT JOIN volume_workday_high h1 on v.id = h1.volume_id
+                        LEFT JOIN volume_workday_high h ON v.id = h.volume_id
+                        AND h.date = #{date}
+                        LEFT JOIN volume_workday_high h1 ON v.id = h1.volume_id
                         LEFT JOIN tec_ratio t ON v.tec = t.tec
-                        LEFT JOIN project_workday_ratio p ON v.project_id = p.project_id
+                        LEFT JOIN project_workday_ratio p ON v.project_id = p.project_id,
+                    default_ratio d
                 WHERE
                     v.id = #{id}
+
+                  AND d.id = 1
             ) AS m
+
     </select>
     <select id="queryUsableWorkday" resultType="java.util.Map">
         SELECT
             IFNULL( SUM( w.workday ), 0 ) AS used,
-            IFNULL( wt.amount, 0 ) AS amount,
+            IFNULL( wt.volume, 0 ) AS amount,
+            IFNULL( w1.workday,0 ) as workday,
             v.state
         FROM
             volume v
-                LEFT JOIN volume_workday w ON w.volume_id IN ( SELECT id FROM volume WHERE v.tec = tec AND v.project_id = project_id ),
-            workday_tec wt
+            LEFT JOIN volume_workday w ON w.volume_id IN ( SELECT id FROM volume WHERE v.tec = tec AND v.project_id = project_id )
+            left join volume_workday w1 on w1.volume_id = v.id,
+            workday_tec_distribute wt
         WHERE
             v.id = #{id}
           AND wt.project_id = v.project_id
-          AND v.tec = wt.volume_tec
+          AND v.tec = wt.tec
+    </select>
+    <select id="queryVolumeWorkdayLog" resultType="java.util.Map">
+        SELECT
+        v.number,
+        v.`name` AS volume,
+        u.`name`,
+        l.date,
+        l.workday,
+        l.this_grant,
+        l.type,
+        l.old
+        FROM
+        `user` u,
+        volume_workday_log l,
+        project p,
+        volume v
+        WHERE
+        p.id = #{id}
+        AND v.project_id = p.id
+        AND l.volume_id = v.id
+        AND l.user_id = u.id
+        AND l.date &lt;= #{max} AND l.date &gt;= #{min}
+    </select>
+    <select id="queryBackupWorkdayLog" resultType="java.util.Map">
+        SELECT
+        u.`name` as `user`,
+        u1.`name` as `issuer`,
+        l.date,
+        l.workday,
+        l.time,
+        l.old
+        FROM
+        `user` u,
+        `user` u1,
+        workday_backup_user_log l,
+        project p
+        WHERE
+        p.id = #{id}
+        AND p.id = l.project_id
+        AND l.user_id = u.id
+        and l.issuer_id = u1.id
+        AND l.time &lt;= #{max} AND l.time &gt;= #{min}
     </select>
 </mapper>

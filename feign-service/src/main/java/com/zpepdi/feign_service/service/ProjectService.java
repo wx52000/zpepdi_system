@@ -40,7 +40,7 @@ public interface ProjectService {
     Result spider(@RequestBody Project project);
 
     @RequestMapping("project/queryById")
-    Result queryById(@RequestHeader("id") Integer id);
+    Result queryById(@RequestHeader("userId") Integer userId,@RequestHeader("id") Integer id);
 
     @RequestMapping("project/queryHumanToBackup")
     Result queryHumanToBackup(@RequestHeader("userId") Integer id,@RequestBody Map<String,Object> map);

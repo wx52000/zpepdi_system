@@ -1,5 +1,6 @@
 package com.zpepdi.feign_service.controller;
 
+import com.zpepdi.feign_service.annotation.UserId;
 import com.zpepdi.feign_service.entity.PartParam;
 import com.zpepdi.feign_service.entity.TecScore;
 import com.zpepdi.feign_service.entity.User;
@@ -42,8 +43,8 @@ public class TecScoreController {
     }
 
     @RequestMapping("appraise")
-    public Result appraise(@RequestBody List<TecScore> list){
-        return tecScoreService.appraise(list);
+    public Result appraise(@UserId Integer userId, @RequestBody TecScore tecScore){
+        return tecScoreService.appraise(userId,tecScore);
     }
 
     @RequestMapping("queryScore")

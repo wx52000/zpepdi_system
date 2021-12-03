@@ -1,5 +1,6 @@
 package com.zpepdi.eureka_client.controller;
 
+import com.zpepdi.eureka_client.annotation.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -47,9 +48,10 @@ public class TecScoreController {
       return Result.ok(tecScoreService.queryByScoreId(user));
     }
 
+    //专业评价
     @RequestMapping("appraise")
-    public Result appraise(@RequestBody List<TecScore> list){
-        tecScoreService.appraise(list);
+    public Result appraise(@UserId Integer id, @RequestBody TecScore tecScore){
+        tecScoreService.appraise(id,tecScore);
         return Result.ok(0);
     }
 

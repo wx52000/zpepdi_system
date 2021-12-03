@@ -29,6 +29,8 @@ public interface ProjectWorkDayService {
 
   Result setProWorkDay(Map map);
 
+  Result setManageWorkday(Integer id, Map map);
+
   Result setTecWorkDay(Map map);
 
   Result setBackupWorkDay(Map map);
@@ -36,15 +38,15 @@ public interface ProjectWorkDayService {
   Result setUserWorkDay(Map map);
 
   //Excel 整体比例 所有项目
-  List<ProjectExcelTec> statisticAll(String min , String max);
+  List<ProjectExcelTec> statisticAll(String date);
 
 
   //Excel 整体比例
   List<Map<String,String>> statistic(Integer id);
 
-  List<Map<String,String>> everyoneAll(Map map);
+  List<Map<String,String>> everyoneAll(String date);
 
   List<Map<String,String>> everyone(Map map);
 
-  List<Map<String,String>> personal(Map<String,String> map);
+  List<Map<String,Object>> personal(Integer id);
 }

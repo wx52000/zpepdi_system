@@ -12,7 +12,7 @@ public interface RangeDao {
 
     void update(Range range);
 
-    Map queryDate();
+    Map<String,Object> queryDate();
 
     void updateDate(Range range);
 }

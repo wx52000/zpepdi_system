@@ -7,6 +7,9 @@
     <groupId>zpepdi.system</groupId>
     <artifactId>zpepdi_system</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>api-geteway</module>
+    </modules>
     <packaging>pom</packaging>
 
 <!--    <parent>-->

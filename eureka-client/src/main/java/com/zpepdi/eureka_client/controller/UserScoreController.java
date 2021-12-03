@@ -1,7 +1,9 @@
 package com.zpepdi.eureka_client.controller;
 
+import com.zpepdi.eureka_client.annotation.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.zpepdi.eureka_client.entity.PartParam;
@@ -48,15 +50,15 @@ public class UserScoreController {
     public Result selectByGradeId(@RequestBody User user){
         return Result.ok(userScoreService.selectByGradeId(user));
     }
-
+//评价
     @RequestMapping("appraise")
-    public Result appraise(@RequestBody List<UserScore> list){
-        userScoreService.appraise(list);
-        return Result.ok(0);
+    public Result appraise(@UserId Integer userId, @RequestBody UserScore userScore){
+        userScoreService.appraise(userId,userScore);
+        return Result.ok();
     }
 
     @RequestMapping("queryScore")
-    public Result queryScore(@RequestBody User user){
+    public Result queryScore( @RequestBody User user){
         return Result.ok(userScoreService.queryScore(user));
     }
 

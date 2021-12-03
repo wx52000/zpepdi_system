@@ -19,14 +19,19 @@
         values (#{number})
   </insert>
     <insert id="setWorkdayBackup">
-        insert into workday_backup_user(user_id ,  issuer_id , workday, `date`, project_id)
+        insert into workday_backup_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,user_id ,  issuer_id , workday, `date`, project_id, tec, reason
+        </trim>
         values
         <foreach collection="list" item="item" separator=",">
-               <if test="item.id != null and  item.id != '' and item.workday != null and item.workday != ''">
-            (#{item.id}, #{userId}, #{item.workday}, #{date}, #{item.project_id})
+               <if test="item.userId != null and  item.userId != '' and item.workday != null and item.workday != ''">
+            (#{item.id}, #{item.userId}, #{userId}, #{item.workday},
+          #{date}, #{item.project_id}, #{item.tec}, #{item.reason})
                </if>
         </foreach>
         on duplicate key update
+        reason = values(reason),
         workday = values(workday)
     </insert>
     <insert id="setWorkdayBackupLog">
@@ -69,6 +74,31 @@
         set spider = #{spider}
         where id = #{id}
   </update>
+    <update id="distributeTecWorkday">
+        insert into workday_tec_distribute
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                project_id,tec,
+            <if test="manage != null and manage != '' or manage == 0">
+                manage,
+            </if>
+            <if test="volume != null and volume != '' or volume == 0">
+                volume
+            </if>
+            </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{id}, #{tec},
+            <if test="manage != null and manage != '' or manage == 0">
+                #{manage},
+            </if>
+            <if test="volume != null and volume != '' or volume == 0">
+                #{volume},
+            </if>
+        </trim>
+        on duplicate key update
+        manage = values(manage),
+        volume = values(volume)
+    </update>
     <select id="queryByAdmin" resultType="java.util.Map" >
     SELECT DISTINCT
       p.id,
@@ -849,62 +879,167 @@
         `number`
     </select>
     <select id="homepageProject" resultType="java.util.Map">
-        SELECT DISTINCT
-            p.id,
-            p.number,
-            p.name,
-            p.general,
-            p.director,
-            p.create_time,
-            COUNT(v.id) as `amount`
+        SELECT
+            id,
+            number,
+            `name`,
+            general,
+            director,
+            create_time,
+            amount,
+            workday,
+            `show`
         FROM
-            project p left join
-            volume v on  v.project_id = p.id
-        WHERE
-                FIND_IN_SET(#{name},
+            (
+                SELECT DISTINCT
+                    p.id,
+                    p.number,
+                    p.NAME,
+                    p.general,
+                    p.director,
+                    p.create_time,
+                    COUNT( v.id ) AS `amount`,
+                    TRUE AS workday,
+                    TRUE AS `show`
+                FROM
+                    project p
+                        LEFT JOIN volume v ON p.id = v.project_id
+                WHERE
+                    p.general = #{name}
+                GROUP BY
+                    p.id UNION
+                SELECT DISTINCT
+                    p.id,
+                    p.number,
+                    p.NAME,
+                    p.general,
+                    p.director,
+                    p.create_time,
+                    COUNT( v.id ) AS `amount`,
+                    TRUE AS workday,
+                    FALSE AS `show`
+                FROM
+                    project p
+                        LEFT JOIN volume v ON v.project_id = p.id
+                WHERE
+                    FIND_IN_SET(
+                            #{name},
                             REPLACE ( v.principal, ";", "," ))
-                OR v.designer = #{name} OR v.checker = #{name}
-                OR p.general = #{name}
-        GROUP BY p.id
+                GROUP BY
+                    p.id UNION
+                SELECT
+                    p.id,
+                    p.number,
+                    p.NAME,
+                    p.general,
+                    p.director,
+                    p.create_time,
+                    COUNT( v.id ) AS `amount`,
+                    FALSE AS workday,
+                    FALSE AS `show`
+                FROM
+                    project p
+                        LEFT JOIN volume v ON v.project_id = p.id
+                WHERE
+                    v.designer = #{name}
+                   OR v.checker = #{name}
+                GROUP BY
+                    p.id
+            ) as p
+        GROUP BY
+            id
     </select>
     <select id="queryHumanToBackup" resultType="java.util.Map">
         SELECT DISTINCT
-            v.designer as `name`, b.workday, u1.id, b.workday as old, #{map.id} as project_id
-        FROM `user` u,
-             volume v LEFT JOIN
-             workday_backup_user b on b.user_id = (SELECT id
-                                                   FROM `user`
-                                                   WHERE `name` = v.designer) and b.issuer_id = #{userId} and b.date = #{map.date},
-            `user` u1
-        WHERE u.id = #{userId}
-          and FIND_IN_SET(u.`name`,REPLACE(v.principal,';',','))
-          and v.project_id = #{map.id}
-          and u1.name = v.designer
-    </select>
-    <select id="queryUsedBackup" resultType="java.lang.String">
-        SELECT DISTINCT
-            ifnull(SUM(b.workday),0)
+            b.id,
+            u.`name` AS `name`,
+            b.workday,
+            b.tec,
+            b.reason,
+            b.workday AS old,
+            b.user_id as userId,
+            #{map.id} as project_id
         FROM
             `user` u,
             workday_backup_user b
         WHERE
-            u.id = #{userId}
-          AND b.issuer_id = u.id
+            b.issuer_id = #{userId}
           AND b.date = #{map.date}
-        and b.project_id = #{map.id}
+          and u.id = b.user_id
     </select>
-    <select id="queryBackupAmountByMajor" resultType="java.lang.String">
-        SELECT DISTINCT
-            ifnull(b.workday,0)
+    <select id="queryAmountByMajor" resultType="java.lang.String">
+        SELECT
+                IFNULL( t.amount, 0 ) + IFNULL(
+                SUM( b.workday ),0) as num
         FROM
-            `user` u,
-            `volume` v,
-            workday_backup b
-        WHERE
-            u.id = #{userId}
-          AND FIND_IN_SET(u.`name`,REPLACE(v.principal,';',','))
-          AND b.date = #{map.date}
-          and b.volume_tec = v.tec
-          and b.project_id = #{map.id}
+            (
+                SELECT DISTINCT
+                    v.project_id, v.tec, t.amount
+                FROM
+                    volume v
+                        LEFT JOIN workday_tec t ON v.project_id = t.project_id
+                        AND t.volume_tec = v.tec,
+                    `user` u
+                WHERE
+                    v.project_id = #{map.id}
+                  AND u.id = #{userId}
+                  AND FIND_IN_SET(
+                        u.`name`,
+                        REPLACE ( v.principal, ";", "," ))
+            ) AS t
+                LEFT JOIN workday_backup b ON t.project_id = b.project_id
+                AND b.volume_tec = t.tec
+
+        GROUP BY
+            tec
     </select>
+    <select id="queryUsed" resultType="java.util.Map">
+        SELECT
+            IFNULL(t.manage,0) as manage,
+            IFNULL(t.volume,0) as volume,
+            t.tec,
+            IFNULL(SUM(b.workday),0) as used
+        FROM
+            (
+                SELECT DISTINCT
+                    v.project_id,
+                    v.tec,
+                    t.manage,
+                    t.volume
+                FROM
+                    volume v
+                        LEFT JOIN workday_tec_distribute t ON v.project_id = t.project_id
+                        AND t.tec = v.tec,
+                    `user` u
+                WHERE
+                    v.project_id = #{map.id}
+                  AND u.id = #{userId}
+                  AND FIND_IN_SET(
+                        u.`name`,
+                        REPLACE ( v.principal, ";", "," ))
+            ) AS t
+                LEFT JOIN workday_backup_user b ON t.project_id = b.project_id
+                AND b.tec = t.tec
+        GROUP BY
+            t.tec
+    </select>
+    <select id="queryUsedManage" resultType="java.util.Map">
+        SELECT
+            IFNULL( SUM( b.workday ), 0 ) AS usedManage,
+            ifnull(b1.workday,0) as todayManage
+        FROM
+            (
+                SELECT DISTINCT
+                    v.project_id
+                FROM
+                    volume v
+                WHERE
+                    v.project_id = 3611
+            ) AS t
+                LEFT JOIN workday_manage_user b ON t.project_id = b.project_id
+                AND b.type = 1
+                LEFT JOIN workday_manage_user b1 ON t.project_id = b.project_id
+                AND b.type = 1 and b.date = #{map.date}
+    </select>
+
 </mapper>

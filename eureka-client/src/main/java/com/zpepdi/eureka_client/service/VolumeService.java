@@ -15,7 +15,7 @@ public interface VolumeService {
 
     List<Map<String, String>> queryByProjectId(Project project);
 
-    List<Map<String,String>> queryByDate(Map map);
+    List<Map<String,String>> queryByDate(String date);
 
     void upd(Volume volume);
 
@@ -34,4 +34,10 @@ public interface VolumeService {
     Result setWorkday(Integer userId,Map<String,String> map);
 
     Result queryVolumeWorkday(Map<String,String> map);
+
+    Result queryVolumeWorkdayLog(Map<String,String> map);
+
+    Result queryBackupWorkdayLog(Map<String,String> map);
+
+    Result setWorkdayState(String date, Integer old , Integer now);
 }

@@ -12,21 +12,15 @@
     <insert id="appraise" parameterType="list">
         insert into user_score( grade_id , score_id , designer , personal , coordinate , `month` , `year` , `date`, `role`)
         value
-        <foreach collection="list" item="item" index="index" separator=",">
-            (#{item.gradeId} ,#{item.scoreId} , #{item.designer} ,#{item.personal} ,#{item.coordinate} ,#{month} ,#{year} , #{item.date} , #{item.role})
-        </foreach>
+            (#{score.gradeId} ,#{score.scoreId} , #{score.designer} ,#{score.personal} ,#{score.coordinate} ,#{month} ,#{year} , current_timestamp() , #{score.role})
         ON DUPLICATE KEY UPDATE
         designer = values(designer),
         personal = values(personal),
-        coordinate = values(coordinate),
-        `month` = values(`month`),
-        `year` = values(`year`),
-        `date` = values(`date`),
-        `role` = values(`role`)
+        coordinate = values(coordinate)
     </insert>
     <insert id="backups">
         insert into user_score_backups(grade_id , score_id  , designer , personal , coordinate , `month` , `year`,date)
-        select grade_id , score_id  , designer , personal , coordinate , `month` , `year`,date
+        select grade_id , score_id  , designer , personal , coordinate , `month` , `year`,`date`
         from user_score
     </insert>
     <delete id="del">
@@ -390,365 +384,206 @@ FROM
     limit 2
   </select>
    <select id="queryScore" resultType="java.util.Map" parameterType="user">
-SELECT
-score_id,
-	designer,
-	coordinate,
-	personal,
-	ROUND(((
-				role0 * is0 * p0 + role1 * is1 * p1 + role2 * is2 * p2 + role3 * is3 * p3 + role4 * is4 * p4
-				)/ ( is0 * p0 + is1 * p1 + is2 * p2 + is3 * p3 + is4 * p4 )),
-		2
-	) AS score,
-		d.`name` as department,
-	t.`name` as technology,
-	u.`name`
-FROM
-	(
-	SELECT
-		mm.score_id,
-		dd.designer,
-		dd.coordinate,
-		dd.personal,
-		IFNULL( MAX( CASE mm.weight WHEN 1 THEN score END ), 0 ) AS role0,
-		IFNULL( MAX( CASE mm.weight WHEN 2 THEN score END ), 0 ) AS role1,
-		IFNULL( MAX( CASE mm.weight WHEN 3 THEN score END ), 0 ) AS role2,
-		IFNULL( MAX( CASE mm.weight WHEN 4 THEN score END ), 0 ) AS role3,
-		IFNULL( MAX( CASE mm.weight WHEN 5 THEN score END ), 0 ) AS role4,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 1 THEN score END ))) AS is0,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 2 THEN score END ))) AS is1,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 3 THEN score END ))) AS is2,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 4 THEN score END ))) AS is3,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 5 THEN score END ))) AS is4,
-		MAX( CASE grade_w WHEN 1 THEN w.weight END ) AS p0,
-		MAX( CASE grade_w WHEN 2 THEN w.weight END ) AS p1,
-		MAX( CASE grade_w WHEN 3 THEN w.weight END ) AS p2,
-		MAX( CASE grade_w WHEN 4 THEN w.weight END ) AS p3,
-		MAX( CASE grade_w WHEN 5 THEN w.weight END ) AS p4
-	FROM
-		(
-		SELECT
-		score_id,
-			weight,
-		IF
-			( designer = 0, NULL, designer ) AS designer,
-		IF
-			( personal = 0, NULL, personal ) AS personal,
-		IF
-			( coordinate = 0, NULL, coordinate ) AS coordinate,
-			( m.designer + m.personal + m.coordinate )/(
-				3-m.bedei - m.beper - m.becoo
-			) AS score
-		FROM
-			(
-			SELECT
-			us.score_id,
-				weight,
-				IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
-				IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
-				IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
-				ISNULL(
-				AVG( designer )) AS bedei,
-				ISNULL(
-				AVG( personal )) AS beper,
-				ISNULL(
-				AVG( coordinate )) AS becoo
-			FROM
-				user_score us,
-				`position` p
-			WHERE
-				us.role = p.id
-			GROUP BY
-				us.score_id,
-				p.weight
-			) AS m
-		) AS mm,
-		(
-SELECT
-us.score_id as id ,
-	grade_w,
-	score_w,
-	weight
-FROM
-	user_weight uw,
-	user_score us
-WHERE
-	score_w = (
-	SELECT
-		IFNULL( Max( weight ), 6 ) AS weight
-	FROM
-		(
-		SELECT
-			weight,
-			up.user_id AS id
-		FROM
-			position p,
-			user_position up
-		WHERE
-			up.user_id = us.score_id
-			and up.position_id = p.id
-		GROUP BY
-			up.user_id UNION
-		SELECT
-			weight,
-			u.id AS id
-		FROM
-			`user` u,
-			project p,
-			position pt
-		WHERE
-			u.id = us.score_id
-			AND (
-				p.general = u.NAME
-				OR SUBSTRING_INDEX( p.general, ";", 1 ) = u.`name`
-			OR SUBSTRING_INDEX( p.general, ";",- 1 ) = u.`name`
-		)
-		AND pt.id = 13
-		GROUP BY
-			us.score_id UNION
-		SELECT
-			weight,
-			u.id AS id
-		FROM
-			`user` u,
-			volume v,
-			position p
-		WHERE
-			u.id = us.score_id
-			AND (
-				v.principal = u.`name`
-				OR SUBSTRING_INDEX( v.principal, ";", 1 ) = u.`name`
-			OR SUBSTRING_INDEX( v.principal, ";",- 1 ) = u.`name`
-		)
-		AND p.id = 14
-		GROUP BY
-			us.score_id
-		) AS u
-	LIMIT 1
-	)
-	GROUP BY us.score_id,grade_w) AS w,
-		(
-		SELECT
-		score_id,
-		`year`,
-			`month`,
-			round( AVG( designer ), 3 ) AS designer,
-			round( AVG( personal ), 3 ) AS personal,
-			round( AVG( coordinate ), 3 ) AS coordinate
-		FROM
-			user_score
-		GROUP BY
-		score_id
-		) AS dd
-	WHERE
-	mm.score_id = w.id
-	and mm.score_id = dd.score_id
-	GROUP BY
-	score_id
-	) AS m,
-department d,
-technology t,
-`user` u
-WHERE m.score_id = u.id
-and u.did = d.id
-and u.tid = t.id
+	   SELECT
+		u.name,
+	    d.name as department,
+	    t.name as technology,
+	   m.score_id,
+	   dd.designer,
+	   dd.coordinate,
+	   dd.personal,
+	   ROUND(SUM(m.score * w.weight)/ SUM(w.weight),3) as score
+	   FROM
+	   (
+	   SELECT
+	   us.score_id,
+	   us.role AS weight,
+	   (
+	   IFNULL( designer, 0 ) + IFNULL( personal, 0 ) + IFNULL( coordinate, 0 ))/ ( 3-ISNULL ( designer ) - ISNULL( personal ) - ISNULL( coordinate ) )  as score
+	   FROM
+	   user_score us
+	   ) AS m,
+	   (
+	   SELECT
+	   us.score_id AS id,
+	   grade_w,
+	   score_w,
+	   uw.weight
+	   FROM
+	   user_weight uw,
+	   user_score us
+	   LEFT JOIN (
+	   SELECT
+	   id,
+	   CASE
+	   pid
+	   WHEN 4 THEN
+	   2 ELSE 1
+	   END AS weight
+	   FROM
+	   `user`
+	   WHERE
+	   pid &lt;&gt; 5 UNION
+	   SELECT
+	   u.id,
+	   3 AS weight
+	   FROM
+	   `user` u,
+	   project p
+	   WHERE
+	   (
+	   FIND_IN_SET(
+	   u.`name`,
+	   REPLACE ( p.general, ";", "," ))) UNION
+	   SELECT
+	   u.id,
+	   4 AS weight
+	   FROM
+	   `user` u,
+	   volume v
+	   WHERE
+	   u.pid = 5
+	   AND (
+	   FIND_IN_SET(
+	   u.`name`,
+	   REPLACE ( v.principal, ";", "," )))
+	   GROUP BY
+	   u.id
+	   ) AS w ON w.id = us.score_id
+	   WHERE
+	   IFNULL( w.weight, 5 ) = uw.score_w
+	   GROUP BY
+	   us.score_id,
+	   grade_w
+	   ) AS w,
+	   (
+	   SELECT
+	   score_id,
+	   `year`,
+	   `month`,
+	   round( AVG( designer ), 3 ) AS designer,
+	   round( AVG( personal ), 3 ) AS personal,
+	   round( AVG( coordinate ), 3 ) AS coordinate
+	   FROM
+	   user_score
+	   GROUP BY
+	   score_id
+	   ) AS dd,
+	    `user` u,
+	    department d,
+	    technology t
+	   WHERE
+	   m.score_id = w.id
+	   and dd.score_id = m.score_id
+	   and u.id = m.score_id
+	   and u.did = d.id
+	   and u.tid = t.id
+	   GROUP BY
+	   score_id
     </select>
     <select id="queryScorePast" resultType="java.util.Map">
-SELECT
-score_id,
-`month`,
-	designer,
-	coordinate,
-	personal,
-	ROUND(((
-				role0 * is0 * p0 + role1 * is1 * p1 + role2 * is2 * p2 + role3 * is3 * p3 + role4 * is4 * p4
-				)/ ( is0 * p0 + is1 * p1 + is2 * p2 + is3 * p3 + is4 * p4 )),
-		2
-	) AS score,
-		d.`name` as department,
-	t.`name` as technology,
-	u.`name`
-FROM
-	(
-	SELECT
-		mm.score_id,
-		mm.`month`,
+		SELECT
+			u.name,
+			d.name as department,
+			t.name as technology,
+		m.score_id,
 		dd.designer,
 		dd.coordinate,
 		dd.personal,
-		IFNULL( MAX( CASE mm.weight WHEN 1 THEN score END ), 0 ) AS role0,
-		IFNULL( MAX( CASE mm.weight WHEN 2 THEN score END ), 0 ) AS role1,
-		IFNULL( MAX( CASE mm.weight WHEN 3 THEN score END ), 0 ) AS role2,
-		IFNULL( MAX( CASE mm.weight WHEN 4 THEN score END ), 0 ) AS role3,
-		IFNULL( MAX( CASE mm.weight WHEN 5  THEN score END ), 0 ) AS role4,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 1 THEN score END ))) AS is0,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 2 THEN score END ))) AS is1,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 3 THEN score END ))) AS is2,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 4 THEN score END ))) AS is3,
-		(
-			1-ISNULL (
-			MAX( CASE mm.weight WHEN 5 THEN score END ))) AS is4,
-		MAX( CASE grade_w WHEN 1 THEN w.weight END ) AS p0,
-		MAX( CASE grade_w WHEN 2 THEN w.weight END ) AS p1,
-		MAX( CASE grade_w WHEN 3 THEN w.weight END ) AS p2,
-		MAX( CASE grade_w WHEN 4 THEN w.weight END ) AS p3,
-		MAX( CASE grade_w WHEN 5 THEN w.weight END ) AS p4
-	FROM
+		ROUND(SUM(m.score * w.weight)/ SUM(w.weight),3) as score
+		FROM
 		(
 		SELECT
-		score_id,
-		`month`,
-			weight,
-		IF
-			( designer = 0, NULL, designer ) AS designer,
-		IF
-			( personal = 0, NULL, personal ) AS personal,
-		IF
-			( coordinate = 0, NULL, coordinate ) AS coordinate,
-			( m.designer + m.personal + m.coordinate )/(
-				3-m.bedei - m.beper - m.becoo
-			) AS score
-		FROM
-			(
-			SELECT
-			us.score_id,
-			`month`,
-				weight,
-				IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
-				IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
-				IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
-				ISNULL(
-				AVG( designer )) AS bedei,
-				ISNULL(
-				AVG( personal )) AS beper,
-				ISNULL(
-				AVG( coordinate )) AS becoo
-			FROM
-				user_score_backups us,
-				position p
-			WHERE
-				us.role = p.id
-			and `month` = #{thisMonth}
-			and `year` = #{thisYear}
-			GROUP BY
-				us.score_id,
-				p.weight
-			) AS m
-		) AS mm,
+		us.score_id,
+		us.role AS weight,
 		(
-SELECT
-us.score_id as id ,
-	grade_w,
-	score_w,
-	weight
-FROM
-	user_weight uw,
-	user_score_backups us
-WHERE
-	score_w = (
-	SELECT
-		IFNULL( Max( weight ), 6 ) AS weight
-	FROM
+		IFNULL( designer, 0 ) + IFNULL( personal, 0 ) + IFNULL( coordinate, 0 ))/ ( 3-ISNULL ( designer ) - ISNULL( personal ) - ISNULL( coordinate ) )  as score
+		FROM
+		user_score_backups us
+		    where  us.year = #{thisYear}
+		    and us.month = #{thisMonth}
+		) AS m,
 		(
 		SELECT
-			weight,
-			up.user_id AS id
+		us.score_id AS id,
+		grade_w,
+		score_w,
+		uw.weight
 		FROM
-			position p,
-			user_position up
+		user_weight uw,
+		user_score_backups us
+		LEFT JOIN (
+		SELECT
+		id,
+		CASE
+		pid
+		WHEN 4 THEN
+		2 ELSE 1
+		END AS weight
+		FROM
+		`user`
 		WHERE
-			up.user_id = us.score_id
-			and up.position_id = p.id
-		GROUP BY
-			up.user_id UNION
+		pid &lt;&gt; 5 UNION
 		SELECT
-			weight,
-			u.id AS id
+		u.id,
+		3 AS weight
 		FROM
-			`user` u,
-			project p,
-			position pt
+		`user` u,
+		project p
 		WHERE
-			u.id = us.score_id
-			and us.`month` = #{thisMonth}
-			and us.`year` =#{thisYear}
-			AND (
-				p.general = u.NAME
-				OR SUBSTRING_INDEX( p.general, ";", 1 ) = u.`name`
-			OR SUBSTRING_INDEX( p.general, ";",- 1 ) = u.`name`
-		)
-		AND pt.id = 13
-		GROUP BY
-			us.score_id UNION
+		(
+		FIND_IN_SET(
+		u.`name`,
+		REPLACE ( p.general, ";", "," ))) UNION
 		SELECT
-			weight,
-			u.id AS id
+		u.id,
+		4 AS weight
 		FROM
-			`user` u,
-			volume v,
-			position p
+		`user` u,
+		volume v
 		WHERE
-			u.id = us.score_id
-			and us.`month` = #{thisMonth}
-			and us.`year` = #{thisYear}
-			AND (
-				v.principal = u.`name`
-				OR SUBSTRING_INDEX( v.principal, ";", 1 ) = u.`name`
-			OR SUBSTRING_INDEX( v.principal, ";",- 1 ) = u.`name`
-		)
-		AND p.id = 14
+		u.pid = 5
+		AND (
+		FIND_IN_SET(
+		u.`name`,
+		REPLACE ( v.principal, ";", "," )))
 		GROUP BY
-			us.score_id
-		) AS u
-	LIMIT 1
-	)
-	GROUP BY us.score_id,grade_w) AS w,
+		u.id
+		) AS w ON w.id = us.score_id
+		WHERE
+		IFNULL( w.weight, 5 ) = uw.score_w
+		and  us.year = #{thisYear}
+		and us.month = #{thisMonth}
+		GROUP BY
+		us.score_id,
+		grade_w
+		) AS w,
 		(
 		SELECT
 		score_id,
 		`year`,
-			`month`,
-			round( AVG( designer ), 3 ) AS designer,
-			round( AVG( personal ), 3 ) AS personal,
-			round( AVG( coordinate ), 3 ) AS coordinate
+		`month`,
+		round( AVG( designer ), 3 ) AS designer,
+		round( AVG( personal ), 3 ) AS personal,
+		round( AVG( coordinate ), 3 ) AS coordinate
 		FROM
 			user_score_backups
-		WHERE
-		 `month` = #{thisMonth}
-			and `year` = #{thisYear}
+		where  us.year = #{thisYear}
+		  and us.month = #{thisMonth}
 		GROUP BY
 		score_id
-		) AS dd
-	WHERE
-	mm.score_id = w.id
-	and mm.score_id = dd.score_id
-	GROUP BY
-	score_id
-	) AS m,
-department d,
-technology t,
-`user` u
-WHERE m.score_id = u.id
-and u.did = d.id
-and u.tid = t.id
+		) AS dd,
+		`user` u,
+		department d,
+		technology t
+		WHERE
+		m.score_id = w.id
+		and dd.score_id = m.score_id
+		  and u.id = m.score_id
+		  and u.did = d.id
+		  and u.tid = t.id
+		GROUP BY
+		score_id
     </select>
     <select id="query" resultType="java.util.Map">
         select m.sname , m.department , m.technology , m .designer ,
@@ -764,28 +599,10 @@ and u.tid = t.id
         u.did = d.id
         and u.tid = t.id
         and s.score_id = u.id
-      <if test="dIds != null and dIds != ''">
-        and d.id in
-        <foreach collection="dIds" item="item" separator="," close=")" open="(">
-          #{item}
-        </foreach>
-      </if>
-      <if test="tIds != null and tIds != ''">
-        and t.id in
-        <foreach collection="tIds" item="item" separator="," open="(" close=")">
-          #{item}
-        </foreach>
-      </if>
         ) as m,
-        user  u
+        `user`  u
         where
         m.grade_id = u.id
-      <if test="selectName != null and selectName != ''">
-        order by ${selectName}
-      </if>
-      <if test="selectType == 1">
-        desc
-      </if>
     </select>
     <select id="queryPast" resultType="java.util.Map">
       select m.sname , m.department , m.technology , m .designer ,
@@ -803,28 +620,10 @@ and u.tid = t.id
       and s.score_id = u.id
       AND s.month = #{thisMonth}
       AND S.year = #{thisYear}
-      <if test="dIds != null and dIds != ''">
-        and d.id in
-        <foreach collection="dIds" item="item" separator="," close=")" open="(">
-          #{item}
-        </foreach>
-      </if>
-      <if test="tIds != null and tIds != ''">
-        and t.id in
-        <foreach collection="tIds" item="item" separator="," open="(" close=")">
-          #{item}
-        </foreach>
-      </if>
       ) as m,
-      user  u
+      `user`  u
       where
       m.grade_id = u.id
-      <if test="selectName != null and selectName != ''">
-        order by ${selectName}
-      </if>
-      <if test="selectType == 1">
-        desc
-      </if>
     </select>
     <select id="excel1" resultType="com.zpepdi.eureka_client.entity.PersonalExcel" parameterType="user">
         SELECT

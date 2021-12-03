@@ -1,6 +1,7 @@
 package com.zpepdi.eureka_client.controller;
 
 
+import com.zpepdi.eureka_client.annotation.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -44,6 +45,7 @@ public class VolumeController {
         return Result.ok();
     }
 
+//    根据人员或卷册信息模糊查询
     @RequestMapping("query")
     public Result query(@RequestBody Map<String,String> params){
         return Result.ok(volumeService.queryVolume(params.get("user"),params.get("volume")));
@@ -54,23 +56,34 @@ public class VolumeController {
         return volumeService.queryByNumber(volume);
     }
 
+//    卷册未按时完成原因
     @RequestMapping("setReason")
     public Result setReason(@RequestBody Map<String,String> map){
         return volumeService.setReason(map);
     }
-
+//工时设置
     @RequestMapping("setWorkday")
-    public Result setWorkday(@RequestHeader Integer userId,@RequestBody Map<String,String> map){
+    public Result setWorkday(@UserId Integer userId, @RequestBody Map<String,String> map){
         return volumeService.setWorkday(userId,map);
     }
-
+//提前发放工时和卷册公式比例修改
     @RequestMapping("setWorkdayHigh")
-    public Result setWorkdayHigh(@RequestHeader Integer userId,@RequestBody Map<String,String> map){
+    public Result setWorkdayHigh(@UserId Integer userId,@RequestBody Map<String,String> map){
         return volumeService.setWorkdayHigh(userId,map);
     }
-
+//卷册提前发放工时所需信息
     @RequestMapping("queryVolumeWorkday")
     public Result queryVolumeWorkday(@RequestBody Map<String,String> map){
         return volumeService.queryVolumeWorkday(map);
+    }
+
+    @RequestMapping("queryVolumeWorkdayLog")
+    public Result queryVolumeWorkdayLog(@RequestBody Map<String,String> map){
+        return volumeService.queryVolumeWorkdayLog(map);
+    }
+
+    @RequestMapping("queryBackupWorkdayLog")
+    public Result queryBackupWorkdayLog(@RequestBody Map<String,String> map){
+        return volumeService.queryBackupWorkdayLog(map);
     }
 }

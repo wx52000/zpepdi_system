@@ -35,8 +35,10 @@ public class ActivityServiceImpl implements ActivityService {
   public Result setProject(Activity activity) {
     Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
 //    Pattern pattern = Pattern.compile("[^0-9]");
-    activity.setStart_date(activity.getDate().get(0));
-    activity.setEnd_date(activity.getDate().get(1));
+    if (activity.getDate().size() > 0) {
+      activity.setStart_date(activity.getDate().get(0));
+      activity.setEnd_date(activity.getDate().get(1));
+    }
     activityDao.setProject(activity);
     if (activity.getGeneral().size()>0) {
       activity.getGeneral().forEach(item -> {
@@ -45,10 +47,15 @@ public class ActivityServiceImpl implements ActivityService {
       activityDao.addUser(activity.getId(), activity.getGeneral());
     }
     if (activity.getPrincipal().size() >0) {
-      activity.getPrincipal().forEach(item -> {
-        item.put("role", 2);
-      });
-      activityDao.addUser(activity.getId(), activity.getPrincipal());
+      double sum = 0;
+      sum = activity.getPrincipal().stream().peek(item -> item.put("role", 2)).
+              filter(item -> item.get("workday") != null && item.get("workday") != "")
+              .mapToDouble(item -> Double.parseDouble(item.get("workday").toString())).sum();
+      if (activity.getWorkday() >= sum) {
+        activityDao.addUser(activity.getId(), activity.getPrincipal());
+      } else {
+        return Result.build(500, "工时总数超出上限");
+      }
     }
     activityDao.setState(activity.getId(),activity.getGeneral(),1);
     activityDao.setState(activity.getId(),activity.getPrincipal(),2);
@@ -71,8 +78,10 @@ public class ActivityServiceImpl implements ActivityService {
     Map<String,Object> map = new HashMap();
     map = activityDao.queryById(id);
     List<String> list = new ArrayList<>();
-    list.add(map.get("start_date").toString());
-    list.add(map.get("end_date").toString());
+    if (map.get("start_date") != null) {
+      list.add(map.get("start_date").toString());
+      list.add(map.get("end_date").toString());
+    }
     map.put("date", list);
     map.put("general",activityDao.queryByRole(id,1));
     map.put("principal",activityDao.queryByRole(id,2));

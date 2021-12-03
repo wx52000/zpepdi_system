@@ -41,6 +41,15 @@ public interface UserDao {
     List<Map<String,Object>> workdayLogById(@Param("id")Integer id, @Param("date")String date, @Param("name")String name);
 
     List<Map> query(User user);
+
+    /*
+    * 查询所有角色的工时
+    */
+
+    List<Map<String,Object>> workday(@Param("date") String date);
+    /*
+    * end*/
+
     //查询有权限打分的人员名单
     List<String> queryGrade();
     //根据工号排序
@@ -67,14 +76,12 @@ public interface UserDao {
     //主任查询
     List<Map> queryByDirector(User user);
     //经理查询
-    List<Map> queryByManager(User user);
+    List<Map> queryByManager(Map<String,Object> map);
     List<String> queryByManagerList(User user);
-    //组长查询
-    List<Map> queryByHeadman(User user);
     List<String> queryByHeadmanList(User user);
-    List<Map> queryNotSelf(User user);
+    List<Map> queryNotSelf(Map<String,Object> map);
     List<String> queryNotSelfList(User user);
-    List<Map> queryByGAndP(User user);
+    List<Map> queryByGAndP(Map<String,Object> map);
 
     List<String> queryByGAndPList(User user);
     List<Map> queryNotScore(User user);
@@ -97,7 +104,7 @@ public interface UserDao {
 
     List<Integer> queryByUsername(List<ExcelData> list);
 
-    void paw(User user);
+    void paw(@Param("id") Integer id ,@Param("user") User user);
 
     List<Map> queryPrincipal(Integer id);
 

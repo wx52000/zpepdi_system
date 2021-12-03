@@ -8,6 +8,8 @@ import java.util.Map;
 
 public interface TechnologyService {
 
+    List<Technology> queryAll();
+
     List<Technology> query(Integer id);
 
     List<Technology> queryNotUser();

@@ -2,6 +2,7 @@ package com.zpepdi.feign_service.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.feign_service.entity.User;
+import com.zpepdi.feign_service.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2ClientProperties;
@@ -11,12 +12,12 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 
 @RestController
@@ -27,6 +28,9 @@ public class LoginController {
 
     @Value("${security.oauth2.client.access-token-uri}")
     private String accessTokenUrl;
+
+    @Autowired()
+    private TokenStore tokenStore;
 
 
     @RequestMapping("login")

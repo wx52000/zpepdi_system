@@ -27,7 +27,7 @@ public interface TecScoreService {
     Result queryByScoreId(@RequestBody User user);
 
     @RequestMapping("tecScore/appraise")
-    Result appraise(@RequestBody List<TecScore> list);
+    Result appraise(@RequestHeader("userId") Integer userId, @RequestBody TecScore tecScore);
 
     @RequestMapping("tecScore/queryScore")
     Result queryScore(@RequestBody User user);

@@ -1,6 +1,7 @@
 package com.zpepdi.eureka_client.service.impl;
 
 import com.zpepdi.eureka_client.entity.Reason;
+import com.zpepdi.eureka_client.tools.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,8 +59,8 @@ public class VolumeServiceImpl implements VolumeService {
   }
 
   @Override
-  public List<Map<String, String>> queryByDate(Map map) {
-    return volumeDao.queryByDate(map);
+  public List<Map<String, String>> queryByDate(String date) {
+    return volumeDao.queryByDate(date);
   }
 
   @Override
@@ -113,19 +114,22 @@ public class VolumeServiceImpl implements VolumeService {
 
     @Override
     public Result setWorkday(Integer userId, Map<String, String> map) {
-        String []s = {"待送出版","正在出版"};
+        String []s = {"待送出版","正在出版",	"代送业主", "已完成", "院交出"};
         Map<String,Object> map1 = volumeDao.queryUsableWorkday(Integer.valueOf(map.get("id")));
+        map1.put("used",Double.parseDouble(map1.get("used").toString()) - Double.parseDouble(map1.get("workday").toString()));
         if ((Double.parseDouble(map1.get("amount").toString()) - Double.parseDouble(map1.get("used").toString()))
                 > Double.parseDouble(map.get("workday"))) {
             map.put("type", "工时设置");
             new Thread(() -> volumeDao.setWorkdayLog(userId, map)).start();
             map.put("state", "0");
-            for (String s1 : s){
-                if ( s1.equals(map1.get("state").toString())){
-                    map.put("state" , "1");
+            for (String s1 : s) {
+                if (s1.equals(map1.get("state").toString())) {
+                    map.put("state", "1");
                 }
             }
+            map.put("date", DateUtils.getDateMonth());
             volumeDao.setWorkday(map);
+            map1.put("used",Double.parseDouble(map1.get("used").toString()) + Double.parseDouble(map.get("workday")));
             return Result.ok(map1);
         }else return Result.build(566,"可用工时不足，请重新输入");
     }
@@ -150,5 +154,21 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public Result queryVolumeWorkday(Map<String, String> map) {
         return Result.ok(volumeDao.queryVolumeWorkday(map));
+    }
+
+    @Override
+    public Result queryVolumeWorkdayLog(Map<String, String> map) {
+        return Result.ok(volumeDao.queryVolumeWorkdayLog(map));
+    }
+
+    @Override
+    public Result queryBackupWorkdayLog(Map<String, String> map) {
+        return Result.ok(volumeDao.queryBackupWorkdayLog(map));
+    }
+
+    @Override
+    public Result setWorkdayState(String date, Integer old, Integer now) {
+        volumeDao.setWorkdayState(date,old,now);
+        return Result.ok();
     }
 }

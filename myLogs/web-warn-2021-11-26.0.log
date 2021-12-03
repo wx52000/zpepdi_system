@@ -1,0 +1,7 @@
+2021-11-26 09:20:08.853 [restartedMain] WARN  o.springframework.boot.actuate.endpoint.EndpointId - Endpoint ID 'service-registry' contains invalid characters, please migrate to a valid format.
+2021-11-26 09:20:12.674 [restartedMain] WARN  com.netflix.config.sources.URLConfigurationSource - No URLs will be polled as dynamic configuration sources.
+2021-11-26 09:20:15.779 [restartedMain] WARN  o.s.s.o.p.token.store.JwtAccessTokenConverter - Unable to create an RSA verifier from verifierKey (ignoreable if using MAC)
+2021-11-26 09:20:16.564 [restartedMain] WARN  com.netflix.config.sources.URLConfigurationSource - No URLs will be polled as dynamic configuration sources.
+2021-11-26 09:20:16.658 [restartedMain] WARN  o.s.s.o.p.token.store.JwtAccessTokenConverter - Unable to create an RSA verifier from verifierKey (ignoreable if using MAC)
+2021-11-26 09:20:20.984 [restartedMain] WARN  o.s.c.l.c.BlockingLoadBalancerClientAutoConfiguration$BlockingLoadBalancerClientRibbonWarnLogger - You already have RibbonLoadBalancerClient on your classpath. It will be used by default. As Spring Cloud Ribbon is in maintenance mode. We recommend switching to BlockingLoadBalancerClient instead. In order to use it, set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or remove spring-cloud-starter-netflix-ribbon from your project.
+2021-11-26 09:20:21.186 [restartedMain] WARN  o.s.c.s.o.SpringCloudSecurityAutoConfiguration - All Spring Cloud Security modules and starters are deprecated. They will be moved to individual projects in the next major release.

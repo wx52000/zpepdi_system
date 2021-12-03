@@ -39,11 +39,22 @@ public class VirtualServiceImpl implements VirtualService {
 
     }
     if (virtual.getPrincipal().size() >0) {
-      virtual.getPrincipal().forEach(item -> {
-        item.put("role", 2);
-      });
-      virtualDao.addUser(virtual.getId(), virtual.getPrincipal());
-      virtualDao.addUserWorkday(virtual.getId(),virtual.getPrincipal(),virtual.getMonth());
+//      virtual.getPrincipal().stream()..forEach(item -> {
+//        if (item.get("workday") != null && item.get("workday") != ""){
+//          sum += Double.parseDouble(item.get("workday").toString());
+//        }
+//        item.put("role", 2);
+//      });
+      double sum = 0;
+      sum = virtual.getPrincipal().stream().peek(item -> item.put("role", 2)).
+              filter(item ->item.get("workday") != null && item.get("workday") != "")
+              .mapToDouble(item -> Double.parseDouble(item.get("workday").toString())).sum();
+      if (virtual.getWorkday() >= sum) {
+        virtualDao.addUser(virtual.getId(), virtual.getPrincipal());
+        virtualDao.addUserWorkday(virtual.getId(), virtual.getPrincipal(), virtual.getMonth());
+      }else {
+        return Result.build(500,"工时总数超出上限");
+      }
     }
     virtualDao.setState(virtual.getId(),virtual.getGeneral(),1);
     virtualDao.setState(virtual.getId(),virtual.getPrincipal(),2);

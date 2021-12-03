@@ -19,7 +19,7 @@ public interface UserScoreDao {
 
     List<Map> queryByScoreIdPast(User user);
 
-    void appraise(@Param("list") List<UserScore> list,
+    void appraise(@Param("score") UserScore userScore,
                   @Param("month")Integer month,@Param("year")Integer year);
 
     //查询当前月整体数据

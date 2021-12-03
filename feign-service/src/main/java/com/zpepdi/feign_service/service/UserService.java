@@ -47,6 +47,12 @@ public interface UserService {
     @RequestMapping("user/workdayLogById")
     Result workdayLogById(@RequestHeader("userId") Integer userId);
 
+    @RequestMapping("user/workdayLog")
+    Result workdayLog(@RequestBody Map<String,Object> map);
+
+    @RequestMapping("user/workday")
+    Result workday(@RequestHeader("queryDate") String queryDate);
+
     @RequestMapping("user/queryToupd")
     Result queryToupd(@RequestHeader("id") Integer id);
 
@@ -57,7 +63,7 @@ public interface UserService {
     Result queryNotSelf(@RequestBody User user);
 
     @RequestMapping("user/queryToScore")
-    Result queryToScore(@RequestBody User user);
+    Result queryToScore(@RequestHeader("userId") Integer userId,@RequestBody Map<String,Object> map);
 
     @RequestMapping("user/queryScoreList")
     Result queryScoreList(@RequestBody User user);
@@ -87,7 +93,7 @@ public interface UserService {
     Result queryByName(@RequestBody User user);
 
     @RequestMapping("user/paw")
-    Result paw(@RequestBody User user);
+    Result paw(@RequestHeader("userId") Integer userId,@RequestBody User user);
 
     //普通树
     @RequestMapping("user/userAll")

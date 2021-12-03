@@ -1,5 +1,6 @@
 package com.zpepdi.eureka_client.controller;
 
+import com.zpepdi.eureka_client.annotation.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -33,28 +34,32 @@ public class VirtualController {
     return virtualService.query();
   }
 
+  //查询用户相关的初设项目
   @RequestMapping("queryByUser")
-  public Result queryByUser(@RequestHeader Integer userId){
+  public Result queryByUser(@UserId Integer userId){
     return virtualService.queryByUser(userId);
   }
 
+//  根据id查询
   @RequestMapping("queryById")
   public Result queryById(@RequestBody Map<String,Object> map){
     return virtualService.queryById(map);
   }
 
   @RequestMapping("queryUsedWorkday")
-  public Result queryUsedWorkday(@RequestBody Map<String,Object> map,@RequestHeader("userId") Integer userId){
+  public Result queryUsedWorkday(@RequestBody Map<String,Object> map,@UserId Integer userId){
     return virtualService.queryUsedWorkday(map,userId);
   }
 
+//  查询工时
   @RequestMapping("queryWorkday")
-  public Result queryWorkday(@RequestBody Map<String,Object> map, @RequestHeader("userId") Integer id){
+  public Result queryWorkday(@RequestBody Map<String,Object> map, @UserId Integer id){
     return virtualService.queryWorkday(map,id);
   }
 
+//  分配工时
   @RequestMapping("setWorkday")
-  public Result setDesignerWorkday(@RequestBody Map<String,Object> map,@RequestHeader Integer userId){
+  public Result setDesignerWorkday(@RequestBody Map<String,Object> map,@UserId Integer userId){
     return virtualService.setWorkday(map,userId);
   }
 }

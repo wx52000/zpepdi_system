@@ -60,11 +60,12 @@ public class UsreScoreServiceImpl implements UserScoreService {
     }
 
   @Override
-    public void appraise(List<UserScore> list) {
+    public void appraise(Integer id, UserScore userScore) {
         Map<Object,Integer> map = appDate();
         Integer month = map.get("month");
         Integer year = map.get("year");
-        userScoreDao.appraise(list,month,year);
+        userScore.setGradeId(id);
+        userScoreDao.appraise(userScore,month,year);
     }
 
     @Override

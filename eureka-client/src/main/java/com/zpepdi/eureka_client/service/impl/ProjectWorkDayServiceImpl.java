@@ -63,7 +63,10 @@ public class ProjectWorkDayServiceImpl implements ProjectWorkDayService {
   @Override
   public Result queryMajorWorkDay(Integer id) {
     Map<String,Object> map = new HashMap<>();
-    map.put("major",proWorkDayDao.queryProWorkDay(id).get("tec"));
+    Map<String,Object> map1 = proWorkDayDao.queryProWorkDay(id);
+    if (map1 != null) {
+      map.put("major", map1.get("tec"));
+    }
     List<Map> list = proWorkDayDao.queryTecWorkDayAmount(id);
     list.removeAll(Collections.singleton(null));
     map.put("workday",  list);
@@ -73,7 +76,12 @@ public class ProjectWorkDayServiceImpl implements ProjectWorkDayService {
   @Override
   public Result queryBackupWorkDay(Map<String, String> map) {
     Map<String,Object> map1 = new HashMap<>();
-    map1.put("backup",proWorkDayDao.queryProWorkDay(Integer.valueOf(map.get("id"))).get("backup"));
+    Map<String,Object> map2 = proWorkDayDao.queryProWorkDay(Integer.valueOf(map.get("id")));
+    if (map2 != null) {
+      map1.put("backup", map2.get("backup"));
+    }
+    map1.put("musable", proWorkDayDao.queryUsableManageWorkday(Integer.valueOf(map.get("id"))));
+    map1.put("manage", proWorkDayDao.queryUsedManageWorkdayByDate(Integer.valueOf(map.get("id")),map.get("date")));
     map1.put("usable",proWorkDayDao.queryUsableBackupWorkday(Integer.valueOf(map.get("id"))));
     List<Map> list =   proWorkDayDao.queryBackupWorkDayAmount(map);
     list.removeAll(Collections.singleton(null));
@@ -102,6 +110,32 @@ public class ProjectWorkDayServiceImpl implements ProjectWorkDayService {
   @Override
   public Result setProWorkDay(Map map) {
     proWorkDayDao.setProWorkDay(map);
+    Map<String,Object> map1 = proWorkDayDao.queryProWorkDay(Integer.valueOf(map.get("project_id").toString()));
+      double manage = 0;
+      double tec = 0;
+      double backup = 0;
+      if (map.get("manage") != ""){
+        manage = Double.parseDouble(map.get("manage").toString());
+      }else{
+        manage = Double.parseDouble(map1.get("manage").toString());
+      }
+      if (map.get("tec") != ""){
+        tec = Double.parseDouble(map.get("tec").toString());
+      }else{
+        tec = Double.parseDouble(map1.get("tec").toString());
+      }
+      if (map.get("backup") != ""){
+        backup = Double.parseDouble(map.get("backup").toString());
+      }else{
+        backup = Double.parseDouble(map1.get("backup").toString());
+      }
+      if (map.get("manage") != "" || map.get("tec") != "" || map.get("backup") != "") {
+      if (Double.parseDouble(map1.get("num").toString()) >= (manage + tec + backup)) {
+        proWorkDayDao.setProWorkDayDistribut(map);
+      } else {
+        return Result.build(500, "管理工时和专业工时备用工时总数超出");
+      }
+    }
     return Result.ok();
   }
 
@@ -109,6 +143,18 @@ public class ProjectWorkDayServiceImpl implements ProjectWorkDayService {
   public Result setTecWorkDay(Map map) {
     proWorkDayDao.setTecWorkDay(Integer.valueOf(map.get("project_id").toString()),
       (List) Arrays.asList(map.get("list")).get(0));
+    return Result.ok();
+  }
+
+  @Override
+  public Result setManageWorkday(Integer id ,Map map) {
+    double manage = Double.parseDouble(
+            proWorkDayDao.queryProWorkDay(Integer.valueOf(map.get("project_id").toString())).get("manage").toString());
+    if (manage >= Double.parseDouble(map.get("workday").toString())) {
+      proWorkDayDao.setManageWorkday(id, map);
+    }else{
+      return Result.build(500, "管理工时分配总数超出");
+    }
     return Result.ok();
   }
 
@@ -129,8 +175,8 @@ public class ProjectWorkDayServiceImpl implements ProjectWorkDayService {
   }
 
   @Override
-  public List<ProjectExcelTec> statisticAll(String min,String max) {
-    return proWorkDayDao.statisticAll(min,max);
+  public List<ProjectExcelTec> statisticAll(String date) {
+    return proWorkDayDao.statisticAll(date);
   }
 
   @Override
@@ -141,8 +187,8 @@ public class ProjectWorkDayServiceImpl implements ProjectWorkDayService {
   }
 
   @Override
-  public List<Map<String, String>> everyoneAll(Map map) {
-    return proWorkDayDao.everyoneAll(map);
+  public List<Map<String, String>> everyoneAll(String date) {
+    return proWorkDayDao.everyoneAll(date);
   }
 
   @Override
@@ -151,9 +197,10 @@ public class ProjectWorkDayServiceImpl implements ProjectWorkDayService {
   }
 
   @Override
-  public List<Map<String, String>> personal(Map<String,String> map) {
-    User user = userDao.queryById(Integer.valueOf(map.get("id")));
-    map.put("name",user.getName());
-    return proWorkDayDao.personal(map);
+  public List<Map<String, Object>> personal(Integer id) {
+    Calendar calendar = Calendar.getInstance();
+    String date = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1);
+    User user = userDao.queryById(id);
+    return userDao.workdayLogById(id,date,user.getName());
   }
 }

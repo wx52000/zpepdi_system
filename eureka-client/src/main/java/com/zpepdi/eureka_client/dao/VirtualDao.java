@@ -38,4 +38,5 @@ public interface VirtualDao {
 
   void setWorkday(@Param("map")Map<String,Object> map, @Param("id") Integer id);
 
+
 }

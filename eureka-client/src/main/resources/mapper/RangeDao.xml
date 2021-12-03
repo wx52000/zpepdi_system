@@ -8,7 +8,7 @@
         where id = 1
     </update>
   <update id="updateDate">
-    update `range_date`
+    update `score_date`
     set `start` = #{max},
         `end` = #{min}
     where id = 1
@@ -19,6 +19,6 @@
     </select>
     <select id="queryDate" resultType="map">
       select *
-      from `range_date`
+      from `score_date`
     </select>
 </mapper>

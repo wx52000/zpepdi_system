@@ -25,7 +25,7 @@ public class TecScoreFallbackService implements TecScoreService {
     }
 
     @Override
-    public Result appraise(List<TecScore> list) {
+    public Result appraise(Integer userId, TecScore tecScore) {
         return Result.build(440);
     }
 

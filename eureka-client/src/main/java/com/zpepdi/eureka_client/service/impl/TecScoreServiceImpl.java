@@ -55,11 +55,12 @@ public class TecScoreServiceImpl implements TecScoreService {
   }
 
   @Override
-    public void appraise(List<TecScore> list) {
+    public void appraise(Integer id, TecScore tecScore) {
         Map<Object,Integer> map = appDate();
         Integer month = map.get("month");
         Integer year = map.get("year");
-        tecScoreDao.appraise(list,month,year);
+        tecScore.setGradeId(id);
+        tecScoreDao.appraise(tecScore,month,year);
     }
 
     @Override

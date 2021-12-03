@@ -16,7 +16,7 @@ public interface UserScoreService {
 
     Map queryByScoreId(User user);
 
-    void appraise(@Param("list") List<UserScore> list);
+    void appraise(Integer id,UserScore userScore);
 
     List<Map> queryScore(User user);
 

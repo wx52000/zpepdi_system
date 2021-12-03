@@ -1,11 +1,6 @@
 package com.zpepdi.feign_service.interceptor;
 
 import com.zpepdi.feign_service.tools.JwtUtils;
-import org.apache.http.Consts;
-import org.apache.tomcat.util.http.parser.Authorization;
-import org.checkerframework.checker.units.qual.A;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -25,7 +20,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         System.out.println(request.getRequestURI());
         String authorization = request.getHeader("Authorization");
         Integer userId = JwtUtils.getUserId(authorization);
-
         request.setAttribute("userId" , userId);
         return true;
     }

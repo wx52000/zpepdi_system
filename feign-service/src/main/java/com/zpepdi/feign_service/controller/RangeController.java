@@ -20,7 +20,7 @@ public class RangeController {
 
     @RequestMapping("query")
     public Result query(){
-        return  Result.ok(rangeService.query());
+        return  rangeService.query();
     }
 
     @RequestMapping("update")
@@ -30,7 +30,7 @@ public class RangeController {
 
   @RequestMapping("queryDate")
   public Result queryDate(){
-    return  Result.ok(rangeService.queryDate());
+    return rangeService.queryDate();
   }
 
   @RequestMapping("updateDate")

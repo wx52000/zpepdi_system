@@ -29,7 +29,7 @@ public class UserScoreFallbackService implements UserScoreService {
     }
 
     @Override
-    public Result appraise(List<UserScore> list) {
+    public Result appraise(Integer id, UserScore userScore) {
         return Result.build(440);
     }
 

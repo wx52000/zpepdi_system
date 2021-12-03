@@ -19,7 +19,7 @@ public interface TecScoreDao {
 
     List<Map> queryByScoreIdPast(User user);
 
-    void appraise(@Param("list") List<TecScore> list,
+    void appraise(@Param("tec") TecScore tecScore,
                   @Param("month") Integer month , @Param("year")Integer year);
 
     List<Map> queryScore(User user);

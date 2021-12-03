@@ -54,6 +54,16 @@ public class UserFallbackService implements UserService {
     }
 
     @Override
+    public Result workdayLog(Map<String, Object> map) {
+        return Result.build(440);
+    }
+
+    @Override
+    public Result workday(String date) {
+        return Result.build(440);
+    }
+
+    @Override
     public Result queryToupd(Integer id) {
         return Result.build(440);
     }
@@ -69,7 +79,7 @@ public class UserFallbackService implements UserService {
     }
 
     @Override
-    public Result queryToScore(User user) {
+    public Result queryToScore(Integer userId, Map<String, Object> map) {
         return Result.build(440);
     }
 
@@ -119,8 +129,8 @@ public class UserFallbackService implements UserService {
     }
 
     @Override
-    public Result paw(User user) {
-        return Result.build(440);
+    public Result paw(Integer userId, User user) {
+        return Result.build(400);
     }
 
     @Override

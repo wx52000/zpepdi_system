@@ -11,23 +11,12 @@ public class AppraiseDate {
   public static Map appDate() {
     Map<Object, Integer> map = new HashMap();
     Calendar calendar = Calendar.getInstance();
+    if (calendar.get(Calendar.DAY_OF_MONTH) <= 15){
+      calendar.add(Calendar.MONTH,-1);
+    }
     //获取当前年份
     map.put("year", calendar.get(Calendar.YEAR));
-    //如果当年月份不为1月
-    if (calendar.get(Calendar.MONTH) != 0) {
-      //当前日期大约评价开始日期
-      if (calendar.get(Calendar.DAY_OF_MONTH) >= setDay)
-        map.put("month", calendar.get(Calendar.MONTH) + 1);
-//      否则赋值月份为上月
-      else map.put("month", calendar.get(Calendar.MONTH));
-    } else {
-      if (calendar.get(Calendar.DAY_OF_MONTH) >= setDay)
-        map.put("month", calendar.get(Calendar.MONTH) + 1);
-      else {
-        map.put("month", 12);
-        map.replace("year", calendar.get(Calendar.YEAR) - 1);
-      }
-    }
+    map.put("month",calendar.get(Calendar.MONTH)+1);
     return map;
   }
 

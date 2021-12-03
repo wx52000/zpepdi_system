@@ -43,7 +43,7 @@ public class ProjectFallbackService implements ProjectService {
     }
 
     @Override
-    public Result queryById(Integer id) {
+    public Result queryById(Integer userId, Integer id) {
         return Result.build(440);
     }
 

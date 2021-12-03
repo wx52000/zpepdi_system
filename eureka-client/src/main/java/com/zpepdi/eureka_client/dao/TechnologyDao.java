@@ -10,6 +10,8 @@ import java.util.Map;
 @Repository
 public interface TechnologyDao {
 
+    List<Technology> queryAll();
+
     List<Technology> query(Integer id);
 
     List<Technology> queryNotUser();

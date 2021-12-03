@@ -29,6 +29,7 @@ public interface UserService {
 
     Result workdayLogById(Integer id);
 
+    Result workdayLog(Map<String,Object> map);
     List<Map> query(User user);
 
     Result workday(String date);
@@ -44,7 +45,7 @@ public interface UserService {
 
     PageInfo<Map> queryNotSelf(User user);
     //用于被打分的数据查询
-    Result queryToScore(User user);
+    Result queryToScore(Integer id, Map<String,Object> map);
 
     Result queryScoreList(User user);
 
@@ -66,7 +67,7 @@ public interface UserService {
 
     List<Integer> queryByUsername(List<ExcelData> list);
 
-    void paw(User user);
+    void paw(Integer id,User user);
 
     List<Map> queryPrincipal(Integer id);
 

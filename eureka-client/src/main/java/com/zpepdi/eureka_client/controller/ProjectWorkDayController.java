@@ -1,5 +1,6 @@
 package com.zpepdi.eureka_client.controller;
 
+import com.zpepdi.eureka_client.annotation.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -44,17 +45,18 @@ public class ProjectWorkDayController {
   public Result queryMajorWorkDay(@RequestHeader Integer id){
     return proWorkDayService.queryMajorWorkDay(id);
   }
-
+//设总分配备用工时查询
   @RequestMapping("queryBackupWorkDay")
   public Result queryBackupWorkDay(@RequestBody Map<String,String> map){
     return proWorkDayService.queryBackupWorkDay(map);
   }
 
+//  按项目查询专业卷册工时分配比例
   @RequestMapping("queryTecVolumeRatio")
-  public Result queryTecVolumeRatio(@RequestHeader Integer userId){
+  public Result queryTecVolumeRatio(@UserId Integer userId){
     return proWorkDayService.queryTecVolumeRatio(userId);
   }
-
+  //  按项目设置专业卷册工时分配比例
   @RequestMapping("setTecVolumeRatio")
   public Result setTecVolumeRatio(@RequestBody List<Map<String,Object>> list){
     return proWorkDayService.setTecVolumeRatio(list);
@@ -73,6 +75,11 @@ public class ProjectWorkDayController {
   @RequestMapping("setTecWorkDay")
   public Result setTecWorkDay(@RequestBody Map map){
     return proWorkDayService.setTecWorkDay(map);
+  }
+
+  @RequestMapping("setManageWorkday")
+  public Result setManageWorkday(@UserId Integer id, @RequestBody Map map){
+    return proWorkDayService.setManageWorkday(id,map);
   }
 
   @RequestMapping("setBackupWorkDay")

@@ -1,5 +1,6 @@
 package com.zpepdi.feign_service.controller;
 
+import com.zpepdi.feign_service.annotation.UserId;
 import com.zpepdi.feign_service.entity.Project;
 import com.zpepdi.feign_service.entity.Technology;
 import com.zpepdi.feign_service.result.Result;
@@ -31,7 +32,7 @@ public class TechnologyController {
     }
 
     @RequestMapping("evaluate")
-    public Result evaluate(@RequestHeader Integer id) {
+    public Result evaluate(@UserId Integer id) {
       return technologyService.evaluate(id);
     }
 

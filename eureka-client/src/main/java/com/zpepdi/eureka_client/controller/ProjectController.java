@@ -1,5 +1,6 @@
 package com.zpepdi.eureka_client.controller;
 
+import com.zpepdi.eureka_client.annotation.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -63,17 +64,28 @@ public class ProjectController {
   }
 
     @RequestMapping("queryById")
-    public Result queryById(@RequestHeader Integer id){
-        return Result.ok(projectService.queryById(id));
+    public Result queryById(@UserId Integer userId, @RequestHeader Integer id){
+        return Result.ok(projectService.queryById(userId,id));
     }
-
+//    备用工时发放页面所用，查询相关人员，与该主设人所在专业的备用工时
     @RequestMapping("queryHumanToBackup")
-    public Result queryHumanToBackup(@RequestHeader("userId") Integer id,@RequestBody Map<String,Object> map){
+    public Result queryHumanToBackup(@UserId Integer id,@RequestBody Map<String,Object> map){
         return projectService.queryHumanToBackup(id,map);
     }
 
+    @RequestMapping("distributeTecWorkday")
+    public Result distributeTecWorkday(@UserId Integer id,@RequestBody Map<String,Object> map){
+        return projectService.distributeTecWorkday(id,map);
+    }
+
+    @RequestMapping("setManageByMajor")
+    public Result setManageByMajor(@UserId Integer id,@RequestBody Map<String,Object> map){
+        return projectService.setManageByMajor(id,map);
+    }
+
+//发放备用工时
     @RequestMapping("setWorkdayBackup")
-    public Result setWorkdayBackup(@RequestHeader("userId") Integer id,@RequestHeader("backupDate") String date,
+    public Result setWorkdayBackup(@UserId Integer id,@RequestHeader("backupDate") String date,
                                    @RequestBody List<Map<String, Object>> list){
         return projectService.setWorkdayBackup(id,list,date);
     }
@@ -138,13 +150,14 @@ public class ProjectController {
       return projectService.queryPrincipal(id);
     }
 
+//    时间段内与个人相关的所有卷册
     @RequestMapping("homepageVolume")
-    public Result homepageVolume(@RequestHeader Integer userId, @RequestBody Map<String,String> map){
+    public Result homepageVolume(@UserId Integer userId, @RequestBody Map<String,String> map){
       return projectService.homepageVolume(userId,map);
     }
-
+    //    时间段内与个人相关的所有项目
     @RequestMapping("homepageProject")
-    public Result homepageProject(@RequestHeader Integer userId){
+    public Result homepageProject(@UserId Integer userId){
         return projectService.homepageProject(userId);
     }
 }
