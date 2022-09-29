@@ -695,7 +695,7 @@
     SELECT DISTINCT
       p.id,
       p.`number` ,
-      p.NAME AS projectName,
+      p.name AS projectName,
       p.director,
       p.general,
       p.state,
@@ -3230,10 +3230,12 @@
         FROM
         project p,
         workday_tec t,
+        workday_tec_principal tp,
         volume v,
         ( SELECT id, `name`, username FROM `user` GROUP BY `name` HAVING count( id ) > 1 ) AS u
         WHERE
-        FIND_IN_SET( #{id}, t.principal )
+        t.id = tp.workday_tec_id
+        and tp.user_id = #{id}
         AND t.project_id = p.id
         AND v.project_id = t.project_id
         AND v.tec = t.volume_tec
@@ -3450,11 +3452,13 @@
     </select>
     <select id="declareLog" resultMap="declareLog">
         select
-        project_id, volume_tec, #{map.date} as date
+        project_id, volume_tec, #{map.date} as `date`
         from
-        workday_tec
+        workday_tec t,
+        workday_tec_principal p
         where  project_id = #{map.id}
-        and FIND_IN_SET(#{userId},principal)
+        and p.workday_tec_id = t.id
+        and p.user_id = #{userId}
     </select>
     <select id="notSubmitByAdmin" resultType="java.util.Map">
         SELECT
@@ -3610,11 +3614,13 @@
             ) AS tab,
             `user` u,
             `user` u1,
-            workday_tec w
+            workday_tec w,
+            workday_tec_principal tp
         WHERE
             u.id = #{id}
           AND u.did = u1.did
-          AND FIND_IN_SET( u1.id, w.principal )
+          and tp.workday_tec_id = w.id
+          and tp.user_id = u1.id
           AND tab.tec = w.volume_tec
           AND tab.id = w.project_id
     </select>
@@ -3799,11 +3805,13 @@
                         FROM
                             project p,
                             volume v,
-                            workday_tec t
+                            workday_tec t,
+                            workday_tec_principal tp
                         WHERE
                             p.id = v.project_id
                           AND p.id = #{id}
-                          AND FIND_IN_SET( #{userId}, t.principal )
+                          and t.id = tp.workday_tec_id
+                          and tp.user_id = #{userId}
                           AND v.tec = t.volume_tec
                         GROUP BY
                             v.tec

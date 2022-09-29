@@ -824,3 +824,293 @@
 2022-09-29 14:38:41.753 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
 2022-09-29 14:43:41.763 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
 2022-09-29 14:48:41.769 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 14:53:41.784 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 14:58:41.797 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:03:41.811 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:08:41.821 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:13:41.825 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:18:41.832 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:23:41.847 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:28:41.860 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:33:41.871 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:38:41.875 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:43:41.889 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:48:41.892 [AsyncResolver-bootstrap-executor-0] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:50:14.818 [Thread-89] INFO  o.s.c.n.e.serviceregistry.EurekaServiceRegistry - Unregistering application EUREKA-CLIENT with eureka with status DOWN
+2022-09-29 15:50:14.821 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002: registering service...
+2022-09-29 15:50:14.845 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002 - registration status: 204
+2022-09-29 15:50:15.543 [Thread-89] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Shutting down ExecutorService 'taskExecutor'
+2022-09-29 15:50:15.558 [Thread-89] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-0} closing ...
+2022-09-29 15:50:15.565 [Thread-89] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-0} closing ...
+2022-09-29 15:50:15.569 [Thread-89] INFO  com.netflix.discovery.DiscoveryClient - Shutting down DiscoveryClient ...
+2022-09-29 15:50:18.583 [Thread-89] INFO  com.netflix.discovery.DiscoveryClient - Unregistering ...
+2022-09-29 15:50:18.600 [Thread-89] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002 - deregister  status: 200
+2022-09-29 15:50:18.608 [Thread-89] INFO  com.netflix.discovery.DiscoveryClient - Completed shut down of DiscoveryClient
+2022-09-29 15:50:22.312 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - No active profile set, falling back to default profiles: default
+2022-09-29 15:50:25.385 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode!
+2022-09-29 15:50:25.385 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2022-09-29 15:50:25.489 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 104ms. Found 0 Redis repository interfaces.
+2022-09-29 15:50:26.534 [restartedMain] INFO  o.springframework.cloud.context.scope.GenericScope - BeanFactory id=4af8bcfe-8d0d-37bf-b77c-1e281ba5c176
+2022-09-29 15:50:27.599 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@79ccd2d2' of type [org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:27.628 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:27.631 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidConfig' of type [com.zpepdi.eureka_client.config.DruidConfig$$EnhancerBySpringCGLIB$$a88fda50] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:27.647 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatInterceptor' of type [com.alibaba.druid.support.spring.stat.DruidStatInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:27.654 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatPointcut' of type [org.springframework.aop.support.JdkRegexpMethodPointcut] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:27.656 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatAdvisor' of type [org.springframework.aop.support.DefaultPointcutAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:43.538 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.1.6.Final
+2022-09-29 15:50:43.787 [restartedMain] INFO  o.s.boot.devtools.restart.ChangeableUrls - The Class-Path manifest attribute in G:\java_tools\apache-maven-3.6.3\repo\com\sun\xml\bind\jaxb-core\2.3.0.1\jaxb-core-2.3.0.1.jar referenced one or more files that do not exist: file:/G:/java_tools/apache-maven-3.6.3/repo/com/sun/xml/bind/jaxb-core/2.3.0.1/jaxb-api.jar
+2022-09-29 15:50:43.789 [restartedMain] INFO  o.s.boot.devtools.restart.ChangeableUrls - The Class-Path manifest attribute in G:\java_tools\apache-maven-3.6.3\repo\com\sun\xml\bind\jaxb-impl\2.3.0.1\jaxb-impl-2.3.0.1.jar referenced one or more files that do not exist: file:/G:/java_tools/apache-maven-3.6.3/repo/com/sun/xml/bind/jaxb-impl/2.3.0.1/jaxb-core.jar
+2022-09-29 15:50:43.797 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2022-09-29 15:50:50.142 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - No active profile set, falling back to default profiles: default
+2022-09-29 15:50:54.731 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode!
+2022-09-29 15:50:54.735 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2022-09-29 15:50:54.842 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 82ms. Found 0 Redis repository interfaces.
+2022-09-29 15:50:55.671 [restartedMain] INFO  o.springframework.cloud.context.scope.GenericScope - BeanFactory id=4af8bcfe-8d0d-37bf-b77c-1e281ba5c176
+2022-09-29 15:50:57.062 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@6b4e0f35' of type [org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:57.118 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:57.139 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidConfig' of type [com.zpepdi.eureka_client.config.DruidConfig$$EnhancerBySpringCGLIB$$95f7a5fc] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:57.525 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatInterceptor' of type [com.alibaba.druid.support.spring.stat.DruidStatInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:57.530 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatPointcut' of type [org.springframework.aop.support.JdkRegexpMethodPointcut] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:50:57.533 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatAdvisor' of type [org.springframework.aop.support.DefaultPointcutAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:51:02.810 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 9002 (http)
+2022-09-29 15:51:03.215 [restartedMain] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-9002"]
+2022-09-29 15:51:03.217 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2022-09-29 15:51:03.217 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.41]
+2022-09-29 15:51:04.444 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2022-09-29 15:51:04.445 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 14221 ms
+2022-09-29 15:51:04.817 [restartedMain] INFO  com.netflix.config.sources.URLConfigurationSource - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2022-09-29 15:51:04.847 [restartedMain] INFO  com.netflix.config.DynamicPropertyFactory - DynamicPropertyFactory is initialized with configuration sources: com.netflix.config.ConcurrentCompositeConfiguration@3bb51205
+2022-09-29 15:51:08.479 [restartedMain] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Initializing ExecutorService
+2022-09-29 15:51:08.481 [restartedMain] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Initializing ExecutorService 'taskExecutor'
+2022-09-29 15:51:08.501 [restartedMain] INFO  com.netflix.config.sources.URLConfigurationSource - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2022-09-29 15:51:11.515 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 2 endpoint(s) beneath base path '/actuator'
+2022-09-29 15:51:11.548 [restartedMain] INFO  o.s.security.web.DefaultSecurityFilterChain - Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2c3e3908, org.springframework.security.web.context.SecurityContextPersistenceFilter@6c4465a5, org.springframework.security.web.header.HeaderWriterFilter@236a65fa, org.springframework.web.filter.CorsFilter@65301cc2, org.springframework.security.web.authentication.logout.LogoutFilter@67b5815b, org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter@5915d0bd, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@58cc2d89, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@8716d14, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@17aa790, org.springframework.security.web.session.SessionManagementFilter@66c747a2, org.springframework.security.web.access.ExceptionTranslationFilter@3007415c, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@5b91defd]
+2022-09-29 15:51:11.816 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2022-09-29 15:51:12.631 [restartedMain] INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses Jersey
+2022-09-29 15:51:12.825 [restartedMain] INFO  o.s.cloud.netflix.eureka.InstanceInfoFactory - Setting initial instance status as: STARTING
+2022-09-29 15:51:12.953 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2022-09-29 15:51:13.585 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using JSON encoding codec LegacyJacksonJson
+2022-09-29 15:51:13.585 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using JSON decoding codec LegacyJacksonJson
+2022-09-29 15:51:13.709 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using XML encoding codec XStreamXml
+2022-09-29 15:51:13.709 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using XML decoding codec XStreamXml
+2022-09-29 15:51:13.898 [restartedMain] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:51:14.483 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Disable delta property : false
+2022-09-29 15:51:14.483 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2022-09-29 15:51:14.483 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2022-09-29 15:51:14.484 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Application is null : false
+2022-09-29 15:51:14.484 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2022-09-29 15:51:14.484 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Application version is -1: true
+2022-09-29 15:51:14.484 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2022-09-29 15:51:14.648 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - The response status is 200
+2022-09-29 15:51:14.650 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 30
+2022-09-29 15:51:14.652 [restartedMain] INFO  com.netflix.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2022-09-29 15:51:14.657 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1664437874655 with initial instances count: 3
+2022-09-29 15:51:14.666 [restartedMain] INFO  o.s.c.n.e.serviceregistry.EurekaServiceRegistry - Registering application EUREKA-CLIENT with eureka with status UP
+2022-09-29 15:51:14.667 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1664437874667, current=UP, previous=STARTING]
+2022-09-29 15:51:14.669 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002: registering service...
+2022-09-29 15:51:14.671 [restartedMain] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-9002"]
+2022-09-29 15:51:14.725 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2022-09-29 15:51:14.725 [restartedMain] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2022-09-29 15:51:14.735 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002 - registration status: 204
+2022-09-29 15:51:14.741 [restartedMain] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 16 ms
+2022-09-29 15:51:14.742 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 9002 (http) with context path ''
+2022-09-29 15:51:14.743 [restartedMain] INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 9002
+2022-09-29 15:51:15.570 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - Started EurekaClientApplication in 36.217 seconds (JVM running for 42.792)
+2022-09-29 15:51:17.374 [RMI TCP Connection(1)-2.0.1.17] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-1} inited
+2022-09-29 15:51:17.710 [RMI TCP Connection(1)-2.0.1.17] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-2} inited
+2022-09-29 15:54:02.590 [Thread-47] INFO  o.s.c.n.e.serviceregistry.EurekaServiceRegistry - Unregistering application EUREKA-CLIENT with eureka with status DOWN
+2022-09-29 15:54:02.591 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002: registering service...
+2022-09-29 15:54:02.615 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002 - registration status: 204
+2022-09-29 15:54:04.184 [Thread-47] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Shutting down ExecutorService 'taskExecutor'
+2022-09-29 15:54:04.340 [Thread-47] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-2} closing ...
+2022-09-29 15:54:04.344 [Thread-47] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-2} closed
+2022-09-29 15:54:04.350 [Thread-47] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-1} closing ...
+2022-09-29 15:54:04.358 [Thread-47] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-1} closed
+2022-09-29 15:54:04.360 [Thread-47] INFO  com.netflix.discovery.DiscoveryClient - Shutting down DiscoveryClient ...
+2022-09-29 15:54:07.376 [Thread-47] INFO  com.netflix.discovery.DiscoveryClient - Unregistering ...
+2022-09-29 15:54:07.393 [Thread-47] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002 - deregister  status: 200
+2022-09-29 15:54:07.410 [Thread-47] INFO  com.netflix.discovery.DiscoveryClient - Completed shut down of DiscoveryClient
+2022-09-29 15:54:10.526 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - No active profile set, falling back to default profiles: default
+2022-09-29 15:54:11.286 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode!
+2022-09-29 15:54:11.286 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2022-09-29 15:54:11.323 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 37ms. Found 0 Redis repository interfaces.
+2022-09-29 15:54:11.434 [restartedMain] INFO  o.springframework.cloud.context.scope.GenericScope - BeanFactory id=4af8bcfe-8d0d-37bf-b77c-1e281ba5c176
+2022-09-29 15:54:11.523 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@1fe86836' of type [org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:54:11.528 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:54:11.530 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidConfig' of type [com.zpepdi.eureka_client.config.DruidConfig$$EnhancerBySpringCGLIB$$95f7a5fc] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:54:11.535 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatInterceptor' of type [com.alibaba.druid.support.spring.stat.DruidStatInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:54:11.537 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatPointcut' of type [org.springframework.aop.support.JdkRegexpMethodPointcut] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:54:11.537 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatAdvisor' of type [org.springframework.aop.support.DefaultPointcutAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:54:11.754 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 9002 (http)
+2022-09-29 15:54:11.754 [restartedMain] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-9002"]
+2022-09-29 15:54:11.755 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2022-09-29 15:54:11.755 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.41]
+2022-09-29 15:54:11.788 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2022-09-29 15:54:11.788 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1254 ms
+2022-09-29 15:54:13.719 [restartedMain] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Initializing ExecutorService
+2022-09-29 15:54:13.719 [restartedMain] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Initializing ExecutorService 'taskExecutor'
+2022-09-29 15:54:13.735 [restartedMain] INFO  com.netflix.config.sources.URLConfigurationSource - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2022-09-29 15:54:15.133 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 2 endpoint(s) beneath base path '/actuator'
+2022-09-29 15:54:15.157 [restartedMain] INFO  o.s.security.web.DefaultSecurityFilterChain - Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@77ec5592, org.springframework.security.web.context.SecurityContextPersistenceFilter@1752530b, org.springframework.security.web.header.HeaderWriterFilter@779456e2, org.springframework.web.filter.CorsFilter@7f9a0a6f, org.springframework.security.web.authentication.logout.LogoutFilter@748b4a58, org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter@27dd5775, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@3d88d95e, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@68febb4b, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@6a4345ac, org.springframework.security.web.session.SessionManagementFilter@8222024, org.springframework.security.web.access.ExceptionTranslationFilter@38f25057, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@13fbc5ee]
+2022-09-29 15:54:15.366 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2022-09-29 15:54:16.947 [restartedMain] INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses Jersey
+2022-09-29 15:54:17.061 [restartedMain] INFO  o.s.cloud.netflix.eureka.InstanceInfoFactory - Setting initial instance status as: STARTING
+2022-09-29 15:54:17.065 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2022-09-29 15:54:17.075 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using JSON encoding codec LegacyJacksonJson
+2022-09-29 15:54:17.075 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using JSON decoding codec LegacyJacksonJson
+2022-09-29 15:54:17.076 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using XML encoding codec XStreamXml
+2022-09-29 15:54:17.076 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using XML decoding codec XStreamXml
+2022-09-29 15:54:17.160 [restartedMain] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:54:17.161 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Disable delta property : false
+2022-09-29 15:54:17.161 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2022-09-29 15:54:17.161 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2022-09-29 15:54:17.161 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Application is null : false
+2022-09-29 15:54:17.161 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2022-09-29 15:54:17.161 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Application version is -1: true
+2022-09-29 15:54:17.161 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2022-09-29 15:54:17.167 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - The response status is 200
+2022-09-29 15:54:17.168 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 30
+2022-09-29 15:54:17.169 [restartedMain] INFO  com.netflix.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2022-09-29 15:54:17.169 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1664438057169 with initial instances count: 4
+2022-09-29 15:54:17.178 [restartedMain] INFO  o.s.c.n.e.serviceregistry.EurekaServiceRegistry - Registering application EUREKA-CLIENT with eureka with status UP
+2022-09-29 15:54:17.178 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1664438057178, current=UP, previous=STARTING]
+2022-09-29 15:54:17.178 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002: registering service...
+2022-09-29 15:54:17.179 [restartedMain] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-9002"]
+2022-09-29 15:54:17.186 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2022-09-29 15:54:17.186 [restartedMain] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2022-09-29 15:54:17.195 [restartedMain] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 9 ms
+2022-09-29 15:54:17.195 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 9002 (http) with context path ''
+2022-09-29 15:54:17.196 [restartedMain] INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 9002
+2022-09-29 15:54:17.199 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002 - registration status: 204
+2022-09-29 15:54:18.184 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - Started EurekaClientApplication in 10.276 seconds (JVM running for 225.405)
+2022-09-29 15:54:18.192 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2022-09-29 15:55:19.971 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.1.6.Final
+2022-09-29 15:55:20.055 [restartedMain] INFO  o.s.boot.devtools.restart.ChangeableUrls - The Class-Path manifest attribute in G:\java_tools\apache-maven-3.6.3\repo\com\sun\xml\bind\jaxb-core\2.3.0.1\jaxb-core-2.3.0.1.jar referenced one or more files that do not exist: file:/G:/java_tools/apache-maven-3.6.3/repo/com/sun/xml/bind/jaxb-core/2.3.0.1/jaxb-api.jar
+2022-09-29 15:55:20.056 [restartedMain] INFO  o.s.boot.devtools.restart.ChangeableUrls - The Class-Path manifest attribute in G:\java_tools\apache-maven-3.6.3\repo\com\sun\xml\bind\jaxb-impl\2.3.0.1\jaxb-impl-2.3.0.1.jar referenced one or more files that do not exist: file:/G:/java_tools/apache-maven-3.6.3/repo/com/sun/xml/bind/jaxb-impl/2.3.0.1/jaxb-core.jar
+2022-09-29 15:55:20.056 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2022-09-29 15:55:22.617 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - No active profile set, falling back to default profiles: default
+2022-09-29 15:55:24.703 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode!
+2022-09-29 15:55:24.705 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2022-09-29 15:55:24.770 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 49ms. Found 0 Redis repository interfaces.
+2022-09-29 15:55:25.137 [restartedMain] INFO  o.springframework.cloud.context.scope.GenericScope - BeanFactory id=4af8bcfe-8d0d-37bf-b77c-1e281ba5c176
+2022-09-29 15:55:25.638 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@6e6acc1' of type [org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:55:25.648 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:55:25.656 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidConfig' of type [com.zpepdi.eureka_client.config.DruidConfig$$EnhancerBySpringCGLIB$$98ed346d] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:55:25.671 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatInterceptor' of type [com.alibaba.druid.support.spring.stat.DruidStatInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:55:25.673 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatPointcut' of type [org.springframework.aop.support.JdkRegexpMethodPointcut] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:55:25.675 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatAdvisor' of type [org.springframework.aop.support.DefaultPointcutAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:55:26.278 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 9002 (http)
+2022-09-29 15:55:26.289 [restartedMain] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-9002"]
+2022-09-29 15:55:26.289 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2022-09-29 15:55:26.290 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.41]
+2022-09-29 15:55:26.443 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2022-09-29 15:55:26.443 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3774 ms
+2022-09-29 15:55:26.606 [restartedMain] INFO  com.netflix.config.sources.URLConfigurationSource - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2022-09-29 15:55:26.615 [restartedMain] INFO  com.netflix.config.DynamicPropertyFactory - DynamicPropertyFactory is initialized with configuration sources: com.netflix.config.ConcurrentCompositeConfiguration@214f657f
+2022-09-29 15:55:29.789 [restartedMain] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Initializing ExecutorService
+2022-09-29 15:55:29.791 [restartedMain] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Initializing ExecutorService 'taskExecutor'
+2022-09-29 15:55:29.823 [restartedMain] INFO  com.netflix.config.sources.URLConfigurationSource - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2022-09-29 15:55:32.355 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 2 endpoint(s) beneath base path '/actuator'
+2022-09-29 15:55:32.391 [restartedMain] INFO  o.s.security.web.DefaultSecurityFilterChain - Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@6d59428d, org.springframework.security.web.context.SecurityContextPersistenceFilter@5cb11d23, org.springframework.security.web.header.HeaderWriterFilter@7e931db2, org.springframework.web.filter.CorsFilter@3a858df0, org.springframework.security.web.authentication.logout.LogoutFilter@56205676, org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter@22e22f08, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@44912c7c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4df36731, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@783059e7, org.springframework.security.web.session.SessionManagementFilter@2e6460e8, org.springframework.security.web.access.ExceptionTranslationFilter@2cd37e68, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@5400573d]
+2022-09-29 15:55:32.658 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2022-09-29 15:55:33.535 [restartedMain] INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses Jersey
+2022-09-29 15:55:33.727 [restartedMain] INFO  o.s.cloud.netflix.eureka.InstanceInfoFactory - Setting initial instance status as: STARTING
+2022-09-29 15:55:33.757 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2022-09-29 15:55:34.380 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using JSON encoding codec LegacyJacksonJson
+2022-09-29 15:55:34.380 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using JSON decoding codec LegacyJacksonJson
+2022-09-29 15:55:34.501 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using XML encoding codec XStreamXml
+2022-09-29 15:55:34.501 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using XML decoding codec XStreamXml
+2022-09-29 15:55:34.878 [restartedMain] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:55:35.621 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Disable delta property : false
+2022-09-29 15:55:35.621 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2022-09-29 15:55:35.622 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2022-09-29 15:55:35.622 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Application is null : false
+2022-09-29 15:55:35.622 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2022-09-29 15:55:35.622 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Application version is -1: true
+2022-09-29 15:55:35.622 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2022-09-29 15:55:35.881 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - The response status is 200
+2022-09-29 15:55:35.886 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 30
+2022-09-29 15:55:35.889 [restartedMain] INFO  com.netflix.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2022-09-29 15:55:35.894 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1664438135892 with initial instances count: 4
+2022-09-29 15:55:35.912 [restartedMain] INFO  o.s.c.n.e.serviceregistry.EurekaServiceRegistry - Registering application EUREKA-CLIENT with eureka with status UP
+2022-09-29 15:55:35.913 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1664438135913, current=UP, previous=STARTING]
+2022-09-29 15:55:35.915 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002: registering service...
+2022-09-29 15:55:35.920 [restartedMain] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-9002"]
+2022-09-29 15:55:35.971 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2022-09-29 15:55:35.971 [restartedMain] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2022-09-29 15:55:35.991 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002 - registration status: 204
+2022-09-29 15:55:35.997 [restartedMain] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 26 ms
+2022-09-29 15:55:35.999 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 9002 (http) with context path ''
+2022-09-29 15:55:36.000 [restartedMain] INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 9002
+2022-09-29 15:55:37.082 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - Started EurekaClientApplication in 19.544 seconds (JVM running for 24.004)
+2022-09-29 15:55:38.431 [RMI TCP Connection(2)-2.0.1.17] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-1} inited
+2022-09-29 15:55:38.561 [RMI TCP Connection(2)-2.0.1.17] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-2} inited
+2022-09-29 15:57:41.810 [Thread-37] INFO  o.s.c.n.e.serviceregistry.EurekaServiceRegistry - Unregistering application EUREKA-CLIENT with eureka with status DOWN
+2022-09-29 15:57:41.814 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002: registering service...
+2022-09-29 15:57:41.830 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002 - registration status: 204
+2022-09-29 15:57:43.728 [Thread-37] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Shutting down ExecutorService 'taskExecutor'
+2022-09-29 15:57:43.903 [Thread-37] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-2} closing ...
+2022-09-29 15:57:43.907 [Thread-37] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-2} closed
+2022-09-29 15:57:43.913 [Thread-37] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-1} closing ...
+2022-09-29 15:57:43.922 [Thread-37] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-1} closed
+2022-09-29 15:57:43.924 [Thread-37] INFO  com.netflix.discovery.DiscoveryClient - Shutting down DiscoveryClient ...
+2022-09-29 15:57:46.935 [Thread-37] INFO  com.netflix.discovery.DiscoveryClient - Unregistering ...
+2022-09-29 15:57:46.949 [Thread-37] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9002 - deregister  status: 200
+2022-09-29 15:57:46.971 [Thread-37] INFO  com.netflix.discovery.DiscoveryClient - Completed shut down of DiscoveryClient
+2022-09-29 15:57:53.527 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - No active profile set, falling back to default profiles: default
+2022-09-29 15:58:05.979 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - No active profile set, falling back to default profiles: default
+2022-09-29 15:58:07.221 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode!
+2022-09-29 15:58:07.222 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2022-09-29 15:58:07.261 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 39ms. Found 0 Redis repository interfaces.
+2022-09-29 15:58:07.393 [restartedMain] INFO  o.springframework.cloud.context.scope.GenericScope - BeanFactory id=4af8bcfe-8d0d-37bf-b77c-1e281ba5c176
+2022-09-29 15:58:07.490 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@449169f3' of type [org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:58:07.492 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:58:07.494 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidConfig' of type [com.zpepdi.eureka_client.config.DruidConfig$$EnhancerBySpringCGLIB$$98ed346d] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:58:07.500 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatInterceptor' of type [com.alibaba.druid.support.spring.stat.DruidStatInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:58:07.502 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatPointcut' of type [org.springframework.aop.support.JdkRegexpMethodPointcut] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:58:07.503 [restartedMain] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'druidStatAdvisor' of type [org.springframework.aop.support.DefaultPointcutAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2022-09-29 15:58:07.788 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port(s): 9001 (http)
+2022-09-29 15:58:07.788 [restartedMain] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-9001"]
+2022-09-29 15:58:07.789 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2022-09-29 15:58:07.789 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.41]
+2022-09-29 15:58:07.880 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2022-09-29 15:58:07.880 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1893 ms
+2022-09-29 15:58:13.900 [restartedMain] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Initializing ExecutorService
+2022-09-29 15:58:13.900 [restartedMain] INFO  o.s.scheduling.concurrent.ThreadPoolTaskExecutor - Initializing ExecutorService 'taskExecutor'
+2022-09-29 15:58:13.937 [restartedMain] INFO  com.netflix.config.sources.URLConfigurationSource - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+2022-09-29 15:58:18.973 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 2 endpoint(s) beneath base path '/actuator'
+2022-09-29 15:58:19.030 [restartedMain] INFO  o.s.security.web.DefaultSecurityFilterChain - Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4b3eb1d7, org.springframework.security.web.context.SecurityContextPersistenceFilter@28cd936a, org.springframework.security.web.header.HeaderWriterFilter@26d91b37, org.springframework.web.filter.CorsFilter@447b35dc, org.springframework.security.web.authentication.logout.LogoutFilter@799e4c9f, org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter@231ccaeb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5731ad44, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@395f0436, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1182c0f3, org.springframework.security.web.session.SessionManagementFilter@18838a90, org.springframework.security.web.access.ExceptionTranslationFilter@4187c08f, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@5ac683e]
+2022-09-29 15:58:19.579 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2022-09-29 15:58:21.460 [restartedMain] INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses Jersey
+2022-09-29 15:58:21.797 [restartedMain] INFO  o.s.cloud.netflix.eureka.InstanceInfoFactory - Setting initial instance status as: STARTING
+2022-09-29 15:58:21.803 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2022-09-29 15:58:21.807 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using JSON encoding codec LegacyJacksonJson
+2022-09-29 15:58:21.807 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using JSON decoding codec LegacyJacksonJson
+2022-09-29 15:58:21.807 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using XML encoding codec XStreamXml
+2022-09-29 15:58:21.808 [restartedMain] INFO  c.n.discovery.provider.DiscoveryJerseyProvider - Using XML decoding codec XStreamXml
+2022-09-29 15:58:21.980 [restartedMain] INFO  c.n.d.shared.resolver.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2022-09-29 15:58:21.980 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Disable delta property : false
+2022-09-29 15:58:21.981 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2022-09-29 15:58:21.981 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2022-09-29 15:58:21.981 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Application is null : false
+2022-09-29 15:58:21.981 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2022-09-29 15:58:21.981 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Application version is -1: true
+2022-09-29 15:58:21.981 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2022-09-29 15:58:21.993 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - The response status is 200
+2022-09-29 15:58:21.995 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 30
+2022-09-29 15:58:21.996 [restartedMain] INFO  com.netflix.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2022-09-29 15:58:21.999 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1664438301999 with initial instances count: 3
+2022-09-29 15:58:22.023 [restartedMain] INFO  o.s.c.n.e.serviceregistry.EurekaServiceRegistry - Registering application EUREKA-CLIENT with eureka with status UP
+2022-09-29 15:58:22.024 [restartedMain] INFO  com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1664438302024, current=UP, previous=STARTING]
+2022-09-29 15:58:22.025 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9001: registering service...
+2022-09-29 15:58:22.028 [restartedMain] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-9001"]
+2022-09-29 15:58:22.037 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2022-09-29 15:58:22.037 [restartedMain] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2022-09-29 15:58:22.049 [DiscoveryClient-InstanceInfoReplicator-0] INFO  com.netflix.discovery.DiscoveryClient - DiscoveryClient_EUREKA-CLIENT/windows10.microdone.cn:eureka-client:9001 - registration status: 204
+2022-09-29 15:58:22.060 [restartedMain] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 23 ms
+2022-09-29 15:58:22.061 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port(s): 9001 (http) with context path ''
+2022-09-29 15:58:22.064 [restartedMain] INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 9001
+2022-09-29 15:58:27.183 [restartedMain] INFO  com.zpepdi.eureka_client.EurekaClientApplication - Started EurekaClientApplication in 25.554 seconds (JVM running for 194.105)
+2022-09-29 15:58:27.193 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2022-09-29 16:00:00.076 [DailyAsync-2] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-3} inited
+2022-09-29 16:00:03.255 [Thread-74] INFO  com.alibaba.druid.pool.DruidDataSource - {dataSource-4} inited

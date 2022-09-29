@@ -77,7 +77,7 @@ security:
       check-token-access: http://localhost:9100/oauth/check_token
 
 server:
-  port: 9002
+  port: 9001
   servlet:
     encoding:
       enabled: true
