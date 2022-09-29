@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.DataTransmissionDao">
+    <insert id="insertData">
+        INSERT INTO `volume` (
+            `project_id`,
+            `number`,
+            `name`,
+            `rollId`,
+            `tec`,
+            `dep`,
+            `state`,
+            `principal`,
+            `chief`,
+            `designer`,
+            `checker`,
+            `headman`,
+            `planned_start_date`,
+            `start_date`,
+            `planned_publication_date`,
+            `actual_publication_date`,
+            `planned_shot_date`,
+            `shot_date`,
+            `proofreading_date`,
+            `complete_time`,
+            `formId`,
+            `actual_principal`,
+            `tips`,
+                `alive`
+        )
+        VALUES <foreach collection="list" item="item" separator=",">
+        (#{id}, #{item.RollCode}, #{item.RollName}, #{item.RollID}, #{item.SpecialtyName},
+         #{item.DelongDeptName},#{item.state}, #{item.MasterDesignerName}, #{item.MasterEngineerName},
+         #{item.RollOwnerName}, #{item.checker}, #{item.headman}, #{item.PlanStartDate},
+         #{item.FactStartDate}, #{item.PlanToPublishDate}, #{item.ToPublishDate},
+         #{item.PlanDesignedDate}, #{item.FactDesignedDate}, #{item.MutualVerifyDate},
+         #{item.FactOutOfCollegeDate}, 85, #{item.principal},0, 1)
+             </foreach>
+         on duplicate key update
+        `name` = values(`name`),
+        `state` = values(`state`),
+        `principal` = values(`principal`),
+        `chief` = values(`chief`),
+        `designer` = values(`designer`),
+        `checker` = values(`checker`),
+        `headman` = values(`headman`),
+        `planned_start_date` = values(`planned_start_date`),
+        `start_date` = values(`start_date`),
+        `actual_publication_date` = values(`actual_publication_date`),
+        `planned_shot_date` = values(`planned_shot_date`),
+        `shot_date` = values(`shot_date`),
+        `proofreading_date` = values(`proofreading_date`),
+        `complete_time` = values(`complete_time`),
+        `actual_principal` = values(`actual_principal`),
+        `tips` = 1,
+        `alive` = 1
+    </insert>
+    <insert id="insertIncome">
+        <foreach collection="list" item="item" separator=";" >
+        INSERT ignore INTO income_information (
+            <trim suffixOverrides=",">
+            <if test="item.MarketProjectCode != null">
+            project_code,
+            </if>
+            project_name,
+            project_id,
+            contract_id,
+                <if test="item.ContractValue != null">
+            contract_value,
+                </if>
+                <if test="item.ContractValueOfEstimate != null">
+            contract_value_estimate,
+                </if>
+            operating_income_ratio_id,
+            <if test="item.ActivityInstanceId != null">
+            activity_instance_id,
+            </if>
+            process_instance_id,
+            <if test="item.PartName != null">
+            part_name,
+            </if>
+            <if test="item.money != null">
+            money,
+            </if>
+            <if test="item.depMoney != null">
+            dep_money,
+            </if>
+            <if test="item.moneyRatio != null">
+            money_ratio,
+            </if>
+            <if test="item.value != null">
+            `value`,
+            </if>
+            <if test="item.depValue != null">
+            dep_value,
+            </if>
+            <if test="item.valueRatio != null">
+            value_ratio,
+            </if>
+                `state`
+            </trim>
+        )
+        values(
+            <trim suffixOverrides=",">
+            <if test="item.MarketProjectCode != null">
+                   #{item.MarketProjectCode},
+            </if>
+                #{item.MarketProjectName},
+                #{item.MarketProjectID},
+                #{item.ContractID},
+                <if test="item.ContractValue != null">
+                    #{item.ContractValue},
+                </if>
+                <if test="item.ContractValueOfEstimate != null">
+                    #{item.ContractValueOfEstimate},
+                </if>
+                #{item.OperatingIncomeRatioID},
+            <if test="item.ActivityInstanceId != null">
+                #{item.ActivityInstanceId},
+            </if>
+                #{item.processInstanceId},
+            <if test="item.PartName != null">
+                #{item.PartName},
+            </if>
+            <if test="item.money != null">
+                #{item.money},
+            </if>
+            <if test="item.depMoney != null">
+                #{item.depMoney},
+            </if>
+            <if test="item.moneyRatio != null">
+                #{item.moneyRatio},
+            </if>
+            <if test="item.value != null">
+                #{item.value},
+            </if>
+            <if test="item.depValue != null">
+                #{item.depValue},
+            </if>
+            <if test="item.valueRatio != null">
+                #{item.valueRatio},
+            </if>
+                1
+            </trim>
+               )
+        </foreach>
+        on duplicate key update
+        `state` = 1
+    </insert>
+    <update id="setAlive">
+        UPDATE volume v,
+            incomplete_project p
+        SET v.alive = 0
+        WHERE
+            p.id = v.project_id
+          and p.spider = 0
+          and v.state not in ('待送出版','正在出版',"
+                            "'待送业主','已完成','院交出')
+    </update>
+    <update id="reSetUser">
+        INSERT INTO volume_user ( volume_id, designer, checker, principal, headman ) SELECT
+                                                                                         v.id,
+                                                                                         IFNULL( u1.`id`, vu.designer ) AS designer,
+                                                                                         IFNULL( u2.`id`, vu.checker ) AS checker,
+                                                                                         IFNULL( u3.`id`, vu.principal ) AS principal,
+                                                                                         IFNULL( u4.id, vu.headman ) AS headman
+        FROM
+            volume v
+                LEFT JOIN volume_user vu ON v.id = vu.volume_id
+                LEFT JOIN ( SELECT id, `name` FROM `user` GROUP BY `name` HAVING COUNT(*) = 1 ) AS u1 ON u1.`name` = v.designer
+                LEFT JOIN ( SELECT id, `name` FROM `user` GROUP BY `name` HAVING COUNT(*) = 1 ) AS u2 ON u2.`name` = v.checker
+                LEFT JOIN ( SELECT id, `name` FROM `user` GROUP BY `name` HAVING COUNT(*) = 1 ) AS u3 ON u3.`name` = v.actual_principal
+                LEFT JOIN ( SELECT id, `name` FROM `user` GROUP BY `name` HAVING COUNT(*) = 1 ) AS u4 ON u4.`name` = v.headman
+        GROUP BY
+            v.id
+            ON DUPLICATE KEY UPDATE designer =
+                             VALUES
+                                 ( designer ),
+                                 checker =
+                             VALUES
+                                 ( checker ),
+                                 principal =
+                             VALUES
+                                 ( principal ),
+                                 headman =
+                             VALUES
+                                 (
+                                 headman
+                                 )
+    </update>
+    <update id="setIncomeState">
+        update income_information
+        set `state` = 0
+    </update>
+    <delete id="delNotAlive">
+        delete
+        from volume
+        where  alive = 0
+    </delete>
+    <delete id="delIncome">
+        delete
+        from income_information
+        where `state` = 0
+    </delete>
+    <select id="queryProjectNumber" resultType="java.util.Map">
+        SELECT
+            id, `number`
+        FROM
+            incomplete_project
+        WHERE
+            spider = 0
+          AND `number` IS NOT NULL
+          AND `number` != ""
+    </select>
+</mapper>

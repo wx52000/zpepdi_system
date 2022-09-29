@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.ScientificProjectDao">
+    <update id="setProject">
+        insert into scientific_project
+            (`number` , `name`, `general`,`generalId`, creator , create_time, workkday)
+        values (#{map.number} , #{map.name} , #{map.general}, #{map.generalId}, #{id}, now(), #{map.workday})
+    </update>
+    <update id="updateProject">
+        update scientific_project
+        set `name` = #{map.name}, `general` = #{map.general},
+            generalId = #{map.generalId}, workday = #{map.workday}
+        where id = #{map.id}
+    </update>
+</mapper>

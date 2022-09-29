@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.IncomeDao">
+    <select id="queryIncome" resultType="java.util.Map">
+        SELECT
+            project_code as code,
+            project_name as name,
+            project_id as projectId,
+            contract_id as contractId,
+            contract_value as contractValue,
+            contract_value_estimate as contractValueEstimate,
+            operating_income_ratio_id as operatingIncomeRatioId,
+            process_instance_id as processInstanceId,
+            money,
+            dep_money as depMoney,
+            money_ratio*100 as moneyRatio,
+            `value`,
+            dep_value as depValue,
+            value_ratio*100 as valueRatio
+        FROM
+            income_information
+    </select>
+</mapper>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.ScientificLeaderDao">
+    <insert id="addTermByGeneral">
+        INSERT INTO scientific_term ( scientific_id, scientific_leader_id, `name`, workday, creator, create_date, complete_date, `check`, checker, check_date )
+        VALUES
+        (
+            #{map.projectId},
+            #{map.id},
+            #{map.name},
+            #{map.workday},
+            #{userId},
+            NOW(),
+            NOW(),
+            1,
+            #{userId},
+            NOW()
+        )
+    </insert>
+    <insert id="addTermByLeader" useGeneratedKeys="true" keyColumn="id" keyProperty="map.id">
+        INSERT INTO scientific_term ( scientific_id,scientific_leader_id, `name`, plan_workday, creator, create_date, plan_complete_date,`check`,apply )
+        VALUES
+        (
+            #{map.projectId},
+            (select id from scientific_leader where scientific_id = #{map.projectId}
+                and leader = #{userId}),
+            #{map.name},
+            #{map.plan_workday},
+            #{userId},
+            NOW(),
+            #{map.plan_complete_date},
+            0,
+            #{map.apply}
+        )
+    </insert>
+    <insert id="addScientificTermFile">
+        insert into scientific_term_files(scientific_term_id, `name`, upload_location, upload_date,upload_user )
+        values(#{map.id}, #{map.name}, #{map.path}, now(), #{userId})
+    </insert>
+    <update id="setLeader" useGeneratedKeys="true" keyProperty="map.id" keyColumn="id">
+        insert  into scientific_leader(
+                                       <if test="map.id != null and map.id != ''">
+                                       id
+                                       </if>
+            scientific_id, leader, handler, handler_date)
+        values(
+               <if test="map.id != null and map.id != ''">
+               #{map.id}</if>
+               #{map.projectId}, #{map.leader}, #{userId}, now())
+        on duplicate key update
+        leader = values(leader),
+        handler = values(handler),
+        handler_date = values(handler_date)
+    </update>
+    <update id="setToCheck">
+        update scientific_term
+        set apply = 1, complete_date = now()
+        where id = #{id}
+    </update>
+    <update id="setLeaderChecker">
+        update scientific_leader
+        set checker_id = #{map.checker}
+        where scientific_id = #{map.id}
+        and leader = #{userId}
+    </update>
+    <delete id="delLeader">
+        delete
+        from scientific_leader
+        where id = #{id}
+    </delete>
+    <select id="queryLeader" resultType="java.util.Map">
+        SELECT
+            l.id,
+            u.id,
+            u.`name`,
+            EXISTS ( SELECT id FROM scientific_term t WHERE t.scientific_leader_id = l.id ) AS state
+        FROM
+            scientific_leader l,
+            `user` u
+        WHERE
+            l.scientific_id = #{id}
+          AND l.leader = u.id
+    </select>
+    <select id="querySurplus" resultType="java.lang.Double">
+        SELECT
+            s.workday - IFNULL(SUM( t.workday ),0)
+        FROM
+            scientific_project s
+                LEFT JOIN scientific_term t ON s.id = t.scientific_id
+        WHERE
+            s.id = #{id}
+    </select>
+    <select id="queryTerm" resultType="java.util.Map">
+        SELECT
+        id,
+        `name`,
+        workday,
+        plan_workday,
+        cast(plan_complete_date as char(10)) as plan_complete_date,
+        cast(complete_date as char(19)) as complete_date,
+        `check`,
+        apply,
+        leaderName,
+        creatorName,
+        max(general) as general,
+        max(principal) as principal
+        FROM
+        (
+        SELECT
+        t.id,
+        t.`name`,
+        t.workday,
+        t.plan_workday,
+        t.plan_complete_date,
+        t.complete_date,
+        t.`check`,
+        t.apply,
+        u.`name` AS leaderName,
+        u1.`name` AS creatorName,
+        1 AS general,
+        0 AS principal
+        FROM
+        scientific_project p,
+        scientific_term t,
+        scientific_leader l,
+        `user` u,
+        `user` u1
+        WHERE
+        p.generalId = #{userId}
+        AND p.id = #{projectId}
+        AND p.id = t.scientific_id
+        AND t.scientific_leader_id = l.id
+        AND l.leader = u.id
+        AND t.creator = u1.id UNION ALL
+        SELECT
+        t.id,
+        t.`name`,
+        t.workday,
+        t.plan_workday,
+        t.plan_complete_date,
+        t.complete_date,
+        t.`check`,
+        t.apply,
+        u.`name` AS leaderName,
+        u1.`name` AS creatorName,
+        0 AS general,
+        1 AS principal
+        FROM
+        scientific_term t,
+        scientific_leader l,
+        `user` u,
+        `user` u1
+        WHERE
+        t.scientific_id = #{projectId}
+        AND l.leader = #{userId}
+        AND t.scientific_leader_id = l.id
+        AND l.leader = u.id
+        AND t.creator = u1.id
+        ) as tab
+        GROUP BY id
+    </select>
+    <select id="queryFilesByTerm" resultType="java.util.Map">
+        SELECT
+            f.id,
+            f.upload_location,
+            u.`name`,
+            f.upload_user,
+            CAST(
+                    f.upload_date AS CHAR ( 19 )) AS upload_date
+        FROM
+            scientific_term_files f,
+            `user` u
+        WHERE
+            scientific_term_id = #{id}
+          AND u.id = f.upload_user
+    </select>
+    <select id="queryFilesById" resultType="java.util.Map">
+        SELECT
+            f.id,
+            f.upload_location,
+            u.`name`,
+            f.upload_user,
+            CAST(
+                    f.upload_date AS CHAR ( 19 )) AS upload_date
+        FROM
+            scientific_term_files f,
+            `user` u
+        WHERE
+            f.id = #{id}
+          AND u.id = f.upload_user
+    </select>
+</mapper>

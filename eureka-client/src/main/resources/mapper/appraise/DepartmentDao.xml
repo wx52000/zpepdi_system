@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.DepartmentDao">
+    <resultMap id="result" type="map">
+        <result column="id" property="id"></result>
+        <result column="dep" property="dep"></result>
+        <collection property="list" column="name = dep, id = id" select="queryTecByProjectAll" javaType="ARRAYLIST">
+        </collection>
+    </resultMap>
+    <resultMap id="resultByUser" type="map">
+        <result column="id" property="id"></result>
+        <result column="userId" property="userId"></result>
+        <result column="dep" property="dep"></result>
+        <collection property="list" column="name = dep, id = id, userId = userId"
+                    select="queryTecByProject" javaType="ARRAYLIST">
+        </collection>
+    </resultMap>
+    <insert id="add" parameterType="com.zpepdi.eureka_client.entity.Department" useGeneratedKeys="true" keyProperty="id">
+        insert into department(`name`)
+        values (#{name})
+    </insert>
+    <delete id="del">
+        delete
+        from department
+        where id = #{id}
+    </delete>
+    <select id="query" resultType="com.zpepdi.eureka_client.entity.Department">
+        select *
+        from department
+    </select>
+    <select id="queryName" resultType="java.lang.Integer">
+        select id
+        from department
+        where name = #{name}
+    </select>
+    <select id="selectByTec" resultType="java.lang.Integer">
+        select did
+        from technology
+        where id = #{id}
+    </select>
+    <select id="queryNotUser" resultType="com.zpepdi.eureka_client.entity.Department">
+        select *
+        from department d
+        where exists (
+        select u.id
+        from `user` u
+        where u.did = d.id)
+    </select>
+    <select id="queryByProject" resultMap="resultByUser">
+        SELECT distinct
+            #{id} as id, #{userId} as userId,d.name as dep
+        FROM
+            workday_tec w,
+            workday_tec_principal p,
+            department d,
+            technology t
+        where
+            w.volume_tec = t.name
+        and d.id = t.did
+        and w.id = p.workday_tec_id
+        and p.user_id = #{userId}
+        and w.project_id = #{id}
+    </select>
+    <select id="queryByProjectAll" resultMap="result">
+        SELECT distinct
+            d.name as dep,  #{id} as id
+        FROM
+            workday_tec w,
+            department d,
+            technology t
+        where
+            w.volume_tec = t.name
+          and d.id = t.did
+          and w.project_id = #{id}
+    </select>
+    <select id="queryTecByProjectAll" resultType="java.util.Map">
+        select distinct `volume_tec` as tec
+        from technology t,
+             workday_tec w,
+             department d
+        where
+           d.name = #{name}
+          and d.id = t.did
+          and t.name = w.volume_tec
+          and w.project_id = #{id}
+    </select>
+    <select id="queryTecByProject" resultType="java.util.Map">
+        select distinct `volume_tec` as tec
+        from technology t,
+             workday_tec w,
+             workday_tec_principal p,
+             department d
+        where
+           d.name = #{name}
+          and d.id = t.did
+          and t.name = w.volume_tec
+          and p.workday_tec_id = w.id
+          and p.user_id = #{userId}
+          and w.project_id = #{id}
+    </select>
+    <select id="queryManageSurplus" resultType="java.util.Map">
+        SELECT
+            IF( d.`limit` = 0, 99999, amount ) AS amount,
+               IF( d.`limit` = 0, 99999, surplus ) AS surplus
+        FROM
+            checker_dep d
+                LEFT JOIN checker_amount a on cd_id = d.id AND a.`year` = YEAR (NOW())
+        WHERE
+            d.id = #{id}
+    </select>
+    <select id="querySurplus" resultType="java.util.Map">
+        SELECT
+            IF( d.`limit` = 0, 99999, amount ) AS amount,
+            IF( d.`limit` = 0, 99999, surplus ) AS surplus
+        FROM
+            checker_dep d
+                LEFT JOIN checker_amount a on cd_id = d.id AND a.`year` = YEAR (NOW())
+        WHERE
+            d.user_id = #{userId}
+            and d.did = #{did}
+    </select>
+    <select id="queryCheckerAndDep" resultType="java.util.Map">
+        SELECT
+            c.id,
+            c.user_id,
+            c.did,
+            CONCAT_WS(
+                    "-",
+                    u.`name`,
+                    SUBSTRING_INDEX( d.`name`, "-",- 1 )) AS `name`,
+            CASE
+                WHEN                 IF
+                    ( c.`limit` = 0, 9999, a.surplus ) > 0 THEN
+                    true ELSE false
+                END AS disabled
+        FROM
+            `user` u,
+            department d,
+            checker_dep c
+                LEFT JOIN checker_amount a ON c.id = a.cd_id
+                AND a.YEAR = YEAR (
+            now())
+        WHERE
+            c.user_id = u.id
+          AND c.did = d.id
+    </select>
+</mapper>

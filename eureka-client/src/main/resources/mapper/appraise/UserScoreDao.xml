@@ -1,0 +1,981 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.UserScoreDao">
+
+    <insert id="add" parameterType="list">
+        insert into user_score(grade_id , score_id , designer , personal , coordinate)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+        (#{item.gradeId} ,#{item.scoreId} , #{item.designer} ,#{item.personal} ,#{item.coordinate})
+        </foreach>
+    </insert>
+    <insert id="appraise" parameterType="list">
+        insert into user_score( grade_id , score_id , designer , personal , coordinate , `month` , `year` , `date`, `role`)
+        value
+            (#{score.gradeId} ,#{score.scoreId} , #{score.designer} ,#{score.personal} ,#{score.coordinate} ,#{month} ,#{year} , current_timestamp() , #{score.role})
+        ON DUPLICATE KEY UPDATE
+        designer = values(designer),
+        personal = values(personal),
+        coordinate = values(coordinate)
+    </insert>
+    <insert id="backups">
+        insert into user_score_backups(grade_id , score_id  , designer , personal , coordinate , `month` , `year`,date)
+        select grade_id , score_id  , designer , personal , coordinate , `month` , `year`,`date`
+        from user_score
+    </insert>
+    <delete id="del">
+        delete
+        from user_score
+        where gs_id = #{gsId}
+    </delete>
+    <delete id="delete">
+        delete
+        from user_score
+    </delete>
+    <select id="queryByGradeId" resultType="java.util.Map" parameterType="user">
+        select gs.id as id , gs.grade_id as gradeId , gs.score_id as scoreId ,
+        CASE gs.state when 0 then "false"
+        when  1 then "true" end as state ,
+        u.name as name , d.name as department, t.name as technology,u.username,
+        s.designer , s.personal , s.coordinate
+        from user u,
+        technology t,
+        department d ,
+        grade_score gs left join
+        user_score s on s.gs_id = gs.id
+        where gs.grade_id = #{id}
+        and gs.score_id = u.id
+        and u.did = d.id
+        and u.tid = t.id
+        <if test="queryByd != null and queryByd != ''">
+        and u.did in
+        <foreach collection="queryByd" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+        </if>
+        <if test="queryByt != null and queryByt != ''">
+            and u.tid in
+            <foreach collection="queryByt" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by department , technology
+    </select>
+    <select id="queryByScoreId" resultType="java.util.Map">
+SELECT
+	`month`,
+	designer,
+	coordinate,
+	personal,
+	ROUND(((
+				role0 * is0 * p0 + role1 * is1 * p1 + role2 * is2 * p2 + role3 * is3 * p3 + role4 * is4 * p4
+				)/ ( is0 * p0 + is1 * p1 + is2 * p2 + is3 * p3 + is4 * p4 )),
+		2
+	) AS score
+FROM
+	(
+	SELECT
+		`month`,
+		dd.designer,
+		dd.coordinate,
+		dd.personal,
+		IFNULL( MAX( CASE mm.weight WHEN 0 THEN score END ), 0 ) AS role0,
+		IFNULL( MAX( CASE mm.weight WHEN 1 THEN score END ), 0 ) AS role1,
+		IFNULL( MAX( CASE mm.weight WHEN 2 THEN score END ), 0 ) AS role2,
+		IFNULL( MAX( CASE mm.weight WHEN 3 THEN score END ), 0 ) AS role3,
+		IFNULL( MAX( CASE mm.weight WHEN 4 THEN score END ), 0 ) AS role4,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 0 THEN score END ))) AS is0,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 1 THEN score END ))) AS is1,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 2 THEN score END ))) AS is2,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 3 THEN score END ))) AS is3,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 4 THEN score END ))) AS is4,
+		MAX( CASE grade_w WHEN 0 THEN w.weight END ) AS p0,
+		MAX( CASE grade_w WHEN 1 THEN w.weight END ) AS p1,
+		MAX( CASE grade_w WHEN 2 THEN w.weight END ) AS p2,
+		MAX( CASE grade_w WHEN 3 THEN w.weight END ) AS p3,
+		MAX( CASE grade_w WHEN 4 THEN w.weight END ) AS p4
+	FROM
+		(
+		SELECT
+			`month`,
+			weight,
+		IF
+			( designer = 0, NULL, designer ) AS designer,
+		IF
+			( personal = 0, NULL, personal ) AS personal,
+		IF
+			( coordinate = 0, NULL, coordinate ) AS coordinate,
+			( m.designer + m.personal + m.coordinate )/(
+				3-m.bedei - m.beper - m.becoo
+			) AS score
+		FROM
+			(
+			SELECT
+				`month`,
+				weight,
+				IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+				IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+				IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+				ISNULL(
+				AVG( designer )) AS bedei,
+				ISNULL(
+				AVG( personal )) AS beper,
+				ISNULL(
+				AVG( coordinate )) AS becoo
+			FROM
+				user_score us,
+				position p
+			WHERE
+				score_id = #{id}
+				AND us.role = p.id
+			GROUP BY
+				p.weight
+			) AS m
+		) AS mm,
+		(
+		SELECT
+			grade_w,
+			weight
+		FROM
+			user_weight
+		WHERE
+			score_w = (
+			SELECT
+				IFNULL(Max(weight),6) as weight
+			FROM
+				(
+				SELECT
+					weight,
+					up.user_id AS id
+				FROM
+					position p,
+					user_position up
+				WHERE
+					up.user_id = #{id}
+					AND up.position_id = p.id UNION
+				SELECT
+					weight,
+					u.id AS id
+				FROM
+					`user` u,
+					project p,
+					position pt
+				WHERE
+					u.id = #{id}
+					AND (
+						p.general = u.NAME
+						OR SUBSTRING_INDEX( p.general, ";", 1 ) = u.`name`
+					OR SUBSTRING_INDEX( p.general, ";",- 1 ) = u.`name`
+				)
+				AND pt.id = 13 UNION
+				SELECT
+					weight,
+					u.id AS id
+				FROM
+					`user` u,
+					volume v,
+					position p
+				WHERE
+					u.id = #{id}
+					AND (
+						v.principal = u.`name`
+						OR SUBSTRING_INDEX( v.principal, ";", 1 ) = u.`name`
+					OR SUBSTRING_INDEX( v.principal, ";",- 1 ) = u.`name`
+				)
+				AND p.id = 14
+			) AS u
+			GROUP BY
+				u.id
+				LIMIT 1
+			)) AS w,
+		(
+		SELECT
+			round( AVG( designer ), 3 ) AS designer,
+			round( AVG( personal ), 3 ) AS personal,
+			round( AVG( coordinate ), 3 ) AS coordinate
+		FROM
+			user_score
+		WHERE
+			score_id = #{id}
+		) AS dd
+	) AS m
+    </select>
+  <select id="queryByScoreIdPast" resultType="java.util.Map">
+SELECT
+	`month`,
+	designer,
+	coordinate,
+	personal,
+	ROUND(((
+				role0 * is0 * p0 + role1 * is1 * p1 + role2 * is2 * p2 + role3 * is3 * p3 + role4 * is4 * p4
+				)/ ( is0 * p0 + is1 * p1 + is2 * p2 + is3 * p3 + is4 * p4 )),
+		2
+	) AS score
+FROM
+	(
+	SELECT
+		mm.`year`,
+		mm.`month`,
+		dd.designer,
+		dd.coordinate,
+		dd.personal,
+		IFNULL( MAX( CASE mm.weight WHEN 0 THEN score END ), 0 ) AS role0,
+		IFNULL( MAX( CASE mm.weight WHEN 1 THEN score END ), 0 ) AS role1,
+		IFNULL( MAX( CASE mm.weight WHEN 2 THEN score END ), 0 ) AS role2,
+		IFNULL( MAX( CASE mm.weight WHEN 3 THEN score END ), 0 ) AS role3,
+		IFNULL( MAX( CASE mm.weight WHEN 4 THEN score END ), 0 ) AS role4,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 0 THEN score END ))) AS is0,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 1 THEN score END ))) AS is1,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 2 THEN score END ))) AS is2,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 3 THEN score END ))) AS is3,
+		(
+			1-ISNULL (
+			MAX( CASE mm.weight WHEN 4 THEN score END ))) AS is4,
+		MAX( CASE grade_w WHEN 0 THEN w.weight END ) AS p0,
+		MAX( CASE grade_w WHEN 1 THEN w.weight END ) AS p1,
+		MAX( CASE grade_w WHEN 2 THEN w.weight END ) AS p2,
+		MAX( CASE grade_w WHEN 3 THEN w.weight END ) AS p3,
+		MAX( CASE grade_w WHEN 4 THEN w.weight END ) AS p4
+	FROM
+		(
+		SELECT
+			`year`,
+			`month`,
+			weight,
+		IF
+			( designer = 0, NULL, designer ) AS designer,
+		IF
+			( personal = 0, NULL, personal ) AS personal,
+		IF
+			( coordinate = 0, NULL, coordinate ) AS coordinate,
+			( m.designer + m.personal + m.coordinate )/(
+				3-m.bedei - m.beper - m.becoo
+			) AS score
+		FROM
+			(
+			SELECT
+				`year`,
+				`month`,
+				weight,
+				IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+				IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+				IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+				ISNULL(
+				AVG( designer )) AS bedei,
+				ISNULL(
+				AVG( personal )) AS beper,
+				ISNULL(
+				AVG( coordinate )) AS becoo
+			FROM
+				user_score_backups us,
+				position p
+			WHERE
+				score_id = #{id}
+				AND us.role = p.id
+			GROUP BY
+				p.weight,
+				`year`,
+				`month`
+			ORDER BY
+				`year`,
+				`month`
+			) AS m
+		) AS mm,
+		(
+		SELECT
+			grade_w,
+			weight
+		FROM
+			user_weight
+		WHERE
+			score_w = (
+			SELECT
+				IFNULL( Max( weight ), 6 ) AS weight
+			FROM
+				(
+				SELECT
+					weight,
+					up.user_id AS id
+				FROM
+					position p,
+					user_position up
+				WHERE
+					up.user_id = #{id}
+					AND up.position_id = p.id UNION
+				SELECT
+					weight,
+					u.id AS id
+				FROM
+					`user` u,
+					project p,
+					position pt
+				WHERE
+					u.id = #{id}
+					AND (
+						p.general = u.NAME
+						OR SUBSTRING_INDEX( p.general, ";", 1 ) = u.`name`
+					OR SUBSTRING_INDEX( p.general, ";",- 1 ) = u.`name`
+				)
+				AND pt.id = 13 UNION
+				SELECT
+					weight,
+					u.id AS id
+				FROM
+					`user` u,
+					volume v,
+					position p
+				WHERE
+					u.id = #{id}
+					AND (
+						v.principal = u.`name`
+						OR SUBSTRING_INDEX( v.principal, ";", 1 ) = u.`name`
+					OR SUBSTRING_INDEX( v.principal, ";",- 1 ) = u.`name`
+				)
+				AND p.id = 14
+			) AS u
+			GROUP BY
+				u.id
+				LIMIT 1
+			)) AS w,
+		(
+		SELECT
+			`month`,
+			round( AVG( designer ), 3 ) AS designer,
+			round( AVG( personal ), 3 ) AS personal,
+			round( AVG( coordinate ), 3 ) AS coordinate
+		FROM
+			user_score_backups
+		WHERE
+			score_id = #{id}
+		GROUP BY
+			`year`,
+			`month`
+		ORDER BY
+			`year`,
+			`month`
+		) AS dd
+	WHERE
+		dd.`month` = mm.`month`
+	GROUP BY
+		mm.`year`,
+		mm.`month`
+	ORDER BY
+		mm.`year` DESC,
+		mm.`month` desc
+	) AS m
+    limit 2
+  </select>
+   <select id="queryScore" resultType="java.util.Map" parameterType="user">
+	   SELECT
+		u.name,
+	    d.name as department,
+	    t.name as technology,
+	   m.score_id,
+	   dd.designer,
+	   dd.coordinate,
+	   dd.personal,
+	   ROUND(SUM(m.score * w.weight)/ SUM(w.weight),3) as score
+	   FROM
+	   (
+	   SELECT
+	   us.score_id,
+	   us.role AS weight,
+	   (
+	   IFNULL( designer, 0 ) + IFNULL( personal, 0 ) + IFNULL( coordinate, 0 ))/ ( 3-ISNULL ( designer ) - ISNULL( personal ) - ISNULL( coordinate ) )  as score
+	   FROM
+	   user_score us
+	   ) AS m,
+	   (
+	   SELECT
+	   us.score_id AS id,
+	   grade_w,
+	   score_w,
+	   uw.weight
+	   FROM
+	   user_weight uw,
+	   user_score us
+	   LEFT JOIN (
+	   SELECT
+	   id,
+	   CASE
+	   pid
+	   WHEN 4 THEN
+	   2 ELSE 1
+	   END AS weight
+	   FROM
+	   `user`
+	   WHERE
+	   pid &lt;&gt; 5 UNION
+	   SELECT
+	   u.id,
+	   3 AS weight
+	   FROM
+	   `user` u,
+	   project p
+	   WHERE
+	   (
+	   FIND_IN_SET(
+	   u.`name`,
+	   REPLACE ( p.general, ";", "," ))) UNION
+	   SELECT
+	   u.id,
+	   4 AS weight
+	   FROM
+	   `user` u,
+	   volume v
+	   WHERE
+	   u.pid = 5
+	   AND (
+	   FIND_IN_SET(
+	   u.`name`,
+	   REPLACE ( v.principal, ";", "," )))
+	   GROUP BY
+	   u.id
+	   ) AS w ON w.id = us.score_id
+	   WHERE
+	   IFNULL( w.weight, 5 ) = uw.score_w
+	   GROUP BY
+	   us.score_id,
+	   grade_w
+	   ) AS w,
+	   (
+	   SELECT
+	   score_id,
+	   `year`,
+	   `month`,
+	   round( AVG( designer ), 3 ) AS designer,
+	   round( AVG( personal ), 3 ) AS personal,
+	   round( AVG( coordinate ), 3 ) AS coordinate
+	   FROM
+	   user_score
+	   GROUP BY
+	   score_id
+	   ) AS dd,
+	    `user` u,
+	    department d,
+	    technology t
+	   WHERE
+	   m.score_id = w.id
+	   and dd.score_id = m.score_id
+	   and u.id = m.score_id
+	   and u.did = d.id
+	   and u.tid = t.id
+	   GROUP BY
+	   score_id
+    </select>
+    <select id="queryScorePast" resultType="java.util.Map">
+		SELECT
+			u.name,
+			d.name as department,
+			t.name as technology,
+		m.score_id,
+		dd.designer,
+		dd.coordinate,
+		dd.personal,
+		ROUND(SUM(m.score * w.weight)/ SUM(w.weight),3) as score
+		FROM
+		(
+		SELECT
+		us.score_id,
+		us.role AS weight,
+		(
+		IFNULL( designer, 0 ) + IFNULL( personal, 0 ) + IFNULL( coordinate, 0 ))/ ( 3-ISNULL ( designer ) - ISNULL( personal ) - ISNULL( coordinate ) )  as score
+		FROM
+		user_score_backups us
+		    where  us.year = #{thisYear}
+		    and us.month = #{thisMonth}
+		) AS m,
+		(
+		SELECT
+		us.score_id AS id,
+		grade_w,
+		score_w,
+		uw.weight
+		FROM
+		user_weight uw,
+		user_score_backups us
+		LEFT JOIN (
+		SELECT
+		id,
+		CASE
+		pid
+		WHEN 4 THEN
+		2 ELSE 1
+		END AS weight
+		FROM
+		`user`
+		WHERE
+		pid &lt;&gt; 5 UNION
+		SELECT
+		u.id,
+		3 AS weight
+		FROM
+		`user` u,
+		project p
+		WHERE
+		(
+		FIND_IN_SET(
+		u.`name`,
+		REPLACE ( p.general, ";", "," ))) UNION
+		SELECT
+		u.id,
+		4 AS weight
+		FROM
+		`user` u,
+		volume v
+		WHERE
+		u.pid = 5
+		AND (
+		FIND_IN_SET(
+		u.`name`,
+		REPLACE ( v.principal, ";", "," )))
+		GROUP BY
+		u.id
+		) AS w ON w.id = us.score_id
+		WHERE
+		IFNULL( w.weight, 5 ) = uw.score_w
+		and  us.year = #{thisYear}
+		and us.month = #{thisMonth}
+		GROUP BY
+		us.score_id,
+		grade_w
+		) AS w,
+		(
+		SELECT
+		score_id,
+		`year`,
+		`month`,
+		round( AVG( designer ), 3 ) AS designer,
+		round( AVG( personal ), 3 ) AS personal,
+		round( AVG( coordinate ), 3 ) AS coordinate
+		FROM
+			user_score_backups
+		where  us.year = #{thisYear}
+		  and us.month = #{thisMonth}
+		GROUP BY
+		score_id
+		) AS dd,
+		`user` u,
+		department d,
+		technology t
+		WHERE
+		m.score_id = w.id
+		and dd.score_id = m.score_id
+		  and u.id = m.score_id
+		  and u.did = d.id
+		  and u.tid = t.id
+		GROUP BY
+		score_id
+    </select>
+    <select id="query" resultType="java.util.Map">
+        select m.sname , m.department , m.technology , m .designer ,
+         m.personal , u.name as gname , m.coordinate
+        from (select u.name as sname, d.name as department , t.name as technology ,
+        designer , personal , s.grade_id , coordinate
+        from
+        user_score s,
+        `user` u,
+        department d,
+        technology t
+        where
+        u.did = d.id
+        and u.tid = t.id
+        and s.score_id = u.id
+        ) as m,
+        `user`  u
+        where
+        m.grade_id = u.id
+    </select>
+    <select id="queryPast" resultType="java.util.Map">
+      select m.sname , m.department , m.technology , m .designer ,
+      m.personal , u.name as gname , m.coordinate
+      from (select u.name as sname, d.name as department , t.name as technology ,
+      designer , personal , s.grade_id , coordinate
+      from
+      user_score_backups s,
+      `user` u,
+      department d,
+      technology t
+      where
+      u.did = d.id
+      and u.tid = t.id
+      and s.score_id = u.id
+      AND s.month = #{thisMonth}
+      AND S.year = #{thisYear}
+      ) as m,
+      `user`  u
+      where
+      m.grade_id = u.id
+    </select>
+    <select id="excel1" resultType="com.zpepdi.eureka_client.entity.PersonalExcel" parameterType="user">
+        SELECT
+	score_id,
+	`month`,
+	designer,
+	coordinate,
+	personal,
+	ROUND(((role0*is0*p0+role1*is1*p1+role2*is2*p2+role3*is3*p3+role4*is4*p4+role5*is5*p5+role6*is6*p6
+	+role7*is7*p7+role8*is8*p8+role9*is9*p9+role10*is10*p10+role11*is11*p11+role12*is12*p12)/
+	(is0*p0+is1*p1+is2*p2+is3*p3+is4*p4+is5*p5+is6*p6
+	+is7*p7+is8*p8+is9*p9+is10*p10+is11*p11+is12*p12)),2) as score,
+	d.`name` as department,
+	t.`name` as technology,
+	u.`name`
+FROM(
+SELECT
+	mm.score_id,
+	`month`,
+	dd.designer,
+	dd.coordinate,
+	dd.personal,
+	IFNULL(MAX( CASE role WHEN 0 THEN score END ),0) AS role0,
+	IFNULL(MAX( CASE role WHEN 1 THEN score END ),0) AS role1,
+	IFNULL(MAX( CASE role WHEN 2 THEN score END ),0) AS role2,
+	IFNULL(MAX( CASE role WHEN 3 THEN score END ),0) AS role3,
+	IFNULL(MAX( CASE role WHEN 4 THEN score END ),0) AS role4,
+	IFNULL(MAX( CASE role WHEN 5 THEN score END ),0) AS role5,
+	IFNULL(MAX( CASE role WHEN 6 THEN score END ),0) AS role6,
+	IFNULL(MAX( CASE role WHEN 7 THEN score END ),0) AS role7,
+	IFNULL(MAX( CASE role WHEN 8 THEN score END ),0) AS role8,
+	IFNULL(MAX( CASE role WHEN 9 THEN score END ),0) AS role9,
+	IFNULL(MAX( CASE role WHEN 10 THEN score END ),0) AS role10,
+	IFNULL(MAX( CASE role WHEN 13 THEN score END ),0) AS role11,
+	IFNULL(MAX( CASE role WHEN 14 THEN score END ),0) AS role12,
+	(1-ISNULL(MAX( CASE role WHEN 0 THEN score END ))) AS is0,
+	(1-ISNULL(MAX( CASE role WHEN 1 THEN score END ))) AS is1,
+	(1-ISNULL(MAX( CASE role WHEN 2 THEN score END ))) AS is2,
+	(1-ISNULL(MAX( CASE role WHEN 3 THEN score END ))) AS is3,
+	(1-ISNULL(MAX( CASE role WHEN 4 THEN score END ))) AS is4,
+	(1-ISNULL(MAX( CASE role WHEN 5 THEN score END ))) AS is5,
+	(1-ISNULL(MAX( CASE role WHEN 6 THEN score END ))) AS is6,
+	(1-ISNULL(MAX( CASE role WHEN 7 THEN score END ))) AS is7,
+	(1-ISNULL(MAX( CASE role WHEN 8 THEN score END ))) AS is8,
+	(1-ISNULL(MAX( CASE role WHEN 9 THEN score END ))) AS is9,
+	(1-ISNULL(MAX( CASE role WHEN 10 THEN score END ))) AS is10,
+	(1-ISNULL(MAX( CASE role WHEN 13 THEN score END ))) AS is11,
+	(1-ISNULL(MAX( CASE role WHEN 14 THEN score END ))) AS is12,
+	MAX( CASE p.id WHEN 0 THEN p.weight END ) AS p0,
+	MAX( CASE p.id WHEN 1 THEN p.weight END ) AS p1,
+	MAX( CASE p.id WHEN 2 THEN p.weight END ) AS p2,
+	MAX( CASE p.id WHEN 3 THEN p.weight END ) AS p3,
+	MAX( CASE p.id WHEN 4 THEN p.weight END ) AS p4,
+	MAX( CASE p.id WHEN 5 THEN p.weight END ) AS p5,
+	MAX( CASE p.id WHEN 6 THEN p.weight END ) AS p6,
+	MAX( CASE p.id WHEN 7 THEN p.weight END ) AS p7,
+	MAX( CASE p.id WHEN 8 THEN p.weight END ) AS p8,
+	MAX( CASE p.id WHEN 9 THEN p.weight END ) AS p9,
+	MAX( CASE p.id WHEN 10 THEN p.weight END ) AS p10,
+	MAX( CASE p.id WHEN 13 THEN p.weight END ) AS p11,
+	MAX( CASE p.id WHEN 14 THEN p.weight END ) AS p12
+FROM
+	(
+	SELECT
+		score_id,
+		`month`,
+		role,
+	IF
+		( designer = 0, NULL, designer ) AS designer,
+	IF
+		( personal = 0, NULL, personal ) AS personal,
+	IF
+		( coordinate = 0, NULL, coordinate ) AS coordinate,
+		( m.designer + m.personal + m.coordinate )/(
+			3-m.bedei - m.beper - m.becoo
+		) AS score
+	FROM
+		(
+			SELECT
+			score_id,
+				`month`,
+				role,
+				IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+				IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+				IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+				ISNULL(
+				AVG( designer )) AS bedei,
+				ISNULL(
+				AVG( personal )) AS beper,
+				ISNULL(
+				AVG( coordinate )) AS becoo
+			FROM
+				user_score
+			GROUP BY
+				score_id , role
+			) as m
+	) as mm,
+	position p,
+	(			SELECT
+				score_id,
+				round( AVG( designer ), 3 ) AS designer,
+				round( AVG( personal ), 3 )AS personal,
+				round( AVG( coordinate ), 3 )AS coordinate
+			FROM
+				user_score
+			GROUP BY score_id	) as dd
+			WHERE mm.score_id = dd.score_id
+						GROUP BY mm.score_id
+)		as m,
+department d,
+technology t,
+`user` u
+WHERE m.score_id = u.id
+and u.did = d.id
+and u.tid = t.id
+    </select>
+  <select id="excel2" resultType="com.zpepdi.eureka_client.entity.PersonalExcel">
+SELECT
+	score_id,
+	`month`,
+	designer,
+	coordinate,
+	personal,
+	ROUND(((role0*is0*p0+role1*is1*p1+role2*is2*p2+role3*is3*p3+role4*is4*p4+role5*is5*p5+role6*is6*p6
+	+role7*is7*p7+role8*is8*p8+role9*is9*p9+role10*is10*p10+role11*is11*p11+role12*is12*p12)/
+	(is0*p0+is1*p1+is2*p2+is3*p3+is4*p4+is5*p5+is6*p6
+	+is7*p7+is8*p8+is9*p9+is10*p10+is11*p11+is12*p12)),2) as score,
+	d.`name` as department,
+	t.`name` as technology,
+	u.`name`
+FROM(
+SELECT
+	mm.score_id,
+	`month`,
+	dd.designer,
+	dd.coordinate,
+	dd.personal,
+	IFNULL(MAX( CASE role WHEN 0 THEN score END ),0) AS role0,
+	IFNULL(MAX( CASE role WHEN 1 THEN score END ),0) AS role1,
+	IFNULL(MAX( CASE role WHEN 2 THEN score END ),0) AS role2,
+	IFNULL(MAX( CASE role WHEN 3 THEN score END ),0) AS role3,
+	IFNULL(MAX( CASE role WHEN 4 THEN score END ),0) AS role4,
+	IFNULL(MAX( CASE role WHEN 5 THEN score END ),0) AS role5,
+	IFNULL(MAX( CASE role WHEN 6 THEN score END ),0) AS role6,
+	IFNULL(MAX( CASE role WHEN 7 THEN score END ),0) AS role7,
+	IFNULL(MAX( CASE role WHEN 8 THEN score END ),0) AS role8,
+	IFNULL(MAX( CASE role WHEN 9 THEN score END ),0) AS role9,
+	IFNULL(MAX( CASE role WHEN 10 THEN score END ),0) AS role10,
+	IFNULL(MAX( CASE role WHEN 13 THEN score END ),0) AS role11,
+	IFNULL(MAX( CASE role WHEN 14 THEN score END ),0) AS role12,
+	(1-ISNULL(MAX( CASE role WHEN 0 THEN score END ))) AS is0,
+	(1-ISNULL(MAX( CASE role WHEN 1 THEN score END ))) AS is1,
+	(1-ISNULL(MAX( CASE role WHEN 2 THEN score END ))) AS is2,
+	(1-ISNULL(MAX( CASE role WHEN 3 THEN score END ))) AS is3,
+	(1-ISNULL(MAX( CASE role WHEN 4 THEN score END ))) AS is4,
+	(1-ISNULL(MAX( CASE role WHEN 5 THEN score END ))) AS is5,
+	(1-ISNULL(MAX( CASE role WHEN 6 THEN score END ))) AS is6,
+	(1-ISNULL(MAX( CASE role WHEN 7 THEN score END ))) AS is7,
+	(1-ISNULL(MAX( CASE role WHEN 8 THEN score END ))) AS is8,
+	(1-ISNULL(MAX( CASE role WHEN 9 THEN score END ))) AS is9,
+	(1-ISNULL(MAX( CASE role WHEN 10 THEN score END ))) AS is10,
+	(1-ISNULL(MAX( CASE role WHEN 13 THEN score END ))) AS is11,
+	(1-ISNULL(MAX( CASE role WHEN 14 THEN score END ))) AS is12,
+	MAX( CASE p.id WHEN 0 THEN p.weight END ) AS p0,
+	MAX( CASE p.id WHEN 1 THEN p.weight END ) AS p1,
+	MAX( CASE p.id WHEN 2 THEN p.weight END ) AS p2,
+	MAX( CASE p.id WHEN 3 THEN p.weight END ) AS p3,
+	MAX( CASE p.id WHEN 4 THEN p.weight END ) AS p4,
+	MAX( CASE p.id WHEN 5 THEN p.weight END ) AS p5,
+	MAX( CASE p.id WHEN 6 THEN p.weight END ) AS p6,
+	MAX( CASE p.id WHEN 7 THEN p.weight END ) AS p7,
+	MAX( CASE p.id WHEN 8 THEN p.weight END ) AS p8,
+	MAX( CASE p.id WHEN 9 THEN p.weight END ) AS p9,
+	MAX( CASE p.id WHEN 10 THEN p.weight END ) AS p10,
+	MAX( CASE p.id WHEN 13 THEN p.weight END ) AS p11,
+	MAX( CASE p.id WHEN 14 THEN p.weight END ) AS p12
+FROM
+	(
+	SELECT
+		score_id,
+		`month`,
+		role,
+	IF
+		( designer = 0, NULL, designer ) AS designer,
+	IF
+		( personal = 0, NULL, personal ) AS personal,
+	IF
+		( coordinate = 0, NULL, coordinate ) AS coordinate,
+		( m.designer + m.personal + m.coordinate )/(
+			3-m.bedei - m.beper - m.becoo
+		) AS score
+	FROM
+		(
+			SELECT
+			score_id,
+				`month`,
+				role,
+				IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+				IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+				IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+				ISNULL(
+				AVG( designer )) AS bedei,
+				ISNULL(
+				AVG( personal )) AS beper,
+				ISNULL(
+				AVG( coordinate )) AS becoo
+			FROM
+				user_score_backups
+				WHERE `month` = #{thisMonth}
+			and `year` = #{thisYear}
+			GROUP BY
+				score_id , role
+			) as m
+	) as mm,
+	position p,
+	(			SELECT
+				score_id,
+				round( AVG( designer ), 3 ) AS designer,
+				round( AVG( personal ), 3 )AS personal,
+				round( AVG( coordinate ), 3 )AS coordinate
+			FROM
+				user_score_backups
+			WHERE `month` = #{thisMonth}
+			and `year` = #{thisYear}
+			GROUP BY score_id	) as dd
+			WHERE mm.score_id = dd.score_id
+			GROUP BY mm.score_id
+)		as m,
+department d,
+technology t,
+`user` u
+WHERE m.score_id = u.id
+and u.did = d.id
+and u.tid = t.id
+  </select>
+  <select id="detail" resultType="java.lang.String">
+    SELECT
+      CONCAT_WS( ',', designer, personal, coordinate ) ,u.username
+      FROM
+        `user` u
+        LEFT JOIN user_score s ON u.id = s.grade_id
+        AND s.score_id = #{id}
+    where u.name in
+    <foreach collection="nameList" item="item" open="(" close=")" separator=",">
+      #{item}
+    </foreach>
+    ORDER BY u.username
+  </select>
+  <select id="detailPast" resultType="java.lang.String">
+    SELECT
+      CONCAT_WS( ',', designer, personal, coordinate ) ,u.username
+      FROM
+        `user` u
+        LEFT JOIN user_score_backups s ON u.id = s.grade_id
+        AND s.score_id = #{uid}
+        AND s.month = #{user.thisMonth}
+        AND S.year = #{user.thisYear}
+    WHERE
+      u.name in
+      <foreach collection="nameList" item="item" open="(" close=")" separator=",">
+        #{item}
+      </foreach>
+    ORDER BY u.username
+  </select>
+  <select id="part0" resultType="com.zpepdi.eureka_client.entity.PartExcel">
+    select u1.name as grade , u2.name as score ,us.personal,us.designer,us.coordinate ,
+    d.name as dep , t.name as tec
+    from
+    `user` u1,
+    `user` u2,
+    user_score us,
+    department d,
+    technology t
+    where
+    u1.id = us.grade_id
+    and u2.id = us.score_id
+    and d.id = u2.did
+    and t.id = u2.tid
+    <if test="users != null and users != ''">
+      and u1.id in
+      <foreach collection="users" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+    </if>
+  </select>
+  <select id="partPast0" resultType="com.zpepdi.eureka_client.entity.PartExcel">
+    select u1.name as grade , u2.name as score ,us.personal,us.designer,us.coordinate ,
+    d.name as dep , t.name as tec
+    from
+    `user` u1,
+    `user` u2,
+    user_score_backups us,
+    department d,
+    technology t
+    where
+    u1.id = us.grade_id
+    and u2.id = us.score_id
+    and d.id = u2.did
+    and t.id = u2.tid
+    AND us.month = #{thisMonth}
+    AND uS.year = #{thisYear}
+    <if test="users != null and users != ''">
+      and u1.id in
+      <foreach collection="users" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+    </if>
+  </select>
+  <select id="part1" resultType="com.zpepdi.eureka_client.entity.PartExcel">
+    select u1.name as grade , u2.name as score ,us.personal,us.designer,us.coordinate ,
+    d.name as dep , t.name as tec
+    from
+    `user` u1,
+    `user` u2,
+    user_score us,
+    department d,
+    technology t
+    where
+    u1.id = us.grade_id
+    and u2.id = us.score_id
+    and d.id = u2.did
+    and t.id = u2.tid
+    <if test="users != null and users != ''">
+      and u2.id in
+      <foreach collection="users" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+    </if>
+  </select>
+  <select id="partPast1" resultType="com.zpepdi.eureka_client.entity.PartExcel">
+    select u1.name as grade , u2.name as score ,us.personal,us.designer,us.coordinate ,
+    d.name as dep , t.name as tec
+    from
+    `user` u1,
+    `user` u2,
+    user_score_backups us,
+    department d,
+    technology t
+    where
+    u1.id = us.grade_id
+    and u2.id = us.score_id
+    and d.id = u2.did
+    and t.id = u2.tid
+    AND us.month = #{thisMonth}
+    AND uS.year = #{thisYear}
+    <if test="users != null and users != ''">
+      and u2.id in
+      <foreach collection="users" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+    </if>
+  </select>
+
+
+</mapper>

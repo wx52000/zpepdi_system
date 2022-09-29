@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.ScientificDao">
+    <insert id="addScientific">
+        INSERT INTO scientific_project(`number`,`name`,`general`,create_time,creator,generalId,workday)
+        VALUES(#{map.number}, #{map.name}, #{map.general.name}, now(), #{userId}, #{map.general.id}, #{map.workday})
+        on DUPLICATE key UPDATE
+        `name` = values(`name`),
+        `general` = values(`general`),
+        `generalId` = values(generalId),
+        workday = values(workday)
+    </insert>
+    <select id="query" resultType="java.util.Map">
+        SELECT
+            p.id,
+            p.number,
+            p.`name`,
+            p.general,
+            p.workday,
+            p.workday - ifnull(SUM( t.workday ),0) as have,
+            ifnull(SUM( t.workday ),0) AS used
+        FROM
+            scientific_project p
+                LEFT JOIN scientific_term t ON p.id = t.scientific_id
+        GROUP BY p.id
+    </select>
+    <select id="queryById" resultType="java.util.Map">
+        SELECT
+        p.id,
+        p.number,
+        p.`name`,
+        p.general,
+        IF
+        ( p.generalId = #{userId}, TRUE, FALSE ) AS generalRole,
+        IF
+        ( l.id IS NOT NULL, TRUE, FALSE ) AS principalRole,
+        l.checker_id as checker
+        FROM
+        scientific_project p
+        LEFT JOIN scientific_leader l ON p.id = l.scientific_id
+        AND l.leader = #{userId}
+        WHERE
+        p.id = #{id}
+    </select>
+</mapper>

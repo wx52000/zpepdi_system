@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.OtherUserDao">
+    <update id="setCheck">
+            update project_note
+            set <trim  suffixOverrides=",">
+                `check_other` = #{check},
+                <if test="check == 2">
+                    `check` = 2
+                </if>
+                </trim>
+            where project_id = #{id}
+    </update>
+    <update id="setPaw">
+        update other_user
+        set paw = AES_ENCRYPT(#{map.paw},'zpepdi'), paw_state = 1
+        where id = #{id}
+    </update>
+    <select id="queryByOffice" resultType="java.util.Map">
+        select
+        u.id, u.name
+        from
+        other_user u
+        where  u.office_id = #{id}
+    </select>
+    <select id="queryCheckList" resultType="java.util.Map">
+        SELECT
+            p.id,
+            p.`name`,
+            p.number,
+            p.general,
+            n.scope,
+            n.stage,
+            n.apply_workday as workday,
+            n.tec,
+            n.other_tec as otherTec,
+            n.planned_date as plannedDate,
+            n.note
+        FROM
+            project_note n,
+            project p
+        WHERE
+            p.id = n.project_id
+          AND n.check_other_handler = #{id}
+          AND `check_other` = 0
+          AND `check` = 0
+    </select>
+    <select id="queryById" resultType="java.util.Map">
+        select username, u.`name`, paw_state, o.`name` as office
+        from other_user u,
+        office o
+        where u.id = #{id}
+        and o.id = u.office_id
+    </select>
+</mapper>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.PositionDao">
+    <resultMap id="queryRole" type="map">
+        <result property="id" column="id" jdbcType="INTEGER"></result>
+        <result property="menus" column="menus" jdbcType="VARCHAR"></result>
+        <result property="path" column="path" jdbcType="VARCHAR"></result>
+        <result property="import" column="import" jdbcType="VARCHAR"></result>
+        <result property="router" column="router" jdbcType="VARCHAR"></result>
+        <result property="hasChildren" column="hasChildren" ></result>
+        <result property="roleId" column="roleId" jdbcType="INTEGER"></result>
+        <collection property="children" column="{roleId = roleId, menusId = id}"
+                    javaType="ARRAYLIST" select="queryMenusByRoleId"></collection>
+    </resultMap>
+    <insert id="newRole">
+        insert  into `position`(`name` )
+        values (#{name})
+    </insert>
+    <update id="update">
+      <foreach collection="list" item="item" separator=";">
+      update user_weight
+      <set>
+       weight = #{item.weight}
+       </set>
+      where id = #{item.id}
+      </foreach>
+    </update>
+    <update id="setMenus">
+        insert into role_menus(role_id, menus_id)
+        values(#{roleId}, #{elementId})
+    </update>
+    <update id="setButton">
+        insert into role_button(role_id, button_id)
+        values(#{roleId}, #{elementId})
+    </update>
+    <delete id="delMenus">
+        delete
+        from role_menus
+        where role_id = #{roleId}
+        and menus_id = #{elementId}
+    </delete>
+    <delete id="delButton">
+        delete
+        from role_button
+        where role_id = #{roleId}
+        and menus_id = #{elementId}
+    </delete>
+    <delete id="delRole">
+        DELETE p,m,b
+        FROM
+            `position` p
+            LEFT JOIN role_menus m ON p.id = m.role_id
+            LEFT JOIN role_button b ON p.id = b.role_id
+        WHERE
+            p.id = #{id}
+    </delete>
+    <select id="query" resultType="java.util.Map">
+    select id , `name`
+    from `position`
+  </select>
+    <select id="queryByWeight" resultType="java.util.Map">
+        SELECT
+            id,
+            CASE
+                grade_w
+
+                WHEN #{id} THEN
+                    "主任"
+                WHEN 2 THEN
+                    "经理"
+                WHEN 3 THEN
+                    "设总"
+                WHEN 4 THEN
+                    "主设人"
+                END as `name`,  weight
+        FROM
+            user_weight
+        WHERE
+            score_w = #{id}
+    </select>
+    <select id="queryRoleMenus" resultType="java.util.Map">
+        SELECT DISTINCT
+            p.id,
+            p.`name`,
+            GROUP_CONCAT( mp.`name` SEPARATOR '、' ) AS menus
+        FROM
+            position p
+                LEFT JOIN role_menus r ON p.id = r.role_id
+                LEFT JOIN
+            menus_path mp on r.menus_id = mp.id
+        GROUP BY
+            p.id
+    </select>
+    <select id="queryTreeByRoleId" resultMap="queryRole">
+        SELECT DISTINCT
+            m.id, m.menus, null as path,null as  import,
+             null as router,
+                        TRUE as hasChildren, #{id} as roleId
+        FROM
+            role_menus r,
+            menus_path mp,
+            menus m
+        WHERE
+            r.menus_id = mp.id
+          AND mp.parent = m.id
+          AND r.role_id = #{id}
+        UNION
+        SELECT DISTINCT
+            mp.id, mp.`name` as menus, mp.path, mp.import, router_name as router,
+                        FALSE as hasChildren, #{id} as roleId
+        FROM
+            role_menus r,
+            menus_path mp
+        WHERE
+            r.menus_id = mp.id
+          AND mp.parent is NULL
+          AND r.role_id = #{id}
+    </select>
+    <select id="queryMenusByRoleId" resultType="java.util.Map">
+        SELECT DISTINCT
+            mp.path,
+            mp.`name`,
+            mp.import,
+            router_name as router
+        FROM
+            role_menus r,
+            menus_path mp
+        WHERE
+            r.menus_id = mp.id
+          AND mp.parent = #{menusId}
+          AND r.role_id = #{roleId}
+    </select>
+    <select id="queryButtonByRoleId" resultType="java.lang.String">
+        SELECT DISTINCT
+            b.auth
+        FROM
+            role_button r,
+            button_auth b
+        WHERE r.role_id = #{roleId}
+          and r.button_id = b.id
+    </select>
+    <select id="queryRole" resultType="string">
+        SELECT DISTINCT
+            CONCAT_WS("-",m.menus,mp.`name`) AS menus
+        FROM
+            role_menus r,
+            menus_path mp LEFT JOIN
+            menus m on  mp.parent = m.id
+        WHERE
+            r.menus_id = mp.id
+          AND r.role_id = #{id}
+    </select>
+    <select id="queryRoleButton" resultType="java.lang.String">
+        SELECT DISTINCT
+        b.button
+        FROM
+        role_button r,
+        button_auth b
+        WHERE r.role_id = #{roleId}
+        and r.button_id = b.id
+    </select>
+
+
+</mapper>

@@ -1,0 +1,1028 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.ProjectWorkdayDao">
+  <resultMap id="queryProjectWorkday" type="map">
+    <result column="id" property="num" jdbcType="INTEGER"/>
+    <result column="number" property="number"/>
+    <result column="name" property="name" />
+    <result column="general" property="general" />
+    <result column="num" property="num" />
+    <result column="manage" property="manage" />
+    <result column="tec" property="tec" />
+    <result column="backup" property="backup" />
+    <result column="check" property="check" />
+    <result column="checkerId" property="checkerId" />
+    <collection property="list" javaType="ARRAYLIST" column="id = id"
+                select="queryTecWorkdayAmount"/>
+    <collection property="exist" javaType="BOOLEAN" column="id = id"
+                select="queryTecPrincipalExist">
+    </collection>
+  </resultMap>
+  <resultMap id="queryProjectSumWorkday" type="map">
+    <result column="id" property="num" jdbcType="INTEGER"/>
+    <result column="number" property="number"/>
+    <result column="name" property="name" />
+    <result column="general" property="general" />
+    <result column="num" property="num" />
+    <result column="manage" property="manage" />
+    <result column="tec" property="tec" />
+    <result column="backup" property="backup" />
+    <result column="check" property="check" />
+    <result column="checkerId" property="checkerId" />
+    <collection property="list" javaType="ARRAYLIST" column="id = id"
+                select="queryTecSumWorkdayAmount">
+    </collection>
+  </resultMap>
+  <resultMap id="tecWorkday" type="com.zpepdi.eureka_client.entity.ProjectExcelTec">
+    <result column="id" property="id" jdbcType="INTEGER"/>
+    <result column="number" property="number" jdbcType="VARCHAR"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="date" jdbcType="VARCHAR"/>
+    <collection property="list" javaType="ARRAYLIST" ofType="map" column="id = id ,date = date"
+                select="statisticByDate">
+    </collection>
+  </resultMap>
+  <resultMap id="tecWorkdayList" type="map">
+    <result column="id" property="id"></result>
+    <result column="id" property="num" jdbcType="INTEGER"/>
+    <result column="num" property="num" jdbcType="INTEGER"/>
+    <result column="manage" property="manage" jdbcType="VARCHAR"/>
+    <result column="tec" property="tec" jdbcType="VARCHAR"/>
+    <result column="backup" property="backup" jdbcType="VARCHAR"/>
+    <result column="check" property="check" jdbcType="VARCHAR"/>
+    <collection property="list" javaType="ARRAYLIST" column="id = id"
+                select="queryTecWorkdayList">
+    </collection>
+  </resultMap>
+  <insert id="setProWorkday">
+    insert into project_workday
+            (project_id, `num` , `date`)
+     values
+          (#{project_id}, #{num}, now())
+        on duplicate key update
+        `num` = values(`num`),
+        `date` = values(`date`)
+  </insert>
+  <update id="setTec" useGeneratedKeys="true" keyColumn="id" keyProperty="map.wtId">
+    insert ignore into workday_tec
+    (project_id, volume_tec, `amount`, `type`, `time`, `handler`)
+    values
+          (#{map.id}, #{map.tec}, 0, #{map.type}, now(), #{id})
+  </update>
+  <update id="setPrincipal">
+    insert ignore into workday_tec_principal(workday_tec_id, user_id)
+    values <foreach collection="map.principal" item="item" separator=",">
+    (#{map.wtId} , #{item})
+      </foreach>
+  </update>
+  <select id="queryWorkdayTecId" resultType="java.lang.Integer">
+    select id
+    from workday_tec
+    where project_id = #{projectId}
+    and volume_tec = #{tec}
+  </select>
+  <delete id="delPrincipal">
+    DELETE
+    FROM
+    workday_tec_principal
+    WHERE
+    workday_tec_id = #{map.wtId}
+    AND user_id not in (
+    <foreach collection="map.principal" item="item" >
+        #{item},
+    </foreach> 0)
+  </delete>
+  <select id="isOperate" resultType="java.lang.Boolean">
+    select  exists (
+        select id
+        from workday_tec_distribute
+        where project_id = #{map.id}
+        and tec = #{map.tec}
+              )
+  </select>
+  <delete id="delTec">
+    DELETE
+    FROM
+      workday_tec
+    WHERE
+      project_id = #{map.id}
+      AND volume_tec = #{map.tec}
+  </delete>
+  <insert id="setNewProWorkday" useGeneratedKeys="true" keyProperty="map.addId" keyColumn="id">
+    insert into project_workday_add
+      (id, project_id, `num` , `date`,`check`, handler, `reason`)
+    values
+      (#{map.addId}, #{map.project_id}, #{map.num}, now(), #{map.check}, #{id}, #{map.reason})
+      on duplicate key update
+        `num` = values(`num`),
+        `check` = values(`check`)
+  </insert>
+  <insert id="setProWorkdayDistribut">
+    insert into project_workday_distribute
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+        project_id,
+       <if test="map.manage != null and map.manage != '' or map.manage == 0">
+        `manage`,
+       </if>
+      <if test="map.backup != null and map.backup != '' or map.backup == 0">
+        `backup`,
+      </if>
+      <if test="map.tec != null and map.tec != '' or map.tec == 0">
+        `tec`,
+    </if>
+    `check`,`time`, `handler`
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      #{map.project_id},
+       <if test="map.manage != null and map.manage != '' or map.manage == 0">
+        #{map.manage},
+        </if>
+        <if test="map.backup != null and map.backup != '' or map.backup == 0">
+          #{map.backup},
+        </if>
+        <if test="map.tec != null and map.tec != '' or map.tec == 0">
+        #{map.tec},
+        </if>
+    #{map.check}, now(), #{id}
+    </trim>
+      on duplicate key update
+    `manage` = values(`manage`),
+    `backup` = values(`backup`),
+    `tec` = values(`tec`),
+    `check` = values(`check`)
+  </insert>
+  <insert id="setNewProWorkdayDistribut">
+    insert into project_workday_distribute_add
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      add_id, project_id,
+      <if test="map.manage != null and map.manage != '' or map.manage == 0">
+        `manage`,
+      </if>
+      <if test="map.backup != null and map.backup != '' or map.backup == 0">
+        `backup`,
+      </if>
+      <if test="map.tec != null and map.tec != '' or map.tec == 0">
+        `tec`,
+      </if>
+      `time`, `handler`
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      #{map.addId}, #{map.project_id},
+      <if test="map.manage != null and map.manage != '' or map.manage == 0">
+        #{map.manage},
+      </if>
+      <if test="map.backup != null and map.backup != '' or map.backup == 0">
+        #{map.backup},
+      </if>
+      <if test="map.tec != null and map.tec != '' or map.tec == 0">
+        #{map.tec},
+      </if>
+       now(), #{id}
+    </trim>
+    on duplicate key update
+    `manage` = values(`manage`),
+    `backup` = values(`backup`),
+    `tec` = values(`tec`)
+  </insert>
+  <update id="setTecWorkday">
+    insert into workday_tec
+    (project_id, volume_tec, `amount`,  `time`, `handler`)
+    values
+    <foreach collection="list" item="item" separator=",">
+      <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="item.workday != null and item.workday != '' or item.workday == 0">
+          #{id}, #{item.name}, #{item.workday}, now(), #{userId}
+        </if>
+      </trim>
+    </foreach>
+    on duplicate key update
+    amount = values(amount)
+</update>
+  <update id="setNewTecWorkday">
+    insert into workday_tec_add
+    (id, project_id, volume_tec, `amount`, `time`, `handler`, `add_id`)
+    values
+    <foreach collection="list" item="item" separator=",">
+      <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="item.workday != null and item.workday != '' or item.workday == 0">
+          #{item.id}, #{id}, #{item.name}, #{item.workday}, now(), #{userId}, #{addId}
+        </if>
+      </trim>
+    </foreach>
+    on duplicate key update
+    amount = values(amount)
+  </update>
+  <update id="setTecVolumeRatio">
+    insert into tec_ratio(project_id, tec, designer, checker, principal, headman, `check`, time, handler)
+    values
+      (#{map.id}, #{map.tec}, #{map.designer}/100, #{map.checker}/100,
+       #{map.principal}/100, #{map.headman}/100, 0, now(), #{id})
+    on duplicate key update
+    designer = values(designer),
+    checker = values(checker),
+    principal = values(principal),
+    headman = values(headman),
+    `check` = 0
+  </update>
+  <update id="delTecWorkday">
+    update workday_tec
+    set state = 0
+    where  project_id = #{id}
+    and volume_tec = #{tec}
+  </update>
+  <update id="setVolumeWorkday">
+    insert into volume_workday(volume_id, `state`, `type`, workday,
+                               designer_workday,checker_workday,
+                               principal_workday,headman_workday,`date`, `check`, `time`, handler)
+    values
+    <foreach collection="map.list" item="item" separator=",">
+      <choose>
+        <when test="item.submit != 1 and item.submit != 2 and item.workday != null and item.workday != '' or item.workday == 0">
+          (#{item.id}, 0, 0, #{item.workday},
+           #{item.workday} * #{map.designer} /100,
+          #{item.workday} * #{map.checker} /100,
+          #{item.workday} * #{map.principal} /100,
+          #{item.workday} * #{map.headman} /100,
+           #{date}, 1, now(), #{id})
+        </when>
+      </choose>
+  </foreach>
+    on duplicate key update
+    workday = values(workday),
+    designer_workday = values(designer_workday),
+    checker_workday = values(checker_workday),
+    principal_workday = values(principal_workday),
+    headman_workday = values(headman_workday),
+    `state` = values(`state`),
+    `handler` = values(`handler`),
+    `time` = values(`time`),
+    `check` = values(`check`)
+  </update>
+  <insert id="setBWorkdayByGeneral">
+    insert  into project_workday_backup( project_id, `number`, `name`, dep, tec,  workday, `time`, `handler`, apply, `check`)
+    values (#{map.pid}, #{map.number},
+        #{map.name}, #{map.dep}, #{map.tec}, #{map.workday}, now(), #{userId}, #{map.workday},1 )
+  </insert>
+  <insert id="setMWorkdayByGeneral">
+    insert  into project_workday_manage(project_id, `number`, `name`, designer,
+                                        workday,planned_end, `end`, `date`, `time`, `handler`)
+    values (#{map.pid}, #{map.number},#{map.name}, #{userId},
+            #{map.workday},#{map.planned_end}, #{map.end}, #{map.date}, now(), #{userId})
+  </insert>
+  <insert id="setUserWorkday">
+    insert into workday_user
+    (project_id, `user`, `ratio`,`type` )
+    values
+    <foreach collection="list" item="item" separator=",">
+      <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="item.ratio != null and item.ratio != ''">
+          #{id}, #{item.name}, #{item.ratio}/100 , #{type}
+        </if>
+      </trim>
+    </foreach>
+    on duplicate key update
+    ratio = values(ratio)
+  </insert>
+  <select id="queryProWorkday" resultMap="queryProjectWorkday">
+    SELECT
+      p.id,
+      p.number,
+      p.`name`,
+      p.general,
+      p.mold,
+      ifnull( p.money, 0 ) AS money,
+      IFNULL( w.num, 0 ) AS num,
+      IFNULL( manage, 0 ) AS manage,
+      IFNULL( tec, 0 ) AS tec,
+      IFNULL( `backup`, 0 ) AS `backup`,
+      d.`check`,
+      c.checker AS checkerId,
+      EXISTS (
+              SELECT
+                w.id
+              FROM
+                workday_tec w
+              WHERE
+                w.project_id = #{id}
+                AND EXISTS ( SELECT p.id FROM workday_tec_principal p WHERE w.id = p.workday_tec_id )
+        ) AS exist
+    FROM
+      project p
+        LEFT JOIN project_workday w ON p.id = w.project_id
+        LEFT JOIN project_workday_distribute d ON w.project_id = d.project_id
+        LEFT JOIN project_checker c ON c.project_id = p.id
+    WHERE
+      p.id = #{id}
+    GROUP BY
+      w.project_id
+  </select>
+  <select id="queryTecWorkdayAmount" resultType="java.util.Map">
+    SELECT
+      project_id,
+      volume_tec as tec,
+      amount
+    FROM
+        workday_tec
+    where project_id = #{id}
+  </select>
+  <select id="queryTecPrincipalExist" resultType="java.lang.Boolean">
+    SELECT EXISTS
+             (
+                   SELECT
+                     id
+                   FROM
+                     workday_tec
+                   WHERE
+                     project_id = #{id}
+
+                     AND ( principal IS NULL OR principal = "" )
+
+             )
+  </select>
+  <select id="queryProSumWorkday" resultMap="queryProjectSumWorkday">
+    SELECT
+      p.id,
+      p.number,
+      p.`name`,
+      p.general,
+      IFNULL( w.num, 0 ) + IFNULL( a.num, 0 ) AS num,
+      IFNULL( d.manage, 0 ) + IFNULL( a.manage, 0 ) AS manage,
+      IFNULL( m.workday, 0 ) AS manageUsed,
+      IFNULL( b.workday, 0 ) AS backupUsed,
+      IFNULL( d.tec, 0 ) + IFNULL( a.tec, 0 ) AS tec,
+      IFNULL( d.`backup`, 0 ) + IFNULL( a.`backup`, 0 ) + IFNULL( tde.workday, 0 ) - IFNULL( de.workday, 0 ) AS `backup`,
+      -(IFNULL( tde.workday, 0 ) - IFNULL( de.workday, 0 )) as deduct,
+      d.`check`,
+      c.checker AS checkerId
+    FROM
+      project p
+        LEFT JOIN project_workday w ON p.id = w.project_id
+        LEFT JOIN project_workday_distribute d ON w.project_id = d.project_id
+        AND d.check = 1
+        LEFT JOIN project_checker c ON c.project_id = p.id
+        LEFT JOIN (
+        SELECT
+          project_id,
+          sum( workday ) AS workday
+        FROM
+          project_workday_manage
+        WHERE
+          project_id = #{id} ) AS m ON m.project_id = p.id
+        LEFT JOIN (
+        SELECT
+          project_id,
+          sum( workday ) AS workday
+        FROM
+          project_workday_backup
+        WHERE
+          project_id = #{id} ) AS b ON b.project_id = p.id
+        LEFT JOIN (
+        SELECT
+          a.project_id,
+          sum( a.num ) AS num,
+          SUM( da.manage ) AS manage,
+          SUM( da.tec ) AS tec,
+          SUM( da.`backup` ) AS `backup`
+        FROM
+          project_workday_add a
+            LEFT JOIN project_workday_distribute_add da ON a.id = da.add_id
+        WHERE
+          a.project_id = #{id}
+          AND a.`check` = 1
+      ) AS a ON a.project_id = p.id
+        LEFT JOIN (
+        SELECT
+          project_id,
+          SUM( manage + volume + `backup` ) AS workday
+        FROM
+          workday_tec_deduct
+        WHERE
+          project_id = #{id} ) AS tde ON tde.project_id = p.id
+        LEFT JOIN (
+        SELECT
+          project_id,
+          SUM( workday ) AS workday
+        FROM
+          workday_deduct
+        WHERE
+          project_id = #{id} ) AS de ON de.project_id = p.id
+
+    WHERE
+      p.id = #{id}
+
+    GROUP BY
+      w.project_id
+  </select>
+  <select id="queryTecSumWorkdayAmount" resultType="java.util.Map">
+    SELECT
+      tab.project_id,
+      `name`,
+      IFNULL( amount, 0 ) AS amount,
+      type,
+      tab.`check`,
+      IFNULL( d.manage, 0 ) - ifnull( tab.manage, 0 ) AS manage,
+      IFNULL( d.volume, 0 ) - ifnull( tab.volume, 0 ) AS volume,
+      amount - IFNULL( d.manage, 0 ) - IFNULL( d.volume, 0 ) AS `backup`,
+      IFNULL( v.workday, 0 ) + IFNULL( vh.workday, 0 ) AS volumeUsed,
+      IFNULL( m.workday, 0 ) + IFNULL( mh.workday, 0 ) AS manageUsed,
+      IFNULL( b.workday, 0 ) + IFNULL( bh.workday, 0 ) + IFNULL(vb.workday,0) AS backupUsed,
+      IFNULL( v.workday, 0 ) + IFNULL( vh.workday, 0 ) + IFNULL( b.workday, 0 ) + IFNULL( bh.workday, 0 ) + IFNULL( m.workday, 0 ) + IFNULL( mh.workday, 0 ) AS used
+    FROM
+      (
+        SELECT
+          wt.project_id,
+          wt.volume_tec AS `name`,
+          wt.amount + IFNULL( a.amount, 0 ) + IFNULL( b.amount, 0 ) - (
+              ifnull( de.`backup`, 0 )+ ifnull( de.manage, 0 )+ ifnull( de.volume, 0 )) AS amount,
+          wt.type AS type,
+          d.`check`,
+          ifnull( de.`backup`, 0 ) AS `backup`,
+          ifnull( de.manage, 0 ) AS manage,
+          ifnull( de.volume, 0 ) AS volume
+        FROM
+          project_workday_distribute d
+            LEFT JOIN workday_tec wt ON wt.project_id = d.project_id
+            AND d.`check` = 1
+            LEFT JOIN (
+            SELECT
+              SUM( amount ) AS amount,
+              volume_tec
+            FROM
+                project_workday_add wa,
+              workday_tec_add a
+            WHERE
+              wa.project_id = #{id}
+            and wa.id = a.add_id
+            and wa.`check` = 1
+            GROUP BY volume_tec ) AS a ON wt.volume_tec = a.volume_tec
+            LEFT JOIN (
+            SELECT
+              SUM( workday ) AS amount,
+              tec
+            FROM
+              project_workday_backup
+            WHERE
+              project_id = #{id}
+            and  `check` = 1 GROUP BY tec ) AS b ON wt.volume_tec = b.tec
+            LEFT JOIN (
+            SELECT
+              SUM( manage ) AS manage,
+              SUM( `backup` ) AS `backup`,
+              SUM( volume ) AS volume,
+              tec
+            FROM
+              workday_tec_deduct
+            WHERE
+              project_id = #{id} GROUP BY tec ) AS de ON wt.volume_tec = de.tec
+
+        WHERE
+          wt.project_id = #{id}
+
+        GROUP BY
+          wt.volume_tec
+      ) AS tab
+        LEFT JOIN (
+        SELECT
+          SUM( w.workday ) AS workday,
+          v.tec
+        FROM
+          volume v
+            LEFT JOIN volume_workday w ON v.id = w.volume_id
+            AND w.submit = 2
+            AND type = 0
+        WHERE
+          v.project_id = #{id}
+
+        GROUP BY
+          v.tec
+      ) AS v ON v.tec = tab.`name`
+        LEFT JOIN (
+        SELECT
+          SUM( w.workday ) AS workday,
+          v.tec
+        FROM
+          volume v
+            LEFT JOIN volume_workday w ON v.id = w.volume_id
+            AND w.submit = 2
+            AND type = 1
+        WHERE
+          v.project_id = #{id}
+        GROUP BY
+          v.tec
+      ) AS vb ON v.tec = tab.`name`
+        LEFT JOIN (
+        SELECT
+          SUM( h.`grant` ) AS workday,
+          v.tec
+        FROM
+          volume v
+            LEFT JOIN volume_workday w ON v.id = w.volume_id
+            AND w.submit &lt;&gt;
+    2
+				LEFT JOIN volume_workday_high h ON w.volume_id = h.volume_id
+				AND h.submit = 2
+				WHERE
+					v.project_id = #{id}
+
+    GROUP BY
+    v.tec
+    ) AS vh ON vh.tec = tab.`name`
+    LEFT JOIN workday_tec_distribute d ON d.project_id = #{id}
+    AND d.tec = tab.`name`
+    LEFT JOIN (
+    SELECT
+    tec,
+    sum( designer_workday + principal_workday + checker_workday + headman_workday ) AS workday
+    FROM
+    project_task
+    WHERE
+    project_id = #{id}
+    AND submit = 2
+    AND type = 0
+    GROUP BY
+    tec
+    ) AS m ON m.tec = tab.`name`
+    LEFT JOIN (
+    SELECT
+    tec,
+    sum( a.advance ) AS workday
+    FROM
+    project_task t
+    LEFT JOIN task_advance a ON t.id = a.task_id
+    AND a.submit = 2
+    WHERE
+    t.project_id = #{id}
+
+    AND t.submit &lt;&gt;
+    2
+    AND type = 0
+    GROUP BY
+    tec
+    ) AS mh ON m.tec = tab.`name`
+    LEFT JOIN (
+    SELECT
+    tec,
+    sum( designer_workday + principal_workday + checker_workday + headman_workday ) AS workday
+    FROM
+    project_task
+    WHERE
+    project_id = #{id}
+    AND submit = 2
+    AND type = 1
+    GROUP BY
+    tec
+    ) AS b ON b.tec = tab.`name`
+    LEFT JOIN (
+    SELECT
+    tec,
+    sum( a.advance ) AS workday
+    FROM
+    project_task t
+    LEFT JOIN task_advance a ON a.task_id = t.id
+    AND t.submit = 2
+    WHERE
+    t.project_id = #{id}
+
+    AND t.submit &lt;&gt;
+    2
+    AND type = 1
+    GROUP BY
+    tec
+    ) AS bh ON b.tec = tab.`name`
+    GROUP BY
+    `name`
+  </select>
+  <select id="queryTecWorkday" resultType="java.util.Map">
+    select volume_tec as `name` , amount as `value`
+    from workday_tec
+    where project_id = #{id}
+   </select>
+  <select id="queryUsedTecWorkday" resultType="java.util.Map">
+    SELECT DISTINCT
+    t.volume_tec AS tec,
+    IFNULL( t.amount, 0 ) + IFNULL( `add`.addAmonunt, 0 ) + IFNULL( b.`backup`, 0 ) - IFNULL( de.deduct, 0 ) AS have,
+    IFNULL( task.used, 0 ) + IFNULL( v.used, 0 ) + IFNULL( vh.used, 0 ) + IFNULL( taskh.used, 0 ) AS used
+    FROM
+    workday_tec t
+    LEFT JOIN ( SELECT SUM( amount ) AS addAmonunt,
+                       volume_tec FROM project_workday_add p,
+                       workday_tec_add t WHERE p.project_id = #{id}
+                       and p.`check` = 1
+                       and p.id = t.add_id
+                       GROUP BY volume_tec ) AS `add` ON t.volume_tec = `add`.volume_tec
+    LEFT JOIN ( SELECT SUM( workday ) AS `backup`, tec FROM project_workday_backup WHERE project_id = #{id} GROUP BY tec ) AS `b` ON t.volume_tec = `b`.tec
+    LEFT JOIN ( SELECT SUM( manage + `backup` + volume ) AS `deduct`, tec FROM workday_tec_deduct WHERE project_id = #{id} GROUP BY tec ) AS `de` ON t.volume_tec = `de`.tec
+    LEFT JOIN (
+    SELECT
+    SUM( w.workday ) AS used,
+    v.tec
+    FROM
+    volume v,
+    volume_workday w
+    WHERE
+    v.project_id = #{id}
+    AND w.volume_id = v.id
+    AND w.submit = 2
+    GROUP BY
+    v.tec
+    ) AS v ON v.tec = t.volume_tec
+    LEFT JOIN (
+    SELECT
+    IFNULL( SUM( designer_workday ), 0 ) + IFNULL( SUM( checker_workday ), 0 ) + IFNULL( SUM( principal_workday ), 0 )+ IFNULL( SUM( headman_workday ), 0 ) AS used,
+    tec
+    FROM
+    project_task
+    WHERE
+    project_id = #{id}
+    AND submit = 2
+    GROUP BY
+    tec
+    ) AS `task` ON t.volume_tec = `task`.tec
+    LEFT JOIN (
+    SELECT
+    SUM( h.`grant` ) AS used,
+    v.tec
+    FROM
+    volume v,
+    volume_workday w,
+    volume_workday_high h
+    WHERE
+    v.project_id = #{id}
+    AND w.volume_id = v.id
+    AND w.submit &lt;&gt; 2
+    AND v.id = h.volume_id
+    AND h.submit = 2
+    GROUP BY
+    v.tec
+    ) AS vh ON vh.tec = t.volume_tec
+    LEFT JOIN (
+    SELECT
+    IFNULL( SUM( a.advance ), 0 ) AS used,
+    t.tec
+    FROM
+    project_task t,
+    task_advance a
+    WHERE
+    t.project_id = #{id}
+    AND t.submit &lt;&gt; 2
+    AND a.task_id = t.id
+    AND a.submit = 2
+    GROUP BY
+    tec
+    ) AS `taskh` ON t.volume_tec = `taskh`.tec
+    WHERE
+    t.project_id = #{id}
+    GROUP BY
+    t.volume_tec
+  </select>
+  <select id="queryWorkdayByGeneral" resultType="java.util.Map">
+    SELECT
+      IFNULL( SUM( da.manage ), 0 ) + d.manage AS manage,
+      IFNULL( SUM( da.`backup` ), 0 ) + d.`backup` AS `backup`,
+      IFNULL( SUM( da.tec ), 0 ) + d.tec AS tec,
+      d.backupUsed,
+      d.manageUsed,
+      d.`check`
+    FROM
+      (
+        SELECT
+          d.project_id,
+          ifnull( d.manage, 0 ) AS manage,
+          ifnull( d.`backup`, 0 ) + IFNULL( tde.workday, 0 ) - IFNULL( de.workday, 0 ) AS `backup`,
+          ifnull( d.tec, 0 ) AS tec,
+          ifnull( sum( b.workday ), 0 ) AS backupUsed,
+          ifnull(  m.workday , 0 ) AS manageUsed,
+          d.`check`
+        FROM
+          project_workday_distribute d
+            LEFT JOIN project_workday_backup b ON b.project_id = d.project_id
+            LEFT JOIN (
+            SELECT
+              SUM(workday) as workday,
+              project_id
+            FROM
+              project_workday_manage
+            WHERE project_id = #{id}
+          ) as m ON m.project_id = d.project_id
+            LEFT JOIN ( SELECT project_id, SUM( manage + volume + `backup` ) AS workday FROM workday_tec_deduct WHERE project_id = #{id} ) AS tde ON tde.project_id = d.project_id
+            LEFT JOIN ( SELECT project_id, SUM( workday ) AS workday FROM workday_deduct WHERE project_id = #{id} ) AS de ON de.project_id = d.project_id
+        WHERE
+          d.project_id = #{id}
+      ) AS d
+        LEFT JOIN project_workday_add a ON a.project_id = d.project_id
+        AND a.`check` = 1
+        LEFT JOIN project_workday_distribute_add da ON da.add_id = a.id
+  </select>
+  <select id="queryUsableBackupWorkday" resultType="java.lang.Double">
+    SELECT
+      ifnull(p.`backup`,0) - IFNULL(SUM( workday ),0)
+    FROM
+      project_workday_distribute p LEFT JOIN
+      workday_backup wb on p.project_id = wb.project_id
+    WHERE
+      p.project_id = #{id}
+  </select>
+  <select id="queryUsableManageWorkday" resultType="java.lang.Double">
+    SELECT
+      ifnull(p.`manage`,0) - IFNULL(SUM( workday ),0)
+    FROM
+      project_workday_distribute p LEFT JOIN
+      workday_manage_user m on p.project_id = m.project_id and m.type = 0
+    WHERE
+      p.project_id = #{id}
+  </select>
+  <select id="queryUsedManageWorkdayByDate" resultType="java.lang.Double">
+    SELECT
+      IFNULL( workday ,0)
+    FROM
+      workday_manage_user
+    WHERE
+      `type` = 0
+      and project_id = #{id}
+        and `date` = #{date}
+  </select>
+  <select id="queryBackupWorkdayAmount" resultType="java.util.Map">
+      select v.tec as `name` , wb.workday, wb.date
+      from volume v
+             LEFT JOIN workday_backup wb on v.tec = wb.volume_tec
+                                             and wb.project_id = v.project_id
+                                             and wb.date = #{date}
+      WHERE
+        v.project_id = #{id}
+      GROUP BY v.tec
+  </select>
+  <select id="queryReserveWorkdayRatio" resultType="java.util.Map">
+    select v.tec as `name` , wt.workday as workday
+    from volume v
+           LEFT JOIN workday_backup wt on v.tec = wt.volume_tec and wt.project_id = v.project_id
+    WHERE
+      v.project_id = #{id}
+    GROUP BY v.tec
+  </select>
+  <select id="statisticAll" resultMap="tecWorkday">
+    select id,`number`, `name`, #{date} as `date`
+    from project
+    where spider = 0
+  </select>
+  <select id="statisticByDate" resultType="java.util.Map">
+    SELECT
+      v.tec,
+    ifnull(COUNT( v.id ),0) AS count,
+	ifnull(t.amount,0) AS have,
+	ifnull(SUM(w.workday),0) as used,
+	ifnull(b.workday,0) as `backup`
+    FROM
+      volume v
+      LEFT JOIN workday_tec t ON v.project_id = t.project_id
+      AND v.tec = t.volume_tec
+      LEFT JOIN workday_backup b ON b.project_id = v.project_id
+      AND b.volume_tec = v.tec
+      AND b.date = #{date}
+      LEFT JOIN volume_workday w on w.volume_id = v.id
+      AND w.date = #{date}
+    WHERE v.project_id = #{id}
+    GROUP BY
+      v.tec
+  </select>
+    <select id="statistic" resultType="java.util.Map">
+      SELECT
+        v.tec,
+        ifnull(COUNT( v.id ),0) AS count,
+	ifnull(t.amount,0) AS have,
+	ifnull(SUM(w.workday),0) as used,
+	ifnull(b.workday,0) as `backup`
+      FROM
+        volume v
+        LEFT JOIN workday_tec t ON v.project_id = t.project_id
+        AND v.tec = t.volume_tec
+        LEFT JOIN workday_backup b ON b.project_id = v.project_id
+        AND b.volume_tec = v.tec
+        LEFT JOIN volume_workday w on w.volume_id = v.id
+      WHERE v.project_id = #{id}
+      GROUP BY
+        v.tec
+    </select>
+  <select id="everyoneAll" resultType="java.util.Map">
+    SELECT DISTINCT
+      u.username,
+      u.id,
+      u.`name`,
+      c.amount_c,
+      d.amount_d,
+      p.amount_p
+    FROM
+      (
+        SELECT
+          u.id,
+          u.`name`,
+          u.username
+        FROM
+          `user` u,
+          volume v
+        WHERE
+          ( v.actual_principal = u.`name` OR v.checker = u.`name` OR v.designer = u.`name` )
+          AND DATE_FORMAT( proofreading_date, '%Y-%m' ) = #{date}
+      ) AS u
+        LEFT JOIN (
+        SELECT DISTINCT
+          u.id,
+          COUNT( v.id ) AS amount_p
+        FROM
+          volume v,
+          `user` u
+        WHERE
+          u.`name` = v.actual_principal
+          AND DATE_FORMAT( proofreading_date, '%Y-%m' ) = #{date}
+        GROUP BY
+          v.actual_principal
+      ) AS p ON u.id = p.id
+        LEFT JOIN (
+        SELECT DISTINCT
+          u.id,
+          COUNT( v.id ) AS amount_d
+        FROM
+          volume v,
+          `user` u
+        WHERE
+          u.`name` = v.designer
+          AND DATE_FORMAT( v.proofreading_date, '%Y-%m' ) = #{date}
+        GROUP BY
+          v.designer
+      ) AS d ON u.id = d.id
+        LEFT JOIN (
+        SELECT DISTINCT
+          u.id,
+          COUNT( v.id ) AS amount_c
+        FROM
+          volume v,
+          `user` u
+        WHERE
+          u.`name` = v.checker
+          AND DATE_FORMAT( v.proofreading_date, '%Y-%m' ) = #{date}
+        GROUP BY
+          v.checker
+      ) AS c ON u.id = c.id
+    GROUP BY
+      id
+  </select>
+  <select id="everyone" resultType="java.util.Map">
+    SELECT DISTINCT
+      u.username,
+      u.id,
+      u.`name`,
+      c.amount_c,
+      d.amount_d,
+      p.amount_p
+    FROM
+      (
+        SELECT
+          u.id,
+          u.`name`,
+          u.username
+        FROM
+          `user` u,
+          volume v
+        WHERE
+          ( v.actual_principal = u.`name` OR v.checker = u.`name` OR v.designer = u.`name` )
+          AND DATE_FORMAT( proofreading_date, '%Y-%m' ) = #{date}
+          and v.project_id = #{id}
+      ) AS u
+        LEFT JOIN (
+        SELECT DISTINCT
+          u.id,
+          COUNT( v.id ) AS amount_p
+        FROM
+          volume v,
+          `user` u
+        WHERE
+          u.`name` = v.actual_principal
+          AND DATE_FORMAT( proofreading_date, '%Y-%m' ) = #{date}
+          and v.project_id = #{id}
+        GROUP BY
+          v.actual_principal
+      ) AS p ON u.id = p.id
+        LEFT JOIN (
+        SELECT DISTINCT
+          u.id,
+          COUNT( v.id ) AS amount_d
+        FROM
+          volume v,
+          `user` u
+        WHERE
+          u.`name` = v.designer
+          AND DATE_FORMAT( v.proofreading_date, '%Y-%m' ) = #{date}
+          and v.project_id = #{id}
+        GROUP BY
+          v.designer
+      ) AS d ON u.id = d.id
+        LEFT JOIN (
+        SELECT DISTINCT
+          u.id,
+          COUNT( v.id ) AS amount_c
+        FROM
+          volume v,
+          `user` u
+        WHERE
+          u.`name` = v.checker
+          AND DATE_FORMAT( v.proofreading_date, '%Y-%m' ) = #{date}
+          and v.project_id = #{id}
+        GROUP BY
+          v.checker
+      ) AS c ON u.id = c.id
+    GROUP BY
+      id
+  </select>
+  <select id="queryTecVolumeRatio" resultType="java.util.Map">
+    SELECT
+      t.id,
+      v.tec,
+    p.name,
+      v.project_id,
+      IFNULL( t.designer, d.designer ) * 100 AS designer,
+      IFNULL( t.checker, d.checker )* 100 AS checker,
+      IFNULL( t.principal, d.principal )* 100 AS principal,
+      IFNULL( t.headman, d.headman )* 100 AS headman
+    FROM
+      `user` u,
+        project p,
+      volume v
+        LEFT JOIN tec_ratio t ON v.project_id = t.project_id
+        AND v.tec = t.tec,
+      default_ratio d
+    WHERE
+      u.id = #{id}
+      AND FIND_IN_SET(
+            u.`name`,
+            REPLACE ( v.principal, ";", "," ))
+      AND d.id = 1
+    and p.id = v.project_id
+    GROUP BY
+      v.project_id , v.tec
+  </select>
+  <select id="queryNewWorkday" resultType="java.util.Map">
+    select `date` , `check`, id, reason
+    from project_workday_add
+    where  project_id = #{id}
+  </select>
+  <select id="queryNewWorkdayByAddId" resultMap="tecWorkdayList">
+    select w.id, w.num,w.reason, d.manage, d.tec, d.backup, w.check
+    from project_workday_add  w
+        left join project_workday_distribute_add d
+            on w.id = d.add_id
+    where  w.id = #{id}
+  </select>
+  <select id="queryTecWorkdayList" resultType="java.util.Map">
+    select volume_tec as name , amount as workday
+    from workday_tec_add
+    where  add_id = #{id}
+  </select>
+  <select id="queryProjectTecWorkdayLog" resultType="java.util.Map">
+    select
+      `time`,
+      amount,
+      reason
+    from (
+           SELECT `time`,
+                  amount,
+                  "工时分配" AS reason
+           FROM workday_tec
+           WHERE project_id = #{id}
+             AND volume_tec = #{tec}
+           UNION
+           SELECT w.time,
+                  w.amount,
+                  p.reason AS reason
+           FROM workday_tec_add w,
+                project_workday_add p
+           WHERE w.project_id = #{id}
+             AND w.volume_tec = #{tec}
+             AND p.`check` = 1
+             AND w.add_id = p.id
+           UNION
+           SELECT
+             `time`,
+             workday AS amount,
+             `name` AS reason
+           FROM
+             project_workday_backup
+           WHERE
+             project_id = #{id}
+             AND tec = #{tec}
+             AND `check` = 1
+           UNION
+           SELECT
+             handler_time as `time`,
+             -(ifnull(manage, 0) + ifnull(volume, 0)+ ifnull(backup, 0)) AS amount,
+             reason
+           FROM
+             workday_tec_deduct
+           WHERE
+             project_id = #{id}
+             AND tec = #{tec}
+         ) as tab
+    order by `time`
+  </select>
+
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.ProjectTaskDao">
+    <insert id="addTask" keyColumn="id" keyProperty="map.taskId" useGeneratedKeys="true" parameterType="map">
+        insert into project_task(
+        <if test="map.id != null and map.id != ''">`id`,</if>
+         `project_id`, `number`, `name`, `principal`, `designer`,`checker`,`headman`, `designer_workday`,`checker_workday`,
+                                 `principal_workday`, `headman_workday` , `planned_end`, `end`,`dep`, `tec`, `type`, `time`, handler)
+        values (   <if test="map.id != null and map.id != ''">#{map.id},</if>#{map.pid}, #{map.number}, #{map.name}, #{id},
+                #{map.designer}, #{map.checker}, #{map.headman}, #{map.designer_workday},#{map.checker_workday}, #{map.principal_workday},
+                #{map.headman_workday}, #{map.planned_end}, #{map.end},#{map.dep}, #{map.tec}, #{map.type}, now(), #{id})
+        on duplicate key update
+        designer = values(designer),
+        `end` = values(`end`)
+    </insert>
+    <insert id="taskLog">
+        insert into project_task_log(user_id, task_id, designer_workday, checker_workday,
+                                     principal_workday, headman_workday, `time` )
+        values (#{id}, #{map.taskId}, #{map.designer_workday}, #{map.checker_workday}, #{map.principal_workday},
+                #{map.headman_workday}, now())
+    </insert> 
+    <update id="taskWorkday">
+        update project_task
+        set designer_workday = #{designer_workday}, checker_workday = #{checker_workday},
+            principal_workday = #{principal_workday}, headman_workday = #{headman_workday}
+        where id = #{taskId}
+    </update>
+    <update id="update">
+        update project_task
+        set ${key} = #{value}
+        where id = #{id}
+    </update>
+    <update id="setAdvance">
+        insert into task_advance(advance, date, task_id)
+        values (#{advance}, #{date}, #{id})
+        on duplicate key update
+        advance = values(advance)
+    </update>
+    <delete id="del">
+        delete
+        from <if test="type == '备用' or type == '管理'">
+             project_task
+            </if>
+        <if test="type == '设总备用'">
+            project_workday_backup
+        </if>
+        <if test="type == '设总管理'">
+            project_workday_manage
+        </if>
+        where id = #{id}
+    </delete>
+    <select id="queryByHumanId">
+        select `id`,p.number as pNumber, p.name as project,
+               `number`, `name`, `principal`, `designer`, `planned_end`, `end`, `tec`, `type`
+        project p,
+        from project_task t left join
+             task_workday w on t.id = w.task_id  and w.date = #{date}
+        where t.principal = #{id} or t.designer = #{id}
+        and p.id = t.project_id
+    </select>
+    <select id="taskExist" resultType="java.lang.Boolean">
+        SELECT EXISTS (
+                       SELECT
+                           id
+                       FROM
+                           `project_task`
+                       WHERE
+                           number = #{number})
+    </select>
+    <select id="queryById" resultType="java.util.Map">
+        SELECT
+            `number`,
+            `name`,
+            ifnull( principal_workday, 0 ) AS principalWorkday,
+            ifnull( designer_workday, 0 ) AS designerWorkday,
+            ifnull( checker_workday, 0 ) AS checkerWorkday,
+            ifnull( headman_workday, 0 ) AS headmanWorkday,
+            ifnull( principal_workday, 0 ) + ifnull( designer_workday, 0 ) + ifnull( checker_workday, 0 ) + ifnull( headman_workday, 0 ) AS workday
+        FROM
+            project_task
+        WHERE
+            id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.TaskDeductDao">
+    <insert id="add">
+        INSERT  INTO workday_deduct(project_id, task_id, task_number, task_name,
+                                user_id, workday, `type`, `handler`, `time`, `reason`, `role`, `tec`, `date`)
+        values
+        <foreach collection="map.deduct" item="item" separator=",">
+               <if test = "item.number != null and item.number != ''">
+                (#{map.projectId}, #{map.taskId}, #{map.number}, #{map.name},
+                #{item.userId}, #{item.number},#{map.type}, #{id}, now(), #{item.reason}, #{item.roleId}, #{map.tec}, #{map.date})
+               </if>
+        </foreach>
+        on duplicate key update
+            workday = values(workday),
+            reason = values(reason)
+
+    </insert>
+    <select id="queryLogById" resultType="java.util.Map">
+        SELECT
+            user_id,
+            workday,
+            `role`,
+            max( CASE `role` WHEN '0' THEN reason ELSE '' END ) AS desReason,
+            max( CASE `role` WHEN '1' THEN reason ELSE '' END ) AS cheReason,
+            max( CASE `role` WHEN '2' THEN reason ELSE '' END ) AS priReason,
+            max( CASE `role` WHEN '3' THEN reason ELSE '' END ) AS heaReason,
+            SUM( CASE `role` WHEN ' 0 ' THEN workday ELSE 0 END ) AS designer,
+            SUM( CASE `role` WHEN ' 1 ' THEN workday ELSE 0 END ) AS checker,
+            SUM( CASE `role` WHEN ' 2 ' THEN workday ELSE 0 END ) AS principal,
+            SUM( CASE `role` WHEN ' 3 ' THEN workday ELSE 0 END ) AS headman
+        FROM
+            workday_deduct
+        WHERE
+            task_id = #{id}
+        GROUP BY
+            task_id
+    </select>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.ProjectWorkdayDeductDao">
+    <insert id="add">
+        insert into workday_tec_deduct( `project_id`, `tec`, `manage`, `volume`, `backup`,
+                                       `handler`, `handler_time`, `reason`, `state`,
+                                        `manageUsable`, `volumeUsable`, `backupUsable`, `num`)
+        values (#{map.id}, #{map.tec}, #{map.manage}, #{map.volume}, #{map.backup}, #{id}, now(),
+                #{map.reason}, 1, #{map.manageUsable}, #{map.volumeUsable}, #{map.backupUsable}, #{map.num})
+    </insert>
+    <update id="close">
+        update workday_tec_deduct
+        set (`state` = 0)
+    </update>
+    <select id="queryLog" resultType="java.util.Map">
+        select id, handler_time, reason from  workday_tec_deduct where  project_id = #{id}
+    </select>
+    <select id="queryLogById" resultType="java.util.Map">
+        select id, `project_id`, `tec`, `manage`, `volume`, `backup`,
+               `handler`, `handler_time`, `reason`, `state`,
+               `manageUsable`, `volumeUsable`, `backupUsable`, `num`
+        from  workday_tec_deduct
+        where  id = #{id}
+    </select>
+    <select id="queryLogByProject" resultType="java.util.Map">
+        SELECT
+            d.task_number as number,
+            d.task_name as `name`,
+            u.`name` as `user`,
+            workday,
+            `role`,
+            reason,
+            "任务工时" as type
+        FROM
+            workday_deduct d LEFT JOIN
+            `user` u on d.user_id = u.id
+        WHERE
+            d.project_id = #{id}
+        UNION
+        SELECT
+            handler_time as number,
+            NULL as `name`,
+            tec as `user`,
+            IFNULL(manage,0) + IFNULL(volume,0) + IFNULL(`backup`,0)workday,
+            null as `role`,
+            reason,
+            "专业工时" as type
+        FROM
+            workday_tec_deduct
+        WHERE
+            project_id = #{id}
+    </select>
+</mapper>

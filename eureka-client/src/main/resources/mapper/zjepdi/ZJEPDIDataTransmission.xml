@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.zjepdi.ZJEPDIDataTransmissionDao">
+    <select id="queryFromZJEPDI" resultType="java.util.Map">
+        SELECT
+            r.ProjectPhaseCode,
+            r.ProjectPhaseName,
+            r.RollCode,
+            r.RollName,
+            r.RollID,
+            r.DelongDeptName,
+            r.MasterDesignerName,
+            r.MasterEngineerName,
+            r.RollOwnerName,
+            r.SpecialtyName,
+            r.PlanStartDate,
+            r.FactStartDate,
+            r.PlanDesignedDate,
+            r.FactDesignedDate,
+            r.PlanMutualVerifyDate,
+            r.MutualVerifyDate,
+            r.PlanOutOfRoomDate,
+            r.OutOfRoomDate,
+            r.VerifyEndDate,
+            r.PlanToPublishDate,
+            r.ToPublishDate,
+            r.PlanPublishedDate,
+            r.PublishedDate,
+            r.FactOutOfCollegeDate,
+            r.PlanSentCustomerDate,
+            s.RollStateName as state,
+            p.checker,
+            p.headman,
+            p.principal
+        FROM
+        [dbo].[RollEntity] r
+        LEFT JOIN (
+        SELECT
+        p.RollID,
+        MAX ( CASE e.verifyRoleName WHEN '校核1' THEN e.OperatorName ELSE NULL END ) AS checker,
+        MAX ( CASE e.verifyRoleName WHEN '主设人' THEN e.OperatorName ELSE NULL END ) AS principal,
+        MAX ( CASE e.verifyRoleName WHEN '组长' THEN e.OperatorName ELSE NULL END ) AS headman
+        FROM
+        [dbo].ProductEntity p
+        LEFT JOIN EPMS_VerifyOperator e ON p.ProductEntityID = e.ProductEntityID
+        AND e.OperatorDate IS NOT NULL
+        AND e.OperatorDate != ''
+        GROUP BY
+        p.RollID
+        ) AS p ON r.RollID = p.RollID,
+        ParamRollState s
+        WHERE
+        s.RollStateID = r.rollStateID
+        and r.ProjectPhaseCode = #{name}
+    </select>
+    <select id="queryIncomeInformation" resultType="java.util.Map">
+        SELECT
+        tab.MarketProjectCode,
+        tab.MarketProjectName,
+        tab.MarketProjectID,
+        tab.ContractID,
+        tab.ContractValue,
+        tab.ContractValueOfEstimate,
+        tab.OperatingIncomeRatioID,
+        tab.LastModifyDate,
+        tab.ActivityInstanceId,
+        tab.processInstanceId,
+        tab.PartName,
+        income.money,
+        income.depMoney,
+        ISNULL( income.depMoney, 0 ) / NULLIF ( income.money, 0 ) AS moneyRatio,
+        projv.[value],
+        projv.depValue,
+        ISNULL( projv.depvalue, 0 ) / NULLIF ( projv.[value], 0 ) AS valueRatio
+        FROM
+        (
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        *,
+        ROW_NUMBER ( ) OVER ( PARTITION BY MarketProjectID ORDER BY LastModifyDate DESC ) rn
+        FROM
+        (
+        SELECT DISTINCT
+        m.MarketProjectCode,
+        m.MarketProjectName,
+        m.MarketProjectID,
+        crp.ContractID,
+        c.ContractValue,
+        c.ContractValueOfEstimate,
+        oir.OperatingIncomeRatioID,
+        oir.LastModifyDate,
+        pi.ActivityInstanceId,
+        wpi.processInstanceId,
+        pi.PartName,
+        pi.PartOrganizationId
+        FROM
+        ZJEPDI.[dbo].[MM_ContractRelateProject] crp,
+        ZJEPDI.[dbo].[MarketProjectEntity] m,
+        ZJEPDI.[dbo].[MM_ContractEntity] c,
+        (
+        SELECT
+        oir.OperatingIncomeRatioID,
+        oir.ContractID,
+        oir.LastModifyDate
+        FROM
+        ZJEPDI.[dbo].MM_OperatingIncomeRatioForm oir
+        WHERE
+        NOT EXISTS ( SELECT 1 FROM ZJEPDI.[dbo].MM_OperatingIncomeRatioForm WHERE oir.ContractID = ContractID AND oir.LastModifyDate &lt; LastModifyDate )
+        ) AS oir
+        LEFT JOIN [WorkflowTrackingDataZJ].[dbo].WorkflowProcessInstance wpi ON wpi.BusinessId = oir.OperatingIncomeRatioID
+        LEFT JOIN [WorkflowTrackingDataZJ].[dbo].ProcessActivityInstance pi ON pi.processInstanceId = wpi.processInstanceId
+        AND pi.PartOrganizationId= '6490AEBD-9B6B-48D4-8F36-4C6D17E226EE'
+        WHERE
+        crp.ProjectPhaseID = m.MarketProjectID
+        AND crp.ContractID = c.ContractID
+        AND crp.ProjectPhaseID &lt;&gt; '00000000-0000-0000-0000-000000000000'
+        AND m.DeptName &lt;&gt; '发电工程公司'
+        AND crp.ContractID = oir.ContractID
+        AND (
+        EXISTS (
+        SELECT
+        pse.MarketProjectID
+        FROM
+        ZJEPDI.[dbo].ProjectPhaseEntity pse,
+        ZJEPDI.[dbo].MM_ProjValSingleSplitOfDept pssd
+        WHERE
+        pssd.DeptID = 'BA1DEBFE-1E6B-4E37-A6A3-0F9FA592C7D3'
+        AND pse.MarketProjectID = m.MarketProjectID
+        AND pse.OrganizationID = pssd.ProjectPhaseID
+        )
+        OR EXISTS ( SELECT sdr.MarketProjectID FROM ZJEPDI.dbo.MM_SingleDeptRatioRecord sdr WHERE sdr.DeptName = '发电工程公司' AND sdr.MarketProjectID = m.MarketProjectID )
+        )
+        AND NOT EXISTS (
+        SELECT
+        wpi.BusinessId
+        FROM
+        [WorkflowTrackingDataZJ].[dbo].ProcessActivityInstance pi,
+        [WorkflowTrackingDataZJ].[dbo].WorkflowProcessInstance wpi
+        WHERE
+        pi.processInstanceId = wpi.processInstanceId
+        AND pi.PartOrganizationId= '6490AEBD-9B6B-48D4-8F36-4C6D17E226EE'
+        AND wpi.BusinessId = oir.OperatingIncomeRatioID
+        AND pi.ActivityStatus = 7
+        AND wpi.ProcessStatus = 7
+        AND wpi.FormId = 229
+        )
+        ) AS tab
+        ) AS tab
+        WHERE
+        rn = 1
+        ) AS tab
+        LEFT JOIN (
+        SELECT
+        tab.MarketProjectID,
+        SUM ( cs.SplitValue ) AS money,
+        tab.depMoney
+        FROM
+        ZJEPDI.dbo.MM_ContractSplit cs,
+        (
+        SELECT
+        sdr.MarketProjectID,
+        SUM ( sdr.DeptRatio * cs.SplitValue / 100 ) AS depMoney
+        FROM
+        ZJEPDI.dbo.MM_SingleDeptRatioRecord sdr,
+        ZJEPDI.dbo.MM_ContractSplit cs
+        WHERE
+        cs.ParamSingleID = sdr.ParamSingleID
+        AND cs.MarketProjectID = sdr.MarketProjectID
+        AND sdr.DeptID = 'ba1debfe-1e6b-4e37-a6a3-0f9fa592c7d3'
+        GROUP BY
+        sdr.MarketProjectID
+        ) AS tab
+        WHERE
+        tab.MarketProjectID = cs.MarketProjectID
+        GROUP BY
+        tab.MarketProjectID ,
+        tab.depMoney
+        ) AS income ON tab.MarketProjectID = income.MarketProjectID
+        LEFT JOIN (
+        SELECT
+        p.MarketProjectID,
+        SUM ( pss.ProjectValue ) AS [value],
+        SUM ( pssd.ProjectValue ) AS depvalue
+        FROM
+        ZJEPDI.[dbo].ProjectPhaseEntity p,
+        ZJEPDI.[dbo].MM_ProjValSingleSplit pss
+        LEFT JOIN ZJEPDI.[dbo].MM_ProjValSingleSplitOfDept pssd ON pss.ProjValSingleSplitID = pssd.ProjValSingleSplitID
+        AND pssd.DeptID = 'BA1DEBFE-1E6B-4E37-A6A3-0F9FA592C7D3'
+        WHERE
+        pss.ProjectPhaseID = p.OrganizationId
+        GROUP BY
+        p.MarketProjectID
+        ) AS projv ON projv.MarketProjectID = tab.MarketProjectID
+    </select>
+</mapper>

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.VirtualDao">
+  <resultMap id="queryDesigner" type="java.util.Map">
+    <result column="id" property="principal" jdbcType="INTEGER"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="vid" property="vid" jdbcType="VARCHAR"/>
+    <collection property="list" column="id = id , vid = vid"
+                javaType="ARRAYLIST" select="queryDesignerByGroup"/>
+  </resultMap>
+  <insert id="setProject" keyProperty="id" useGeneratedKeys="true" keyColumn="id">
+    insert into virtual_project
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+    <if test="name != null">
+      `name`,
+    </if>
+      <if test="number != null">
+        `number`,
+      </if>
+      <if test="workday != null">
+        `workday`,
+      </if>
+      <if test="createDate != null">
+        `create_date`,
+      </if>
+      <if test="createUser != null">
+        `create_user`,
+      </if>
+    </trim>
+    values
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="name != null">
+        #{name},
+      </if>
+      <if test="number != null">
+        #{number},
+      </if>
+      <if test="workday != null">
+        #{workday},
+      </if>
+      <if test="createDate != null">
+        #{createDate},
+      </if>
+      <if test="createUser != null">
+        #{createUser}
+      </if>
+    </trim>
+    on duplicate key update
+    workday = values(workday)
+  </insert>
+  <insert id="addUser">
+    insert into virtual_user(user_id,virtual_id,`role`,`state`, `tid`)
+    values
+    <foreach collection="list" item="item" separator=",">
+    ( #{item.id} , #{id} ,#{item.role}, 1, #{item.tid})
+    </foreach>
+    on duplicate key update
+    `role` = values(`role`),
+    `state` = values(`state`)
+  </insert>
+  <insert id="addUserWorkday">
+    insert into vu_workday(vu_id,workday,`date`)
+    values
+    <foreach collection="list" item="item" separator=",">
+      ( (select id from virtual_user where user_id = #{item.id} and virtual_id = #{id} and `role` = 2),
+       #{item.workday} ,#{date})
+    </foreach>
+    on duplicate key update
+    `workday` = values(`workday`)
+  </insert>
+   <insert id="setWorkday">
+        insert into virtual_workday(virtual_id,`user_id`,workday, `date`, issuer_id)
+        values
+        <foreach collection="map.list" item="item" separator=",">
+               (#{map.id},#{item.id}, #{item.workday}, #{map.date}, #{id})
+        </foreach>
+        on duplicate key update
+        workday = values(workday)
+  </insert>
+  <update id="setState">
+    update virtual_user
+    set `state` = 0
+    where virtual_id = #{id}
+      and `role` = #{role}
+      and user_id not in
+    <foreach collection="list" item="item" open="(" close=")" separator=",">
+      #{item.id}
+    </foreach>
+  </update>
+    <select id="queryRole" resultType="java.util.Map">
+    select vl.user_id as id, u.name as `name`, vw.workday, t.name as tec,t.id as tid
+    from  virtual_user vl
+    LEFT JOIN vu_workday vw on vl.id = vw.vu_id and vw.date = #{map.month}
+    left join technology t on vl.tid = t.id,
+         `user` u
+    where u.id = vl.user_id
+    and  virtual_id = #{map.id}
+    and `role` = #{role}
+    and vl.`state` = 1
+  </select>
+  <select id="queryById" resultType="java.util.Map">
+    SELECT
+      vp.id,
+      vp.`name`,
+      vp.number,
+      vp.workday,
+      vp.create_user AS createUser,
+      vp.create_date AS createDate
+    FROM
+      virtual_project vp
+        LEFT JOIN virtual_user vl ON vp.id = vl.virtual_id 	AND vl.role = 1
+        LEFT JOIN `user` u ON u.id = vl.user_id
+    WHERE
+      vp.id = #{id}
+    GROUP BY
+      vp.id
+  </select>
+  <select id="query" resultType="java.util.Map">
+    SELECT
+      vp.id,
+      vp.`name`,
+      vp.number,
+      vp.workday,
+      vp.create_user as createUser,
+      GROUP_CONCAT( u.NAME SEPARATOR ";" ) AS `general`,
+      vp.create_date AS createDate
+    FROM
+      virtual_project vp
+        LEFT JOIN virtual_user vl ON vp.id = vl.virtual_id
+        AND vl.role = 1 and vl.`state` = 1
+        LEFT JOIN `user` u on u.id = vl.user_id
+
+    GROUP BY
+      vp.id
+  </select>
+  <select id="queryByUser" resultType="java.util.Map">
+    SELECT
+      vp.id,
+      vp.`name`,
+      vp.number,
+      vp.workday,
+      vp.create_user AS createUser,
+      GROUP_CONCAT( u.NAME SEPARATOR ";" ) AS `general`,
+      vp.create_date AS createDate,
+      GROUP_CONCAT( vl.role SEPARATOR ";" ) AS `role`
+    FROM
+      virtual_project vp
+        LEFT JOIN virtual_user vl ON vp.id = vl.virtual_id and vl.state = 1
+        LEFT JOIN `user` u ON u.id = vl.user_id
+        AND vl.role = 1
+    WHERE
+        vl.virtual_id IN ( SELECT virtual_id FROM virtual_user WHERE user_id = #{id} )
+    GROUP BY
+      vp.id
+  </select>
+  <select id="queryUsedWorkday" resultType="java.util.Map">
+    SELECT
+      SUM( w.workday ) AS used,
+      ifnull( vw.workday, 0 ) AS workday
+    FROM
+      virtual_user u LEFT JOIN
+      vu_workday vw on  vw.vu_id = u.id
+        AND vw.date = #{map.date} LEFT JOIN
+      virtual_workday w on 	w.date = vw.date
+
+        AND w.issuer_id = u.user_id
+
+        AND w.virtual_id = u.virtual_id
+    WHERE
+      u.virtual_id = #{map.id}
+      AND u.user_id = #{id}
+      AND u.role = 2
+
+  </select>
+  <select id="queryWorkday" resultType="java.util.Map">
+    SELECT u.name,
+           workday,
+           u.id
+    FROM
+      user u
+        LEFT JOIN virtual_workday v on u.id = v.user_id and v.virtual_id = #{map.id}
+                                           and v.date = #{map.date} and v.issuer_id = #{id}
+    WHERE u.id = #{id}
+    UNION
+    SELECT u.name,
+           workday,
+           u.id
+    FROM
+      user u,
+      virtual_workday v
+    WHERE
+      u.id = v.user_id
+      and v.date = #{map.date}
+      and v.issuer_id = #{id}
+      and v.virtual_id = #{map.id}
+  </select>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.RangeDao">
+    <update id="update">
+        update `range`
+        set `min` = #{min},
+            `max` = #{max}
+        where id = 1
+    </update>
+  <update id="updateDate">
+    update `score_date`
+    set `start` = #{max},
+        `end` = #{min}
+    where id = 1
+  </update>
+  <select id="query" resultType="com.zpepdi.eureka_client.entity.Range">
+        select *
+        from `range`
+    </select>
+    <select id="queryDate" resultType="map">
+      select *
+      from `score_date`
+    </select>
+</mapper>

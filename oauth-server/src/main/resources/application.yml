@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: oauth-server
+  security:
+    user:
+      name: 7499
+      password: 7499
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 7499
+
+server:
+  port: 9100
+
+debug: true
+
+logging:
+  level: #修改日志级别
+    com.jourwon.springcloud.service: debug
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    # 注册到Eureka的注册中心
+    register-with-eureka: true
+    # 获取注册实例列表
+    fetch-registry: true
+    service-url:
+      # 配置注册中心地址
+      defaultZone: http://localhost:9000/eureka/
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.zpepdi.oauth-server.entity

@@ -1,0 +1,2095 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.VolumeDao">
+    <insert id="addFormPro">
+        <foreach collection="volumes" item="item" separator=",">
+        insert into volume
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="item.pid != null and item.pid != ''">
+                project_id,
+            </if>
+            <if test="item.number != null and item.number != ''">
+                `number`,
+            </if>
+            <if test="item.name != null and item.name != ''">
+                `name`,
+            </if>
+            <if test="item.grade != null and item.grade != ''">
+                grade,
+            </if>
+            <if test="item.tecId != null and item.tecId != ''">
+                tec_id,
+            </if>
+            <if test="item.plannedPublicationDate != null and item.plannedPublicationDate != ''">
+                planned_publication_date,
+            </if>
+        </trim>
+        value
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="item.pid != null and item.pid != ''">
+                #{item.pid},
+            </if>
+            <if test="item.number != null and item.number != ''">
+                #{item.number},
+            </if>
+            <if test="item.name != null and item.name != ''">
+                #{item.name },
+            </if>
+            <if test="item.grade != null and item.grade != ''">
+                #{item.grade},
+            </if>
+            <if test="item.tecId != null and item.tecId != ''">
+                #{item.tecId },
+            </if>
+            <if test="item.plannedPublicationDate != null and item.plannedPublicationDate != ''">
+                #{item.plannedPublicationDate}
+            </if>
+            </trim>
+        </foreach>
+    </insert>
+    <insert id="add" parameterType="volume" useGeneratedKeys="true" keyProperty="id">
+        insert into volume
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pid != null and pid != ''">
+                `project_id`,
+            </if>
+            <if test="number != null and number != ''">
+                `number`,
+            </if>
+            <if test="name != null and name != ''">
+                `name`,
+            </if>
+            <if test="grade != null and grade != ''">
+                grade,
+            </if>
+            <if test="tecId != null and tecId != ''">
+                tec_id,
+            </if>
+            <if test="plannedPublicationDate != null and plannedPublicationDate != ''">
+                planned_publication_date,
+            </if>
+            <if test="professionalDate != null and professionalDate != ''">
+                professional_date,
+            </if>
+            <if test="withdrawalDate != null and withdrawalDate != ''">
+                withdrawal_date,
+            </if>
+            <if test="creator != null and creator != ''">
+                creator,
+            </if>
+            <if test="creatorDate != null and creatorDate != ''">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="pid != null and pid != ''">
+            #{pid},
+        </if>
+        <if test="number != null and number != ''">
+            #{number},
+        </if>
+        <if test="name != null and name != ''">
+            #{name},
+        </if>
+        <if test="grade != null and grade != ''">
+            #{grade},
+        </if>
+        <if test="tecId != null and tecId != ''">
+            #{tecId},
+        </if>
+        <if test="plannedPublicationDate != null and plannedPublicationDate != ''">
+            #{plannedPublicationDate},
+        </if>
+        <if test="professionalDate != null and professionalDate != ''">
+            #{professionalDate},
+        </if>
+        <if test="withdrawalDate != null and withdrawalDate != ''">
+            #{withdrawalDate},
+        </if>
+            <if test="creator != null and creator != ''">
+                #{creator},
+            </if>
+            <if test="creatorDate != null and creatorDate != ''">
+                #{creatorDate},
+            </if>
+
+        </trim>
+    </insert>
+    <insert id="addExcelVolume" parameterType="excelProject">
+        <selectKey resultType="integer" keyProperty="vid" order="AFTER">
+            select id
+            from volume
+            where `number` = #{number}
+        </selectKey>
+       insert ignore into volume
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pid != null and pid != ''">
+                `project_id`,
+            </if>
+            <if test="number != null and number != ''">
+                `number`,
+            </if>
+            <if test="volumeName != null and volumeName != ''">
+                `name`,
+            </if>
+            <if test="grade != null and grade != ''">
+                grade,
+            </if>
+            <if test="tid != null and tid != ''">
+                tec_id,
+            </if>
+            <if test="plannedPublicationDate != null and plannedPublicationDate != ''">
+                planned_publication_date,
+            </if>
+            <if test="actualPublicationDate != null and actualPublicationDate != ''">
+                actual_publication_date,
+            </if>
+            <if test="professionalDate != null and professionalDate != ''">
+                professional_date,
+            </if>
+            <if test="withdrawalDate != null and withdrawalDate != ''">
+                withdrawal_date,
+            </if>
+            <if test="checkerCompletionDate != null and checkerCompletionDate != ''">
+                checker_date,
+            </if>
+            <if test="principalCompletionDate != null and principalCompletionDate != ''">
+                principal_date,
+            </if>
+            <if test="headmanCompletionDate != null and headmanCompletionDate != ''">
+                headman_date,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pid != null and pid != ''">
+                #{pid},
+            </if>
+            <if test="number != null and number != ''">
+                #{number},
+            </if>
+            <if test="volumeName != null and volumeName != ''">
+                #{volumeName},
+            </if>
+            <if test="grade != null and grade != ''">
+                #{grade},
+            </if>
+            <if test="tid != null and tid != ''">
+                #{tid},
+            </if>
+            <if test="plannedPublicationDate != null and plannedPublicationDate != ''">
+                #{plannedPublicationDate},
+            </if>
+            <if test="actualPublicationDate != null and actualPublicationDate != ''">
+                #{actualPublicationDate},
+            </if>
+            <if test="professionalDate != null and professionalDate != ''">
+                #{professionalDate},
+            </if>
+            <if test="withdrawalDate != null and withdrawalDate != ''">
+                #{withdrawalDate},
+            </if>
+            <if test="checkerCompletionDate != null and checkerCompletionDate != ''">
+                #{checkerCompletionDate},
+            </if>
+            <if test="principalCompletionDate != null and principalCompletionDate != ''">
+                #{principalCompletionDate},
+            </if>
+            <if test="headmanCompletionDate != null and headmanCompletionDate != ''">
+                #{headmanCompletionDate},
+            </if>
+        </trim>
+    </insert>
+    <insert id="setReason">
+        insert into volume_reason(volume_id,reason,`date`)
+        values (#{id}, #{reason}, now())
+        on duplicate key update
+        reason = values(reason),
+        `date` = values(`date`)
+    </insert>
+    <insert id="setWorkday" parameterType="hashmap">
+        insert into volume_workday(volume_id, `state`, workday,
+                                   designer_workday, checker_workday,
+                                   principal_workday,headman_workday,
+                                   `type`, `date`, `time`, handler)
+        values (#{map.taskId}, #{map.state}, #{map.workday},
+                #{map.designer},#{map.checker}, #{map.principal},#{map.headman},
+                #{map.typeId}, #{map.date}, now(), #{id})
+        ON DUPLICATE KEY UPDATE
+        workday = values(workday),
+        designer_workday = values(designer_workday),
+        checker_workday = values(checker_workday),
+        principal_workday = values(principal_workday),
+        headman_workday = values(headman_workday),
+        `date` = values(`date`),
+        `type` = values(`type`),
+        `check` = 0
+    </insert>
+    <insert id="setWorkdayLog" parameterType="hashmap">
+        insert volume_workday_log(user_id, volume_id, `date`, workday, this_grant, `type`, `old`)
+        values (#{userId}, #{map.taskId}, now(), #{map.workday}, #{map.thisGrant}, #{map.type}, #{map.old})
+    </insert>
+    <update id="setWorkdayHigh" parameterType="hashmap">
+        insert into volume_ratio(volume_id, principal, designer, checker, headman, `check`, `time`, handler )
+        values (#{map.id}, #{map.principal}/100, #{map.designer}/100, #{map.checker}/100,
+                #{map.headman}/100, 0, now(), #{id})
+        on duplicate key update
+            principal = values(`principal`),
+            designer = values(`designer`),
+            checker = values(`checker`),
+            headman = values(`headman`)
+    </update>
+    <update id="setWorkdayAdvance">
+        insert into volume_workday_high(volume_id, `ratio`, `grant`, `date`, `time`, `handler`)
+        values (#{map.id}, #{map.ratio}, #{map.grant} , #{map.date}, now(), #{id})
+        ON DUPLICATE KEY UPDATE
+        `ratio` = values(`ratio`),
+        `grant` = values(`grant`)
+    </update>
+    <update id="setPlanDate">
+        <foreach collection="list" item="item" separator=";">
+            update volume
+            set planned_publication_date = #{item.date},entry_plan_time = now()
+            where `number` = #{item.number}
+        </foreach>
+    </update>
+    <update id="upd">
+        update volume
+        <set>
+        <if test="number != null and number !=''">
+            `number`  = #{number},
+        </if>
+        <if test="name != null and name !=''">
+            `name`  = #{name},
+        </if>
+        <if test="grade != null and grade !=''">
+            `grade`  = #{grade},
+        </if>
+        <if test="tecId != null and tecId !=''">
+            `tec_id`  = #{tecId},
+        </if>
+        <if test="plannedPublicationDate != null and plannedPublicationDate !=''">
+            `planned_publication_date`  = #{plannedPublicationDate},
+        </if>
+        <if test="actualPublicationDate != null and actualPublicationDate !=''">
+            `actual_publication_date`  = #{actualPublicationDate},
+        </if>
+        <if test="professionalDate != null and professionalDate !=''">
+            `professional_date`  = #{professionalDate},
+        </if>
+        <if test="withdrawalDate != null and withdrawalDate !=''">
+            `withdrawal_date`  = #{withdrawalDate},
+        </if>
+        <if test="shotDate != null and shotDate !=''">
+            `shot_date`  = #{shotDate} ,
+        </if>
+        <if test="completeDate != null and completeDate !=''">
+            `complete_time`  = #{completeDate} ,
+        </if>
+            <if test="headmanDate != null and headmanDate !=''">
+                `headman_date`  = #{headmanDate} ,
+            </if>
+            <if test="checkerDate != null and checkerDate !=''">
+                `checker_date`  = #{checkerDate} ,
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <update id="setWorkdayState">
+        UPDATE volume_workday
+        SET `state` = #{now},
+            `date` = #{date}
+        WHERE
+            `state` = 0
+          AND volume_id IN (
+            SELECT
+                v.id
+            FROM
+                project p,
+                volume v
+            WHERE
+                p.spider = #{old}
+              AND p.id = v.project_id
+              AND v.state IN ( "待送出版", "正在出版", "待送业主", "已完成", "院交出" ))
+    </update>
+    <update id="setWorkdayStateById">
+        update volume_workday
+        set `state` = #{state}
+        where volume_id = #{id}
+    </update>
+    <update id="setSinglePlanDate">
+        update volume
+        set planned_publication_date = #{plannedPublictionDate},
+            entry_plan_time = now()
+        where id = #{id}
+    </update>
+    <delete id="del">
+        DELETE volume, volume_workday, volume_workday_high
+        FROM
+            volume
+            LEFT JOIN volume_workday ON volume_workday.volume_id = volume.id
+            LEFT JOIN volume_workday_high ON volume_workday_high.volume_id = volume.id
+        WHERE
+            volume.id = #{id}
+    </delete>
+    <select id="queryById" resultType="java.util.Map">
+        select v.id, v.number, v.name, v.designer, w.workday, w.state
+        from  volume v
+        left join volume_workday w on v.id = w.volume_id
+        where  v.id = #{id}
+    </select>
+  <select id="queryByProjectId" resultType="java.util.Map" parameterType="map">
+      SELECT
+          project_id,
+          id,
+          NULL AS wtid,
+          number,
+          `name`,
+          dep,
+          tec,
+          state,
+          principal,
+          designer,
+          checker,
+          headman,
+          start_date,
+          planned_shot_date,
+          shot_date,
+          proofreading_date,
+          planned_publication_date,
+          actual_publication_date,
+          complete_time,
+          workday_state,
+          workday,
+          format( workday * designer_ratio, 2 ) AS designer_workday,
+          format( workday * checker_ratio, 2 ) AS checker_workday,
+          format( workday * principal_ratio, 2 ) AS principal_workday,
+          format( workday * headman_ratio, 2 ) AS headman_workday,
+          `grant`,
+          reason,
+          CASE
+              type
+              WHEN 1 THEN
+                  "备用" ELSE "卷册"
+              END AS type,
+          TRUE AS hasChildren
+      FROM
+          (
+              SELECT DISTINCT
+                  v.project_id,
+                  v.id AS id,
+                  v.number,
+                  v.`name` AS `name`,
+                  v.dep,
+                  v.tec,
+                  v.state AS state,
+                  v.principal,
+                  v.designer,
+                  v.checker,
+                  v.headman,
+                  ifnull( r.designer, tr.designer ) AS designer_ratio,
+                  ifnull( r.principal, tr.principal ) AS principal_ratio,
+                  ifnull( r.checker, tr.checker ) AS checker_ratio,
+                  ifnull( r.headman, tr.headman ) AS headman_ratio,
+                  v.planned_start_date,
+                  v.start_date,
+                  v.planned_shot_date,
+                  v.shot_date,
+                  v.proofreading_date,
+                  v.planned_publication_date,
+                  v.actual_publication_date,
+                  v.complete_time,
+                  CASE
+                      w.`check`
+                      WHEN 0 THEN
+                          "未审核" ELSE
+                          CASE
+                              w.submit
+                              WHEN 0 THEN
+                                  "未申报"
+                              WHEN 1 THEN
+                                  "已申报"
+                              WHEN 2 THEN
+                                  "已发放"
+                              WHEN 3 THEN
+                                  "申报被拒" ELSE "未填报"
+                              END
+                      END AS workday_state,
+                  w.workday,
+                  sum(h.`grant`) as `grant`,
+                  s.reason,
+                  w.type
+              FROM
+                  volume v
+                      LEFT JOIN volume_workday w ON v.id = w.volume_id
+                      LEFT JOIN volume_ratio r ON v.id = r.volume_id
+                      LEFT JOIN tec_ratio tr ON tr.tec = v.tec
+                      AND v.project_id = tr.project_id
+                      LEFT JOIN volume_workday_high h ON v.id = h.volume_id and h.submit = 2
+                      LEFT JOIN volume_reason s ON v.id = s.volume_id
+              WHERE
+                  v.project_id = #{id}
+              GROUP BY
+                  v.id ) as tab UNION
+      SELECT
+          t.project_id,
+          t.`id`,
+          w.id AS wtid,
+          t.`number`,
+          t.`name`,
+          t.dep,
+          t.`tec`,
+          IF
+              (( t.`end` IS NULL OR t.`end` = "" ), "正在设计", "已完成" ) AS state,
+          u.`name` AS `principal`,
+          u1.`name` AS `designer`,
+          u2.`name` AS checker,
+          u3.`name` AS headman,
+          NULL AS start_date,
+          `planned_end` AS planned_shot_date,
+          `end` AS shot_date,
+          NULL AS proofreading_date,
+          NULL AS planned_publication_date,
+          NULL AS actual_publication_date,
+          NULL AS complete_time,
+          CASE
+              t.submit
+              WHEN 0 THEN
+                  "未申报"
+              WHEN 1 THEN
+                  "已申报"
+              WHEN 2 THEN
+                  "已发放"
+              WHEN 3 THEN
+                  "申报被拒" ELSE "未填报"
+              END AS workday_state,
+          t.designer_workday + t.checker_workday + t.principal_workday + t.headman_workday AS workday,
+          t.designer_workday,
+          t.checker_workday,
+          t.principal_workday,
+          t.headman_workday,
+          sum(w.advance) AS `grant`,
+          NULL AS reason,
+          CASE
+              type
+              WHEN 0 THEN
+                  "管理" ELSE "备用"
+              END AS type,
+          TRUE AS hasChildren
+      FROM
+          `user` u,
+          project_task t
+              LEFT JOIN task_advance w ON t.id = w.task_id
+              LEFT JOIN `user` u1 ON u1.id = t.designer
+              LEFT JOIN `user` u2 ON u2.id = t.checker
+              LEFT JOIN `user` u3 ON u3.id = t.headman
+      WHERE
+
+          t.project_id = #{id}
+
+        AND u.id = t.principal
+      group by t.id
+     UNION
+      SELECT
+          t.project_id,
+          t.`id`,
+          NULL AS wtid,
+          t.`number`,
+          t.`name`,
+          NULL AS dep,
+          NULL AS `tec`,
+          IF
+              (( t.`end` IS NULL OR t.`end` = "" ), "正在设计", "已完成" ) AS state,
+          NULL AS `principal`,
+          u1.NAME AS `designer`,
+          NULL AS checker,
+          NULL AS headman,
+          NULL AS start_date,
+          `planned_end` AS planned_shot_date,
+          `end` AS shot_date,
+          NULL AS proofreading_date,
+          NULL AS planned_publication_date,
+          NULL AS actual_publication_date,
+          t.`date` AS complete_time,
+          NULL AS workday_state,
+          t.workday AS workday,
+          NULL AS designer_workday,
+          NULL AS checker_workday,
+          NULL AS principal_workday,
+          NULL AS headman_workday,
+          NULL AS `grant`,
+          NULL AS reason,
+          "设总管理" AS type,
+          TRUE AS hasChildren
+      FROM
+          `user` u1,
+          project p,
+          project_workday_manage t
+      WHERE
+          t.project_id = #{id}
+        AND u1.id = t.designer
+  </select>
+    <select id="queryVolume" resultType="java.util.Map">
+    <if test="user != null and user !=''">
+    SELECT
+      v.id,
+      v.`name`,
+      v.number,
+      v.designer,
+      v.checker,
+      v.principal,
+    v.headman,
+      v.state,
+       v.rollId,
+       p.general,
+      p.`name` as projectName
+    FROM
+      project p,
+      volume v
+    WHERE
+      p.id = v.project_id
+      AND (
+        v.checker = #{user}
+        OR v.designer = #{user}
+        OR ( v.principal = #{user}
+        AND v.principal NOT LIKE "%;%" )
+      OR ((
+          SUBSTRING_INDEX( v.principal, "", 1 )= #{user}
+          OR SUBSTRING_INDEX( v.principal, ";",- 1 )= #{user})
+    AND v.principal LIKE "%;%")
+    	OR ( p.general = #{user} AND p.general NOT LIKE "%;%" )
+      OR ((
+          SUBSTRING_INDEX( p.general, "", 1 )= #{user}
+          OR SUBSTRING_INDEX( p.general, ";",- 1 )= #{user}
+          )
+        AND p.general LIKE "%;%"
+        )
+	  )
+    </if>
+	  <if test="user != null and volume != null and user !='' and volume !=''">
+      union distinct
+    </if>
+    <if test="volume != null and volume !=''">
+      SELECT
+      v.id,
+      v.`name`,
+      v.number,
+      v.designer,
+      v.checker,
+      v.principal,
+      v.rollId,
+      v.state,
+      p.general,
+      p.`name` as projectName
+      FROM
+      project p,
+      volume v
+      WHERE
+      p.id = v.project_id
+      AND (
+      v.number like "%"#{volume}"%"
+      or v.name like "%"#{volume}"%"
+      )
+    </if>
+    </select>
+    <select id="queryByNumber" resultType="java.util.Map">
+      SELECT
+        pid,
+        projectName,
+        director,
+        general,
+        id,
+        number,
+        volumeName,
+        dep,
+        tec,
+        state,
+        principal,
+        designer,
+        checker,
+        workday,
+        planned_start_date,
+        planned_shot_date,
+        shot_date,
+        proofreading_date,
+        formId,
+        wfInstId,
+        rollId,
+        planned_publication_date,
+        actual_publication_date,
+        complete_time,
+        GROUP_CONCAT( role ) as role,
+        DATE_FORMAT( planned_shot_date, "%Y-%m" )
+      FROM
+        (
+          SELECT DISTINCT
+            p.id AS pid,
+            p.name AS projectName,
+            p.director,
+            p.general,
+            v.id AS id,
+            v.number,
+            v.name AS volumeName,
+            v.dep,
+            v.tec,
+            v.state,
+            v.principal,
+            v.designer,
+            v.checker,
+            v.workday,
+            v.planned_start_date,
+            v.planned_shot_date,
+            v.shot_date,
+            v.proofreading_date,
+            v.formId,
+            v.wfInstId,
+            v.rollId,
+            v.planned_publication_date,
+            v.actual_publication_date,
+            v.complete_time,
+            1 AS role
+          FROM
+            project p,
+            volume v
+          WHERE
+            v.project_id = p.id
+            AND FIND_IN_SET(
+            #{name},
+            REPLACE ( v.principal, ";", "," ))
+            AND FIND_IN_SET(
+            SUBSTRING_INDEX(#{number},"+",1),
+            REPLACE ( v.number, "+", "," ))
+          UNION
+          SELECT DISTINCT
+            p.id AS pid,
+            p.name AS projectName,
+            p.director,
+            p.general,
+            v.id AS id,
+            v.number,
+            v.name AS volumeName,
+            v.dep,
+            v.tec,
+            v.state,
+            v.principal,
+            v.designer,
+            v.checker,
+            v.workday,
+            v.planned_start_date,
+            v.planned_shot_date,
+            v.shot_date,
+            v.proofreading_date,
+            v.formId,
+            v.wfInstId,
+            v.rollId,
+            v.planned_publication_date,
+            v.actual_publication_date,
+            v.complete_time,
+            2 AS role
+          FROM
+            project p,
+            volume v
+          WHERE
+            v.project_id = p.id
+            AND v.designer = #{name}
+            AND FIND_IN_SET(
+            SUBSTRING_INDEX(#{number},"+",1),
+            REPLACE ( v.number, "+", "," ))
+          union
+          SELECT DISTINCT
+            p.id AS pid,
+            p.name AS projectName,
+            p.director,
+            p.general,
+            v.id AS id,
+            v.number,
+            v.name AS volumeName,
+            v.dep,
+            v.tec,
+            v.state,
+            v.principal,
+            v.designer,
+            v.checker,
+            v.workday,
+            v.planned_start_date,
+            v.planned_shot_date,
+            v.shot_date,
+            v.proofreading_date,
+            v.formId,
+            v.wfInstId,
+            v.rollId,
+            v.planned_publication_date,
+            v.actual_publication_date,
+            v.complete_time,
+            3 AS role
+          FROM
+            project p,
+            volume v
+          WHERE
+            v.project_id = p.id
+            AND v.checker = #{name}
+            AND FIND_IN_SET(
+            SUBSTRING_INDEX(#{number},"+",1),
+            REPLACE( v.number, "+","," ))
+        ) AS dataTable
+      where number &lt;&gt; #{number}
+      GROUP BY
+        number
+    </select>
+  <select id="queryByDate" resultType="java.util.Map">
+      SELECT
+          v.id,
+          v.number,
+          v.name,
+          v.tec,
+          v.dep,
+          v.state,
+          v.principal,
+          v.chief,
+          v.designer,
+          v.checker,
+          v.headman,
+          planned_start_date,
+          planned_publication_date,
+          actual_publication_date,
+          professional_date,
+          withdrawal_date,
+          planned_shot_date,
+          shot_date,
+          professional_date,
+          complete_time,
+          actual_principal,
+          w.workday,
+          CASE
+              w.state
+              WHEN 0 THEN
+                  '未发放'
+              WHEN 1 THEN
+                  '已发放'
+              WHEN 2 THEN
+                  '部分发放'
+              WHEN 3 THEN
+                  '已发放'
+              END AS workday_state
+      FROM
+          volume v
+              LEFT JOIN volume_workday w ON v.id = w.volume_id
+      WHERE
+          p.id = v.project_id
+        AND p.spider = 0
+    and DATE_FORMAT(proofreading_date,'%Y-%m' ) = #{date}
+  </select>
+  <select id="personalVolume" resultType="java.util.Map">
+    SELECT DISTINCT
+    v.*,
+    p.number as pNumber,
+    p.`name` as pName
+    FROM
+    volume v,
+    project p
+    WHERE
+    v.actual_principal = #{name}
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+    and p.id = v.project_id UNION
+    SELECT DISTINCT
+    v.*,
+    p.number as pNumber,
+    p.`name` as pName
+    FROM
+    volume v,
+    project p
+    WHERE
+    v.designer = #{name}
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+      and p.id = v.project_id UNION
+    SELECT DISTINCT
+    v.*,
+    p.number as pNumber,
+    p.`name` as pName
+    FROM
+    volume v,
+    project p
+    WHERE
+    v.checker = #{name}
+    AND v.proofreading_date &gt;= #{min}
+    AND v.proofreading_date &lt;= #{max}
+      and p.id = v.project_id
+  </select>
+    <select id="queryVolumeWorkdayHigh" resultType="java.util.Map">
+            SELECT
+                v.project_id,
+                v.id,
+                v.tec,
+                w.workday,
+                w.state,
+                w.type,
+                IFNUll( max(h.`ratio`), 0 ) AS `ratio`,
+                IFNULL(max(h1.ratio),0) as `max`
+            FROM
+                volume v
+                left join volume_workday w on w.volume_id = v.id
+                LEFT JOIN volume_workday_high h ON v.id = h.volume_id
+                LEFT JOIN volume_workday_high h1 ON h1.volume_id = h.volume_id
+                AND h1.submit = 2
+            WHERE
+                v.id = #{id}
+            GROUP BY
+                v.id
+    </select>
+    <select id="queryUsableWorkday" resultType="java.util.Map">
+        SELECT
+            IFNULL( SUM( w.workday ), 0 ) AS used,
+            IFNULL( wt.volume, 0 ) AS amount,
+            IFNULL( w1.workday,0 ) as workday,
+            v.state
+        FROM
+            volume v
+            LEFT JOIN volume_workday w ON w.volume_id IN ( SELECT id FROM volume WHERE v.tec = tec AND v.project_id = project_id )
+            left join volume_workday w1 on w1.volume_id = v.id,
+            workday_tec_distribute wt
+        WHERE
+            v.id = #{id}
+          AND wt.project_id = v.project_id
+          AND v.tec = wt.tec
+    </select>
+     <select id="queryVolumeWorkdayLog" resultType="java.util.Map">
+        SELECT
+        v.number,
+        v.`name` AS volume,
+        u.`name`,
+        l.date,
+        l.workday,
+        l.this_grant,
+        l.type,
+        l.old
+        FROM
+        `user` u,
+        volume_workday_log l,
+        project p,
+        volume v
+        WHERE
+        p.id = #{id}
+        AND v.project_id = p.id
+        AND l.volume_id = v.id
+        AND l.user_id = u.id
+        AND  DATE_FORMAT(l.date,'%Y-%m-%d') &lt;= #{max} AND l.date &gt;= #{min}
+    </select>
+    <select id="queryBackupWorkdayLog" resultType="java.util.Map">
+        SELECT
+               p.number,
+               p.name,
+        u.`name` as `user`,
+        u1.`name` as designer,
+        u2.`name` as checker,
+        u3.`name` as principal,
+        u4.`name` as headman,
+        l.designer_workday,
+        l.checker_workday,
+        l.principal_workday,
+        l.headman_workday,
+        l.time
+        FROM
+        `user` u,
+        project_task_log l,
+        project_task p left join
+            `user` u1 on p.designer = u1.id
+        left join `user` u2 on p.checker = u2.id
+                       left join `user` u3 on p.principal = u3.id
+                       left join `user` u4 on p.headman = u4.id
+        WHERE
+        p.project_id = #{id}
+        AND p.id = l.task_id
+        AND l.user_id = u.id
+            and DATE_FORMAT(l.time,'%Y-%m-%d') &lt;= #{max} AND l.time &gt;= #{min}
+    </select>
+    <select id="queryPlannedPublic" resultType="java.util.Map">
+        SELECT
+        p.number as pnumber,
+        p.`name` as pname,
+        v.number,
+        v.`name`,
+        v.tec,
+        v.designer,
+        v.actual_principal as principal,
+        v.checker,
+        v.headman,
+        v.planned_publication_date,
+        v.actual_publication_date,
+        v.state
+        FROM
+        `project` p,
+        volume v
+        WHERE
+        v.project_id = p.id
+        AND #{start} &lt;= v.planned_publication_date
+        AND v.planned_publication_date &lt;= #{end}
+    </select>
+    <select id="tecProgress" resultType="java.util.Map">
+        SELECT
+        tec,
+        type,
+        IFNULL( `1`, 0 ) AS `1`,
+        IFNULL( `2`, 0 ) AS `2`,
+        IFNULL( `3`, 0 ) AS `3`,
+        IFNULL( `4`, 0 ) AS `4`,
+        IFNULL( `5`, 0 ) AS `5`,
+        IFNULL( `6`, 0 ) AS `6`,
+        IFNULL( `7`, 0 ) AS `7`,
+        IFNULL( `8`, 0 ) AS `8`,
+        IFNULL( `9`, 0 ) AS `9`,
+        IFNULL( `10`, 0 ) AS `10`,
+        IFNULL( `11`, 0 ) AS `11`,
+        IFNULL( `12`, 0 ) AS `12`,
+        IFNULL( `plan1`, 0 ) AS `plan1`,
+        IFNULL( `plan2`, 0 ) AS `plan2`,
+        IFNULL( `plan3`, 0 ) AS `plan3`,
+        IFNULL( `plan4`, 0 ) AS `plan4`,
+        IFNULL( `plan5`, 0 ) AS `plan5`,
+        IFNULL( `plan6`, 0 ) AS `plan6`,
+        IFNULL( `plan7`, 0 ) AS `plan7`,
+        IFNULL( `plan8`, 0 ) AS `plan8`,
+        IFNULL( `plan9`, 0 ) AS `plan9`,
+        IFNULL( `plan10`, 0 ) AS `plan10`,
+        IFNULL( `plan11`, 0 ) AS `plan11`,
+        IFNULL( `plan12`, 0 ) AS `plan12`,
+        IFNULL( incomplete, 0 ) AS incomplete,
+        IFNULL( num, 0 ) AS num,
+        IFNULL( `avg`, 0 ) AS `avg`,
+        IFNULL( ROUND( lastNum / avg, 1 ), 0 ) AS rate
+        FROM
+        (
+        SELECT
+        m.big_name AS tec,
+        m.did,
+        0 AS type,
+        MAX(
+        IF
+        ( m.`month` = 1, tab.num, 0 )) AS `1`,
+        MAX(
+        IF
+        ( m.`month` = 2, tab.num, 0 )) AS `2`,
+        MAX(
+        IF
+        ( m.`month` = 3, tab.num, 0 )) AS `3`,
+        MAX(
+        IF
+        ( m.`month` = 4, tab.num, 0 )) AS `4`,
+        MAX(
+        IF
+        ( m.`month` = 5, tab.num, 0 )) AS `5`,
+        MAX(
+        IF
+        ( m.`month` = 6, tab.num, 0 )) AS `6`,
+        MAX(
+        IF
+        ( m.`month` = 7, tab.num, 0 )) AS `7`,
+        MAX(
+        IF
+        ( m.`month` = 8, tab.num, 0 )) AS `8`,
+        MAX(
+        IF
+        ( m.`month` = 9, tab.num, 0 )) AS `9`,
+        MAX(
+        IF
+        ( m.`month` = 10, tab.num, 0 )) AS `10`,
+        MAX(
+        IF
+        ( m.`month` = 11, tab.num, 0 )) AS `11`,
+        MAX(
+        IF
+        ( m.`month` = 12, tab.num, 0 )) AS `12`,
+        MAX(
+        IF
+        ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
+        MAX(
+        IF
+        ( m.`month` = 2, plan.num, 0 )) AS `plan2`,
+        MAX(
+        IF
+        ( m.`month` = 3, plan.num, 0 )) AS `plan3`,
+        MAX(
+        IF
+        ( m.`month` = 4, plan.num, 0 )) AS `plan4`,
+        MAX(
+        IF
+        ( m.`month` = 5, plan.num, 0 )) AS `plan5`,
+        MAX(
+        IF
+        ( m.`month` = 6, plan.num, 0 )) AS `plan6`,
+        MAX(
+        IF
+        ( m.`month` = 7, plan.num, 0 )) AS `plan7`,
+        MAX(
+        IF
+        ( m.`month` = 8, plan.num, 0 )) AS `plan8`,
+        MAX(
+        IF
+        ( m.`month` = 9, plan.num, 0 )) AS `plan9`,
+        MAX(
+        IF
+        ( m.`month` = 10, plan.num, 0 )) AS `plan10`,
+        MAX(
+        IF
+        ( m.`month` = 11, plan.num, 0 )) AS `plan11`,
+        MAX(
+        IF
+        ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
+        max(
+        IF
+        ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
+        inc.incomplete,
+        s.num AS num,
+        ROUND( num6 / 6, 0 ) AS `avg`
+        FROM
+        ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        m.did,
+        mon.`month` AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        `month` mon
+        LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND YEAR ( v.actual_publication_date ) = #{year}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        m.big_name,
+        mon.`month`
+        ) AS tab ON tab.tec = m.big_name
+        AND tab.`month` = m.`month`
+        left join (
+            SELECT
+                COUNT(*) AS num,
+                m.big_name AS tec
+            FROM
+                project p,
+                major_contrast_technology m,
+                 volume v
+            WHERE
+                p.id = v.project_id
+              AND v.tec = m.small_name
+              AND RIGHT ( p.number, 1 ) = "s"
+              AND YEAR ( v.actual_publication_date ) = #{year}
+              AND v.number NOT LIKE "%+%"
+            GROUP BY
+                m.big_name
+            ) as s on  s.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        m.did,
+        DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND YEAR ( v.planned_publication_date ) = #{year}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        m.big_name,
+        DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+        AND plan.`month` = m.`month`
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS incomplete,
+        m.big_name AS tec
+        FROM
+        (
+        SELECT
+        v.id,
+        v.tec
+        FROM
+        project p,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND p.id = v.project_id
+        AND v.number NOT LIKE "%+%"
+        AND v.actual_publication_date IS NULL UNION
+        SELECT
+        v.id,
+        v.tec
+        FROM
+        project p,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND p.id = v.project_id
+        AND v.number NOT LIKE "%+%"
+        AND v.actual_publication_date = ""
+        ) AS v,
+        major_contrast_technology m
+        WHERE
+        v.tec = m.small_name
+        GROUP BY
+        m.big_name
+        ) AS inc ON inc.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT( v.id ) AS num6,
+        m.big_name AS tec
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND v.tec = m.small_name
+        AND p.id = v.project_id
+        AND v.number NOT LIKE "%+%"
+        AND v.actual_publication_date &gt;= DATE_FORMAT( NOW()- INTERVAL '6' MONTH, "%Y-%m-01" )
+        AND v.actual_publication_date &lt; DATE_FORMAT( NOW(), "%Y-%m-01" )
+        GROUP BY
+        m.big_name
+        ) AS a ON a.tec = m.big_name
+        GROUP BY
+        tec UNION
+        SELECT
+        m.big_name AS tec,
+        m.did,
+        1 AS type,
+        MAX(
+        IF
+        ( m.`month` = 1, tab.num, 0 )) AS `1`,
+        MAX(
+        IF
+        ( m.`month` = 2, tab.num, 0 )) AS `2`,
+        MAX(
+        IF
+        ( m.`month` = 3, tab.num, 0 )) AS `3`,
+        MAX(
+        IF
+        ( m.`month` = 4, tab.num, 0 )) AS `4`,
+        MAX(
+        IF
+        ( m.`month` = 5, tab.num, 0 )) AS `5`,
+        MAX(
+        IF
+        ( m.`month` = 6, tab.num, 0 )) AS `6`,
+        MAX(
+        IF
+        ( m.`month` = 7, tab.num, 0 )) AS `7`,
+        MAX(
+        IF
+        ( m.`month` = 8, tab.num, 0 )) AS `8`,
+        MAX(
+        IF
+        ( m.`month` = 9, tab.num, 0 )) AS `9`,
+        MAX(
+        IF
+        ( m.`month` = 10, tab.num, 0 )) AS `10`,
+        MAX(
+        IF
+        ( m.`month` = 11, tab.num, 0 )) AS `11`,
+        MAX(
+        IF
+        ( m.`month` = 12, tab.num, 0 )) AS `12`,
+        MAX(
+        IF
+        ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
+        MAX(
+        IF
+        ( m.`month` = 2, plan.num, 0 )) AS `plan2`,
+        MAX(
+        IF
+        ( m.`month` = 3, plan.num, 0 )) AS `plan3`,
+        MAX(
+        IF
+        ( m.`month` = 4, plan.num, 0 )) AS `plan4`,
+        MAX(
+        IF
+        ( m.`month` = 5, plan.num, 0 )) AS `plan5`,
+        MAX(
+        IF
+        ( m.`month` = 6, plan.num, 0 )) AS `plan6`,
+        MAX(
+        IF
+        ( m.`month` = 7, plan.num, 0 )) AS `plan7`,
+        MAX(
+        IF
+        ( m.`month` = 8, plan.num, 0 )) AS `plan8`,
+        MAX(
+        IF
+        ( m.`month` = 9, plan.num, 0 )) AS `plan9`,
+        MAX(
+        IF
+        ( m.`month` = 10, plan.num, 0 )) AS `plan10`,
+        MAX(
+        IF
+        ( m.`month` = 11, plan.num, 0 )) AS `plan11`,
+        MAX(
+        IF
+        ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
+        max(
+        IF
+        ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
+        inc.incomplete,
+        s.num AS num,
+        ROUND( num6 / 6, 0 ) AS `avg`
+        FROM
+        ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        m.did,
+        mon.`month` AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        `month` mon
+        LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND YEAR ( v.actual_publication_date ) = #{year}
+        AND v.number LIKE "%+%"
+        GROUP BY
+        m.big_name,
+        mon.`month`
+        ) AS tab ON tab.tec = m.big_name
+        AND tab.`month` = m.`month`
+        left join (
+            SELECT
+                COUNT(*) AS num,
+                m.big_name AS tec
+            FROM
+                project p,
+                major_contrast_technology m,
+                volume v
+            WHERE
+                p.id = v.project_id
+              AND v.tec = m.small_name
+              AND RIGHT ( p.number, 1 ) = "s"
+              AND YEAR ( v.actual_publication_date ) = #{year}
+              AND v.number LIKE "%+%"
+            GROUP BY
+                m.big_name
+        ) as s on  s.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        m.did,
+        DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND YEAR ( v.planned_publication_date ) = #{year}
+        AND v.number LIKE "%+%"
+        GROUP BY
+        m.big_name,
+        DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+        AND plan.`month` = m.`month`
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS incomplete,
+        m.big_name AS tec
+        FROM
+        (
+        SELECT
+        v.id,
+        v.tec
+        FROM
+        project p,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND p.id = v.project_id
+        AND v.number LIKE "%+%"
+        AND v.actual_publication_date IS NULL UNION
+        SELECT
+        v.id,
+        v.tec
+        FROM
+        project p,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND p.id = v.project_id
+        AND v.number LIKE "%+%"
+        AND v.actual_publication_date = ""
+        ) AS v,
+        major_contrast_technology m
+        WHERE
+        v.tec = m.small_name
+        GROUP BY
+        m.big_name
+        ) AS inc ON inc.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT( v.id ) AS num6,
+        m.big_name AS tec
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND v.tec = m.small_name
+        AND p.id = v.project_id
+        AND v.number LIKE "%+%"
+        AND v.actual_publication_date &gt;= DATE_FORMAT( NOW()- INTERVAL '6' MONTH, "%Y-%m-01" )
+        AND v.actual_publication_date &lt; DATE_FORMAT( NOW(), "%Y-%m-01" )
+        GROUP BY
+        m.big_name
+        ) AS a ON a.tec = m.big_name
+        GROUP BY
+        tec
+        ) AS tab
+        GROUP BY
+        tec,
+        `type`
+        ORDER BY
+        did,
+        tec
+    </select>
+    <select id="manageTecProgress" resultType="java.util.Map">
+        SELECT
+        tec,
+        type,
+        IFNULL( `1`, 0 ) AS `1`,
+        IFNULL( `2`, 0 ) AS `2`,
+        IFNULL( `3`, 0 ) AS `3`,
+        IFNULL( `4`, 0 ) AS `4`,
+        IFNULL( `5`, 0 ) AS `5`,
+        IFNULL( `6`, 0 ) AS `6`,
+        IFNULL( `7`, 0 ) AS `7`,
+        IFNULL( `8`, 0 ) AS `8`,
+        IFNULL( `9`, 0 ) AS `9`,
+        IFNULL( `10`, 0 ) AS `10`,
+        IFNULL( `11`, 0 ) AS `11`,
+        IFNULL( `12`, 0 ) AS `12`,
+        IFNULL( `plan1`, 0 ) AS `plan1`,
+        IFNULL( `plan2`, 0 ) AS `plan2`,
+        IFNULL( `plan3`, 0 ) AS `plan3`,
+        IFNULL( `plan4`, 0 ) AS `plan4`,
+        IFNULL( `plan5`, 0 ) AS `plan5`,
+        IFNULL( `plan6`, 0 ) AS `plan6`,
+        IFNULL( `plan7`, 0 ) AS `plan7`,
+        IFNULL( `plan8`, 0 ) AS `plan8`,
+        IFNULL( `plan9`, 0 ) AS `plan9`,
+        IFNULL( `plan10`, 0 ) AS `plan10`,
+        IFNULL( `plan11`, 0 ) AS `plan11`,
+        IFNULL( `plan12`, 0 ) AS `plan12`,
+        IFNULL( incomplete, 0 ) AS incomplete,
+        IFNULL( num, 0 ) AS num,
+        IFNULL( avg, 0 ) AS avg,
+        IFNULL( ROUND( lastNum / avg, 1 ), 0 ) AS rate
+        FROM
+        (
+        SELECT
+        m.big_name AS tec,
+        m.did,
+        0 AS type,
+        MAX(
+        IF
+        ( m.`month` = 1, tab.num, 0 )) AS `1`,
+        MAX(
+        IF
+        ( m.`month` = 2, tab.num, 0 )) AS `2`,
+        MAX(
+        IF
+        ( m.`month` = 3, tab.num, 0 )) AS `3`,
+        MAX(
+        IF
+        ( m.`month` = 4, tab.num, 0 )) AS `4`,
+        MAX(
+        IF
+        ( m.`month` = 5, tab.num, 0 )) AS `5`,
+        MAX(
+        IF
+        ( m.`month` = 6, tab.num, 0 )) AS `6`,
+        MAX(
+        IF
+        ( m.`month` = 7, tab.num, 0 )) AS `7`,
+        MAX(
+        IF
+        ( m.`month` = 8, tab.num, 0 )) AS `8`,
+        MAX(
+        IF
+        ( m.`month` = 9, tab.num, 0 )) AS `9`,
+        MAX(
+        IF
+        ( m.`month` = 10, tab.num, 0 )) AS `10`,
+        MAX(
+        IF
+        ( m.`month` = 11, tab.num, 0 )) AS `11`,
+        MAX(
+        IF
+        ( m.`month` = 12, tab.num, 0 )) AS `12`,
+        MAX(
+        IF
+        ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
+        MAX(
+        IF
+        ( m.`month` = 2, plan.num, 0 )) AS `plan2`,
+        MAX(
+        IF
+        ( m.`month` = 3, plan.num, 0 )) AS `plan3`,
+        MAX(
+        IF
+        ( m.`month` = 4, plan.num, 0 )) AS `plan4`,
+        MAX(
+        IF
+        ( m.`month` = 5, plan.num, 0 )) AS `plan5`,
+        MAX(
+        IF
+        ( m.`month` = 6, plan.num, 0 )) AS `plan6`,
+        MAX(
+        IF
+        ( m.`month` = 7, plan.num, 0 )) AS `plan7`,
+        MAX(
+        IF
+        ( m.`month` = 8, plan.num, 0 )) AS `plan8`,
+        MAX(
+        IF
+        ( m.`month` = 9, plan.num, 0 )) AS `plan9`,
+        MAX(
+        IF
+        ( m.`month` = 10, plan.num, 0 )) AS `plan10`,
+        MAX(
+        IF
+        ( m.`month` = 11, plan.num, 0 )) AS `plan11`,
+        MAX(
+        IF
+        ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
+        max(
+        IF
+        ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
+        inc.incomplete,
+        s.num AS num,
+        ROUND( num6 / 6, 0 ) AS `avg`
+        FROM
+        ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
+        `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        m.did,
+        mon.`month` AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        `month` mon
+        LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND YEAR ( v.actual_publication_date ) = #{year}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        m.big_name,
+        mon.`month`
+        ) AS tab ON tab.tec = m.big_name
+        AND tab.`month` = m.`month`
+            left join (
+            SELECT
+            COUNT(*) AS num,
+            m.big_name AS tec
+            FROM
+            project p,
+            major_contrast_technology m,
+            volume v
+            WHERE
+            p.id = v.project_id
+            AND v.tec = m.small_name
+            AND RIGHT ( p.number, 1 ) = "s"
+            AND YEAR ( v.actual_publication_date ) = #{year}
+            AND v.number NOT LIKE "%+%"
+            GROUP BY
+            m.big_name
+            ) as s on  s.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        m.did,
+        DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND YEAR ( v.planned_publication_date ) = #{year}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        m.big_name,
+        DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+        AND plan.`month` = m.`month`
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS incomplete,
+        m.big_name AS tec
+        FROM
+        (
+        SELECT
+        v.id,
+        v.tec
+        FROM
+        project p,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND p.id = v.project_id
+        AND v.number NOT LIKE "%+%"
+        AND v.actual_publication_date IS NULL UNION
+        SELECT
+        v.id,
+        v.tec
+        FROM
+        project p,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND p.id = v.project_id
+        AND v.number NOT LIKE "%+%"
+        AND v.actual_publication_date = ""
+        ) AS v,
+        major_contrast_technology m
+        WHERE
+        v.tec = m.small_name
+        GROUP BY
+        m.big_name
+        ) AS inc ON inc.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT( v.id ) AS num6,
+        m.big_name AS tec
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND v.tec = m.small_name
+        AND p.id = v.project_id
+        AND v.number NOT LIKE "%+%"
+        AND v.actual_publication_date &gt;= DATE_FORMAT( NOW()- INTERVAL '6' MONTH, "%Y-%m-01" )
+        AND v.actual_publication_date &lt; DATE_FORMAT( NOW(), "%Y-%m-01" )
+        GROUP BY
+        m.big_name
+        ) AS a ON a.tec = m.big_name
+        GROUP BY
+        tec UNION
+        SELECT
+        m.big_name AS tec,
+        m.did,
+        1 AS type,
+        MAX(
+        IF
+        ( m.`month` = 1, tab.num, 0 )) AS `1`,
+        MAX(
+        IF
+        ( m.`month` = 2, tab.num, 0 )) AS `2`,
+        MAX(
+        IF
+        ( m.`month` = 3, tab.num, 0 )) AS `3`,
+        MAX(
+        IF
+        ( m.`month` = 4, tab.num, 0 )) AS `4`,
+        MAX(
+        IF
+        ( m.`month` = 5, tab.num, 0 )) AS `5`,
+        MAX(
+        IF
+        ( m.`month` = 6, tab.num, 0 )) AS `6`,
+        MAX(
+        IF
+        ( m.`month` = 7, tab.num, 0 )) AS `7`,
+        MAX(
+        IF
+        ( m.`month` = 8, tab.num, 0 )) AS `8`,
+        MAX(
+        IF
+        ( m.`month` = 9, tab.num, 0 )) AS `9`,
+        MAX(
+        IF
+        ( m.`month` = 10, tab.num, 0 )) AS `10`,
+        MAX(
+        IF
+        ( m.`month` = 11, tab.num, 0 )) AS `11`,
+        MAX(
+        IF
+        ( m.`month` = 12, tab.num, 0 )) AS `12`,
+        MAX(
+        IF
+        ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
+        MAX(
+        IF
+        ( m.`month` = 2, plan.num, 0 )) AS `plan2`,
+        MAX(
+        IF
+        ( m.`month` = 3, plan.num, 0 )) AS `plan3`,
+        MAX(
+        IF
+        ( m.`month` = 4, plan.num, 0 )) AS `plan4`,
+        MAX(
+        IF
+        ( m.`month` = 5, plan.num, 0 )) AS `plan5`,
+        MAX(
+        IF
+        ( m.`month` = 6, plan.num, 0 )) AS `plan6`,
+        MAX(
+        IF
+        ( m.`month` = 7, plan.num, 0 )) AS `plan7`,
+        MAX(
+        IF
+        ( m.`month` = 8, plan.num, 0 )) AS `plan8`,
+        MAX(
+        IF
+        ( m.`month` = 9, plan.num, 0 )) AS `plan9`,
+        MAX(
+        IF
+        ( m.`month` = 10, plan.num, 0 )) AS `plan10`,
+        MAX(
+        IF
+        ( m.`month` = 11, plan.num, 0 )) AS `plan11`,
+        MAX(
+        IF
+        ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
+        max(
+        IF
+        ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
+        inc.incomplete,
+        s.num AS num,
+        ROUND( num6 / 6, 0 ) AS `avg`
+        FROM
+        ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
+        `user` u WHERE u.id = #{userId} and u.did = m.did ) AS m
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        m.did,
+        mon.`month` AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        `month` mon
+        LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND YEAR ( v.actual_publication_date ) = #{year}
+        AND v.number LIKE "%+%"
+        GROUP BY
+        m.big_name,
+        mon.`month`
+        ) AS tab ON tab.tec = m.big_name
+        AND tab.`month` = m.`month`
+            left join (
+            SELECT
+            COUNT(*) AS num,
+            m.big_name AS tec
+            FROM
+            project p,
+            major_contrast_technology m,
+            volume v
+            WHERE
+            p.id = v.project_id
+            AND v.tec = m.small_name
+            AND RIGHT ( p.number, 1 ) = "s"
+            AND YEAR ( v.actual_publication_date ) = #{year}
+            AND v.number LIKE "%+%"
+            GROUP BY
+            m.big_name
+            ) as s on  s.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        m.did,
+        DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND YEAR ( v.planned_publication_date ) = #{year}
+        AND v.number LIKE "%+%"
+        GROUP BY
+        m.big_name,
+        DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+        AND plan.`month` = m.`month`
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS incomplete,
+        m.big_name AS tec
+        FROM
+        (
+        SELECT
+        v.id,
+        v.tec
+        FROM
+        project p,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND p.id = v.project_id
+        AND v.number LIKE "%+%"
+        AND v.actual_publication_date IS NULL UNION
+        SELECT
+        v.id,
+        v.tec
+        FROM
+        project p,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND p.id = v.project_id
+        AND v.number LIKE "%+%"
+        AND v.actual_publication_date = ""
+        ) AS v,
+        major_contrast_technology m
+        WHERE
+        v.tec = m.small_name
+        GROUP BY
+        m.big_name
+        ) AS inc ON inc.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT( v.id ) AS num6,
+        m.big_name AS tec
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND v.tec = m.small_name
+        AND p.id = v.project_id
+        AND v.number LIKE "%+%"
+        AND v.actual_publication_date &gt;= DATE_FORMAT( NOW()- INTERVAL '6' MONTH, "%Y-%m-01" )
+        AND v.actual_publication_date &lt; DATE_FORMAT( NOW(), "%Y-%m-01" )
+        GROUP BY
+        m.big_name
+        ) AS a ON a.tec = m.big_name
+        GROUP BY
+        tec
+        ) AS tab
+        GROUP BY
+        tec,
+        `type`
+        ORDER BY
+        tec
+    </select>
+    <select id="tecVolumeCompleteByDate" resultType="java.util.Map">
+        SELECT
+        p.number as pNumber,
+        p.name as pName,
+        v.number,
+        v.`name`,
+        v.designer,
+        v.headman,
+        v.actual_principal AS principal,
+        v.checker,
+        v.start_date,
+        v.actual_publication_date,
+        w.workday
+        FROM
+        project p,
+        major_contrast_technology m,
+        `volume` v left join volume_workday w on v.id = w.volume_id
+        WHERE
+        RIGHT ( p.number
+        , 1 ) = "s"
+        AND p.id = v.project_id
+        and m.small_name = v.tec
+        and m.big_name = #{tec}
+        <if test="type == 0">
+            and v.number not LIKE "%+%"
+        </if>
+        <if test="type == 1">
+            and v.number LIKE "%+%"
+        </if>
+        <if test="state == 1">
+            AND DATE_FORMAT( actual_publication_date, '%Y-%m' ) = #{date}
+        </if>
+        <if test="state == 2">
+            AND DATE_FORMAT( actual_publication_date, '%Y' ) = #{date}
+        </if>
+    </select>
+    <select id="tecVolumeInCompleteByDate" resultType="java.util.Map">
+        SELECT
+            p.number as pNumber,
+            p.name as pName,
+            v.number,
+            v.`name`,
+            v.designer,
+            v.headman,
+            v.principal AS principal,
+            v.checker,
+            v.start_date,
+            v.planned_publication_date,
+            w.workday
+        FROM
+            project p,
+            major_contrast_technology m,
+            `volume` v left join volume_workday w on v.id = w.volume_id
+        WHERE
+            RIGHT ( p.number
+            , 1 ) = "s"
+          AND p.id = v.project_id
+        and m.small_name = v.tec
+        and m.big_name = #{tec}
+        <if test="type == 0">
+            and v.number not LIKE "%+%"
+        </if>
+        <if test="type == 1">
+            and v.number LIKE "%+%"
+        </if>
+          and v.actual_publication_date is null
+         union
+        SELECT
+        p.number as pNumber,
+        p.name as pName,
+        v.number,
+        v.`name`,
+        v.designer,
+        v.headman,
+        v.principal AS principal,
+        v.checker,
+        v.start_date,
+        v.planned_publication_date,
+        w.workday
+        FROM
+        project p,
+        major_contrast_technology m,
+        `volume` v left join volume_workday w on v.id = w.volume_id
+        WHERE
+        RIGHT ( p.number
+        , 1 ) = "s"
+        AND p.id = v.project_id
+        and m.small_name = v.tec
+        and m.big_name = #{tec}
+        <if test="type == 0">
+            and v.number not LIKE "%+%"
+        </if>
+        <if test="type == 1">
+            and v.number LIKE "%+%"
+        </if>
+          and v.tec like concat("%",#{tec},"%")
+        <if test="type == 0">
+            and v.number not LIKE "%+%"
+        </if>
+        <if test="type == 1">
+            and v.number LIKE "%+%"
+        </if>
+          and v.actual_publication_date = ''
+    </select>
+    <select id="tecVolumePlanCompleteByDate" resultType="java.util.Map">
+        SELECT
+        p.number as pNumber,
+        p.name as pName,
+        v.number,
+        v.`name`,
+        v.designer,
+        v.headman,
+        v.principal AS principal,
+        v.checker,
+        v.start_date,
+        v.planned_publication_date,
+        w.workday
+        FROM
+        project p,
+        major_contrast_technology m,
+        `volume` v left join volume_workday w on v.id = w.volume_id
+        WHERE
+        RIGHT ( p.number
+        , 1 ) = "s"
+        AND p.id = v.project_id
+        and m.small_name = v.tec
+        and m.big_name = #{tec}
+        <if test="type == 0">
+            and v.number not LIKE "%+%"
+        </if>
+        <if test="type == 1">
+            and v.number LIKE "%+%"
+        </if>
+        AND DATE_FORMAT( planned_publication_date, '%Y-%m' ) = #{date}
+    </select>
+    <select id="queryTodayEntryPlan" resultType="java.util.Map">
+        select id, `number`, `name`, planned_publication_date as plannedPublictionDate
+        from volume
+        where entry_plan_time = DATE_FORMAT(NOW(),"%Y-%m-%d")
+    </select>
+    <select id="queryPlannedPublicDate" resultType="java.util.Map">
+        SELECT
+               id,
+            `number`,
+            `name`,
+            planned_publication_date AS plannedPublictionDate
+        FROM
+            volume
+        WHERE `name` LIKE CONCAT("%",#{search},"%")
+        UNION
+        SELECT
+               id,
+            `number`,
+            `name`,
+            planned_publication_date AS plannedPublictionDate
+        FROM
+            volume
+        WHERE `number` LIKE CONCAT("%",#{search},"%")
+    </select>
+    <select id="queryNotHave" resultType="java.util.Map">
+        SELECT
+            jt.number
+        FROM
+            JSON_TABLE( #{list}, '$[*]' COLUMNS ( `number` VARCHAR ( 40 )
+                PATH '$.number',
+                `date` VARCHAR (20) path '$.date' )) AS jt
+        WHERE
+            NOT EXISTS (
+                    SELECT
+                        v.id
+                    FROM
+                        volume v
+                    WHERE
+                        v.number = jt.number
+                )
+    </select>
+    <select id="queryRecently10Day" resultType="java.util.Map">
+        SELECT
+        p.number AS pNumber,
+        p.`name` AS pName,
+        v.number,
+        v.`name`,
+        v.designer,
+        v.checker,
+        v.headman,
+        v.principal,
+        v.state,
+        v.planned_publication_date,
+        v.start_date
+        FROM
+        project p,
+        volume v
+        WHERE
+        p.generalId = #{userId}
+        AND p.id = v.project_id
+        AND v.planned_publication_date &gt;= DATE_FORMAT( NOW(), '%Y-%m-%d' )
+        AND v.planned_publication_date &lt; DATE_FORMAT( DATE_ADD( NOW(), INTERVAL 10 DAY ), '%Y-%m-%d' ) UNION
+        SELECT
+        p.number AS pNumber,
+        p.`name` AS pName,
+        v.number,
+        v.`name`,
+        v.designer,
+        v.checker,
+        v.headman,
+        v.principal,
+        v.state,
+        v.planned_publication_date,
+        v.start_date
+        FROM
+        project p,
+        volume v
+        WHERE
+        p.generalId = #{userId}
+        AND p.id = v.project_id
+        AND v.planned_publication_date &lt; DATE_FORMAT( NOW(), '%Y-%m-%d' )
+        AND v.actual_publication_date IS NULL UNION
+        SELECT
+        p.number AS pNumber,
+        p.`name` AS pName,
+        v.number,
+        v.`name`,
+        v.designer,
+        v.checker,
+        v.headman,
+        v.principal,
+        v.state,
+        v.planned_publication_date,
+        v.start_date
+        FROM
+        project p,
+        volume v,
+        workday_tec t
+        WHERE
+        FIND_IN_SET( #{userId}, t.principal )
+        AND t.project_id = p.id
+        AND t.project_id = v.project_id
+        AND t.volume_tec = v.tec
+        AND v.planned_publication_date &gt;= DATE_FORMAT( NOW(), '%Y-%m-%d' )
+        AND v.planned_publication_date &lt; DATE_FORMAT( DATE_ADD( NOW(), INTERVAL 10 DAY ), '%Y-%m-%d' ) UNION
+        SELECT
+        p.number AS pNumber,
+        p.`name` AS pName,
+        v.number,
+        v.`name`,
+        v.designer,
+        v.checker,
+        v.headman,
+        v.principal,
+        v.state,
+        v.planned_publication_date,
+        v.start_date
+        FROM
+        project p,
+        volume v,
+        workday_tec t
+        WHERE
+        FIND_IN_SET( #{userId}, t.principal )
+        AND t.project_id = v.project_id
+        AND t.volume_tec = v.tec
+        AND p.id = v.project_id
+        AND v.planned_publication_date &lt;DATE_FORMAT( NOW(), '%Y-%m-%d' )
+        AND v.actual_publication_date IS NULL
+
+    </select>
+    <select id="queryVolumeWorkdayAndRatio" resultType="java.util.Map">
+        SELECT
+            vw.workday,
+            vw.designer_workday,
+            vw.checker_workday,
+            vw.principal_workday,
+            vw.headman_workday,
+            IFNULL( vr.designer, tr.designer ) *100 AS designer,
+            IFNULL( vr.checker, tr.checker )*100 AS checker,
+            IFNULL( vr.principal, tr.principal )*100 AS principal,
+            IFNULL( vr.headman, tr.headman )*100 AS headman
+        FROM
+            volume v
+                LEFT JOIN volume_workday vw ON v.id = vw.volume_id
+                LEFT JOIN volume_ratio vr ON vr.volume_id = v.id
+                LEFT JOIN volume_workday_high h ON v.id = h.`grant`,
+            tec_ratio tr
+        WHERE
+            v.id = #{id}
+          AND v.tec = tr.tec
+          AND v.project_id = tr.project_id
+    </select>
+
+</mapper>

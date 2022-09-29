@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: gateway-service
+  main:
+    allow-bean-definition-overriding: true
+
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowCredentials: true
+            allowedHeaders: '*'
+            allowedMethods: '*'
+            allowedOrigins: '*'
+      httpclient: #http连接设置
+        pool:
+          max-connections: 5000 #最大连接数
+          #       max-life-time: 45000 #最大连接时间
+          acquire-timeout: 15000 #返回时间
+          max-idle-time: 10000 #最大空闲时间
+
+      routes:
+        - id: gateway-server
+          uri: lb://eureka-client
+          predicates:
+            - Path=/api/**
+          filters:
+            - StripPrefix=1
+            - name: Hystrix
+              args:
+                name: default
+                fallbackUri: forward:/defaultfallback
+                timeout:
+                  # 这里暂时用-分隔URL，因为/不支持
+                  demo-control-down_control: 11000
+                  demo-control-down_up: 11000
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds: 8000
+
+#security:
+#  oauth2:
+#    client:
+#      client-id: gateway-server
+#      client-secret: zpepdi7499
+#      user-authorization-uri: http://localhost:9100/oauth/authorize
+#      access-token-uri: http://localhost:9100/token/login
+#    resource:
+#      id: feign-server
+#      user-info-uri: http://localhost:9100/oauth/check_token
+#      jwt:
+#        key-uri: http://localhost:9100/oauth/token_key
+#        key-value: dev
+#    authorization:
+#      check-token-access: http://localhost:9100/oauth/check_token
+
+server:
+  port: 9999
+
+debug: true
+
+logging:
+  level: #修改日志级别
+    com.jourwon.springcloud.service: debug
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    # 注册到Eureka的注册中心
+    register-with-eureka: true
+    # 获取注册实例列表
+    fetch-registry: true
+    service-url:
+      # 配置注册中心地址
+      defaultZone: http://localhost:9000/eureka/
+

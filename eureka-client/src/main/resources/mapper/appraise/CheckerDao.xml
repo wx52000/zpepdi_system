@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.CheckerDao">
+    <insert id="set">
+        insert ignore into checker(chekerId, `type`)
+        values (#{id}, #{type})
+    </insert>
+    <update id="setDepChecker" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert into checker_dep(user_id, did, limit)
+        values(#{userId}, #{did}, #{limit})
+        on duplicate key update
+        limit = values(limit)
+</update>
+    <update id="setCheckerAmount">
+        insert into checker_amount(cd_id, amount, `date`, `year`, surplus)
+        values(#{id}, #{amount}, DATE_FORMAT(NOW(),'%Y-%m-%d'), YEAR(now()), #{surplus})
+        on duplicate key update
+            amount = values(amount),
+            surplus = values(surplus)
+    </update>
+    <delete id="del">
+        delete
+        from checker
+        where checkerId = #{id}
+        and `type` = #{type}
+    </delete>
+    <delete id="delDepChecker">
+        delete d.id, a.id
+        from checker_dep d,
+        checker_amount a
+        where user_id = #{id}
+          and `did` = #{did}
+          and cd_id = d.id
+    </delete>
+    <select id="queryDepChecker" resultType="java.util.Map">
+        SELECT
+            c.id,
+            c.user_id,
+            u.`name`,
+            c.did,
+            d.`name` as dep,
+            c.`limit`,
+            a.amount,
+            a.surplus
+        FROM
+            `user` u,
+            department d,
+            checker_dep c
+                LEFT JOIN checker_amount a ON c.id = a.cd_id
+                AND a.YEAR = YEAR(now())
+        WHERE
+            c.user_id = u.id
+          AND c.did = d.id
+    </select>
+</mapper>

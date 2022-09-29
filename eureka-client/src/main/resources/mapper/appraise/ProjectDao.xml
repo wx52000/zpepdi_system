@@ -1,0 +1,4175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.ProjectDao">
+    <resultMap id="queryUsed" type="map">
+        <result column="id" property="id"></result>
+        <result column="manage" property="manage"></result>
+        <result column="volume" property="volume"></result>
+        <result column="amount" property="amount"></result>
+        <result column="tec" property="tec"></result>
+        <result column="backupUsed" property="backupUsed"></result>
+        <result column="volumeUsed" property="volumeUsed"></result>
+        <result column="manageUsed" property="manageUsed"></result>
+        <result column="check" property="check"></result>
+        <result column="designer" property="designer"></result>
+        <result column="checker" property="checker"></result>
+        <result column="principal" property="principal"></result>
+        <result column="headman" property="headman"></result>
+        <result column="checkerId" property="checkerId"></result>
+        <result column="userId" property="userId"></result>
+        <collection property="list" column="id = id, tec = tec, userId = userId"
+                    javaType="ARRAYLIST" select="queryIncomByProjectId"></collection>
+<!--        <collection property="completeUsed" column="id = id, tec = tec, userId = userId"-->
+<!--                    javaType="DOUBLE" select="completeUsed"></collection>-->
+    </resultMap>
+    <resultMap id="queryTecById" type="map">
+        <result column="id" property="id"></result>
+        <result column="project_id" property="project_id"></result>
+        <result column="tec" property="tec"></result>
+        <result column="type" property="type"></result>
+        <collection property="list" column="id = id"
+                    javaType="ARRAYLIST" select="queryTecPrincipal"></collection>
+    </resultMap>
+    <resultMap id="declareLog" type="map">
+        <result column="project_id" property="project_id"></result>
+        <result column="volume_tec" property="tec"></result>
+        <result column="date" property="date"></result>
+        <collection property="list" column="id = project_id, tec = volume_tec, date = date"
+                    javaType="ARRAYLIST" select="declareLogList"></collection>
+    </resultMap>
+    <insert id="setProject" parameterType="project" useGeneratedKeys="true" keyProperty="project.id" keyColumn="id">
+        insert into project(`number` , `name`, `general`,`generalId`,`type`, `spider`, creator , create_time)
+        values (#{project.number} , #{project.name} , #{project.general}, #{project.generalId}, 0,  #{project.spider}, #{id}, now())
+    </insert>
+    <insert id="setOtherProject" parameterType="map" useGeneratedKeys="true" keyProperty="map.projectId" keyColumn="id">
+        insert into project(
+                            <if test="map.id != null and map.id != ''">
+                                id,
+                            </if>
+                            `number` , `name`, `general`,`generalId`,`type`, `spider`, creator , create_time)
+        values (
+                <if test="map.id != null and map.id != ''">
+                #{map.projectId},
+                </if>
+                    #{map.number} , #{map.name} , #{map.general}, #{map.generalId}, #{type},  1, #{id}, now())
+        on duplicate key update
+        `number` = values(`number`),
+         `name` = values(`name`),
+        `type` = values(`type`),
+        `create_time` = values(`create_time`)
+    </insert>
+    <update id="setProjectChildren">
+        insert into project_children
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">
+                `id`,
+            </if>
+            `project_id` , `check`, `check_handler`, `office_id`,`general`,`generalId`,
+            <if test="cNumber != null and cNumber != ''">
+                `number`,
+            </if>
+            <if test="cName != null and cName != ''">
+                `name`,
+            </if>
+            <if test="stage != null and stage != ''">
+                `stage`,
+            </if>
+            <if test="tec != null and tec != ''">
+                `tec`,
+            </if>
+            <if test="money != null and money != ''">
+                `money`,
+            </if>
+            <if test="ratio != null and ratio != ''">
+                `ratio`,
+            </if>
+            <if test="otherTec != null and otherTec != ''">
+                `other_tec`,
+            </if>
+            <if test="scope != null and scope != ''">
+                `scope`,
+            </if>
+            <if test="plannedDate != null and plannedDate != ''">
+                `planned_date`,
+            </if>
+            <if test="note != null and note != ''">
+                `note`,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">
+                #{projectId},
+            </if>
+        #{projectId} , 0 , #{handler}, #{departmentId},#{general}, #{generalId},
+            <if test="cNumber != null and cNumber != ''">
+                #{cNumber},
+            </if>
+            <if test="cName != null and cName != ''">
+                #{cName},
+            </if>
+        <if test="stage != null and stage != ''">
+            #{stage},
+        </if>
+        <if test="tec != null and tec != ''">
+            #{tec},
+        </if>
+        <if test="money != null and money != ''">
+            #{money},
+        </if>
+        <if test="ratio != null and ratio != ''">
+            #{ratio},
+        </if>
+        <if test="otherTec != null and otherTec != ''">
+            #{otherTec},
+        </if>
+        <if test="scope != null and scope != ''">
+            #{scope},
+        </if>
+        <if test="plannedDate != null and plannedDate != ''">
+            #{plannedDate},
+        </if>
+        <if test="note != null and note != ''">
+            #{note},
+        </if>
+        </trim>
+        on duplicate key update
+        project_id = values(`project_id`),
+        `check` = values(`check`),
+        check_handler = values(`check_handler`),
+        office_id = values(`office_id`),
+        `number` = values(`number`),
+        `name` = values(`name`),
+        stage = values(`stage`),
+        tec = values(`tec`),
+        money = values(`money`),
+        ratio = values(`ratio`),
+        other_tec = values(`other_tec`),
+        `scope` = values(`scope`),
+        planned_date = values(`planned_date`),
+        `note` = values(`note`)
+    </update>
+    <insert id="setOtherProjectNote" parameterType="map" >
+        insert into project_note
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                `project_id` , `check`, `check_handler`, `office_id`, `check_other`, `type`,
+            <if test="stage != null and stage != ''">
+                `stage`,
+            </if>
+            <if test="tec != null and tec != ''">
+                `tec`,
+            </if>
+            <if test="money != null and money != ''">
+                `money`,
+            </if>
+                <if test="ratio != null and ratio != ''">
+                    `ratio`,
+                </if>
+            <if test="otherTec != null and otherTec != ''">
+                `other_tec`,
+            </if>
+            <if test="scope != null and scope != ''">
+                `scope`,
+            </if>
+            <if test="plannedDate != null and plannedDate != ''">
+                `planned_date`,
+            </if>
+            <if test="note != null and note != ''">
+                `note`,
+            </if>
+                <if test="otherHandler != null and otherHandler != ''">
+                    `check_other_handler`,
+                </if>
+                <if test="workday != null and workday != ''">
+                    `apply_workday`,
+                </if>
+                <if test="did != null and did != ''">
+                    `did`,
+                </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{projectId} , 0 , #{handler}, #{departmentId}, #{checkOther},#{typeNote},
+            <if test="stage != null and stage != ''">
+                #{stage},
+            </if>
+            <if test="tec != null and tec != ''">
+                #{tec},
+            </if>
+            <if test="money != null and money != ''">
+                #{money},
+            </if>
+            <if test="ratio != null and ratio != ''">
+                #{ratio},
+            </if>
+            <if test="otherTec != null and otherTec != ''">
+                #{otherTec},
+            </if>
+            <if test="scope != null and scope != ''">
+                #{scope},
+            </if>
+            <if test="plannedDate != null and plannedDate != ''">
+                #{plannedDate},
+            </if>
+            <if test="note != null and note != ''">
+                #{note},
+            </if>
+            <if test="otherHandler != null and otherHandler != ''">
+                #{otherHandler},
+            </if>
+            <if test="workday != null and workday != ''">
+                #{workday},
+            </if>
+            <if test="did != null and did != ''">
+                #{did},
+            </if>
+        </trim>
+        on duplicate key update
+        project_id = values(`project_id`),
+        `check` = values(`check`),
+        check_handler = values(`check_handler`),
+        check_other = values(`check_other`),
+        office_id = values(`office_id`),
+        stage = values(`stage`),
+        tec = values(`tec`),
+        money = values(`money`),
+        ratio = values(`ratio`),
+        other_tec = values(`other_tec`),
+        `scope` = values(`scope`),
+        planned_date = values(`planned_date`),
+        apply_workday = values(apply_workday),
+        `note` = values(`note`)
+    </insert>
+    <insert id="addExcel" parameterType="excelProject">
+        <selectKey resultType="integer" keyProperty="pid" order="AFTER">
+            select id as pid
+            from project
+            where `name` = #{projectName}
+        </selectKey>
+        insert ignore into project(`name`)
+        values (#{projectName})
+    </insert>
+  <insert id="addNumber">
+            insert into project(`number`)
+        values (#{number})
+  </insert>
+    <insert id="setWorkdayBackup">
+        insert into workday_backup_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,user_id ,  issuer_id , workday, `date`, project_id, tec, reason
+        </trim>
+        values
+        <foreach collection="list" item="item" separator=",">
+               <if test="item.userId != null and  item.userId != '' and item.workday != null and item.workday != ''">
+            (#{item.id}, #{item.userId}, #{userId}, #{item.workday},
+          #{date}, #{item.project_id}, #{item.tec}, #{item.reason})
+               </if>
+        </foreach>
+        on duplicate key update
+        reason = values(reason),
+        workday = values(workday)
+    </insert>
+    <insert id="setWorkdayBackupLog">
+        insert into workday_backup_user_log(user_id ,  issuer_id , workday, `date`, `old` , `time` , project_id)
+        values
+        <foreach collection="list" item="item"  separator=",">
+            <if test="item.id != null and  item.id != '' and item.workday != null and item.workday != ''">
+            (#{item.id}, #{userId}, #{item.workday}, #{date} , #{item.old} , now(), #{item.project_id})
+            </if>
+        </foreach>
+    </insert>
+    <insert id="sameNameInsert">
+        insert into volume_user(volume_id, designer, checker, principal, headman)
+        values (#{id}, #{designerId}, #{checkerId}, #{principalId}, #{headmanId})
+        on duplicate key update
+        designer = values(designer),
+        checker = values(checker),
+        principal = values(principal),
+        headman = values(headman)
+    </insert>
+    <update id="setMoney">
+        update project
+        set money = #{money}
+        where id = #{id}
+    </update>
+    <update id="upd" parameterType="project">
+        update project
+        <set>
+            <if test="name != null and name != ''">
+                `number` = #{number},
+            </if>
+            <if test="name != null and name != ''">
+            `name` = #{name},
+            </if>
+            <if test="general != null and general != ''">
+                `general` = #{general},
+            </if>
+            <if test="generalId != null and generalId != ''">
+                `generalId` = #{generalId},
+            </if>
+            <if test="spider != null and spider != '' || spider == 0">
+                `spider` = #{spider},
+            </if>
+        </set>
+        where id = #{project_id}
+    </update>
+    <update id="renewError">
+        update project
+        set `error` = 0
+        where id = #{id}
+    </update>
+    <update id="updState">
+        update project
+        set state = 1
+        where id = #{id}
+    </update>
+  <update id="spider">
+        update project
+        set spider = #{spider}
+        where id = #{id}
+  </update>
+    <update id="distributeTecWorkday">
+        insert into workday_tec_distribute
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                project_id,tec,
+            <if test="map.manage != null and map.manage != '' or map.manage == 0">
+                manage,
+            </if>
+            <if test="map.volume != null and map.volume != '' or map.volume == 0">
+                volume,
+            </if>
+            `check` , `time`, `handler`
+            </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{map.id}, #{map.tec},
+            <if test="map.manage != null and map.manage != '' or map.manage == 0">
+                #{map.manage},
+            </if>
+            <if test="map.volume != null and map.volume != '' or map.volume == 0">
+                #{map.volume},
+            </if>
+            #{map.check},  now(), #{id}
+        </trim>
+        on duplicate key update
+        manage = values(manage),
+        volume = values(volume),
+        `check` = values(`check`)
+    </update>
+    <select id="getCheckerList" resultType="java.util.Map">
+        select  u.id, u.name, true as disabled
+        from  `user` u,
+            checker c
+        where u.id = c.checkerId
+        and `type` = #{type}
+    </select>
+    <select id="getCheckerByProjectId" resultType="java.util.Map">
+        select DISTINCT u.id, u.name, false as disabled
+        from  `user` u,
+              project_note n
+        where u.id = n.check_handler
+          and n.project_id = #{id}
+          and n.`check` = 1
+          and not exists (
+                select  id
+                from checker c
+                where c.checkerId = u.id
+                 and c.type = 1
+            )
+    </select>
+    <update id="setTecChecker">
+        insert into project_tec_checker(project_id, tec, checker, principal)
+        values (#{map.id}, #{map.tec}, #{map.checker}, #{userId})
+        on duplicate key update
+        checker = values(checker)
+    </update>
+    <update id="setChecker">
+        insert into project_checker(project_id, checker)
+        values (#{map.id},  #{map.checker})
+            on duplicate key update
+        checker = values(checker)
+    </update>
+    <update id="resetDeclare">
+        update <if test="task == 0 and advance == 0">
+        volume_workday
+        </if>
+        <if test="task == 0 and advance == 1">
+            volume_workday_high
+        </if>
+        <if test="task == 1 and advance == 0">
+            project_task
+        </if>
+        <if test="task == 1 and advance == 1">
+            task_advance
+        </if>
+        set
+        submit = 0
+        where  id = #{id}
+    </update>
+    <update id="setDeclare">
+    <foreach collection="list" item="item" separator=";">
+        update <if test="item.task == 0 and item.advance == 0">
+            volume_workday
+    </if>
+        <if test="item.task == 0 and item.advance == 1">
+            volume_workday_high
+        </if>
+        <if test="item.task == 1 and item.advance == 0">
+            project_task
+        </if>
+        <if test="item.task == 1 and item.advance == 1">
+            task_advance
+        </if>
+        set submit = 1, submit_date = #{date}
+        where
+        id = #{item.id}
+    </foreach>
+    </update>
+    <update id="setDeclareDay">
+        update declare_day
+        set `day` = #{day}
+        where id = 1
+    </update>
+    <update id="setShow">
+        insert into project_show(project_id, user_id, `show`)
+        values (#{map.id}, #{id}, #{map.show})
+        on duplicate key update
+        `show` = values(`show`)
+    </update>
+    <update id="backOff">
+        update
+        <if test="map.task == 0 and map.advance == 0">
+            volume_workday
+        </if>
+        <if test="map.task == 1 and map.advance == 0">
+            project_task
+        </if>
+        <if test="map.task == 0 and map.advance == 1">
+            volume_workday_high
+        </if>
+        <if test="map.task == 1 and map.advance == 1">
+            task_advance
+        </if>
+        set backOff = 1, backOff_time = now(), backOff_user = #{userId}
+        where id = #{map.id}
+    </update>
+
+    <select id="queryProjectRole" resultType="java.lang.Integer" statementType="CALLABLE">
+        call queryProjectRole(#{userId,mode=IN}, #{projectId,mode = IN})
+    </select>
+
+    <select id="queryByAdmin" resultType="java.util.Map" >
+        SELECT
+        id,
+        `number`,
+        projectName,
+        director,
+        general,
+        generalId,
+        workday,
+        workdayState,
+        distributeState,
+        CASE
+        frozen
+        WHEN 1 THEN
+        "已冻结" ELSE state
+        END AS `state`,
+        projectPhaseID,
+        spider,
+        type,
+        error,
+        used,
+        workday - used AS have
+        FROM
+        (
+        SELECT DISTINCT
+        p.id,
+        p.`number`,
+        p.`name` AS projectName,
+        p.director,
+        p.general,
+        p.generalId,
+        ifnull( w.num, 0 ) + IFNULL( a.workday, 0 ) AS workday,
+        IF
+        ( d.id IS NOT NULL, 1, 0 ) AS workdayState,
+        IF
+        ( w.num IS NOT NULL, 1, 0 ) AS distributeState,
+        p.state,
+        p.projectPhaseID,
+        p.spider,
+        p.frozen,
+        p.type,
+        p.error,
+        IFNULL( vw.workday, 0 ) + IFNULL( t.designer, 0 ) + IFNULL( t.principal, 0 ) + IFNULL( t.checker, 0 ) + IFNULL( t.headman, 0 ) + IFNULL( m.workday, 0 ) AS used
+        FROM
+        (
+        SELECT
+        p.id,
+        p.`number`,
+        p.`name`,
+        p.director,
+        `general`,
+        generalId,
+        p.`state`,
+        projectPhaseID,
+        p.spider,
+        p.frozen,
+        p.type,
+        p.error
+        FROM
+        project p
+        LEFT JOIN project_note n ON p.id = n.project_id
+        WHERE
+        IFNULL( n.`check`, 1 ) = 1
+        AND IFNULL( n.check_other, 1 ) = 1
+        ) AS p
+        LEFT JOIN project_workday w ON w.project_id = p.id
+        LEFT JOIN project_workday_distribute d ON p.id = d.project_id
+        LEFT JOIN (
+        SELECT
+        p.id,
+        SUM( a.num ) AS workday
+        FROM
+        project p,
+        project_workday_add a
+        WHERE
+        a.project_id = p.id
+        GROUP BY
+        p.id
+        ) AS a ON a.id = p.id
+        LEFT JOIN (
+        SELECT
+        p.id,
+        SUM( vw.workday ) AS workday
+        FROM
+        project p,
+        volume v,
+        volume_workday vw
+        WHERE
+        v.project_id = p.id
+        AND vw.volume_id = v.id
+        AND vw.submit = 2
+        GROUP BY
+        p.id
+        ) AS vw ON vw.id = p.id
+        LEFT JOIN (
+        SELECT
+        p.id,
+        SUM( t.designer_workday ) AS designer,
+        SUM( t.principal_workday ) AS principal,
+        SUM( t.checker_workday ) AS checker,
+        SUM( t.headman_workday ) AS headman
+        FROM
+        project p,
+        project_task t
+        WHERE
+        t.project_id = p.id
+        AND t.submit = 2
+        GROUP BY
+        p.id
+        ) AS t ON t.id = p.id
+        LEFT JOIN (
+        SELECT
+        p.id,
+        SUM( m.workday ) AS workday
+        FROM
+        project p,
+        project_workday_manage m
+        WHERE
+        p.id = m.project_id
+        GROUP BY
+        p.id
+        ) AS m ON m.id = p.id
+        GROUP BY
+        p.id
+        ORDER BY
+        p.id DESC
+        ) AS tab
+        WHERE
+        tab.workday  &lt;&gt;
+        tab.used
+        OR tab.workday = 0
+    </select>
+    <select id="queryCompleteByAdmin" resultType="java.util.Map">
+        SELECT
+            id,
+            `number`,
+            projectName,
+            director,
+            general,
+            generalId,
+            workday,
+            workdayState,
+            distributeState,
+            state,
+            projectPhaseID,
+            spider,
+            error,
+            used,
+            workday - used as have
+        FROM(
+                SELECT DISTINCT
+                    p.id,
+                    p.`number`,
+                    p.`name` AS projectName,
+                    p.director,
+                    p.general,
+                    p.generalId,
+                    ifnull( w.num, 0 ) + IFNULL( a.workday, 0 ) AS workday,
+                    IF
+                        ( d.id IS NOT NULL, 1, 0 ) AS workdayState,
+                    IF
+                        ( w.num IS NOT NULL, 1, 0 ) AS distributeState,
+                    p.state,
+                    p.projectPhaseID,
+                    p.spider,
+                    p.error,
+                    IFNULL( vw.workday, 0 ) + IFNULL( t.designer, 0 ) + IFNULL( t.principal, 0 ) + IFNULL( t.checker, 0 ) + IFNULL( t.headman, 0 ) + IFNULL( m.workday, 0 ) AS used
+                FROM
+                    project p
+                        LEFT JOIN project_workday w ON w.project_id = p.id
+                        LEFT JOIN project_workday_distribute d ON p.id = d.project_id
+                        LEFT JOIN (
+                        SELECT
+                            p.id,
+                            SUM( a.num ) AS workday
+                        FROM
+                            project p,
+                            project_workday_add a
+                        WHERE
+                            a.project_id = p.id
+                        GROUP BY
+                            p.id
+                    ) AS a ON a.id = p.id
+                        LEFT JOIN (
+                        SELECT
+                            p.id,
+                            SUM( vw.workday ) AS workday
+                        FROM
+                            project p,
+                            volume v,
+                            volume_workday vw
+                        WHERE
+                            v.project_id = p.id
+                          AND vw.volume_id = v.id
+                          AND vw.submit = 2
+                        GROUP BY
+                            p.id
+                    ) AS vw ON vw.id = p.id
+                        LEFT JOIN (
+                        SELECT
+                            p.id,
+                            SUM( t.designer_workday ) AS designer,
+                            SUM( t.principal_workday ) AS principal,
+                            SUM( t.checker_workday ) AS checker,
+                            SUM( t.headman_workday ) AS headman
+                        FROM
+                            project p,
+                            project_task t
+                        WHERE
+                            t.project_id = p.id
+                          AND t.submit = 2
+                        GROUP BY
+                            p.id
+                    ) AS t ON t.id = p.id
+                        LEFT JOIN (
+                        SELECT
+                            p.id,
+                            SUM( m.workday ) AS workday
+                        FROM
+                            project p,
+                            project_workday_manage m
+                        WHERE
+                            p.id = m.project_id
+                        GROUP BY
+                            p.id
+                    ) AS m ON m.id = p.id
+                GROUP BY
+                    p.id
+                ORDER BY
+                    p.id DESC) as tab
+        WHERE tab.workday = tab.used
+        and tab.workday != 0
+    </select>
+    <select id="queryByGeneral" resultType="java.util.Map" parameterType="map">
+    SELECT DISTINCT
+      p.id,
+      p.`number` ,
+      p.NAME AS projectName,
+      p.director,
+      p.general,
+      p.state,
+      p.projectPhaseID,
+      COUNT(v.id) as amount
+    FROM
+      project p,
+      volume v
+    WHERE
+      v.project_id = p.id
+      AND FIND_IN_SET(
+      #{name},
+      REPLACE ( p.general, ";", "," ))
+    GROUP BY v.project_id
+    </select>
+    <select id="queryByPrincipal" resultType="java.util.Map">
+    SELECT DISTINCT
+      p.id AS pid,
+      p.NAME AS projectName,
+      p.director,
+      p.general,
+      v.id AS vid,
+      v.number,
+      v.NAME AS volumeName,
+      v.dep,
+      v.tec,
+      v.state,
+      v.principal,
+      v.chief,
+      v.designer,
+      v.checker,
+      v.workday,
+      v.planned_shot_date,
+      v.shot_date,
+      v.proofreading_date,
+      v.formId,
+      v.wfInstId,
+      v.rollId,
+      v.planned_publication_date,
+      v.actual_publication_date,
+    GROUP_CONCAT(distinct p1.proportion, "$", p1.remarks , "$" , p1.week ORDER BY p1.date DESC SEPARATOR '##' ) AS designerList,
+		GROUP_CONCAT(distinct p2.proportion, "$", p2.remarks , "$" , p2.week ORDER BY p2.date DESC SEPARATOR '##' ) AS checkerList
+    FROM
+      project p,
+      volume v
+    LEFT JOIN ( SELECT *,	WEEK (FROM_UNIXTIME( date /1000)) as week FROM proportion WHERE type = 0 ORDER BY date ) AS p1 ON p1.volume_id = v.id
+    LEFT JOIN ( SELECT *, WEEK (FROM_UNIXTIME( date /1000)) as week FROM proportion WHERE type = 1 ORDER BY date ) AS p2 ON p2.volume_id = v.id
+    WHERE
+      v.project_id = p.id
+      AND FIND_IN_SET(
+      #{name},
+      REPLACE ( v.principal, ";", "," ))
+    GROUP BY v.id
+    </select>
+    <select id="queryProByPrincipal" resultType="java.util.Map">
+    select p.id , p.name
+    from project p,
+    volume v
+    where
+    p.id = v.project_id
+      AND FIND_IN_SET(
+      #{name},
+      REPLACE ( v.principal, ";", "," ))
+    </select>
+    <select id="queryDesigner" resultType="java.util.Map">
+
+    </select>
+    <select id="queryByDesigner" resultType="java.util.Map">
+    SELECT DISTINCT
+        p.id AS pid,
+        p.NAME AS projectName,
+        p.director,
+        p.general,
+        v.id AS vid,
+        v.number,
+        v.NAME AS volumeName,
+        v.dep,
+        v.tec,
+        v.state,
+        v.principal,
+        v.chief,
+        v.designer,
+        v.checker,
+        v.planned_shot_date,
+        v.shot_date,
+        v.proofreading_date,
+        v.rollId,
+        v.planned_publication_date
+    FROM
+        volume v,
+        project p
+    WHERE
+        v.project_id = p.id
+    and v.designer = #{name}
+    and v.state in ('尚未开展','正在设计','正在校审')
+    ORDER BY
+        field(v.state,'正在设计','正在校审','尚未开展'),
+        p.NAME,
+        v.number
+    </select>
+    <select id="queryByChecker" resultType="java.util.Map">
+    SELECT DISTINCT
+        p.id AS pid,
+        p.NAME AS projectName,
+        p.director,
+        p.general,
+        v.id AS vid,
+        v.number,
+        v.NAME AS volumeName,
+        v.dep,
+        v.tec,
+        v.state,
+        v.principal,
+        v.chief,
+        v.designer,
+        v.checker,
+        v.workday,
+        v.planned_shot_date,
+        v.shot_date,
+        v.proofreading_date,
+        v.formId,
+        v.wfInstId,
+        v.planned_publication_date
+    FROM
+        volume v,
+        project p
+    WHERE
+        v.project_id = p.id
+    and v.checker = #{name}
+    and v.state in ('正在设计','正在校审')
+    ORDER BY
+    field(v.state,'正在校审','正在设计'),
+        p.NAME,
+        v.number
+    </select>
+    <select id="queryById" resultType="java.util.Map">
+        SELECT
+            p.id,
+            p.`name`,
+            p.state,
+            p.`number`,
+            count( v.id ) AS `count`,
+            p.general,
+            IF
+                ( p.generalId = #{userId}, TRUE, FALSE ) AS generalRole,
+            IF
+                ((
+                     SELECT EXISTS
+                                (
+                                    SELECT
+                                        r.id
+                                    FROM
+                                        role_menus r,
+                                        `user` u
+                                    WHERE
+                                        u.id = #{userId}
+                                      AND u.pid = r.role_id
+                                      AND r.menus_id = 10
+                                )
+                 )|| p.generalId = #{userId},
+                 TRUE,
+                 FALSE
+                ) AS `show`
+        FROM
+            project p
+                LEFT JOIN volume v ON p.id = v.project_id
+        WHERE
+            p.id = #{id}
+        GROUP BY
+            p.id
+    </select>
+    <select id="queryChildren" resultType="java.util.Map">
+        SELECT
+            id,
+            `name`,
+            `number`,
+            `scope`,
+            stage,
+            money,
+            ratio,
+            tec,
+            other_tec AS otherTec,
+            CONVERT (
+                    planned_date,
+                    CHAR ( 10 )) AS plannedDate,
+            note,
+            CASE
+                spider
+                WHEN 1 THEN
+                    spider_money ELSE "抓取失败"
+                END AS netMoney,
+            CASE
+                spider
+                WHEN 1 THEN
+                    spider_ratio ELSE "抓取失败"
+                END AS netRatio
+        FROM
+            project_children
+        WHERE
+            project_id = #{id}
+
+          AND `check` = 1
+    </select>
+    <select id="queryByNameAndNum" resultType="java.lang.Boolean">
+        select exists (
+            select id
+            from  project
+            where  name = #{name}
+            and number = #{number}
+                   )
+    </select>
+    <select id="queryByNumber" resultType="java.lang.Integer">
+        select id
+        from
+            project
+        where `number` = #{number}
+        and generalId = #{id}
+    </select>
+       <select id="queryExcel" resultType="java.util.Map">
+      SELECT DISTINCT
+        p.id AS pid,
+        p.NAME AS projectName,
+        p.director,
+        p.general,
+        v.id AS vid,
+        v.number,
+        v.NAME AS volumeName,
+        v.dep,
+        v.tec,
+        v.state,
+        v.principal,
+        v.chief,
+        v.designer,
+        v.checker,
+        v.workday,
+        v.planned_shot_date,
+        v.shot_date,
+        v.proofreading_date,
+        v.complete_time,
+        v.formId,
+        v.wfInstId,
+        v.rollId,
+        v.planned_publication_date,
+        v.actual_publication_date,
+        GROUP_CONCAT( DISTINCT p1.proportion, "$", p1.remarks, "$", p1.date ORDER BY p1.date DESC SEPARATOR '##' ) AS designerList,
+        GROUP_CONCAT( DISTINCT p2.proportion, "$", p2.remarks, "$", p2.date ORDER BY p2.date DESC SEPARATOR '##' ) AS checkerList,
+                GROUP_CONCAT( DISTINCT p3.proportion, "$", p3.remarks, "$", p3.date ORDER BY p3.date DESC SEPARATOR '##' ) AS principalList
+      FROM
+        project p,
+        volume v
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 0 ORDER BY date) AS p1 ON p1.volume_id = v.id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin}  AND `type` = 1 ORDER BY date) AS p2 ON p2.volume_id = v.id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 2 ORDER BY date) AS p3 ON p3.volume_id = v.id
+      WHERE
+        v.project_id = p.id
+         AND (v.planned_start_date &lt;= #{sqlDate} or v.start_date &lt;= #{sqlDate})
+         AND v.shot_date is NULL
+      GROUP BY
+        v.id UNION
+      DISTINCT SELECT DISTINCT
+        p.id AS pid,
+        p.NAME AS projectName,
+        p.director,
+        p.general,
+        v.id AS vid,
+        v.number,
+        v.NAME AS volumeName,
+        v.dep,
+        v.tec,
+        v.state,
+        v.principal,
+        v.chief,
+        v.designer,
+        v.checker,
+        v.workday,
+        v.planned_shot_date,
+        v.shot_date,
+        v.proofreading_date,
+        v.complete_time,
+        v.formId,
+        v.wfInstId,
+        v.rollId,
+        v.planned_publication_date,
+        v.actual_publication_date,
+        GROUP_CONCAT( DISTINCT p1.proportion, "$", p1.remarks, "$", p1.date ORDER BY p1.date DESC SEPARATOR '##' ) AS designerList,
+        GROUP_CONCAT( DISTINCT p2.proportion, "$", p2.remarks, "$", p2.date ORDER BY p2.date DESC SEPARATOR '##' ) AS checkerList,
+        GROUP_CONCAT( DISTINCT p3.proportion, "$", p3.remarks, "$", p3.date ORDER BY p3.date DESC SEPARATOR '##' ) AS principalList
+      FROM
+        project p,
+        volume v
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 0 ORDER BY date) AS p1 ON p1.volume_id = v.id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 1 ORDER BY date) AS p2 ON p2.volume_id = v.id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 2 ORDER BY date) AS p3 ON p3.volume_id = v.id
+      WHERE
+        v.project_id = p.id
+        AND date_format( v.shot_date, '%m' ) = #{thisMonth}
+        And DATE_FORMAT(v.shot_date,'%Y')=#{thisYear}
+      GROUP BY
+        v.id
+        UNION DISTINCT
+        SELECT DISTINCT
+        p.id AS pid,
+        p.NAME AS projectName,
+        p.director,
+        p.general,
+        v.id AS vid,
+        v.number,
+        v.NAME AS volumeName,
+        v.dep,
+        v.tec,
+        v.state,
+        v.principal,
+        v.chief,
+        v.designer,
+        v.checker,
+        v.workday,
+        v.planned_shot_date,
+        v.shot_date,
+        v.proofreading_date,
+        v.complete_time,
+        v.formId,
+        v.wfInstId,
+        v.rollId,
+        v.planned_publication_date,
+        v.actual_publication_date,
+        GROUP_CONCAT( DISTINCT p1.proportion, "$", p1.remarks, "$", p1.date ORDER BY p1.date DESC SEPARATOR '##' ) AS designerList,
+        GROUP_CONCAT( DISTINCT p2.proportion, "$", p2.remarks, "$", p2.date ORDER BY p2.date DESC SEPARATOR '##' ) AS checkerList,
+        GROUP_CONCAT( DISTINCT p3.proportion, "$", p3.remarks, "$", p3.date ORDER BY p3.date DESC SEPARATOR '##' ) AS principalList
+      FROM
+        project p,
+        volume v
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 0 ORDER BY date) AS p1 ON p1.volume_id = v.id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt;  #{monthMin} AND `type` = 1 ORDER BY date) AS p2 ON p2.volume_id = v.id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 2 ORDER BY date) AS p3 ON p3.volume_id = v.id
+      WHERE
+        v.project_id = p.id
+        AND date_format( v.planned_shot_date, '%m' ) = #{thisMonth}
+        And DATE_FORMAT(v.planned_shot_date,'%Y')=#{thisYear}
+      GROUP BY
+        v.id UNION
+      DISTINCT
+      SELECT DISTINCT
+        p.id AS pid,
+        p.NAME AS projectName,
+        p.director,
+        p.general,
+        v.id AS vid,
+        v.number,
+        v.NAME AS volumeName,
+        v.dep,
+        v.tec,
+        v.state,
+        v.principal,
+        v.chief,
+        v.designer,
+        v.checker,
+        v.workday,
+        v.planned_shot_date,
+        v.shot_date,
+        v.proofreading_date,
+        v.complete_time,
+        v.formId,
+        v.wfInstId,
+        v.rollId,
+        v.planned_publication_date,
+        v.actual_publication_date,
+        GROUP_CONCAT( DISTINCT p1.proportion, "$", p1.remarks, "$", p1.date ORDER BY p1.date DESC SEPARATOR '##' ) AS designerList,
+        GROUP_CONCAT( DISTINCT p2.proportion, "$", p2.remarks, "$", p2.date ORDER BY p2.date DESC SEPARATOR '##' ) AS checkerList,
+        GROUP_CONCAT( DISTINCT p3.proportion, "$", p3.remarks, "$", p3.date ORDER BY p3.date DESC SEPARATOR '##' ) AS principalList
+      FROM
+        project p,
+        volume v,
+        ( SELECT * FROM proportion WHERE #{monthMax} > date AND date &gt; #{monthMin} AND type = 0 ORDER BY date ) AS p1
+        LEFT JOIN ( SELECT * FROM proportion WHERE #{monthMax} > date AND date &gt; #{monthMin} AND type = 1 ORDER BY date ) AS p2 ON p1.volume_id = p2.volume_id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 2 ORDER BY date) AS p3 ON p3.volume_id = p2.volume_id
+      WHERE
+        v.project_id = p.id
+        AND p1.volume_id = v.id
+      GROUP BY
+        v.id UNION
+      DISTINCT SELECT DISTINCT
+        p.id AS pid,
+        p.NAME AS projectName,
+        p.director,
+        p.general,
+        v.id AS vid,
+        v.number,
+        v.NAME AS volumeName,
+        v.dep,
+        v.tec,
+        v.state,
+        v.principal,
+        v.chief,
+        v.designer,
+        v.checker,
+        v.workday,
+        v.planned_shot_date,
+        v.shot_date,
+        v.proofreading_date,
+        v.complete_time,
+        v.formId,
+        v.wfInstId,
+        v.rollId,
+        v.planned_publication_date,
+        v.actual_publication_date,
+        GROUP_CONCAT( DISTINCT p1.proportion, "$", p1.remarks, "$", p1.date ORDER BY p1.date DESC SEPARATOR '##' ) AS designerList,
+        GROUP_CONCAT( DISTINCT p2.proportion, "$", p2.remarks, "$", p2.date ORDER BY p1.date DESC SEPARATOR '##' ) AS checkerList,
+        GROUP_CONCAT( DISTINCT p3.proportion, "$", p3.remarks, "$", p3.date ORDER BY p3.date DESC SEPARATOR '##' ) AS principalList
+      FROM
+        project p,
+        volume v,
+        ( SELECT * FROM proportion WHERE #{monthMax} > date AND date &gt; #{monthMin} AND type = 1 ORDER BY date ) AS p2
+        LEFT JOIN ( SELECT * FROM proportion WHERE #{monthMax} > date AND date &gt; #{monthMin} AND type = 0 ORDER BY date ) AS p1 ON p1.volume_id = p2.volume_id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 2 ORDER BY date) AS p3 ON p3.volume_id = p2.volume_id
+      WHERE
+        v.project_id = p.id
+        AND p2.volume_id = v.id
+      GROUP BY
+        v.id UNION
+      DISTINCT
+      SELECT DISTINCT
+        p.id AS pid,
+        p.NAME AS projectName,
+        p.director,
+        p.general,
+        v.id AS vid,
+        v.number,
+        v.NAME AS volumeName,
+        v.dep,
+        v.tec,
+        v.state,
+        v.principal,
+        v.chief,
+        v.designer,
+        v.checker,
+        v.workday,
+        v.planned_shot_date,
+        v.shot_date,
+        v.proofreading_date,
+        v.complete_time,
+        v.formId,
+        v.wfInstId,
+        v.rollId,
+        v.planned_publication_date,
+        v.actual_publication_date,
+        GROUP_CONCAT( DISTINCT p1.proportion, "$", p1.remarks, "$", p1.date ORDER BY p1.date DESC SEPARATOR '##' ) AS designerList,
+        GROUP_CONCAT( DISTINCT p2.proportion, "$", p2.remarks, "$", p2.date ORDER BY p2.date DESC SEPARATOR '##' ) AS checkerList,
+        GROUP_CONCAT( DISTINCT p3.proportion, "$", p3.remarks, "$", p3.date ORDER BY p3.date DESC SEPARATOR '##' ) AS principalList
+      FROM
+        project p,
+        volume v,
+        ( SELECT * FROM proportion WHERE #{monthMax} > date AND date &gt; #{monthMin} AND type = 0 ORDER BY date ) AS p1
+        LEFT JOIN ( SELECT * FROM proportion WHERE #{monthMax} > date AND date &gt; #{monthMin} AND type = 1 ORDER BY date ) AS p2 ON p1.volume_id = p2.volume_id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 2 ORDER BY date) AS p3 ON p3.volume_id = p2.volume_id
+      WHERE
+        v.project_id = p.id
+        AND p1.volume_id = v.id
+      GROUP BY
+        v.id UNION
+      DISTINCT SELECT DISTINCT
+        p.id AS pid,
+        p.NAME AS projectName,
+        p.director,
+        p.general,
+        v.id AS vid,
+        v.number,
+        v.NAME AS volumeName,
+        v.dep,
+        v.tec,
+        v.state,
+        v.principal,
+        v.chief,
+        v.designer,
+        v.checker,
+        v.workday,
+        v.planned_shot_date,
+        v.shot_date,
+        v.proofreading_date,
+        v.complete_time,
+        v.formId,
+        v.wfInstId,
+        v.rollId,
+        v.planned_publication_date,
+        v.actual_publication_date,
+        GROUP_CONCAT( DISTINCT p1.proportion, "$", p1.remarks, "$", p1.date ORDER BY p1.date DESC SEPARATOR '##' ) AS designerList,
+        GROUP_CONCAT( DISTINCT p2.proportion, "$", p2.remarks, "$", p2.date ORDER BY p2.date DESC SEPARATOR '##' ) AS checkerList,
+        GROUP_CONCAT( DISTINCT p3.proportion, "$", p3.remarks, "$", p3.date ORDER BY p3.date DESC SEPARATOR '##' ) AS principalList
+      FROM
+        project p,
+        volume v,
+        ( SELECT * FROM proportion WHERE #{monthMax} > date AND date &gt; #{monthMin} AND type = 2 ORDER BY date ) AS p3
+        LEFT JOIN ( SELECT * FROM proportion WHERE #{monthMax} > date AND date &gt; #{monthMin} AND type = 0 ORDER BY date ) AS p1 ON p1.volume_id = p3.volume_id
+        LEFT JOIN ( SELECT * FROM proportion WHERE  #{monthMax} > date AND date &gt; #{monthMin} AND `type` = 1 ORDER BY date) AS p2 ON p2.volume_id = p1.volume_id
+      WHERE
+        v.project_id = p.id
+        AND p2.volume_id = v.id
+      GROUP BY
+        v.id
+      </select>
+  <select id="drawLine" resultType="java.util.Map">
+    select distinct state as `name` , count(id) as `value`
+    from volume
+    where  project_id = #{id}
+    group by state
+  </select>
+  <select id="queryAll" resultType="java.util.Map">
+    select id, `name`, `number`
+    from project
+  </select>
+  <select id="queryPrincipal" resultType="java.util.Map">
+    SELECT v.principal as name, wu.ratio
+    FROM volume v
+    left join workday_user wu on FIND_IN_SET(wu.`user`,REPLACE ( v.principal, ";", "," )) and wu.project_id = #{id}
+    WHERE v.project_id = #{id}
+  </select>
+    <select id="queryAllTaskByUser" resultType="java.util.Map">
+        SELECT
+            project_id,
+            id,
+            wtid,
+            number,
+            `name`,
+            dep,
+            tec,
+            state,
+            principal,
+            designer,
+            checker,
+            headman,
+            start_date,
+            planned_shot_date,
+            shot_date,
+            proofreading_date,
+            planned_publication_date,
+            actual_publication_date,
+            complete_time,
+            workday_state,
+            workday,
+            designer_workday,
+            checker_workday,
+            principal_workday,
+            headman_workday,
+            `grant`,
+            reason,
+            type,
+            hasChildren,
+            spider,
+            `check`,
+            submit,
+            IF
+                ( p.volume_tec IS NOT NULL, TRUE, FALSE ) AS principalRole
+        FROM
+            (
+                SELECT
+                    project_id,
+                    id,
+                    NULL AS wtid,
+                    number,
+                    `name`,
+                    dep,
+                    tec,
+                    state,
+                    principal,
+                    designer,
+                    checker,
+                    headman,
+                    start_date,
+                    planned_shot_date,
+                    shot_date,
+                    proofreading_date,
+                    planned_publication_date,
+                    actual_publication_date,
+                    complete_time,
+                    workday_state,
+                    workday,
+                    designer_workday,
+                    checker_workday,
+                    principal_workday,
+                    headman_workday,
+                    `grant`,
+                    reason,
+                    CASE
+                        type
+                        WHEN 1 THEN
+                            "备用" ELSE "卷册"
+                        END AS type,
+                    TRUE AS hasChildren,
+                    1 AS spider,
+                    `check`,
+                    submit
+                FROM
+                    (
+                        SELECT DISTINCT
+                            v.project_id,
+                            v.id AS id,
+                            v.number,
+                            v.`name` AS NAME,
+                            v.dep,
+                            v.tec,
+                            v.state AS state,
+                            CONCAT(v.actual_principal,"(流程主设：",v.principal,")") as principal,
+                            v.designer,
+                            v.checker,
+                            v.headman,
+                            v.planned_start_date,
+                            v.start_date,
+                            v.planned_shot_date,
+                            v.shot_date,
+                            v.proofreading_date,
+                            v.planned_publication_date,
+                            v.actual_publication_date,
+                            v.complete_time,
+                            CASE
+                                w.CHECK
+                                WHEN 0 THEN
+                                    "未审核" ELSE
+                                    CASE
+                                        w.submit
+                                        WHEN 0 THEN
+                                            "未申报"
+                                        WHEN 1 THEN
+                                            "已申报"
+                                        WHEN 2 THEN
+                                            "已发放"
+                                        WHEN 3 THEN
+                                            "申报被拒" ELSE "未填报"
+                                        END
+                                END AS workday_state,
+                            w.workday,
+                            w.designer_workday,
+                            w.checker_workday,
+                            w.principal_workday,
+                            w.headman_workday,
+                            sum( h.`grant` ) AS `grant`,
+                            s.reason,
+                            w.type,
+                            w.`check`,
+                            w.submit
+                        FROM
+                            volume v
+                                LEFT JOIN volume_workday w ON v.id = w.volume_id
+                                LEFT JOIN volume_workday_high h ON v.id = h.volume_id
+                                AND h.submit = 2
+                                LEFT JOIN volume_reason s ON v.id = s.volume_id
+                        WHERE
+                            v.project_id = #{map.id}
+                        GROUP BY
+                            v.id UNION
+                        SELECT DISTINCT
+                            v.project_id,
+                            v.id AS id,
+                            v.number,
+                            v.`name` AS NAME,
+                            v.dep,
+                            v.tec,
+                            v.state AS state,
+                            CONCAT(v.actual_principal,"(流程主设：",v.principal,")") as principal,
+                            v.designer,
+                            v.checker,
+                            v.headman,
+                            v.planned_start_date,
+                            v.start_date,
+                            v.planned_shot_date,
+                            v.shot_date,
+                            v.proofreading_date,
+                            v.planned_publication_date,
+                            v.actual_publication_date,
+                            v.complete_time,
+                            CASE
+                                w.CHECK
+                                WHEN 0 THEN
+                                    "未审核" ELSE
+                                    CASE
+                                        w.submit
+                                        WHEN 0 THEN
+                                            "未申报"
+                                        WHEN 1 THEN
+                                            "已申报"
+                                        WHEN 2 THEN
+                                            "已发放"
+                                        WHEN 3 THEN
+                                            "申报被拒" ELSE "未填报"
+                                        END
+                                END AS workday_state,
+                            w.workday,
+                            w.designer_workday,
+                            w.checker_workday,
+                            w.principal_workday,
+                            w.headman_workday,
+                            sum( h.`grant` ) AS `grant`,
+                            s.reason,
+                            w.type,
+                            w.`check`,
+                            w.submit
+                        FROM
+                            volume v
+                                LEFT JOIN volume_workday w ON v.id = w.volume_id
+                                LEFT JOIN volume_workday_high h ON v.id = h.volume_id
+                                AND h.submit = 2
+                                LEFT JOIN volume_reason s ON v.id = s.volume_id
+                        WHERE
+                            v.project_id = #{map.id}
+                        GROUP BY
+                            v.id
+                    ) AS dataTable
+                GROUP BY
+                    `number` UNION
+                SELECT
+                    t.project_id,
+                    t.`id`,
+                    w.id AS wtid,
+                    t.`number`,
+                    t.`name`,
+                    t.dep,
+                    t.`tec`,
+                    IF
+                        (( t.`end` IS NULL OR t.`end` = "" ), "正在设计", "已完成" ) AS state,
+                    u.`name` AS `principal`,
+
+                    u1.`name` AS `designer`,
+                    u2.`name` AS checker,
+                    u3.`name` AS headman,
+                    NULL AS start_date,
+                    `planned_end` AS planned_shot_date,
+                    null AS shot_date,
+                    NULL AS proofreading_date,
+                    NULL AS planned_publication_date,
+                    NULL AS actual_publication_date,
+                    `end` AS complete_time,
+                    CASE
+                        t.submit
+                        WHEN 0 THEN
+                            "未申报"
+                        WHEN 1 THEN
+                            "已申报"
+                        WHEN 2 THEN
+                            "已发放"
+                        WHEN 3 THEN
+                            "申报被拒" ELSE "未填报"
+                        END AS workday_state,
+                    t.designer_workday + t.checker_workday + t.principal_workday + t.headman_workday AS workday,
+                    t.designer_workday,
+                    t.checker_workday,
+                    t.principal_workday,
+                    t.headman_workday,
+                    sum( w.`advance` ) AS `grant`,
+                    NULL AS reason,
+                    CASE
+                        type
+                        WHEN 0 THEN
+                            "管理" ELSE "备用"
+                        END AS type,
+                    TRUE AS hasChildren,
+                    0 AS spider,
+                    1 AS `check`,
+                    t.submit
+                FROM
+                    `user` u,
+                    project_task t
+                        LEFT JOIN task_advance w ON t.id = w.task_id
+                        AND w.submit = 2
+                        LEFT JOIN `user` u1 ON u1.id = t.designer
+                        LEFT JOIN `user` u2 ON u2.id = t.checker
+                        LEFT JOIN `user` u3 ON u3.id = t.headman
+                WHERE
+                    t.project_id = #{map.id}
+                  AND u.id = t.principal
+                GROUP BY
+                    t.id UNION
+                SELECT
+                    t.project_id,
+                    t.`id`,
+                    w.id AS wtid,
+                    t.`number`,
+                    t.`name`,
+                    t.dep,
+                    t.`tec`,
+                    IF
+                        (( t.`end` IS NULL OR t.`end` = "" ), "正在设计", "已完成" ) AS state,
+                    u.`name` AS `principal`,
+                    u1.`name` AS `designer`,
+                    u2.`name` AS checker,
+                    u3.`name` AS headman,
+                    NULL AS start_date,
+                    `planned_end` AS planned_shot_date,
+                    null AS shot_date,
+                    NULL AS proofreading_date,
+                    NULL AS planned_publication_date,
+                    NULL AS actual_publication_date,
+                    `end` AS complete_time,
+                    CASE
+                        t.submit
+                        WHEN 0 THEN
+                            "未申报"
+                        WHEN 1 THEN
+                            "已申报"
+                        WHEN 2 THEN
+                            "已发放"
+                        WHEN 3 THEN
+                            "申报被拒" ELSE "未填报"
+                        END AS workday_state,
+                    t.designer_workday + t.checker_workday + t.principal_workday + t.headman_workday AS workday,
+                    t.designer_workday,
+                    t.checker_workday,
+                    t.principal_workday,
+                    t.headman_workday,
+                    sum( w.`advance` ) AS `grant`,
+                    NULL AS reason,
+                    CASE
+                        type
+                        WHEN 0 THEN
+                            "管理" ELSE "备用"
+                        END AS type,
+                    TRUE AS hasChildren,
+                    0 AS spider,
+                    1 AS `check`,
+                    t.submit
+                FROM
+                    `user` u,
+                    project_task t
+                        LEFT JOIN task_advance w ON t.id = w.task_id
+                        LEFT JOIN `user` u1 ON u1.id = t.designer
+                        LEFT JOIN `user` u2 ON u2.id = t.checker
+                        LEFT JOIN `user` u3 ON u3.id = t.headman
+                WHERE
+                    t.project_id = #{map.id}
+                  AND u.id = t.principal
+                GROUP BY
+                    t.id UNION
+                SELECT
+                    t.project_id,
+                    t.`id`,
+                    NULL AS wtid,
+                    t.`number`,
+                    t.`name`,
+                    NULL AS dep,
+                    NULL AS `tec`,
+                    IF
+                        (( t.`end` IS NULL OR t.`end` = "" ), "正在设计", "已完成" ) AS state,
+                    NULL AS `principal`,
+                    u.`name` AS `designer`,
+                    NULL AS checker,
+                    NULL AS headman,
+                    NULL AS start_date,
+                    `planned_end` AS planned_shot_date,
+                    `end` AS shot_date,
+                    NULL AS proofreading_date,
+                    NULL AS planned_publication_date,
+                    NULL AS actual_publication_date,
+                    t.`date` AS complete_time,
+                    "已发放" AS workday_state,
+                    t.workday AS workday,
+                    NULL AS designer_workday,
+                    NULL AS checker_workday,
+                    NULL AS principal_workday,
+                    NULL AS headman_workday,
+                    NULL AS `grant`,
+                    NULL AS reason,
+                    "设总管理" AS type,
+                    TRUE AS hasChildren,
+                    0 AS spider,
+                    1 AS `check`,
+                    1 AS submit
+                FROM
+                    `user` u,
+                    project p,
+                    project_workday_manage t
+                WHERE
+                    t.project_id = #{map.id}
+                  and p.id = t.project_id
+                  AND u.id = p.generalId
+            ) AS tab
+                LEFT JOIN (
+                SELECT DISTINCT
+                    wt.volume_tec
+                FROM
+                    workday_tec wt,
+                    workday_tec_principal wtp
+                WHERE
+                    wt.project_id = #{map.id}
+                  AND wtp.user_id = #{id}
+                  AND wt.id = wtp.workday_tec_id
+            ) AS p ON tab.tec = p.volume_tec
+        GROUP BY
+            id
+    </select>
+    <select id="queryPartTaskByUser" resultType="java.util.Map">
+        SELECT
+            project_id,
+            id,
+            wtid,
+            number,
+            `name`,
+            dep,
+            tec,
+            state,
+            principal,
+            designer,
+            checker,
+            headman,
+            start_date,
+            planned_shot_date,
+            shot_date,
+            proofreading_date,
+            planned_publication_date,
+            actual_publication_date,
+            complete_time,
+            workday_state,
+            workday,
+            designer_workday,
+            checker_workday,
+            principal_workday,
+            headman_workday,
+            `grant`,
+            reason,
+            type,
+            hasChildren,
+            spider,
+            `check`,
+            submit,
+            principalRole
+        FROM
+            (
+                SELECT
+                    project_id,
+                    id,
+                    NULL AS wtid,
+                    number,
+                    `name`,
+                    dep,
+                    tec,
+                    state,
+                    principal,
+                    designer,
+                    checker,
+                    headman,
+                    start_date,
+                    planned_shot_date,
+                    shot_date,
+                    proofreading_date,
+                    planned_publication_date,
+                    actual_publication_date,
+                    complete_time,
+                    workday_state,
+                    workday,
+                    designer_workday,
+                    checker_workday,
+                    principal_workday,
+                    headman_workday,
+                    `grant`,
+                    reason,
+                    CASE
+                        type
+                        WHEN 1 THEN
+                            "备用" ELSE "卷册"
+                        END AS type,
+                    TRUE AS hasChildren,
+                    1 AS spider,
+                    `check`,
+                    submit,
+                    principalRole
+                FROM
+                    (
+                        SELECT DISTINCT
+                            v.project_id,
+                            v.id AS id,
+                            v.number,
+                            v.`name` AS `name`,
+                            v.dep,
+                            v.tec,
+                            v.state AS state,
+                            CONCAT(v.actual_principal,"(流程主设：",v.principal,")") as principal,
+                            v.designer,
+                            v.checker,
+                            v.headman,
+                            v.planned_start_date,
+                            v.start_date,
+                            v.planned_shot_date,
+                            v.shot_date,
+                            v.proofreading_date,
+                            v.planned_publication_date,
+                            v.actual_publication_date,
+                            v.complete_time,
+                            CASE
+                                w.CHECK
+                                WHEN 0 THEN
+                                    "未审核" ELSE
+                                    CASE
+                                        w.submit
+                                        WHEN 0 THEN
+                                            "未申报"
+                                        WHEN 1 THEN
+                                            "已申报"
+                                        WHEN 2 THEN
+                                            "已发放"
+                                        WHEN 3 THEN
+                                            "申报被拒" ELSE "未填报"
+                                        END
+                                END AS workday_state,
+                            w.workday,
+                            w.designer_workday,
+                            w.checker_workday,
+                            w.principal_workday,
+                            w.headman_workday,
+                            sum( h.`grant` ) AS `grant`,
+                            s.reason,
+                            w.type,
+                            w.`check`,
+                            w.submit,
+                            TRUE AS principalRole
+                        FROM
+                            volume v
+                                LEFT JOIN volume_workday w ON v.id = w.volume_id
+                                LEFT JOIN volume_workday_high h ON v.id = h.volume_id
+                                AND h.submit = 2
+                                LEFT JOIN volume_reason s ON v.id = s.volume_id,
+                            workday_tec wt,
+                            workday_tec_principal wtp
+                        WHERE
+                            v.project_id = #{map.id}
+                          AND wtp.user_id = #{id}
+                          AND wtp.workday_tec_id = wt.id
+                          AND wt.volume_tec = v.tec
+                        GROUP BY
+                            v.id UNION
+                        SELECT DISTINCT
+                            v.project_id,
+                            v.id AS id,
+                            v.number,
+                            v.`name` AS NAME,
+                            v.dep,
+                            v.tec,
+                            v.state AS state,
+                            CONCAT(v.actual_principal,"(流程主设：",v.principal,")") as principal,
+                            v.designer,
+                            v.checker,
+                            v.headman,
+                            v.planned_start_date,
+                            v.start_date,
+                            v.planned_shot_date,
+                            v.shot_date,
+                            v.proofreading_date,
+                            v.planned_publication_date,
+                            v.actual_publication_date,
+                            v.complete_time,
+                            CASE
+                                w.CHECK
+                                WHEN 0 THEN
+                                    "未审核" ELSE
+                                    CASE
+                                        w.submit
+                                        WHEN 0 THEN
+                                            "未申报"
+                                        WHEN 1 THEN
+                                            "已申报"
+                                        WHEN 2 THEN
+                                            "已发放"
+                                        WHEN 3 THEN
+                                            "申报被拒" ELSE "未填报"
+                                        END
+                                END AS workday_state,
+                            w.workday,
+                            w.designer_workday,
+                            w.checker_workday,
+                            w.principal_workday,
+                            w.headman_workday,
+                            sum( h.`grant` ) AS `grant`,
+                            s.reason,
+                            w.type,
+                            w.`check`,
+                            w.submit,
+                            FALSE AS principalRole
+                        FROM
+                            volume v
+                                LEFT JOIN volume_user vu ON vu.volume_id = v.id
+                                LEFT JOIN volume_workday w ON v.id = w.volume_id
+                                LEFT JOIN volume_workday_high h ON v.id = h.volume_id
+                                AND h.submit = 2
+                                LEFT JOIN volume_reason s ON v.id = s.volume_id,
+                            workday_tec wt,
+                            workday_tec_principal wtp
+                        WHERE
+                            v.project_id = #{map.id}
+                          AND wtp.user_id = #{id}
+                          AND wtp.workday_tec_id = wt.id
+                          AND wt.volume_tec = v.tec
+                        GROUP BY
+                            v.id
+                    ) AS dataTable
+                GROUP BY
+                    `number` UNION
+                SELECT
+                    t.project_id,
+                    t.`id`,
+                    w.id AS wtid,
+                    t.`number`,
+                    t.`name`,
+                    t.dep,
+                    t.`tec`,
+                    IF
+                        (( t.`end` IS NULL OR t.`end` = "" ), "正在设计", "已完成" ) AS state,
+                    u.`name` AS `principal`,
+                    u1.`name` AS `designer`,
+                    u2.`name` AS checker,
+                    u3.`name` AS headman,
+                    NULL AS start_date,
+                    `planned_end` AS planned_shot_date,
+                    null AS shot_date,
+                    NULL AS proofreading_date,
+                    NULL AS planned_publication_date,
+                    NULL AS actual_publication_date,
+                    `end` AS complete_time,
+                    CASE
+                        t.submit
+                        WHEN 0 THEN
+                            "未申报"
+                        WHEN 1 THEN
+                            "已申报"
+                        WHEN 2 THEN
+                            "已发放"
+                        WHEN 3 THEN
+                            "申报被拒" ELSE "未填报"
+                        END AS workday_state,
+                    t.designer_workday + t.checker_workday + t.principal_workday + t.headman_workday AS workday,
+                    t.designer_workday,
+                    t.checker_workday,
+                    t.principal_workday,
+                    t.headman_workday,
+                    sum( w.`advance` ) AS `grant`,
+                    NULL AS reason,
+                    CASE
+                        t.type
+                        WHEN 0 THEN
+                            "管理" ELSE "备用"
+                        END AS type,
+                    TRUE AS hasChildren,
+                    0 AS spider,
+                    1 AS `check`,
+                    t.submit,
+                    TRUE AS principalRole
+                FROM
+                    `user` u,
+                    project_task t
+                        LEFT JOIN task_advance w ON t.id = w.task_id
+                        AND w.submit = 2
+                        LEFT JOIN `user` u1 ON u1.id = t.designer
+                        LEFT JOIN `user` u2 ON u2.id = t.checker
+                        LEFT JOIN `user` u3 ON u3.id = t.headman,
+                    workday_tec wt,
+                    workday_tec_principal wtp
+                WHERE
+                    t.project_id = #{map.id}
+                  and u.id = t.principal
+                  AND wtp.user_id = #{id}
+                  AND wtp.workday_tec_id = wt.id
+                  AND wt.volume_tec = t.tec
+                GROUP BY
+                    t.id UNION
+                SELECT
+                    t.project_id,
+                    t.`id`,
+                    w.id AS wtid,
+                    t.`number`,
+                    t.`name`,
+                    t.dep,
+                    t.`tec`,
+                    IF
+                        (( t.`end` IS NULL OR t.`end` = "" ), "正在设计", "已完成" ) AS state,
+                    u.`name` AS `principal`,
+                    u1.`name` AS `designer`,
+                    u2.`name` AS checker,
+                    u3.`name` AS headman,
+                    NULL AS start_date,
+                    `planned_end` AS planned_shot_date,
+                    null AS shot_date,
+                    NULL AS proofreading_date,
+                    NULL AS planned_publication_date,
+                    NULL AS actual_publication_date,
+                    `end` AS complete_time,
+                    CASE
+                        t.submit
+                        WHEN 0 THEN
+                            "未申报"
+                        WHEN 1 THEN
+                            "已申报"
+                        WHEN 2 THEN
+                            "已发放"
+                        WHEN 3 THEN
+                            "申报被拒" ELSE "未填报"
+                        END AS workday_state,
+                    t.designer_workday + t.checker_workday + t.principal_workday + t.headman_workday AS workday,
+                    t.designer_workday,
+                    t.checker_workday,
+                    t.principal_workday,
+                    t.headman_workday,
+                    sum( w.`advance` ) AS `grant`,
+                    NULL AS reason,
+                    CASE
+                        t.type
+                        WHEN 0 THEN
+                            "管理" ELSE "备用"
+                        END AS type,
+                    TRUE AS hasChildren,
+                    0 AS spider,
+                    1 AS `check`,
+                    t.submit,
+                    FALSE AS principalRole
+                FROM
+                    `user` u,
+                    project_task t
+                        LEFT JOIN task_advance w ON t.id = w.task_id
+                        LEFT JOIN `user` u1 ON u1.id = t.designer
+                        LEFT JOIN `user` u2 ON u2.id = t.checker
+                        LEFT JOIN `user` u3 ON u3.id = t.headman,
+                    workday_tec wt,
+                    workday_tec_principal wtp
+                WHERE
+                    t.project_id = #{map.id}
+                  and u.id = t.principal
+                  AND wtp.user_id = #{id}
+                  AND wtp.workday_tec_id = wt.id
+                  AND wt.volume_tec = t.tec
+                GROUP BY
+                    t.id
+            ) AS tab
+        GROUP BY
+            id
+    </select>
+    <select id="homepageProject" resultType="java.util.Map">
+        SELECT
+            p.id,
+            p.number,
+            p.`name`,
+            p.general,
+            p.director,
+            p.create_time,
+            IFNULL( num.num, 0 ) AS amount,
+            p.principal,
+            p.`show`,
+            p.type,
+            p.frozen,
+            0 as `mode`
+        FROM
+            (
+                SELECT
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    p.general,
+                    p.director,
+                    p.create_time,
+                    p.principal,
+                    p.`show`,
+                    p.frozen,
+                    p.type,
+                    IFNULL( s.`show`, 1 ) AS `sShow`
+                FROM
+                    (
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            p.director,
+                            p.create_time,
+                            TRUE AS principal,
+                            TRUE AS `show`,
+                            p.type,
+                            frozen
+                        FROM
+                            (
+                                SELECT
+                                    p.id,
+                                    p.`number`,
+                                    p.`name`,
+                                    p.director,
+                                    p.`general`,
+                                    p.generalId,
+                                    p.`state`,
+                                    projectPhaseID,
+                                    p.spider,
+                                    p.error,
+                                    p.frozen,
+                                    p.type,
+                                    p.create_time
+                                FROM
+                                    project p
+                                        LEFT JOIN project_note n ON p.id = n.project_id
+                                WHERE
+                                    IFNULL( n.`check`, 1 ) = 1
+                                  AND IFNULL( n.`check_other`, 1 ) = 1
+                                  AND p.generalId = #{id}
+
+                            ) AS p
+                                LEFT JOIN workday_tec t ON p.id = t.project_id,
+                             workday_tec_principal tp
+                        WHERE
+                            t.id = tp.workday_tec_id
+                          AND tp.user_id = #{id}
+
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            p.director,
+                            p.create_time,
+                            FALSE AS principal,
+                            TRUE AS `show`,
+                            p.type,
+                            frozen
+                        FROM
+                            (
+                            SELECT
+                            p.id,
+                            p.`number`,
+                            p.`name`,
+                            p.director,
+                            p.`general`,
+                            p.generalId,
+                            p.`state`,
+                            projectPhaseID,
+                            p.spider,
+                            p.error,
+                            p.frozen,
+                            p.type,
+                            p.create_time
+                            FROM
+                            project p
+                            LEFT JOIN project_note n ON p.id = n.project_id
+                            WHERE
+                            IFNULL( n.`check`, 1 ) = 1
+                            AND IFNULL( n.`check_other`, 1 ) = 1
+                            AND p.generalId = #{id}
+
+                            ) AS p
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            p.director,
+                            p.create_time,
+                            TRUE AS principal,
+                            FALSE AS `show`,
+                            p.type,
+                            frozen
+                        FROM
+                            project p
+                            LEFT JOIN workday_tec t ON p.id = t.project_id,
+                            workday_tec_principal tp
+                        WHERE
+                            t.id = tp.workday_tec_id
+                          AND tp.user_id = #{id}
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            p.director,
+                            p.create_time,
+                            FALSE AS principal,
+                            FALSE AS `show`,
+                            p.type,
+                            frozen
+                        FROM
+                            project p
+                            LEFT JOIN volume v ON v.project_id = p.id
+                            LEFT JOIN volume_user vu ON v.id = vu.volume_id
+                        WHERE
+                            vu.designer = #{id}
+
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            p.director,
+                            p.create_time,
+                            FALSE AS principal,
+                            FALSE AS `show`,
+                            p.type,
+                            frozen
+                        FROM
+                            project p
+                            LEFT JOIN volume v ON v.project_id = p.id
+                            LEFT JOIN volume_user vu ON v.id = vu.volume_id
+                        WHERE
+                            vu.checker = #{id}
+
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            p.director,
+                            p.create_time,
+                            FALSE AS principal,
+                            FALSE AS `show`,
+                            p.type,
+                            frozen
+                        FROM
+                            project p
+                            LEFT JOIN project_task t ON p.id = t.project_id
+                        WHERE
+                            t.designer = #{id}
+
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            p.director,
+                            p.create_time,
+                            FALSE AS principal,
+                            FALSE AS `show`,
+                            p.type,
+                            frozen
+                        FROM
+                            project p
+                            LEFT JOIN project_task t ON p.id = t.project_id
+                        WHERE
+                            t.checker = #{id}
+
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            p.director,
+                            p.create_time,
+                            FALSE AS principal,
+                            FALSE AS `show`,
+                            p.type,
+                            frozen
+                        FROM
+                            project p
+                            LEFT JOIN project_task t ON p.id = t.project_id
+                        WHERE
+                            t.headman = #{id}
+
+                        GROUP BY
+                            p.id
+                    ) AS p
+                        LEFT JOIN project_show s ON p.id = s.project_id
+                        AND s.user_id = #{id}
+
+            ) AS p
+                LEFT JOIN (
+                SELECT
+                    COUNT( id ) AS num,
+                    t.project_id
+                FROM
+                    (
+                        SELECT
+                            w.id,
+                            v.project_id,
+                            v.tec
+                        FROM
+                            volume v,
+                            volume_workday w
+                        WHERE
+                            w.submit_date = #{date}
+
+                          AND v.id = w.volume_id UNION
+                        SELECT
+                            h.id,
+                            v.project_id,
+                            v.tec
+                        FROM
+                            volume v,
+                            volume_workday_high h
+                        WHERE
+                            h.volume_id = v.id
+                          AND h.submit_date = #{date} UNION
+                        SELECT
+                            t.id,
+                            t.project_id,
+                            t.tec
+                        FROM
+                            project_task t
+                        WHERE
+                            submit_date = #{date} UNION
+                        SELECT
+                            a.id,
+                            t.project_id,
+                            t.tec
+                        FROM
+                            project_task t,
+                            task_advance a
+                        WHERE
+                            a.submit_date = #{date}
+
+                          AND a.task_id = t.id
+                    ) AS tab,
+                    (
+                        SELECT
+                            t.project_id,
+                            t.volume_tec
+                        FROM
+                            workday_tec t,
+                            workday_tec_principal tp
+                        WHERE
+                            t.id = tp.workday_tec_id
+                          AND tp.user_id = #{id} ) AS t
+
+                WHERE
+                    tab.tec = t.volume_tec
+                  AND tab.project_id = t.project_id
+                GROUP BY
+                    tab.project_id
+            ) AS num ON p.id = num.project_id
+        WHERE
+            p.sShow = 1
+        GROUP BY
+            p.id
+        union
+        SELECT
+            p.id,
+            p.number,
+            p.`name`,
+            p.general,
+            u.`name` AS director,
+            p.create_time,
+            0 AS amount,
+            1 AS principal,
+            1 AS `show`,
+            0 AS type,
+            0 AS frozen,
+            1 as `mold`
+        FROM
+            scientific_project p,
+            `user` u
+        WHERE
+            p.generalId = #{id}
+          AND p.creator = u.id UNION
+        SELECT
+            p.id,
+            p.number,
+            p.`name`,
+            p.general,
+            u.`name` AS director,
+            p.create_time,
+            0 AS amount,
+            1 AS principal,
+            1 AS `show`,
+            0 AS type,
+            0 AS frozen,
+            1 as `mold`
+        FROM
+            scientific_project p,
+            `user` u,
+            scientific_leader l
+        WHERE
+            p.id = l.scientific_id
+          AND p.creator = u.id
+          AND l.`leader` = #{id}
+    </select>
+    <select id="personalProject" resultType="map">
+        SELECT DISTINCT
+            p.id,
+            p.number,
+            p.`name`,
+            ifnull( s.`show`, TRUE ) AS `show`
+        FROM
+            project p
+                LEFT JOIN project_show s ON p.id = s.project_id
+                AND s.user_id = #{id}
+        WHERE
+            p.generalId = #{id} UNION
+        SELECT DISTINCT
+            p.id,
+            p.number,
+            p.`name`,
+            ifnull( s.`show`, TRUE ) AS `show`
+        FROM
+            project p
+                LEFT JOIN project_show s ON p.id = s.project_id
+                AND s.user_id = #{id}
+                LEFT JOIN volume v ON v.project_id = p.id
+                LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+            vu.designer = #{id} UNION
+        SELECT DISTINCT
+            p.id,
+            p.number,
+            p.`name`,
+            ifnull( s.`show`, TRUE ) AS `show`
+        FROM
+            project p
+                LEFT JOIN project_show s ON p.id = s.project_id
+                AND s.user_id = #{id}
+                LEFT JOIN volume v ON v.project_id = p.id
+                LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+            vu.checker = #{id} UNION
+        SELECT DISTINCT
+            p.id,
+            p.number,
+            p.`name`,
+            ifnull( s.`show`, TRUE ) AS `show`
+        FROM
+            project p
+                LEFT JOIN project_show s ON p.id = s.project_id
+                AND s.user_id = #{id}
+                LEFT JOIN volume v ON v.project_id = p.id
+                LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+            vu.principal = #{id} UNION
+        SELECT DISTINCT
+            p.id,
+            p.number,
+            p.`name`,
+            ifnull( s.`show`, TRUE ) AS `show`
+        FROM
+            project p
+                LEFT JOIN project_show s ON p.id = s.project_id
+                AND s.user_id = #{id}
+                LEFT JOIN volume v ON v.project_id = p.id
+                LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+            vu.headman = #{id} UNION
+        SELECT DISTINCT
+            p.id,
+            p.number,
+            p.`name`,
+            ifnull( s.`show`, TRUE ) AS `show`
+        FROM
+            project p
+                LEFT JOIN project_show s ON p.id = s.project_id
+                AND s.user_id = #{id}
+                LEFT JOIN workday_tec w ON w.project_id = p.id
+                LEFT JOIN project_task t ON t.project_id = p.id
+        WHERE
+            FIND_IN_SET( #{id}, w.principal ) UNION
+        SELECT DISTINCT
+            p.id,
+            p.number,
+            p.`name`,
+            ifnull( s.`show`, TRUE ) AS `show`
+        FROM
+            project p
+                LEFT JOIN project_show s ON p.id = s.project_id
+                AND s.user_id = #{id}
+                LEFT JOIN project_task t ON t.project_id = p.id
+        WHERE
+            t.designer = #{id} UNION
+        SELECT DISTINCT
+            p.id,
+            p.number,
+            p.`name`,
+            ifnull( s.`show`, TRUE ) AS `show`
+        FROM
+            project p
+                LEFT JOIN project_show s ON p.id = s.project_id
+                AND s.user_id = #{id}
+                LEFT JOIN project_task t ON t.project_id = p.id
+        WHERE
+            t.checker = #{id} UNION
+        SELECT DISTINCT
+            p.id,
+            p.number,
+            p.`name`,
+            ifnull( s.`show`, TRUE ) AS `show`
+        FROM
+            project p
+                LEFT JOIN project_show s ON p.id = s.project_id
+                AND s.user_id = #{id}
+                LEFT JOIN project_task t ON t.project_id = p.id
+        WHERE
+            t.headman = #{id}
+    </select>
+    <select id="queryAmountByMajor" resultType="java.lang.String">
+        SELECT
+                IFNULL( t.amount, 0 ) + IFNULL(
+                SUM( b.workday ),0) as num
+        FROM
+            (
+                SELECT DISTINCT
+                    v.project_id, v.tec, t.amount
+                FROM
+                    volume v
+                        LEFT JOIN workday_tec t ON v.project_id = t.project_id
+                        AND t.volume_tec = v.tec,
+                    `user` u
+                WHERE
+                    v.project_id = #{map.id}
+                  AND u.id = #{userId}
+                  AND (FIND_IN_SET(
+                        u.`name`,
+                        REPLACE ( v.principal, ";", "," ))  or  v.actual_principal = u.`name`)
+            ) AS t
+                LEFT JOIN workday_backup b ON t.project_id = b.project_id
+                AND b.volume_tec = t.tec
+
+        GROUP BY
+            tec
+    </select>
+    <select id="queryUsed" resultMap="queryUsed">
+        SELECT
+            v.project_id AS id,
+            v.tec,
+            IFNULL( v.manage, 0 ) AS manage,
+            IFNULL( v.volume, 0 ) AS volume,
+            IFNULL( v.amount, 0 ) AS amount,
+            IFNULL( v.manageUsed, 0 ) AS manageUsed,
+            IFNULL( v.volumeUsed, 0 ) AS volumeUsed,
+            IFNULL( v.backupUsed, 0 ) + IFNULL( SUM( t1.designer_workday + t1.principal_workday + t1.checker_workday + t1.headman_workday ), 0 ) AS backupUsed,
+            v.`check`,
+            v.tecCheck,
+            r.designer * 100 AS designer,
+            r.checker * 100 AS checker,
+            r.principal * 100 AS principal,
+            r.headman * 100 AS headman,
+            c.checker AS checkerId,
+            #{userId} AS userId
+        FROM
+            (
+                SELECT
+                    v.project_id,
+                    v.tec,
+                    v.manage,
+                    v.volume,
+                    v.amount - v.manageDeduct - v.volumeDeduct - v.backupDeduct AS amount,
+                    v.manageDeduct,
+                    v.volumeDeduct,
+                    v.backupDeduct,
+                    v.volumeUsed,
+                    v.backupUsed,
+                    v.`check`,
+                    v.tecCheck,
+                    IFNULL( SUM( t.designer_workday + t.principal_workday + t.checker_workday + t.headman_workday ), 0 ) AS manageUsed
+                FROM
+                    (
+                        SELECT
+                            v.project_id,
+                            v.tec,
+                            v.manage,
+                            v.volume,
+                            v.amount,
+                            IFNULL( SUM( d.manage ), 0 ) AS manageDeduct,
+                            IFNULL( SUM( d.volume ), 0 ) AS volumeDeduct,
+                            IFNULL( SUM( d.`backup` ), 0 ) AS backupDeduct,
+                            v.volumeUsed,
+                            v.backupUsed,
+                            v.`check`,
+                            v.tecCheck
+                        FROM
+                            (
+                                SELECT
+                                    v.project_id,
+                                    v.tec,
+                                    v.manage,
+                                    v.volume,
+                                    IFNULL( SUM( ta.amount ), 0 ) + v.amount AS amount,
+                                    v.volumeUsed,
+                                    v.backupUsed,
+                                    v.`check`,
+                                    v.tecCheck
+                                FROM
+                                    (
+                                        SELECT
+                                            v.project_id,
+                                            v.tec,
+                                            t.manage,
+                                            t.volume,
+                                            ifnull( wt.amount, 0 ) + ifnull( sum( b.workday ), 0 ) AS amount,
+                                            v.volumeUsed,
+                                            v.backupUsed,
+                                            d.`check`,
+                                            t.`check` AS tecCheck
+                                        FROM
+                                            (
+                                                SELECT
+                                                    t.project_id,
+                                                    t.tec,
+                                                    t.volumeUsed,
+                                                    IFNULL( SUM( w.workday ), 0 ) AS backupUsed
+                                                FROM
+                                                    (
+                                                        SELECT
+                                                            t.project_id,
+                                                            t.tec,
+                                                            IFNULL( SUM( w.workday ), 0 ) AS volumeUsed
+                                                        FROM
+                                                            (
+                                                                SELECT
+                                                                    project_id,
+                                                                    volume_tec AS tec
+                                                                FROM
+                                                                    workday_tec t,
+                                                                    workday_tec_principal p
+                                                                WHERE
+                                                                    p.workday_tec_id = t.id
+                                                                  AND t.project_id = #{map.id}
+                                                                  AND p.user_id = #{userId}
+                                                                GROUP BY
+                                                                    tec
+                                                            ) AS t
+                                                                LEFT JOIN volume v ON v.project_id = t.project_id
+                                                                AND v.tec = t.tec
+                                                                LEFT JOIN volume_workday w ON w.volume_id = v.id
+                                                                AND w.type = 0
+                                                        GROUP BY
+                                                            t.tec
+                                                    ) AS t
+                                                        LEFT JOIN volume v ON v.project_id = t.project_id
+                                                        AND v.tec = t.tec
+                                                        LEFT JOIN volume_workday w ON w.volume_id = v.id
+                                                        AND w.type = 1
+                                                GROUP BY
+                                                    t.tec
+                                            ) AS v
+                                                LEFT JOIN project_workday_distribute d ON d.project_id = v.project_id
+                                                AND d.`check` = 1
+                                                LEFT JOIN workday_tec wt ON d.project_id = wt.project_id
+                                                AND v.tec = wt.volume_tec
+                                                LEFT JOIN workday_tec_distribute t ON v.project_id = t.project_id
+                                                AND t.tec = v.tec
+                                                LEFT JOIN project_workday_backup b ON b.project_id = v.project_id
+                                                AND v.tec = b.tec
+                                                AND b.`check` = 1
+                                        GROUP BY
+                                            v.project_id,
+                                            v.tec
+                                    ) AS v
+                                        LEFT JOIN project_workday_add a ON a.project_id = v.project_id
+                                        AND a.`check` = 1
+                                        LEFT JOIN workday_tec_add ta ON ta.add_id = a.id
+                                        AND ta.volume_tec = v.tec
+                                GROUP BY
+                                    v.project_id,
+                                    v.tec
+                            ) AS v
+                                LEFT JOIN workday_tec_deduct d ON d.project_id = v.project_id
+                                AND d.tec = v.tec
+                        GROUP BY
+                            v.project_id,
+                            v.tec
+                    ) AS v
+                        LEFT JOIN project_task t ON t.project_id = v.project_id
+                        AND t.tec = v.tec
+                        AND t.type = 0
+                        AND t.project_id = v.project_id
+                GROUP BY
+                    v.tec
+            ) AS v
+                LEFT JOIN project_task t1 ON t1.project_id = v.project_id
+                AND t1.tec = v.tec
+                AND t1.type = 1
+                AND t1.project_id = v.project_id
+                LEFT JOIN tec_ratio r ON r.project_id = v.project_id
+                AND r.tec = v.tec
+                LEFT JOIN project_tec_checker c ON c.project_id = v.project_id
+                AND c.tec = v.tec
+                AND c.principal = #{userId}
+        GROUP BY
+            v.tec
+    </select>
+    <select id="queryUsedByTec" resultType="java.util.Map">
+        SELECT DISTINCT
+            p.mold,
+            IFNULL( v.manage, 0 ) - IFNULL( deduct.manageDeduct, 0 ) AS manage,
+            IFNULL( v.volume, 0 ) - IFNULL( deduct.volumeDeduct, 0 ) AS volume,
+            v.amount - IFNULL( deduct.manageDeduct, 0 ) - IFNULL( deduct.volumeDeduct, 0 ) - IFNULL( deduct.backupDeduct, 0 ) AS amount,
+            v.tec,
+            SUM(
+                        IFNULL( v.backupUsed, 0 ) + IFNULL( t1.designer_workday, 0 ) + IFNULL( t1.principal_workday, 0 ) + IFNULL( t1.checker_workday, 0 ) + IFNULL( t1.headman_workday, 0 )) AS backupUsed,
+            IFNULL( v.volumeUsed, 0 ) AS volumeUsed,
+            manageUsed,
+            `check`
+        FROM
+            (
+                SELECT DISTINCT
+                    v.project_id,
+                    IFNULL( v.manage, 0 ) AS manage,
+                    IFNULL( v.volume, 0 ) AS volume,
+                    v.amount,
+                    v.tec,
+                    v.volumeUsed AS volumeUsed,
+                    v.backupUsed,
+                    SUM(
+                                IFNULL( t.designer_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.headman_workday, 0 )
+                        ) AS manageUsed,
+                    `check`
+                FROM
+                    (
+                        SELECT
+                            v.project_id,
+                            v.tec,
+                            t.manage,
+                            t.volume,
+                            (
+                                    ifnull( b.workday, 0 ) + ifnull( wt.amount, 0 ) + ifnull( SUM( ta.amount ), 0 )) AS amount,
+                            v.volumeUsed,
+                            v.backupUsed,
+                            ifnull( t.`check`, FALSE ) AS `check`
+                        FROM
+                            (
+                                SELECT
+                                    t.project_id,
+                                    t.tec,
+                                    IFNULL( SUM( w.workday ), 0 ) AS volumeUsed,
+                                    IFNULL( bw.backupUsed, 0 ) AS backupUsed
+                                FROM
+                                    (
+                                        SELECT DISTINCT
+                                            t.project_id,
+                                            t.volume_tec AS tec
+                                        FROM
+                                            workday_tec t
+                                        WHERE
+                                            t.project_id = #{map.id}
+                                          AND t.volume_tec = #{map.tec}
+                                        GROUP BY
+                                            t.volume_tec
+                                    ) AS t
+                                        LEFT JOIN volume v ON v.project_id = t.project_id
+                                        AND v.tec = t.tec
+                                        LEFT JOIN volume_workday w ON w.volume_id = v.id
+                                        AND w.type = 0
+                                        LEFT JOIN (
+                                        SELECT
+                                            v.tec,
+                                            SUM( w.workday ) AS backupUsed
+                                        FROM
+                                            volume v
+                                                LEFT JOIN volume_workday w ON w.volume_id = v.id
+                                                AND w.type = 1
+                                        WHERE
+                                            v.project_id = #{map.id}
+                                          AND v.tec = #{map.tec}
+                                    ) AS bw ON bw.tec = t.tec
+                            ) AS v
+                                LEFT JOIN workday_tec wt ON v.project_id = wt.project_id
+                                AND v.tec = wt.volume_tec
+                                LEFT JOIN workday_tec_distribute t ON v.project_id = t.project_id
+                                AND t.tec = v.tec
+                                LEFT JOIN ( SELECT sum( workday ) AS workday, project_id FROM project_workday_backup WHERE project_id = #{map.id} AND tec = #{map.tec} AND `check` = 1 ) AS b ON b.project_id = v.project_id
+                                LEFT JOIN project_workday_add a ON a.project_id = v.project_id
+                                AND a.`check` = 1
+                                LEFT JOIN workday_tec_add ta ON ta.add_id = a.id
+                                AND ta.volume_tec = v.tec
+                    ) AS v
+                        LEFT JOIN project_task t ON t.project_id = v.project_id
+                        AND t.tec = v.tec
+                        AND t.type = 0
+                        AND t.project_id = v.project_id
+            ) AS v
+                LEFT JOIN project_task t1 ON t1.project_id = v.project_id
+                AND t1.tec = v.tec
+                AND t1.type = 1
+                AND t1.project_id = v.project_id
+                LEFT JOIN (
+                SELECT
+                    project_id,
+                    tec,
+                    IFNULL( SUM( manage ), 0 ) AS manageDeduct,
+                    IFNULL( SUM( volume ), 0 ) AS volumeDeduct,
+                    IFNULL( SUM( `backup` ), 0 ) AS backupDeduct
+                FROM
+                    workday_tec_deduct
+                WHERE
+                    project_id = #{map.id}
+                  AND tec = #{map.tec}
+            ) AS deduct ON deduct.project_id = v.project_id
+                AND deduct.tec = v.tec,
+             project p
+            where p.id = v.project_id
+        GROUP BY
+            v.tec
+    </select>
+    <select id="queryByVolumeId" resultType="java.util.Map">
+        SELECT
+            IFNULL( w.workday, 0 ) AS workday,
+            IFNULL( vr.designer, tr.designer ) AS designer,
+            IFNULL( vr.checker, tr.checker ) AS checker,
+            IFNULL( vr.principal, tr.principal ) AS principal,
+            IFNULL( vr.headman, tr.headman ) AS headman
+        FROM
+            volume v
+                LEFT JOIN volume_workday w ON v.id = w.volume_id
+                LEFT JOIN tec_ratio tr ON tr.tec = v.tec
+                AND tr.project_id = v.project_id
+                LEFT JOIN volume_ratio vr ON vr.volume_id = v.id
+        WHERE
+            v.id = #{id}
+    </select>
+       <select id="queryIncomByProjectId" resultType="java.util.Map">
+        select
+            v.id, v.number, v.name, v.designer, v.checker, ifnull(w.workday,0) as workday, w.submit, v.tips
+        from
+            volume v
+            left join volume_workday w on v.id = w.volume_id
+        where  v.project_id = #{id}
+          and v.tec = #{tec}
+    </select>
+    <select id="completeUsed" resultType="java.lang.Double">
+        select
+        ifnull(sum(w.workday),0) as workday
+        from
+        volume v,
+        `user`  u,
+        volume_workday w
+        where
+        u.id = #{userId}
+        and (FIND_IN_SET(u.`name`,REPLACE(v.principal,';',',')) or  v.actual_principal = u.`name`)
+        and v.id = w.volume_id
+        and v.tec = #{tec}
+        and v.project_id = #{id}
+    </select>
+    <select id="queryNotDeclare" resultType="java.util.Map">
+        SELECT
+            w.id,
+            v.number,
+            v.`name`,
+            w.workday,
+            v.designer as designerName,
+            v.checker as checkerName,
+            v.actual_principal as principalName,
+            v.headman as headmanName,
+            vu.designer as designerId,
+            vu.checker as checkerId,
+            vu.principal as principalId,
+            vu.headman as headmanId,
+            w.designer_workday  AS designer,
+            w.checker_workday  AS checker,
+            w.principal_workday  AS principal,
+            w.headman_workday  AS headman,
+            w.type AS `type`,
+            0 as task,
+            0 as advance
+        FROM
+            volume v
+                left join volume_user vu on v.id = vu.volume_id,
+            volume_workday w
+        WHERE
+            v.id = w.volume_id
+          AND v.project_id = #{map.id}
+          AND w.handler = #{userId}
+          AND w.submit IN ( 0, 3 )
+          AND w.`check` = 1
+          AND v.state not in ("尚未开展", "正在设计", "正在校审", "尚未确定")
+        union
+        SELECT
+            h.id,
+            v.number,
+            v.`name`,
+            w.workday,
+            v.designer as designerName,
+            v.checker as checkerName,
+            v.actual_principal as principalName,
+            v.headman as headmanName,
+            vu.designer as designerId,
+            vu.checker as checkerId,
+            vu.principal as principalId,
+            vu.headman as headmanId,
+            h.`grant` AS designer,
+            0 AS checker,
+            0 AS principal,
+            0 AS headman,
+            w.type AS type,
+            0 as task,
+            1 as advance
+        FROM
+            volume v
+            left join volume_user vu on v.id = vu.volume_id ,
+            volume_workday w,
+            volume_workday_high h
+        WHERE
+            v.id = w.volume_id
+          AND v.project_id = #{map.id}
+          AND w.handler = #{userId}
+          and h.volume_id = v.id
+          and h.submit in (0, 3)
+          and w.`check` = 1
+          AND v.state in ("尚未开展", "正在设计", "正在校审",  "尚未确定")
+        union
+        SELECT
+            t.id,
+            t.number,
+            t.`name`,
+            IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 ) AS workday,
+            u1.`name` as designerName,
+            u2.`name` as checkerName,
+            u3.`name` as principalName,
+            u4.`name` as headmanName,
+            t.designer as designerId,
+            t.checker as checkerId,
+            t.principal as principalId,
+            t.headman as headmanId,
+            t.designer_workday AS designer,
+            t.checker_workday AS checker,
+            t.principal_workday AS principal,
+            t.headman_workday AS headman,
+            t.type AS type,
+            1 AS task,
+            0 as advance
+        FROM
+            project_task t
+            left join `user` u1 on t.designer = u1.id
+            left join `user` u2 on t.checker = u2.id
+            left join `user` u3 on t.principal = u3.id
+            left join `user` u4 on t.headman = u4.id
+        WHERE
+            t.project_id = #{map.id}
+          AND t.`handler` = #{userId}
+          and t.`end` is not null
+          AND submit IN (0, 3)
+        union
+        SELECT
+            a.id,
+            t.number,
+            t.`name`,
+            IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 ) AS workday,
+            u1.`name` as designerName,
+            null as checkerName,
+            null as principalName,
+            null as headmanName,
+            t.designer as designerId,
+            null as checkerId,
+            null as principalId,
+            null as headmanId,
+            a.advance AS designer,
+            0 AS checker,
+            0 AS principal,
+            0 AS headman,
+            t.type AS type,
+            1 AS task,
+            1 as advance
+        FROM
+            project_task t
+                left join `user` u1 on t.designer = u1.id,
+            task_advance a
+        WHERE
+            project_id = #{map.id}
+          AND `handler` = #{userId}
+          and t.`end` is null
+          AND a.submit IN (0, 3)
+          and a.task_id = t.id
+</select>
+    <select id="queryDeclare" resultType="java.util.Map">
+        SELECT
+            w.id,
+            v.number,
+            v.`name`,
+            w.workday,
+            w.designer_workday  AS designer,
+            w.checker_workday  AS checker,
+            w.principal_workday  AS principal,
+            w.headman_workday  AS headman,
+            w.type AS type,
+            w.submit,
+            0 as task,
+            0 as advance
+        FROM
+            volume v
+                LEFT JOIN tec_ratio t ON v.tec = t.tec,
+            volume_workday w
+
+        WHERE
+            v.id = w.volume_id
+          AND v.project_id = #{map.id}
+          AND w.handler = #{userId}
+          AND w.submit in (1, 2)
+          AND w.`check` = 1
+          AND v.state not in ("尚未开展", "正在设计", "正在校审",  "尚未确定")
+            and w.submit_date = #{map.date}
+        union
+        SELECT
+            h.id,
+            v.number,
+            v.`name`,
+            w.workday,
+            h.`grant` AS designer,
+            0 AS checker,
+            0 AS principal,
+            0 AS headman,
+            w.type AS type,
+            h.submit,
+            0 as task,
+            1 as advance
+        FROM
+            volume v,
+            volume_workday w,
+            volume_workday_high h
+
+        WHERE
+            v.id = w.volume_id
+          AND v.project_id = #{map.id}
+          AND w.handler = #{userId}
+          and h.volume_id = v.id
+          and h.submit in (1, 2)
+          AND v.state in ("尚未开展", "正在设计", "正在校审",  "尚未确定")
+          and h.submit_date = #{map.date}
+          and w.`check` = 1
+        union
+        SELECT
+            id,
+            number,
+            `name`,
+            IFNULL( designer_workday, 0 ) + IFNULL( checker_workday, 0 ) + IFNULL( principal_workday, 0 ) + IFNULL( headman_workday, 0 ) AS workday,
+            designer_workday AS designer,
+            checker_workday AS checker,
+            principal_workday AS principal,
+            headman_workday AS headman,
+            type AS type,
+            submit,
+            1 AS task,
+            0 as advance
+        FROM
+            project_task
+        WHERE
+            project_id = #{map.id}
+          AND `handler` = #{userId}
+          AND submit in (1, 2)
+          and `end` is not null
+         and submit_date = #{map.date}
+        union
+        SELECT
+            a.id,
+            t.number,
+            t.`name`,
+            IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 ) AS workday,
+            a.advance AS designer,
+            0 AS checker,
+            0 AS principal,
+            0 AS headman,
+            t.type AS type,
+            a.submit,
+            1 AS task,
+            1 as advance
+        FROM
+            project_task t,
+            task_advance a
+        WHERE
+            project_id = #{map.id}
+          AND `handler` = #{userId}
+          AND a.submit in (1, 2)
+          and t. `end` is null
+          and a.submit_date = #{map.date}
+          and a.task_id = t.id
+    </select>
+    <select id="declareDay" resultType="java.lang.Integer">
+        select `day`
+        from declare_day
+        where  id = 1
+    </select>
+    <select id="queryTecById" resultMap="queryTecById">
+        select id, project_id, volume_tec as tec, `type`
+        from workday_tec
+        where project_id = #{id}
+        union
+        select null as id, project_id, tec, 1 as type
+        from volume
+        where project_id = #{id}
+        group by tec
+    </select>
+    <select id="queryBySelfCheck" resultType="java.util.Map">
+        SELECT
+               projectId,
+            id,
+            `number`,
+            `name`,
+            `general`,
+            generalId,
+            `typeTab`,
+            isGeneral,
+            workday,
+            `date`,
+            `type`,
+            office,
+            `check`
+        FROM
+            (
+            SELECT
+            p.id as projectId,
+            n.id,
+            p.`number`,
+            p.`name`,
+            `general`,
+            generalId,
+            p.type as typeTab,
+            TRUE AS isGeneral,
+            IFNULL( w.num, 0 ) AS workday,
+            w.date,
+            CASE
+            n.type
+            WHEN 0 THEN
+            "本部有产值"
+            WHEN 1 THEN
+            "本部无产值"
+            WHEN 2 THEN
+            "外部无产值"
+            WHEN 3 THEN
+            "外部有产值" ELSE "未知"
+            END AS type,
+            o.`name` AS office,
+            CASE
+            WHEN n.`check` = 1
+            AND n.check_other = 1 THEN
+            "审核通过"
+            WHEN n.`check` = 2
+                AND n.check_other = 2 THEN
+                "回退"
+            WHEN n.`check` = 2 THEN
+            "本部回退"
+            WHEN
+             n.check_other = 2 THEN
+            "外部回退"  ELSE  "待审核"
+            END AS `check`
+            FROM
+            project p
+            LEFT JOIN project_workday w ON w.project_id = p.id,
+            project_note n,
+            office o
+            WHERE
+            p.id = n.project_id
+            AND p.generalId = #{id}
+            AND n.office_id = o.id UNION
+            SELECT
+            p.id as projectId,
+            n.id,
+            p.`number`,
+            p.`name`,
+            `general`,
+            generalId,
+            p.type as typeTab,
+            FALSE AS isGeneral,
+            IFNULL( w.num, 0 ) AS workday,
+            w.date,
+            CASE
+            n.type
+            WHEN 0 THEN
+            "本部有产值"
+            WHEN 0 THEN
+            "本部无产值"
+            WHEN 0 THEN
+            "外部无产值" ELSE "未知"
+            END AS type,
+            o.`name` AS office,
+            CASE
+
+            WHEN n.`check` = 1
+            AND n.check_other = 1 THEN
+            "审核通过"
+            WHEN n.`check` = 2
+                AND n.check_other = 2 THEN
+                "回退"
+            WHEN n.`check` = 2
+             THEN
+            "本部回退"
+            WHEN
+            n.check_other = 2 THEN
+            "外部回退"  ELSE  "待审核"
+            END AS `check`
+            FROM
+            project p
+            LEFT JOIN project_workday w ON w.project_id = p.id,
+            project_note n,
+            office o
+            WHERE
+            p.id = n.project_id
+            AND n.check_handler = #{id}
+            AND o.id = n.office_id UNION
+            SELECT
+                c.project_id as projectId,
+            c.id,
+            c.`number`,
+            c.`name`,
+            c.`general`,
+            c.generalId,
+            p.type as typeTab,
+            TRUE AS isGeneral,
+            IFNULL( workday, 0 ) AS workday,
+            c.create_time AS date,
+            "外部有产值" AS type,
+            o.`name` AS office,
+            CASE
+            WHEN c.`check` = 1 THEN
+            "审核通过"
+            WHEN c.`check` = 2 THEN
+            "本部回退" ELSE "待审核"
+            END AS `check`
+            FROM
+            project p,
+            project_children c,
+            office o
+            WHERE
+            c.generalId = #{id}
+            AND c.office_id = o.id
+            AND c.project_id = p.id UNION
+            SELECT
+                c.project_id as projectId,
+            c.id,
+            c.`number`,
+            c.`name`,
+            c.`general`,
+            c.generalId,
+            p.type as typeTab,
+            FALSE AS isGeneral,
+            IFNULL( workday, 0 ) AS workday,
+            c.create_time AS date,
+            "外部有产值" AS type,
+            o.`name` AS office,
+            CASE
+
+            WHEN c.`check` = 1 THEN
+            "审核通过"
+            WHEN c.`check` = 2 THEN
+            "本部回退" ELSE "待审核"
+            END AS `check`
+            FROM
+            project p,
+            project_children c,
+            office o
+            WHERE
+            c.`check` = #{id}
+            AND c.office_id = o.id
+            AND c.project_id = p.id
+            ) AS tab
+        GROUP BY
+            id,
+            type
+    </select>
+    <select id="querySelfPbyId" resultType="java.util.Map">
+        SELECT
+            p.id AS projectId,
+            p.number,
+            p.`name`,
+            CASE
+                n.type
+                WHEN 0 THEN
+                    0 ELSE 1
+                END AS type,
+            n.tec,
+            n.office_id AS departmentId,
+            n.other_tec AS otherTec,
+            n.money,
+            n.ratio,
+            n.stage,
+            n.scope,
+            n.note,
+            n.planned_date AS plannedDate,
+            n.apply_workday as workday,
+            n.check_other_handler as otherHandler,
+            n.check_handler as handler
+        FROM
+            project_note n,
+            project p
+        WHERE
+            n.id = #{id}
+          AND p.id = n.project_id
+    </select>
+    <select id="querySelfChildrenById" resultType="java.util.Map">
+        select n.project_id as projectId,
+               n.number,
+               n.name,
+               0 as type,
+               n.tec,
+               n.office_id as departmentId,
+               n.other_tec as otherTec,
+               n.money,
+               n.ratio,
+               n.stage,
+               n.scope,
+               n.note,
+               n.planned_date as plannedDate,
+               n.workday,
+               n.check_handler as handler
+        from project_children n
+             where  n.id = #{id}
+    </select>
+    <select id="queryTecPrincipal" resultType="java.util.Map">
+        SELECT u.id, u.`name`, u.username
+        FROM `user` u,
+        workday_tec_principal w
+        WHERE w.workday_tec_id = #{id}
+        and w.user_id = u.id
+    </select>
+    <select id="sameName" resultType="java.util.Map">
+        SELECT DISTINCT
+        v.pid,
+        v.pname,
+        v.pnumber,
+        v.id,
+        v.`name`,
+        v.number,
+        v.designer,
+        v.checker,
+        v.principal,
+        v.headman,
+        u1.id AS designerId,
+        u2.id AS checkerId,
+        u3.id AS principalId,
+        u4.id AS headmanId,
+        v.sameDesigner,
+        v.sameChecker,
+        v.samePrincipal,
+        v.sameHeadman
+        FROM
+        (
+        SELECT
+        p.id AS pid,
+        p.`name` AS pname,
+        p.number AS pnumber,
+        v.id,
+        v.`name`,
+        v.number,
+        v.designer,
+        v.checker,
+        v.actual_principal AS principal,
+        v.headman,
+        ( CASE v.designer WHEN u.`name` THEN 1 ELSE 0 END ) AS sameDesigner,
+        ( CASE v.checker WHEN u.`name` THEN 1 ELSE 0 END ) AS sameChecker,
+        ( CASE v.actual_principal WHEN u.`name` THEN 1 ELSE 0 END ) AS samePrincipal,
+        ( CASE v.headman WHEN u.`name` THEN 1 ELSE 0 END ) AS sameHeadman
+        FROM
+        project p,
+        workday_tec t,
+        volume v,
+        ( SELECT id, `name`, username FROM `user` GROUP BY `name` HAVING count( id ) > 1 ) AS u
+        WHERE
+        FIND_IN_SET( #{id}, t.principal )
+        AND t.project_id = p.id
+        AND v.project_id = t.project_id
+        AND v.tec = t.volume_tec
+        AND (
+        v.designer = u.`name`
+        OR v.`checker` = u.`name`
+        OR v.actual_principal = u.`name`
+        OR v.headman = u.`name`
+        )
+          AND v.id NOT IN
+              ( SELECT volume_id AS id
+              FROM volume_user WHERE
+                                     designer IS NOT NULL
+                                 AND checker IS NOT NULL
+                                 AND principal IS NOT NULL
+                                 AND headman IS NOT NULL )
+        ) AS v
+        LEFT JOIN `user` u1 ON u1.`name` = v.designer
+        AND v.sameDesigner = 0
+        LEFT JOIN `user` u2 ON u2.`name` = v.checker
+        AND v.sameChecker = 0
+        LEFT JOIN `user` u3 ON u3.`name` = v.principal
+        AND v.samePrincipal = 0
+        LEFT JOIN `user` u4 ON u4.`name` = v.headman
+        AND v.sameHeadman = 0,
+        volume_user vu
+        WHERE
+            v.id = vu.volume_id
+          AND (
+                ( vu.designer IS NULL AND v.sameDesigner = 1 )
+                OR ( vu.checker IS NULL AND v.sameChecker = 1 )
+                OR ( vu.principal IS NULL AND v.samePrincipal = 1 )
+                OR ( vu.headman IS NULL AND v.sameHeadman = 1 )
+            )
+    </select>
+    <select id="declareLogList" resultType="java.util.Map">
+        SELECT
+            w.id,
+            v.number,
+            v.`name`,
+            w.workday,
+            v.designer as designerName,
+            v.checker as `checkerName`,
+            v.principal as principalName,
+            v.headman as headmanName,
+            w.workday * ifnull( r.designer, t.designer ) AS designer,
+            w.workday * ifnull( r.checker, t.checker ) AS checker,
+            w.workday * ifnull( r.principal, t.principal ) AS principal,
+            w.workday * ifnull( r.headman, t.headman ) AS headman,
+            w.type AS type,
+            w.submit_date,
+            CASE w.backOff
+                WHEN 1 THEN
+                    "申请回退"
+                WHEN 2 THEN
+                    "回退被拒" ELSE
+                    CASE
+                        w.submit
+                        WHEN 0 THEN
+                            "未申报"
+                        WHEN 1 THEN
+                            "已申报"
+                        WHEN 2 THEN
+                            "已发放"
+                        WHEN 3 THEN
+                            "申报被拒" ELSE "未填报"
+                        END
+                END AS submitState,
+            0 AS task,
+            0 AS advance
+        FROM
+            volume v
+                LEFT JOIN tec_ratio t ON v.tec = t.tec
+                AND t.project_id = v.project_id
+                LEFT JOIN volume_ratio r ON r.volume_id = v.id,
+            volume_workday w
+        WHERE
+            v.tec = #{tec}
+          AND w.submit_date = #{date}
+          AND v.id = w.volume_id
+          AND v.project_id = #{id} UNION
+        SELECT
+            h.id,
+            v.number,
+            v.`name`,
+            w.workday,
+            v.designer AS designerName,
+            v.checker AS checkerName,
+            v.actual_principal AS principalName,
+            v.headman AS headmanName,
+            h.`grant` AS designer,
+            0 AS checker,
+            0 AS principal,
+            0 AS headman,
+            w.type AS type,
+            h.submit_date,
+            CASE h.backOff
+                WHEN 1 THEN
+                    "申请回退"
+                WHEN 2 THEN
+                    "回退被拒" ELSE
+                    CASE
+                        h.submit
+                        WHEN 0 THEN
+                            "未申报"
+                        WHEN 1 THEN
+                            "已申报"
+                        WHEN 2 THEN
+                            "已发放"
+                        WHEN 3 THEN
+                            "申报被拒" ELSE "未填报"
+                        END
+                END AS submitState,
+            0 AS task,
+            1 AS advance
+        FROM
+            volume v
+                LEFT JOIN volume_user vu ON v.id = vu.volume_id,
+            volume_workday w,
+            volume_workday_high h
+        WHERE
+            v.id = w.volume_id
+          AND v.project_id = #{id}
+          AND h.volume_id = v.id
+          AND v.tec = #{tec}
+          AND h.submit_date = #{date} UNION
+        SELECT
+            t.id,
+            t.number,
+            t.`name`,
+            IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 ) AS workday,
+            u1.`name` AS designerName,
+            u2.`name` AS checkerName,
+            u3.`name` AS principalName,
+            u4.`name` AS headmanName,
+            t.designer_workday AS designer,
+            t.checker_workday AS checker,
+            t.principal_workday AS principal,
+            t.headman_workday AS headman,
+            t.type AS type,
+            t.submit_date,
+            CASE t.backOff
+                WHEN 1 THEN
+                    "申请回退"
+                WHEN 2 THEN
+                    "回退被拒" ELSE
+                    CASE
+                        t.submit
+                        WHEN 0 THEN
+                            "未申报"
+                        WHEN 1 THEN
+                            "已申报"
+                        WHEN 2 THEN
+                            "已发放"
+                        WHEN 3 THEN
+                            "申报被拒" ELSE "未填报"
+                        END
+                END AS submitState,
+            1 AS task,
+            0 AS advance
+        FROM
+            project_task t
+                LEFT JOIN `user` u1 ON t.designer = u1.id
+                LEFT JOIN `user` u2 ON t.checker = u2.id
+                LEFT JOIN `user` u3 ON t.principal = u3.id
+                LEFT JOIN `user` u4 ON t.headman = u4.id
+        WHERE
+            t.project_id = #{id}
+          AND t.tec = #{tec}
+          AND submit_date = #{date} UNION
+        SELECT
+            a.id,
+            t.number,
+            t.`name`,
+            IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 ) AS workday,
+            u1.`name` AS designerName,
+            NULL AS checkerName,
+            NULL AS principalName,
+            NULL AS headmanName,
+            a.advance AS designer,
+            0 AS checker,
+            0 AS principal,
+            0 AS headman,
+            t.type AS type,
+            a.submit_date,
+            CASE a.backOff
+                WHEN 1 THEN
+                    "申请回退"
+                WHEN 2 THEN
+                    "回退被拒" ELSE
+                    CASE
+                        a.submit
+                        WHEN 0 THEN
+                            "未申报"
+                        WHEN 1 THEN
+                            "已申报"
+                        WHEN 2 THEN
+                            "已发放"
+                        WHEN 3 THEN
+                            "申报被拒" ELSE "未填报"
+                        END
+                END AS submitState,
+            1 AS task,
+            1 AS advance
+        FROM
+            project_task t
+                LEFT JOIN `user` u1 ON t.designer = u1.id,
+            task_advance a
+        WHERE
+            t.project_id = #{id}
+          AND t.tec = #{tec}
+          AND a.submit_date = #{date}
+          AND a.task_id = t.id
+    </select>
+    <select id="declareLog" resultMap="declareLog">
+        select
+        project_id, volume_tec, #{map.date} as date
+        from
+        workday_tec
+        where  project_id = #{map.id}
+        and FIND_IN_SET(#{userId},principal)
+    </select>
+    <select id="notSubmitByAdmin" resultType="java.util.Map">
+        SELECT
+            p.number AS pNumber,
+            p.`name` AS pName,
+            p.general,
+            v.number,
+            v.`name`,
+            v.tec,
+            w.workday
+        FROM
+            volume_workday w,
+            volume v,
+            project p
+        WHERE
+            w.submit = 1
+          AND w.submit_date = #{date}
+          AND v.id = w.volume_id
+          AND v.project_id = p.id UNION
+        SELECT
+            p.number AS pNumber,
+            p.`name` AS pName,
+            p.general,
+            v.number,
+            v.`name`,
+            v.tec,
+            h.`grant` AS workday
+        FROM
+            volume_workday_high h,
+            volume v,
+            project p
+        WHERE
+            h.submit = 1
+          AND h.submit_date = #{date}
+          AND v.id = h.volume_id
+          AND v.project_id = p.id UNION
+        SELECT
+            p.number AS pNumber,
+            p.`name` AS pName,
+            p.general,
+            t.number,
+            t.`name`,
+            t.tec,
+            IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 )
+                + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 )AS workday
+        FROM
+            project p,
+            project_task t
+        WHERE
+            p.id = t.project_id
+          AND t.submit = 1
+          AND t.submit_date = #{date} UNION
+        SELECT
+            p.number AS pNumber,
+            p.`name` AS pName,
+            p.general,
+            t.number,
+            t.`name`,
+            t.tec,
+            a.advance AS workday
+        FROM
+            project p,
+            project_task t,
+            task_advance a
+        WHERE
+            p.id = t.project_id
+          AND t.id = a.task_id
+          AND a.submit = 1
+          AND a.submit_date = #{date}
+    </select>
+    <select id="notSubmitByManage" resultType="java.util.Map">
+        SELECT
+            tab.id,
+            pNumber,
+            pName,
+            general,
+            tab.number,
+            tab.`name`,
+            tab.tec,
+            tab.workday
+        FROM
+            (
+                SELECT
+                    p.id,
+                    p.number AS pNumber,
+                    p.`name` AS pName,
+                    p.general,
+                    v.number,
+                    v.`name`,
+                    v.tec,
+                    w.workday
+                FROM
+                    volume_workday w,
+                    volume v,
+                    project p
+                WHERE
+                    w.submit = 1
+                  AND w.submit_date = #{date}
+                  AND v.id = w.volume_id
+                  AND v.project_id = p.id UNION
+                SELECT
+                    p.id,
+                    p.number AS pNumber,
+                    p.`name` AS pName,
+                    p.general,
+                    v.number,
+                    v.`name`,
+                    v.tec,
+                    h.`grant` AS workday
+                FROM
+                    volume_workday_high h,
+                    volume v,
+                    project p
+                WHERE
+                    h.submit = 1
+                  AND h.submit_date = #{date}
+                  AND v.id = h.volume_id
+                  AND v.project_id = p.id UNION
+                SELECT
+                    p.id,
+                    p.number AS pNumber,
+                    p.`name` AS pName,
+                    p.general,
+                    t.number,
+                    t.`name`,
+                    t.tec,
+                    IFNULL( t.designer, 0 ) + IFNULL( t.checker, 0 ) + IFNULL( t.principal, 0 ) + IFNULL( t.headman, 0 ) AS workday
+                FROM
+                    project p,
+                    project_task t
+                WHERE
+                    p.id = t.project_id
+                  AND t.submit = 1
+                  AND t.submit_date = #{date} UNION
+                SELECT
+                    p.id,
+                    p.number AS pNumber,
+                    p.`name` AS pName,
+                    p.general,
+                    t.number,
+                    t.`name`,
+                    t.tec,
+                    a.advance AS workday
+                FROM
+                    project p,
+                    project_task t,
+                    task_advance a
+                WHERE
+                    p.id = t.project_id
+                  AND t.id = a.task_id
+                  AND a.submit = 1
+                  AND a.submit_date = #{date}
+            ) AS tab,
+            `user` u,
+            `user` u1,
+            workday_tec w
+        WHERE
+            u.id = #{id}
+          AND u.did = u1.did
+          AND FIND_IN_SET( u1.id, w.principal )
+          AND tab.tec = w.volume_tec
+          AND tab.id = w.project_id
+    </select>
+    <select id="projectProgress" resultType="java.util.Map">
+        SELECT
+        p.id,
+        p.number,
+        p.`name`,
+        IFNULL( n0.num, 0 ) AS nowMonthZero,
+        IFNULL( n1.num, 0 ) AS nowMonthUp,
+        IFNULL( a.num, 0 ) AS allZero,
+        IFNULL( c.num, 0 ) AS completeZero,
+        IFNULL( c.num, 0 )/ IFNULL( a.num, 0 ) AS comRatio,
+        IFNULL( a.num, 0 ) - IFNULL( c.num, 0 ) AS incompleteZero
+        FROM
+        (
+        SELECT
+        p.id,
+        p.number,
+        p.`name`
+        FROM
+        project p,
+        volume v
+        WHERE
+        p.id = v.project_id
+        <if test="type == 0">
+        AND v.actual_publication_date is NULL
+        </if>
+        AND RIGHT ( p.number, 1 ) IN ( "Z", "S" )
+        GROUP BY
+        p.id
+        <if test="type == 0">
+        UNION
+        SELECT
+        p.id,
+        p.number,
+        p.`name`
+        FROM
+        project p,
+        volume v
+        WHERE
+        p.id = v.project_id
+        AND v.actual_publication_date = ''
+        AND RIGHT ( p.number, 1 ) IN ( "Z", "S" )
+        GROUP BY
+        p.id
+        </if>
+        ) AS p
+        LEFT JOIN (
+        SELECT
+        p.id,
+        COUNT( v.id ) AS num
+        FROM
+        project p,
+        volume v
+        WHERE
+        p.id = v.project_id
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) = #{date}
+        AND v.number NOT LIKE "%+%"
+        AND RIGHT ( p.number, 1 ) IN ( "Z", "S" )
+        GROUP BY
+        p.id
+        ) AS n0 ON p.id = n0.id
+        LEFT JOIN (
+        SELECT
+        p.id,
+        COUNT( v.id ) AS num
+        FROM
+        project p,
+        volume v
+        WHERE
+        p.id = v.project_id
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) = #{date}
+        AND v.number LIKE "%+%"
+        AND RIGHT ( p.number, 1 ) IN ( "Z", "S" )
+        GROUP BY
+        p.id
+        ) AS n1 ON p.id = n1.id
+        LEFT JOIN (
+        SELECT
+        p.id,
+        COUNT( v.id ) AS num
+        FROM
+        project p,
+        volume v
+        WHERE
+        p.id = v.project_id
+        AND v.number NOT LIKE "%+%"
+        AND RIGHT ( p.number, 1 ) IN ( "Z", "S" )
+        GROUP BY
+        p.id
+        ) a ON p.id = a.id
+        LEFT JOIN (
+        SELECT
+        p.id,
+        COUNT( v.id ) AS num
+        FROM
+        project p,
+        volume v
+        WHERE
+        p.id = v.project_id
+        AND v.actual_publication_date IS NOT NULL
+        AND v.actual_publication_date &lt;&gt; ''
+        AND v.number NOT LIKE "%+%"
+        AND RIGHT ( p.number, 1 ) IN ( "Z", "S" )
+        GROUP BY
+        p.id
+        ) AS c ON p.id = c.id
+    </select>
+    <select id="projectProgressById" resultType="java.util.Map">
+        SELECT
+            p.id,
+            p.number,
+            p.`name`,
+            IFNULL( n0.num, 0 ) + IFNULL( n1.num, 0 ) AS allNowComplete,
+            IFNULL( n0.num, 0 ) AS zeroNowComplete,
+            IFNULL( c.num, 0 ) / IFNULL( a.num, 0 ) AS completeRatio,
+            IFNULL( n1.num, 0 ) AS upNowComplete,
+            IFNULL( a.num, 0 ) AS allZero,
+            IFNULL( c.num, 0 ) AS completeZero,
+            IFNULL( inc.incomplete, 0 ) AS incompleteZero,
+            IFNULL(plan0.num,0) as plan0,
+            IFNULL(plan1.num,0) as plan1,
+            p.tec
+        FROM
+            (
+                SELECT DISTINCT
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    p.tec
+                FROM
+                    (
+                        SELECT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            CASE
+
+                                WHEN v.tec LIKE "%电气%" THEN
+                                    '电气'
+                                WHEN v.tec LIKE "%长输管道%" THEN
+                                    '长输管道' ELSE v.tec
+                                END AS tec
+                        FROM
+                            project p,
+                            volume v
+                        WHERE
+                            p.id = v.project_id
+                          AND p.id = #{id}
+                          AND EXISTS (
+                                SELECT
+                                    r.id
+                                FROM
+                                    role_menus r,
+                                    `user` u
+                                WHERE
+                                    u.id = #{userId}
+                                  AND u.pid = r.role_id
+                                  AND r.menus_id = 10 UNION
+                                SELECT
+                                    id
+                                FROM
+                                    project p1
+                                WHERE
+                                    p1.generalId = #{userId}
+                                  AND p1.id = #{id}
+                            )
+                        GROUP BY
+                            v.tec UNION
+                        SELECT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            CASE
+
+                                WHEN v.tec LIKE "%电气%" THEN
+                                    '电气'
+                                WHEN v.tec LIKE "%长输管道%" THEN
+                                    '长输管道' ELSE v.tec
+                                END AS tec
+                        FROM
+                            project p,
+                            volume v,
+                            workday_tec t
+                        WHERE
+                            p.id = v.project_id
+                          AND p.id = #{id}
+                          AND FIND_IN_SET( #{userId}, t.principal )
+                          AND v.tec = t.volume_tec
+                        GROUP BY
+                            v.tec
+                    ) AS p
+                GROUP BY
+                    p.tec
+            ) AS p
+                LEFT JOIN (
+                SELECT
+                    SUM(
+                            IFNULL( num, 0 )) AS num,
+                    tec
+                FROM
+                    (
+                        SELECT
+                            IFNULL( COUNT( v.id ), 0 ) AS num,
+                            CASE
+
+                                WHEN v.tec LIKE "%电气%" THEN
+                                    '电气'
+                                WHEN v.tec LIKE "%长输管道%" THEN
+                                    '长输管道' ELSE v.tec
+                                END AS tec
+                        FROM
+                            volume v
+                        WHERE
+                            v.project_id = #{id}
+
+                          AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) = #{date}
+
+                          AND v.number NOT LIKE "%+%"
+                        GROUP BY
+                            v.tec
+                    ) AS n
+                GROUP BY
+                    tec
+            ) AS n0 ON n0.tec = p.tec
+                LEFT JOIN (
+                SELECT
+                    SUM(
+                            IFNULL( num, 0 )) AS num,
+                    tec
+                FROM
+                    (
+                        SELECT
+                            IFNULL( COUNT( v.id ), 0 ) AS num,
+                            CASE
+
+                                WHEN v.tec LIKE "%电气%" THEN
+                                    '电气'
+                                WHEN v.tec LIKE "%长输管道%" THEN
+                                    '长输管道' ELSE v.tec
+                                END AS tec
+                        FROM
+                            volume v
+                        WHERE
+                            v.project_id = #{id}
+
+                          AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) = #{date}
+
+                          AND v.number LIKE "%+%"
+                        GROUP BY
+                            v.tec
+                    ) AS n
+                GROUP BY
+                    tec
+            ) AS n1 ON p.tec = n1.tec LEFT JOIN
+            (
+                SELECT
+                    SUM(
+                            IFNULL( num, 0 )) AS num,
+                    tec
+                FROM
+                    (
+                        SELECT
+                            IFNULL( COUNT( v.id ), 0 ) AS num,
+                            CASE
+
+                                WHEN v.tec LIKE "%电气%" THEN
+                                    '电气'
+                                WHEN v.tec LIKE "%长输管道%" THEN
+                                    '长输管道' ELSE v.tec
+                                END AS tec
+                        FROM
+                            volume v
+                        WHERE
+                            v.project_id = #{id}
+
+                          AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) = #{date}
+
+                          AND v.number NOT LIKE "%+%"
+                        GROUP BY
+                            v.tec
+                    ) AS n
+                GROUP BY
+                    tec
+            ) AS plan0 ON p.tec = plan0.tec
+                LEFT JOIN
+            (
+                SELECT
+                    SUM(
+                            IFNULL( num, 0 )) AS num,
+                    tec
+                FROM
+                    (
+                        SELECT
+                            IFNULL( COUNT( v.id ), 0 ) AS num,
+                            CASE
+
+                                WHEN v.tec LIKE "%电气%" THEN
+                                    '电气'
+                                WHEN v.tec LIKE "%长输管道%" THEN
+                                    '长输管道' ELSE v.tec
+                                END AS tec
+                        FROM
+                            volume v
+                        WHERE
+                            v.project_id = #{id}
+
+                          AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) = #{date}
+
+                          AND v.number LIKE "%+%"
+                        GROUP BY
+                            v.tec
+                    ) AS n
+                GROUP BY
+                    tec
+            ) AS plan1 ON p.tec = plan1.tec
+                LEFT JOIN (
+                SELECT
+                    SUM(
+                            IFNULL( num, 0 )) AS num,
+                    tec
+                FROM
+                    (
+                        SELECT
+                            IFNULL( COUNT( v.id ), 0 ) AS num,
+                            CASE
+
+                                WHEN v.tec LIKE "%电气%" THEN
+                                    '电气'
+                                WHEN v.tec LIKE "%长输管道%" THEN
+                                    '长输管道' ELSE v.tec
+                                END AS tec
+                        FROM
+                            volume v
+                        WHERE
+                            v.project_id = #{id}
+
+                          AND v.number NOT LIKE "%+%"
+                        GROUP BY
+                            v.tec
+                    ) AS n
+                GROUP BY
+                    tec
+            ) AS a ON a.tec = p.tec
+                LEFT JOIN (
+                SELECT
+                    SUM(
+                            IFNULL( num, 0 )) AS num,
+                    tec
+                FROM
+                    (
+                        SELECT
+                            IFNULL( COUNT( v.id ), 0 ) AS num,
+                            CASE
+
+                                WHEN v.tec LIKE "%电气%" THEN
+                                    '电气'
+                                WHEN v.tec LIKE "%长输管道%" THEN
+                                    '长输管道' ELSE v.tec
+                                END AS tec
+                        FROM
+                            volume v
+                        WHERE
+                            v.project_id = #{id}
+
+                          AND v.number NOT LIKE "%+%"
+                          AND actual_publication_date != '' 
+			AND actual_publication_date IS NOT NULL
+                        GROUP BY
+                            v.tec
+                    ) AS n
+                GROUP BY
+                    tec
+            ) AS c ON p.tec = c.tec
+                LEFT JOIN (
+                SELECT
+                    SUM( num ) AS incomplete,
+                    tec
+                FROM
+                    (
+                        SELECT
+                            COUNT(*) AS num,
+                            CASE
+
+                                WHEN v.tec LIKE "%电气%" THEN
+                                    '电气'
+                                WHEN v.tec LIKE "%长输管道%" THEN
+                                    '长输管道' ELSE v.tec
+                                END AS tec
+                        FROM
+                            (
+                                SELECT
+                                    id,
+                                    tec
+                                FROM
+                                    volume v
+                                WHERE
+                                    v.project_id = #{id}
+
+                                  AND v.number NOT LIKE "%+%"
+                                  AND v.actual_publication_date IS NULL UNION
+                                SELECT
+                                    id,
+                                    tec
+                                FROM
+                                    volume v
+                                WHERE
+                                    v.project_id = #{id}
+
+                                  AND v.number NOT LIKE "%+%"
+                                  AND v.actual_publication_date = ''
+                            ) AS v
+                        GROUP BY
+                            v.tec
+                    ) AS c
+                GROUP BY
+                    tec
+            ) AS inc ON inc.tec = p.tec
+        WHERE
+            p.id = #{id}
+
+        GROUP BY
+            p.tec
+        ORDER BY
+            tec DESC
+    </select>
+    <select id="progressVolume" resultType="java.util.Map">
+        SELECT
+            v.number,
+            v.`name`,
+            v.designer,
+            v.headman,
+            v.actual_principal AS principal,
+            v.checker,
+            v.start_date,
+        v.planned_publication_date,
+            v.actual_publication_date,
+               w.workday
+        FROM
+            `volume` v left join volume_workday w on v.id = w.volume_id
+        WHERE
+            v.project_id = #{id}
+            <if test="type == 1">
+                AND v.number not LIKE "%+%"
+            </if>
+            <if test="type == 2">
+                AND v.number LIKE "%+%"
+            </if>
+          <if test="state == 1">
+          AND DATE_FORMAT( actual_publication_date, '%Y-%m' ) = #{date}
+          </if>
+            <if test="state == 2">
+          AND actual_publication_date is NOT NULL
+          And actual_publication_date &lt;&gt; ''
+            </if>
+          <if test="tec != '' and tec != '合计'">
+            and v.tec like  CONCAT("%",#{tec},"%")
+          </if>
+    </select>
+    <select id="progressIncompleteVolume" resultType="java.util.Map">
+        SELECT
+            v.number,
+            v.`name`,
+            v.designer,
+            v.headman,
+            v.principal AS principal,
+            v.checker,
+            v.start_date,
+            v.planned_publication_date,
+            v.actual_publication_date,
+            w.workday
+        FROM
+            `volume` v
+                LEFT JOIN volume_workday w ON v.id = w.volume_id
+        WHERE
+            v.project_id = #{id}
+          AND v.actual_publication_date IS NULL
+          AND v.number not LIKE "%+%"
+          and v.tec like  CONCAT("%",#{tec},"%") UNION
+        SELECT
+            v.number,
+            v.`name`,
+            v.designer,
+            v.headman,
+            v.actual_principal AS principal,
+            v.checker,
+            v.start_date,
+            v.planned_publication_date,
+            v.actual_publication_date,
+            w.workday
+        FROM
+            `volume` v
+                LEFT JOIN volume_workday w ON v.id = w.volume_id
+        WHERE
+            v.project_id = #{id}
+          AND v.actual_publication_date = ''
+          AND v.number not LIKE "%+%"
+          and v.tec like  CONCAT("%",#{tec},"%")
+    </select>
+    <select id="planVolume" resultType="java.util.Map">
+        SELECT
+        v.number,
+        v.`name`,
+        v.designer,
+        v.headman,
+        v.principal AS principal,
+        v.checker,
+        v.start_date,
+        v.planned_publication_date,
+        v.actual_publication_date,
+        w.workday
+        FROM
+        `volume` v left join volume_workday w on v.id = w.volume_id
+        WHERE
+        v.project_id = #{id}
+        AND DATE_FORMAT( planned_publication_date, '%Y-%m' ) = #{date}
+        <if test="type == 1">
+            AND v.number not LIKE "%+%"
+        </if>
+        <if test="type == 2">
+            AND v.number LIKE "%+%"
+        </if>
+        <if test="tec != '' and tec != '合计'">
+            and v.tec like  CONCAT("%",#{tec},"%")
+        </if>
+    </select>
+    <select id="queryUser" resultType="java.util.Map">
+        SELECT
+            u.id,
+            u.`name`,
+            u.username,
+            max(
+                    IF
+                        ( r.id IS NULL, FALSE, TRUE )) AS admin,
+            max(
+                    IF
+                        ( p.generalId = #{userId}, TRUE, FALSE )) AS general,
+            max(
+                    IF
+                        ( wtp.id IS NULL, FALSE, TRUE )) AS principal
+        FROM
+            `user` u
+                LEFT JOIN role_menus r ON u.pid = r.role_id
+                AND r.menus_id = 10,
+            project p
+                LEFT JOIN workday_tec wt ON p.id = wt.project_id
+                LEFT JOIN workday_tec_principal wtp ON wt.id = wtp.workday_tec_id
+                AND wtp.user_id = #{userId}
+        WHERE
+            u.id = #{userId}
+          AND p.id = #{id}
+        GROUP BY
+            u.id
+    </select>
+
+
+</mapper>

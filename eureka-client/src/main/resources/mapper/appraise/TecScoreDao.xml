@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.TecScoreDao">
+    <insert id="appraise" parameterType="list">
+        insert into tec_score(grade_id , tec_id , designer , personal , coordinate , `month` , `year` ,`date`)
+        value
+            (#{tec.gradeId} , #{tec.tecId} , #{tec.designer} ,#{tec.personal} ,#{tec.coordinate} ,#{month} ,#{year},current_timestamp())
+        ON DUPLICATE KEY UPDATE
+        designer = values(designer),
+        personal = values(personal),
+        coordinate = values(coordinate)
+    </insert>
+    <update id="backups">
+        insert into tec_score_backups(grade_id , tec_id , designer , personal , coordinate , `month` , `year` , `date`)
+        select grade_id , tec_id , designer , personal , coordinate , `month` , `year` , `date`
+        from tec_score
+    </update>
+    <delete id="delete">
+        delete
+        from tec_score
+    </delete>
+
+    <select id="queryByGradeId" resultType="java.util.Map">
+        select gt.id as gtId ,
+        CASE gt.state when 0 then "false"
+        when  1 then "true" end as state ,
+        d.name as department, t.name as technology,
+        s.designer , s.personal , s.coordinate
+        from
+        `user` u,
+        technology t,
+        department d,
+        grade_tec gt  left join
+        tec_score s on s.gt_id = gt.id
+        where gt.grade_id = #{id}
+        and gt.tec_id = t.id
+        and u.id = gt.grade_id
+        and t.did = d.id
+    </select>
+  <select id="queryByScoreId" resultType="java.util.Map">
+    select  if(`month`=0,NULL,`month`)as `month`, if(designer=0,NULL,designer) as designer ,
+    if(personal=0,NULL,personal) as personal
+    ,IF(coordinate=0,NULL,coordinate) as coordinate,
+          ( m.designer + m.personal + m.coordinate )/(
+      3-m.bedei - m.beper - m.becoo) as score
+    from
+    (select `month`,IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+        IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+        IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+        ISNULL(
+        AVG( designer )) AS bedei,
+        ISNULL(
+        AVG( personal )) AS beper,
+        ISNULL(
+        AVG( coordinate )) AS becoo
+    from tec_score s,
+    `user` u
+    where u.id = #{id}
+    and u.tid = s.tec_id) as m
+    group by `month`
+  </select>
+  <select id="queryByScoreIdPast" resultType="java.util.Map">
+    select `month`,  if(designer=0,NULL,designer) as designer ,
+    if(personal=0,NULL,personal) as personal
+    ,IF(coordinate=0,NULL,coordinate) as coordinate,
+          ( m.designer + m.personal + m.coordinate )/(
+      3-m.bedei - m.beper - m.becoo) as score
+    from
+    (select
+     `month`,IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+        IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+        IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+        ISNULL(
+        AVG( designer )) AS bedei,
+        ISNULL(
+        AVG( personal )) AS beper,
+        ISNULL(
+        AVG( coordinate )) AS becoo
+     from tec_score_backups s,
+    `user` u
+    where u.id = #{id}
+    and u.tid = s.tec_id) as m
+    group by `month`
+    limit 2
+  </select>
+    <select id="queryScore" resultType="java.util.Map">
+        SELECT distinct  m.department, m.technology,
+      ( m.designer + m.personal + m.coordinate )/(
+      3-m.bedei - m.beper - m.becoo) as score
+      FROM(
+        SELECT d.NAME AS department, t.NAME AS technology,s.tec_id,
+        IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+        IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+        IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+        ISNULL(
+        AVG( designer )) AS bedei,
+        ISNULL(
+        AVG( personal )) AS beper,
+        ISNULL(
+        AVG( coordinate )) AS becoo
+      FROM
+        tec_score s,
+        department d,
+        technology t
+        WHERE
+        t.did = d.id
+        AND s.tec_id = t.id
+        GROUP BY s.tec_id) as m,
+        `user` u
+        <where>
+            <choose>
+                <when test="pid == 1">
+                </when>
+                <otherwise>
+                u.id = #{id}
+                and m.tec_id = u.tid
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+  <select id="queryScorePast" resultType="java.util.Map">
+    SELECT distinct  m.department, m.technology,
+    ( m.designer + m.personal + m.coordinate )/(
+    3-m.bedei - m.beper - m.becoo) as score
+    FROM(
+    SELECT d.NAME AS department, t.NAME AS technology,s.tec_id,
+    IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+    IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+    IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+    ISNULL(
+    AVG( designer )) AS bedei,
+    ISNULL(
+    AVG( personal )) AS beper,
+    ISNULL(
+    AVG( coordinate )) AS becoo
+    FROM
+    tec_score_backups s,
+    department d,
+    technology t
+    WHERE
+    t.did = d.id
+    AND s.tec_id = t.id
+    AND s.month = #{thisMonth}
+    AND S.year = #{thisYear}
+    GROUP BY s.tec_id) as m,
+    `user` u
+    <where>
+      <choose>
+        <when test="pid == 1">
+        </when>
+        <otherwise>
+          u.id = #{id}
+          and m.tec_id = u.tid
+        </otherwise>
+      </choose>
+    </where>
+  </select>
+    <select id="query" resultType="java.util.Map">
+        select u.name , d.name as department , t.name as technology ,
+        s.designer ,  s.personal , s.coordinate
+        from tec_score s,
+        `user` u,
+        department d,
+        technology t
+        where
+        u.id = s.grade_id
+        and t.did = d.id
+        and s.tec_id = t.id
+      <if test="dIds != null and dIds != ''">
+        and d.id in
+        <foreach collection="dIds" item="item" separator="," close=")" open="(">
+          #{item}
+        </foreach>
+      </if>
+      <if test="tIds != null and tIds != ''">
+        and t.id in
+        <foreach collection="tIds" item="item" separator="," open="(" close=")">
+          #{item}
+        </foreach>
+      </if>
+      <if test="selectName != null and selectName != ''">
+        order by ${selectName}
+      </if>
+      <if test="selectType == 1">
+        desc
+      </if>
+    </select>
+  <select id="queryPast" resultType="java.util.Map">
+    select u.name , d.name as department , t.name as technology ,
+    s.designer ,  s.personal , s.coordinate
+    from tec_score_backups s,
+    `user` u,
+    department d,
+    technology t
+    where
+    u.id = s.grade_id
+    and t.did = d.id
+    and s.tec_id = t.id
+    AND s.month = #{thisMonth}
+    AND S.year = #{thisYear}
+    <if test="dIds != null and dIds != ''">
+      and d.id in
+      <foreach collection="dIds" item="item" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="tIds != null and tIds != ''">
+      and t.id in
+      <foreach collection="tIds" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+    </if>
+    <if test="selectName != null and selectName != ''">
+      order by ${selectName}
+    </if>
+    <if test="selectType == 1">
+      desc
+    </if>
+  </select>
+    <select id="excel" resultType="com.zpepdi.eureka_client.entity.TechnologyExcel">
+        SELECT distinct  m.department, m.technology,
+        ( m.designer + m.personal + m.coordinate )/(
+        3-m.bedei - m.beper - m.becoo) as score
+        FROM(
+        SELECT d.NAME AS department, t.NAME AS technology,s.tec_id,
+        IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+        IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+        IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+        ISNULL(
+        AVG( designer )) AS bedei,
+        ISNULL(
+        AVG( personal )) AS beper,
+        ISNULL(
+        AVG( coordinate )) AS becoo
+        FROM
+        tec_score s,
+        department d,
+        technology t
+        WHERE
+        t.did = d.id
+        AND s.tec_id = t.id
+        GROUP BY s.tec_id) as m
+    </select>
+  <select id="excel1" resultType="com.zpepdi.eureka_client.entity.TechnologyExcel">
+        SELECT distinct  m.department, m.technology,
+        ( m.designer + m.personal + m.coordinate )/(
+        3-m.bedei - m.beper - m.becoo) as score
+        FROM(
+        SELECT d.NAME AS department, t.NAME AS technology,s.tec_id,
+        IFNULL( round( AVG( designer ), 3 ), 0 ) AS designer,
+        IFNULL( round( AVG( personal ), 3 ), 0 ) AS personal,
+        IFNULL( round( AVG( coordinate ), 3 ), 0 ) AS coordinate,
+        ISNULL(
+        AVG( designer )) AS bedei,
+        ISNULL(
+        AVG( personal )) AS beper,
+        ISNULL(
+        AVG( coordinate )) AS becoo
+        FROM
+        tec_score_backups s,
+        department d,
+        technology t
+        WHERE
+        t.did = d.id
+        AND s.tec_id = t.id
+        AND s.month = #{thisMonth}
+        AND S.year = #{thisYear}
+        GROUP BY s.tec_id) as m
+  </select>
+
+  <select id="detail" resultType="java.lang.String">
+    SELECT
+      CONCAT_WS( ',', designer, personal, coordinate ) ,u.username
+      FROM
+        `user` u
+        LEFT JOIN tec_score s ON u.id = s.grade_id
+        AND s.tec_id = #{id}
+    WHERE
+    u.name in
+    <foreach collection="userList" item="item" open="(" close=")" separator=",">
+      #{item}
+    </foreach>
+    ORDER BY u.username
+  </select>
+  <select id="detailPast" resultType="java.lang.String">
+    SELECT
+      CONCAT_WS( ',', designer, personal, coordinate ) ,u.username
+      FROM
+        `user` u
+        LEFT JOIN tec_score_backups s ON u.id = s.grade_id
+        AND s.tec_id = #{tid}
+        AND s.month = #{user.thisMonth}
+        AND S.year = #{user.thisYear}
+    WHERE
+    u.name in
+    <foreach collection="userList" item="item" open="(" close=")" separator=",">
+      #{item}
+    </foreach>
+    ORDER BY u.username
+  </select>
+  <select id="part" resultType="com.zpepdi.eureka_client.entity.TecPartExcel">
+    select u.name as grade ,ts.personal,ts.designer,ts.coordinate ,
+    d.name as dep , t.name as tec
+    from
+    `user` u,
+    tec_score ts,
+    department d,
+    technology t
+    where
+    u.id = ts.grade_id
+    and t.id = ts.tec_id
+    and d.id = t.did
+    <if test="users != null and users != ''">
+      and u.id in
+      <foreach collection="users" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+    </if>
+  </select>
+  <select id="partPast" resultType="com.zpepdi.eureka_client.entity.TecPartExcel">
+    select u.name as grade ,ts.personal,ts.designer,ts.coordinate ,
+    d.name as dep , t.name as tec
+    from
+    `user` u,
+    tec_score_backups ts,
+    department d,
+    technology t
+    where
+    u.id = ts.grade_id
+    and t.id = ts.tec_id
+    and d.id = t.did
+    AND ts.month = #{thisMonth}
+    AND ts.year = #{thisYear}
+    <if test="users != null and users != ''">
+      and u.id in
+      <foreach collection="users" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+    </if>
+  </select>
+
+
+</mapper>

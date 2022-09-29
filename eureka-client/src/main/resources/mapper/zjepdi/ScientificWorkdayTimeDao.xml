@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.zjepdi.ScientificWorkdayTimeDao">
+    <select id="queryDepartmentSum" resultType="java.lang.Double">
+        SELECT
+        SUM(d.WorkTime)/8
+        FROM
+        [dbo].[TMS_WorkTime] w,
+        [dbo].[TMS_WorkTimeDetail] d
+        WHERE w.WorkTimeID = d.WorkTimeID
+        AND w.WorkDate &lt; #{endDate}
+        AND w.WorkDate &gt;= #{startDate}
+        AND d.ParentDeptName = #{department}
+    </select>
+    <select id="queryDepartment" resultType="java.util.Map">
+        SELECT
+        SUM(d.WorkTime)/8 as workday, w.LoginId, w.UserName
+        FROM
+        [dbo].[TMS_WorkTime] w,
+        [dbo].[TMS_WorkTimeDetail] d
+        WHERE w.WorkTimeID = d.WorkTimeID
+        AND w.WorkDate &lt; #{endDate}
+        AND w.WorkDate &gt;= #{startDate}
+        AND d.ParentDeptName = #{department}
+        GROUP BY w.LoginId, w.UserName
+    </select>
+</mapper>

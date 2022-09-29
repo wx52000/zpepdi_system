@@ -1,0 +1,1685 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.NewsDao">
+  <resultMap id="queryByAdminList" type="java.util.Map">
+      <result column="type" property="type"></result>
+      <result column="id" property="id"></result>
+      <result column="number" property="number"></result>
+      <result column="name" property="name"></result>
+      <collection property="list" column="id = id" select="queryByAdminList"
+                  javaType="ARRAYLIST"></collection>
+  </resultMap>
+    <resultMap id="queryByAdmin1List" type="java.util.Map">
+        <result column="type" property="type"></result>
+        <result column="id" property="id"></result>
+        <result column="tid" property="tid"></result>
+        <result column="number" property="number"></result>
+        <result column="name" property="name"></result>
+        <collection property="list" column="id = tid" select="queryByAdmin1List"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
+    <resultMap id="queryByGeneral" type="java.util.Map">
+        <result column="type" property="type"></result>
+        <result column="id" property="id"></result>
+        <result column="number" property="number"></result>
+        <result column="name" property="name"></result>
+        <result column="userId" property="userId"></result>
+        <result column="tec" property="tec"></result>
+        <result column="submit_date" property="submit_date"></result>
+        <result column="handler" property="handler"></result>
+        <result column="handlerId" property="handlerId"></result>
+        <result column="result" property="result"></result>
+        <collection property="list" column="id = id,userId = userId,
+         handlerId = handlerId,submitDate = submit_date" select="queryByGeneralList"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
+    <resultMap id="queryByGeneral2" type="java.util.Map">
+        <result column="type" property="type"></result>
+        <result column="id" property="id"></result>
+        <result column="number" property="number"></result>
+        <result column="name" property="name"></result>
+        <result column="userId" property="userId"></result>
+        <result column="tec" property="tec"></result>
+        <result column="submit_date" property="submit_date"></result>
+        <result column="handler" property="handler"></result>
+        <result column="handlerId" property="handlerId"></result>
+        <result column="result" property="result"></result>
+        <collection property="list" column="id = id,userId = userId,
+         handlerId = handlerId,submitDate = submit_date" select="queryByGeneral2List"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
+    <resultMap id="queryByHeadmanList" type="java.util.Map">
+        <result column="type" property="type"></result>
+        <result column="id" property="id"></result>
+        <result column="tec" property="tec"></result>
+        <result column="number" property="number"></result>
+        <result column="name" property="name"></result>
+        <result column="handler" property="handler"></result>
+        <result column="handlerId" property="handlerId"></result>
+        <result column="principal" property="principal"></result>
+        <result column="check" property="check"></result>
+        <result column="result" property="result"></result>
+        <collection property="list" column="id = id, handlerId = handlerId, tec = tec, check = check" select="queryByHeadmanList"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
+    <resultMap id="checkLog" type="java.util.Map">
+        <result column="type" property="type"></result>
+        <result column="id" property="id"></result>
+        <result column="tec" property="tec"></result>
+        <result column="number" property="number"></result>
+        <result column="name" property="name"></result>
+        <result column="workday" property="workday"></result>
+        <result column="manage" property="manage"></result>
+        <result column="volume" property="volume"></result>
+        <result column="backup" property="backup"></result>
+        <result column="designer_ratio" property="designer"></result>
+        <result column="principal_ratio" property="principal"></result>
+        <result column="headman_ratio" property="headman"></result>
+        <result column="checker_ratio" property="checker"></result>
+        <result column="check" property="check"></result>
+        <collection property="list" column="id = id, type = type" select="queryLogList"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
+    <resultMap id="queryChildren" type="map">
+        <result column="type" property="type"></result>
+        <result column="number" property="number"></result>
+        <result column="name" property="name"></result>
+        <result column="handler" property="handler"></result>
+        <result column="projectId" property="projectId"></result>
+        <result column="userId" property="userId"></result>
+        <collection property="list" column="userId = userId, projectId = projectId"
+                    select="queryChildren"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
+    <resultMap id="scientificTerm" type="map">
+        <result column="id" property="id"></result>
+        <result column="handler" property="handler"></result>
+        <result column="name" property="name"></result>
+        <result column="create_date" property="create_date"></result>
+        <result column="plan_workday" property="plan_workday"></result>
+        <result column="workday" property="workday"></result>
+        <result column="result" property="result"></result>
+        <result column="type" property="type"></result>
+        <collection property="list" column="id = id"
+                    select="scientificFiles"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
+    <resultMap id="scientificTask" type="map">
+        <result column="id" property="id"></result>
+        <result column="handlerId" property="handlerId"></result>
+        <result column="number" property="number"></result>
+        <result column="name" property="name"></result>
+        <result column="handler" property="handler"></result>
+        <result column="result" property="result"></result>
+        <result column="type" property="type"></result>
+        <collection property="list" column="userId = handlerId, projectId = id"
+                    select="scientificTask"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
+    <insert id="checkLog0" keyColumn="id" useGeneratedKeys="true" keyProperty="map.logId">
+        insert into check_log_project( project_id,
+                                      <if test="map.workday != null and map.workday != ''">
+                                      workday,
+                                      </if>
+                                      `type`, `check`, `handler`, handler_time, tec, submit_handler, submit_date)
+        values (#{map.id},
+                <if test="map.workday != null and map.workday != ''">
+                #{map.workday}>
+                </if>#{map.type}, #{check}, #{id}, now(), #{map.tec}, #{map.handlerId}, #{map.submit_date} )
+    </insert>
+    <insert id="checkLog0List">
+        insert into check_log_volume(check_log_id,tec , workday, `check`, `handler`, handler_time)
+        values <foreach collection="map.list" item="item" separator=",">
+        ( #{map.logId}, #{item.tec}, #{item.workday}, #{check}, #{id}, now() )
+    </foreach>
+    </insert>
+        <insert id="checkLog3">
+        insert into check_log_project( project_id,tec, manage, volume, backup, designer_ratio, principal_ratio,
+                                       headman_ratio,checker_ratio, `type`, `check`, `handler`, handler_time, submit_handler)
+        values (#{map.id},#{map.tec}, #{map.manage}, #{map.volume}, #{map.backup}, #{map.designer}, #{map.principal},
+                 #{map.headman} ,#{map.checker}, #{map.type}, #{check}, #{id}, now(), #{map.handlerId})
+    </insert>
+    <insert id="checkLog4" keyColumn="id" useGeneratedKeys="true" keyProperty="map.logId">
+        insert into check_log_project( project_id,tec,
+        `type`, `check`, `handler`, handler_time, submit_handler)
+        values (#{map.id}, #{map.tec}, #{map.type}, #{check}, #{id}, now(), #{map.handlerId} )
+    </insert>
+    <insert id="checkLog4List">
+        insert into check_log_volume(check_log_id, task_id, workday, `designer`, `checker`,
+                                     `principal`, `headman`, `check`, `handler`, handler_time)
+        values <foreach collection="map.list" item="item" separator=",">
+        ( #{map.logId}, #{item.task_id}, #{item.workday},#{item.designer}, #{item.checker}, #{item.principal},
+        #{item.headman}, #{check}, #{id}, now() )
+    </foreach>
+    </insert>
+    <insert id="checkLog5List">
+        insert into check_log_volume(check_log_id, task_id, workday, `designer`, `checker`,
+        `principal`, `headman`, `check`, `handler`, handler_time, task, advance)
+        values <foreach collection="map.list" item="item" separator=",">
+        ( #{map.logId}, #{item.task_id}, #{item.workday},#{item.designerWorkday}, #{item.checkerWorkday}, #{item.principalWorkday},
+        #{item.headmanWorkday}, #{check}, #{id}, now(), #{item.task}, #{item.advance} )
+    </foreach>
+    </insert>
+    <insert id="checkLog7">
+        insert into check_log_project(project_id, `type`, handler, handler_time, `check`)
+        values( #{map.id}, 7, #{id}, now(), #{check})
+    </insert>
+    <!--    <insert id="checkLog2List">-->
+<!--        insert into check_log_volume( check_log_id,tec ,task_id, apply,  `check`, `handler`, handler_time)-->
+<!--        values (#{map.id}, #{map.type}, #{check}, #{id}, now() )-->
+<!--    </insert>-->
+    <update id="check">
+    <foreach collection="list" item="item" separator=";" >
+       <if test="item.type == 0">
+        update project_workday_distribute
+        set `check` = #{check}, `check_time` = now(), `check_handler` = #{id}
+           where
+             project_id = #{item.id}
+          </if>
+            <if test="item.type == 1">
+                update project_workday_add
+                set `check` = #{check}, `check_time` = now(), `check_handler` = #{id}
+                where
+                id = #{item.tid}
+             </if>
+            <if test="item.type == 2">
+                update project_workday_backup
+                set `check` = #{check}, `check_time` = now(), `check_handler` = #{id}, `workday` = #{item.workday}
+                where
+                id = #{item.tid}
+            </if>
+             <if test="item.type == 3">
+                 update workday_tec_distribute a, tec_ratio r
+                 set a.`check` = #{check}, a.`check_time` = now(), a.`check_handler` = #{id},
+                 r.`check` = #{check}, r.`check_time` = now(), r.`check_handler` = #{id}
+                 where
+                 r.id = #{item.rid}
+                 and a.id = #{item.bid}
+                 </if>
+            <if test="item.type == 4">
+                <foreach collection="item.list" item="i" separator=";" >
+                    <if test="i.type == 0">
+                        update volume_workday
+                        set `check` = #{check}, `check_time` = now(), `check_handler` = #{id}
+                        where
+                        id = #{i.id}
+                    </if>
+                    <if test="i.type == 1">
+                        update volume_ratio
+                        set `check` = #{check}, `check_time` = now(), `check_handler` = #{id}
+                        where
+                        id = #{i.id}
+                    </if>
+                </foreach>
+            </if>
+        <if test="item.type == 5">
+            <foreach collection="item.list" item="i" separator=";">
+                update <if test="i.task == 0 and i.advance == 0">
+                volume_workday
+            </if>
+                <if test="i.task == 0 and i.advance == 1">
+                    volume_workday_high
+                </if>
+                <if test="i.task == 1 and i.advance == 0">
+                    project_task
+                </if>
+                <if test="i.task == 1 and i.advance == 1">
+                    task_advance
+                </if>
+                set submit = #{check} + 1, submit_time = now(), submit_date = #{item.submit_date}
+                where
+                id = #{i.id}
+            </foreach>
+        </if>
+        <if test="item.type == 6">
+            <foreach collection="item.list" item="i" separator=";">
+                update <if test="i.task == 0 and i.advance == 0">
+                volume_workday
+            </if>
+                <if test="i.task == 0 and i.advance == 1">
+                    volume_workday_high
+                </if>
+                <if test="i.task == 1 and i.advance == 0">
+                    project_task
+                </if>
+                <if test="i.task == 1 and i.advance == 1">
+                    task_advance
+                </if>
+                set <if test="check ==1">
+                submit = 0, backOff = 0,
+                    </if>
+                  <if test="check ==0">
+                      backOff = 2,
+                  </if>
+                backOff_handler_time = now()
+                where
+                id = #{i.id}
+            </foreach>
+        </if>
+        <if test="item.type == 7">
+            update project_note
+            set
+                <trim suffixOverrides=",">
+                `check` = #{check},
+                <if test="check == 2 and item.typeNote == 2">
+                    check_other = 2
+                </if>
+                </trim>
+            where project_id = #{item.id};
+            <if test="check == 1 and item.typeNote == 1">
+                update checker_amount a left join checker_dep d on a.cd_id = d.id
+                set surplus = surplus-${item.workday}
+                where d.user_id = #{id} and d.did = #{item.did};
+            </if>
+            <if test="check != 2">
+            INSERT INTO project_workday(project_id, num, `date`)
+            VALUEs(#{item.id}, #{item.workday}, NOW())
+            </if>
+        </if>
+        <if test="item.type == 8">
+            <foreach collection="item.list" item="i" separator=";">
+            update project_children
+            set `check` = #{check}, `workday` = #{i.workday}
+            where id = #{i.id}
+            </foreach>
+        </if>
+        <if test="item.type == 9">
+                update scientific_term
+                set `check` = #{check}, `workday` = #{item.workday}, checker = #{id},
+                    check_date = now()
+                where id = #{item.id}
+        </if>
+        <if test="item.type == 10">
+            <foreach collection="item.list" item="i" separator=";">
+                update scientific_task_workday
+                set  <if test="check ==1">
+                submit = 2,
+                 </if >
+                <if test="check ==0">
+                    submit = 0,
+                </if> submit_time = now()
+                where id = #{i.id}
+            </foreach>
+        </if>
+    </foreach>
+  </update>
+    <update id="setProjectWorkday">
+        INSERT INTO project_workday ( project_id, num, `date` )
+        SELECT
+            project_id, workday + ${num}, `time`
+        FROM
+            (SELECT
+                 project_id,
+                 num as workday,
+                 now() as `time`
+             FROM
+                 project_workday
+             WHERE
+                 project_id = #{id}
+             UNION
+             SELECT #{id} as project_id, 0 as workday,NOW() as `time`) as tab
+            LIMIT 1
+        on duplicate key update
+        num = values(num)
+    </update>
+    <update id="setProjectBackup">
+        update project_workday_distribute
+        set `backup` = `backup` + ${num}
+        where  project_id = #{id}
+    </update>
+    <select id="count" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+        FROM
+            (
+                SELECT DISTINCT
+                    p.id
+                FROM
+                    project p,
+                    project_checker c,
+                    project_workday_distribute d
+                WHERE
+                    c.project_id = p.id
+                  AND c.checker = #{id}
+                  AND p.id = d.project_id
+                  AND d.`check` = 0 UNION ALL
+                SELECT
+                    p.id
+                FROM
+                    project p,
+                    project_workday_add a,
+                    project_checker c
+                WHERE
+                    p.id = a.project_id
+                  AND a.`check` = 0
+                  AND c.project_id = p.id
+                  AND c.checker = #{id} UNION ALL
+                SELECT
+                    id
+                FROM
+                    (
+                        SELECT
+                            p.id,
+                            v.tec,
+                            w.`handler`,
+                            w.submit_date
+                        FROM
+                            project p,
+                            volume v,
+                            volume_workday w
+                        WHERE
+                            p.generalId = #{id}
+                          AND v.id = w.volume_id
+                          AND v.project_id = p.id
+                          AND w.submit = 1
+                        GROUP BY
+                            v.tec,
+                            w.`handler` UNION
+                        SELECT
+                            p.id,
+                            v.tec,
+                            h.`handler`,
+                            h.submit_date
+                        FROM
+                            project p,
+                            volume v,
+                            volume_workday w,
+                            volume_workday_high h
+                        WHERE
+                            p.generalId = #{id}
+                          AND v.id = w.volume_id
+                          AND v.project_id = p.id
+                          AND h.volume_id = w.volume_id
+                          AND h.submit = 1
+                        GROUP BY
+                            v.tec,
+                            w.`handler` UNION
+                        SELECT
+                            p.id,
+                            t.tec,
+                            t.`handler`,
+                            t.submit_date
+                        FROM
+                            project p,
+                            project_task t
+                        WHERE
+                            p.generalId = #{id}
+                          AND t.project_id = p.id
+                          AND submit = 1
+                        GROUP BY
+                            t.tec,
+                            t.`handler` UNION
+                        SELECT
+                            p.id,
+                            t.tec,
+                            t.`handler`,
+                            a.submit_date
+                        FROM
+                            project p,
+                            `user` u1,
+                            project_task t,
+                            task_advance a
+                        WHERE
+                            p.generalId = #{id}
+                          AND t.project_id = p.id
+                          AND a.task_id = t.id
+                          AND a.submit = 1
+                        GROUP BY
+                            t.tec,
+                            t.`handler`
+                    ) AS t
+                GROUP BY
+                    t.tec,
+                    t.`handler`,
+                    submit_date UNION ALL
+                SELECT
+                    id
+                FROM
+                    (
+                        SELECT
+                            p.id,
+                            v.tec,
+                            w.`handler`,
+                            w.submit_date
+                        FROM
+                            project p,
+                            volume v,
+                            volume_workday w
+                        WHERE
+                            p.generalId = #{id}
+                          AND v.id = w.volume_id
+                          AND v.project_id = p.id
+                          AND w.backOff = 1
+                        GROUP BY
+                            v.tec,
+                            w.`handler` UNION
+                        SELECT
+                            p.id,
+                            v.tec,
+                            h.`handler`,
+                            h.submit_date
+                        FROM
+                            project p,
+                            volume v,
+                            volume_workday w,
+                            volume_workday_high h
+                        WHERE
+                            p.generalId = #{id}
+                          AND v.id = w.volume_id
+                          AND v.project_id = p.id
+                          AND h.volume_id = w.volume_id
+                          AND h.backOff = 1
+                        GROUP BY
+                            v.tec,
+                            w.`handler` UNION
+                        SELECT
+                            p.id,
+                            t.tec,
+                            t.`handler`,
+                            t.submit_date
+                        FROM
+                            project p,
+                            project_task t
+                        WHERE
+                            p.generalId = #{id}
+                          AND t.project_id = p.id
+                          AND t.backOff = 1
+                        GROUP BY
+                            t.tec,
+                            t.`handler` UNION
+                        SELECT
+                            p.id,
+                            t.tec,
+                            t.`handler`,
+                            a.submit_date
+                        FROM
+                            project p,
+                            project_task t,
+                            task_advance a
+                        WHERE
+                            p.generalId = #{id}
+                          AND t.project_id = p.id
+                          AND a.task_id = t.id
+                          AND a.backOff = 1
+                        GROUP BY
+                            t.tec,
+                            t.`handler`
+                    ) AS t
+                GROUP BY
+                    t.tec,
+                    t.`handler`,
+                    submit_date UNION ALL
+                SELECT
+                    p.id
+                FROM
+                    project_tec_checker c,
+                    project p,
+                    workday_tec_distribute b
+                WHERE
+                    c.checker = #{id}
+                  AND c.checker = b.`handler`
+                  AND c.principal = b.`handler`
+                  AND c.project_id = b.project_id
+                  AND p.id = b.project_id
+                  AND b.tec = c.tec
+                  AND b.`check` = 0
+                GROUP BY
+                    p.id,
+                    b.`handler` UNION ALL
+                SELECT
+                    p.id
+                FROM
+                    project p,
+                    project_tec_checker c,
+                    volume v
+                WHERE
+                    c.checker = #{id}
+                  AND p.id = c.project_id
+                  AND c.tec = v.tec
+                  AND v.project_id = p.id
+                  AND (
+                        EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
+                        OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
+                    )
+                GROUP BY
+                    p.id,
+                    c.tec,
+                    c.principal
+                union all
+                SELECT
+                    n.id
+                FROM
+                    project_note n
+                WHERE
+                    n.check_handler = #{id}
+                  AND `check` = 0
+                union all
+                    SELECT
+                        project_id
+                    FROM
+                        project_children
+                    WHERE
+                        check_handler = #{id}
+                        AND `check` = 0
+                    GROUP BY project_id
+            ) AS tab
+    </select>
+    <select id="queryByAdmin" resultMap="queryByAdminList">
+      select 0 as type, p.id as id,
+             p.number,p.`name`,u.name, d.handler as handlerId,  false  as result
+      from
+          project p,
+           project_checker c,
+          project_workday_distribute d,
+           `user` u
+      where c.project_id = p.id
+    and c.checker = #{id}
+    and p.id = d.project_id
+    and d.check = 0
+    and u.id = d.handler
+  </select>
+    <select id="queryByAdminList" resultType="java.util.Map">
+        select id, "管理" as tec, manage as workday, 0 as type
+        from project_workday_distribute
+        where project_id = #{id}
+        union
+        select id, "卷册" as tec, tec as workday, 0 as type
+        from project_workday_distribute
+        where  project_id = #{id}
+        union
+        select id, "备用" as tec, backup as workday, 0 as type
+        from project_workday_distribute
+        where  project_id = #{id}
+        union
+        select id, volume_tec as tec, amount as workday, 1 as type
+        from workday_tec
+        where  project_id = #{id}
+    </select>
+      <select id="queryByAdmin1" resultMap="queryByAdmin1List">
+        select 1 as type,p.id, a.id  as tid, p.number, p.name, a.handler as handlerId, u.name as handler, false  as result
+        from  project p,
+            project_workday_add a,
+            project_checker c,
+             `user` u
+        where p.id = a.project_id
+          and a.`check` = 0
+          and c.project_id = p.id
+          and c.checker = #{id}
+            and u.id = a.handler
+    </select>
+    <select id="queryByAdmin1List" resultType="java.util.Map">
+        select id, "管理" as tec, manage as workday, 0 as type
+        from project_workday_distribute_add
+        where add_id = #{id}
+        union
+        select id, "卷册" as tec, tec as workday, 0 as type
+        from project_workday_distribute_add
+        where  add_id = #{id}
+        union
+        select id, "备用" as tec, backup as workday, 0 as type
+        from project_workday_distribute_add
+        where  add_id = #{id}
+        union
+        select id, "原因" as tec, reason as workday, 0 as type
+        from project_workday_add
+        where  id = #{id}
+        union
+        select id, volume_tec as tec, amount as workday, 1 as type
+        from workday_tec_add
+        where  add_id = #{id}
+    </select>
+    <select id="queryByGeneral" resultType="map">
+        SELECT
+            2 AS type,
+            p.id,
+            p.number,
+            p.`name`,
+            b.id AS tid,
+            b.tec,
+            b.number as tnumber,
+            b.`name` AS tname,
+            b.workday,
+            b.apply,
+            false  as result
+        FROM
+            project p,
+            project_workday_backup b,
+            `user` u
+        WHERE
+            p.id = b.project_id
+          AND `check` = 0
+          AND u.id = #{id}
+          AND u.`name` = p.general
+    </select>
+   <select id="queryByHeadman" resultType="java.util.Map">
+       SELECT
+           3 AS type,
+           p.id,
+           p.number,
+           u.id as `handlerId`,
+           u.`name` AS `handler`,
+           b.tec,
+           p.`name`,
+           b.manage,
+           b.id AS bid,
+           b.volume,
+           r.id AS rid,
+           FALSE AS result,
+           r.designer,
+           r.checker,
+           r.principal,
+           r.headman,
+           IFNULL( w.amount, 0 ) + IFNULL( w.`backup`, 0 ) + IFNULL( w.`add`, 0 ) as workday,
+           (
+                   IFNULL( w.amount, 0 ) + IFNULL( w.`backup`, 0 ) + IFNULL( w.`add`, 0 ) - IFNULL( b.manage, 0 ) - IFNULL( b.volume, 0 )
+               ) AS `backup`
+       FROM
+           `user` u,
+           project_tec_checker c,
+           (
+               SELECT
+                   w.project_id,
+                   w.volume_tec,
+                   w.amount,
+                   w.`backup`,
+                   SUM( a.amount ) AS `add`
+               FROM
+                   (
+                       SELECT
+                           w.project_id,
+                           w.volume_tec,
+                           w.amount,
+                           SUM( wb.workday ) AS `backup`
+                       FROM
+                           workday_tec w
+                               LEFT JOIN project_workday_backup wb ON w.project_id = wb.project_id
+                               AND w.volume_tec = wb.tec
+                       GROUP BY
+                           w.project_id,
+                           w.volume_tec
+                   ) AS w
+                       LEFT JOIN workday_tec_add a ON a.project_id = w.project_id
+                       AND a.volume_tec = w.volume_tec
+               GROUP BY
+                   w.project_id,
+                   w.volume_tec
+           ) AS w,
+           project p,
+           workday_tec_distribute b,
+           tec_ratio r
+       WHERE
+           c.checker = #{id}
+         AND u.id = b.`handler`
+         AND c.principal = b.`handler`
+         AND c.project_id = b.project_id
+         AND p.id = b.project_id
+         AND w.project_id = p.id
+         AND w.volume_tec = c.tec
+         AND b.tec = c.tec
+         AND b.`check` = 0
+         AND r.project_id = p.id
+         AND r.tec = b.tec
+       GROUP BY
+           p.id,
+           b.`handler`
+  </select>
+    <select id="queryByHeadman2" resultMap="queryByHeadmanList">
+        SELECT
+            4 AS type,
+            p.id,
+            p.number,
+            v.tec,
+            u.id AS handlerId,
+            u.`name` AS `handler`,
+            u.`name` AS principal,
+            p.`name`,
+            0 AS `check`,
+            FALSE AS `result`
+        FROM
+            project p,
+            project_tec_checker c,
+            volume v,
+            `user` u
+        WHERE
+            c.checker = #{id}
+          AND p.id = c.project_id
+          AND c.tec = v.tec
+          AND v.project_id = p.id
+          AND u.id = c.principal
+          AND (
+                EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
+                OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
+            )
+        GROUP BY
+            p.id,
+            tec,
+            u.id
+    </select>
+    <select id="queryByHeadmanList" resultType="java.util.Map">
+        SELECT distinct
+            0 AS type,
+            v.id as task_id,
+            v.number,
+            v.name,
+            w.workday,
+            w.id,
+            w.workday * IFNULL(r.principal,t.principal) AS principal,
+            w.workday * IFNULL(r.designer,t.designer) AS designer,
+            w.workday * IFNULL(r.checker,t.checker) AS checker,
+            w.workday * IFNULL(r.headman,t.headman) AS headman
+        FROM
+            volume_workday w
+                LEFT JOIN volume v ON v.id = w.volume_id
+                LEFT JOIN volume_ratio r ON w.volume_id = r.volume_id
+                LEFT JOIN tec_ratio t ON t.tec = v.tec
+        WHERE
+            v.project_id = #{id}
+          AND v.tec = #{tec}
+          AND w.handler = #{handlerId}
+          <if test="check == 0">
+              AND w.`check` in (0 , 2)
+          </if>
+        <if test="check == 2">
+            AND w.`check` = 2
+        </if>
+        group by v.id
+        union all
+        select distinct
+            1  as  type, v.id as task_id, v.number, v.name, (ifnull(w.principal,0) +  ifnull(w.checker,0)
+                + ifnull(w.designer,0) + ifnull(w.headman,0))as workday,w.id,
+            w.principal as principal, w.designer as designer, w.checker as checker, w.headman as headman
+        from
+            volume v,
+            volume_ratio w
+        where v.project_id = #{id}
+          and v.tec = #{tec}
+          and w.handler = #{handlerId}
+          and v.id = w.volume_id
+        <if test="check == 0">
+            AND w.`check` in (0 , 2)
+        </if>
+        <if test="check == 2">
+            AND w.`check` = 2
+        </if>
+    </select>
+    <select id="resultByGeneral" resultMap="queryByAdminList">
+        select 0 as type, p.id as id,
+               p.number,p.`name`, true as result
+        from
+            project p,
+             `user` u
+        where exists (
+                select id
+                from  project_workday_distribute
+                where `check` = 2
+                  and  p.id = project_id
+            )
+          and u.id = #{id}
+            and u.name = p.general
+    </select>
+    <select id="resultByGeneral1" resultMap="queryByAdmin1List">
+        select 1 as type,p.id, a.id  as tid, p.number, p.name, false  as result
+        from  project p,
+              project_workday_add a,
+              `user` u
+        where p.id = a.project_id
+          and a.`check` = 2
+          and u.id = #{id}
+          and u.name = p.general
+    </select>
+    <select id="resultByPrincipal" resultType="java.util.Map">
+        SELECT
+            2 AS type,
+            p.id,
+            p.number,
+            p.`name`,
+            b.id AS tid,
+            b.tec,
+            b.number as tnumber,
+            b.`name` AS tname,
+            b.workday,
+            b.apply,
+            true  as result
+        FROM
+            project p,
+            project_workday_backup b
+        WHERE
+            p.id = b.project_id
+          AND `check` = 2
+          AND b.handler = #{id}
+    </select>
+    <select id="resultByPrincipal1" resultType="java.util.Map">
+        SELECT
+            3 AS type,
+            p.id,
+            p.number,
+            v.tec,
+            p.`name`,
+            b.manage,
+            b.id AS bid,
+            b.volume,
+            r.id AS rid,
+            true  as result,
+            r.designer,
+            r.checker,
+            r.principal,
+            r.headman,
+            ( w.amount - b.manage - b.volume ) AS `backup`
+        FROM
+            volume v,
+            `user` u,
+            workday_tec w,
+            project p,
+            workday_tec_distribute b,
+            tec_ratio r
+        WHERE
+           v.project_id = p.id
+          AND w.volume_tec = v.tec
+          AND w.project_id = v.project_id
+          AND b.`check` = 2
+          AND v.project_id = b.project_id
+          AND v.tec = b.tec
+          AND r.project_id = p.id
+          AND r.tec = v.tec
+          and b.handler = #{id}
+        GROUP BY
+            p.id,
+            v.tec
+    </select>
+    <select id="resultByPrincipal2" resultMap="queryByHeadmanList">
+        SELECT
+            4 as type,
+            p.id,
+            p.number,
+            v.tec,
+            u.id as handlerId,
+            u.name as handler,
+            u.name as principal,
+            p.`name`,
+            2 as `check`,
+            true as `result`
+        FROM
+            project p,
+            volume v,
+            workday_tec w,
+            `user` u
+        WHERE
+            FIND_IN_SET(#{id},w.principal)
+          and u.id = #{id}
+          and w.project_id = p.id
+          and w.volume_tec = v.tec
+          AND v.project_id = p.id
+          AND (EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 2 )
+            OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 2 ) )
+        GROUP BY
+            p.id,
+            v.tec,
+            v.principal
+    </select>
+    <select id="queryByGeneral1" resultMap="queryByGeneral">
+        select type,
+               id,
+               number,
+               `name`,
+               tec,
+               handler,
+               submit_date,
+               handlerId,
+               result,
+               userId
+        from (
+                 SELECT 5       AS type,
+                        p.id,
+                        p.number,
+                        p.`name`,
+                        v.tec,
+                        w.submit_date,
+                        u1.name as handler,
+                        u1.id as handlerId,
+                        FALSE   AS result,
+                        #{id}   as userId
+                 FROM project p,
+                      `user` u1,
+                      volume v,
+                      volume_workday w
+                 WHERE p.generalId = #{id}
+                   and u1.id = w.handler
+                   AND v.id = w.volume_id
+                   AND v.project_id = p.id
+                   AND w.submit = 1
+                 GROUP BY v.tec,
+                          w.`handler`
+                 union
+                 SELECT 5     AS type,
+                        p.id,
+                        p.number,
+                        p.`name`,
+                        v.tec,
+                        h.submit_date,
+                        u1.`name` as handler,
+                        u1.id as handlerId,
+                        FALSE AS result,
+                        #{id} as userId
+                 FROM project p,
+                      `user` u1,
+                      volume v,
+                      volume_workday w,
+                      volume_workday_high h
+                 WHERE p.generalId = #{id}
+                   and u1.id = w.`handler`
+                   AND v.id = w.volume_id
+                   AND v.project_id = p.id
+                   and h.volume_id = w.volume_id
+                   AND h.submit = 1
+                 GROUP BY v.tec,
+                          w.`handler`
+                 union
+                 SELECT 5     AS type,
+                        p.id,
+                        p.number,
+                        p.`name`,
+                        t.tec,
+                        t.submit_date,
+                        u1.`name` as handler,
+                        u1.id as handlerId,
+                        FALSE AS result,
+                        #{id} as userId
+                 FROM project p,
+                      `user` u1,
+                      project_task t
+                 WHERE p.generalId = #{id}
+                   AND u1.id = t.`handler`
+                   AND t.project_id = p.id
+                   AND submit = 1
+                 GROUP BY t.tec,
+                          t.`handler`
+                 union
+                 SELECT 5     AS type,
+                        p.id,
+                        p.number,
+                        p.`name`,
+                        t.tec,
+                        a.submit_date,
+                        u1.`name` as handler,
+                        u1.id as handlerId,
+                        FALSE AS result,
+                        #{id} as userId
+                 FROM project p,
+                      `user` u1,
+                      project_task t,
+                      task_advance a
+                 WHERE p.generalId = #{id}
+                   AND u1.id = t.`handler`
+                   AND t.project_id = p.id
+                   and a.task_id = t.id
+                   AND a.submit = 1
+                 GROUP BY t.tec,
+                          t.`handler`
+             )as t
+        group by t.tec, t.handler,submit_date
+    </select>
+    <select id="queryByGeneralList" resultType="java.util.Map">
+        SELECT
+        v.project_id,
+        w.id,
+        v.id as task_id,
+        v.number,
+        v.`name`,
+        v.tec,
+        v.designer,
+        v.checker,
+        v.actual_principal as principal,
+        v.headman,
+        vu.designer as designerId,
+        vu.checker as checkerId,
+        vu.principal as principalId,
+        vu.headman as headmanId,
+        w.workday,
+        w.workday * ifnull( r.designer, t.designer ) AS designerWorkday,
+        w.workday * ifnull( r.checker, t.checker ) AS checkerWorkday,
+        w.workday * ifnull( r.principal, t.principal ) AS principalWorkday,
+        w.workday * ifnull( r.headman, t.headman ) AS headmanWorkday,
+        w.type AS type,
+        w.submit,
+        #{submitDate} as `date`,
+        0 as task,
+        0 as advance
+        FROM
+        volume v
+        LEFT JOIN volume_user vu on v.id = vu.volume_id
+        LEFT JOIN tec_ratio t ON v.tec = t.tec
+        AND t.project_id = v.project_id
+        LEFT JOIN volume_ratio r ON r.volume_id = v.id,
+        volume_workday w
+        WHERE
+        v.id = w.volume_id
+        AND v.project_id = #{id}
+        AND w.submit = 1
+        AND w.`check` = 1
+        and w.submit_date = #{submitDate}
+        and w.handler = #{handlerId}
+        union
+        SELECT
+        v.project_id,
+        h.id,
+        v.id as task_id,
+        v.number,
+        v.`name`,
+        v.tec,
+        v.designer,
+        v.checker,
+        v.actual_principal as principal,
+        v.headman,
+        vu.designer as designerId,
+        vu.checker as checkerId,
+        vu.principal as principalId,
+        vu.headman as headmanId,
+        w.workday,
+        h.`grant` AS designerWorkday,
+        0 AS checkerWorkday,
+        0 AS principalWorkday,
+        0 AS headmanWorkday,
+        w.type AS type,
+        h.submit,
+        #{submitDate} as `date`,
+        0 as task,
+        1 as advance
+        FROM
+        volume v
+        LEFT JOIN volume_user vu on v.id = vu.volume_id,
+        volume_workday w,
+        volume_workday_high h
+        WHERE
+        v.id = w.volume_id
+        AND v.project_id = #{id}
+        and h.volume_id = v.id
+        and h.submit = 1
+        and w.`check` = 1
+        and h.submit_date = #{submitDate}
+        and w.handler = #{handlerId}
+        union
+        SELECT
+        t.project_id,
+        t.id,
+        t.id as task_id,
+        t.number,
+        t.`name`,
+        t.tec,
+        u.name as designer,
+        u1.name as checker,
+        u2.name as principal,
+        u3.name as headman,
+        u.id as designerId,
+        u1.id as checkerId,
+        u2.id as principalId,
+        u3.id as headmanId,
+        IFNULL( designer_workday, 0 ) + IFNULL( checker_workday, 0 ) + IFNULL( 				principal_workday, 0 ) + IFNULL( headman_workday, 0 ) AS workday,
+        designer_workday AS designerWorkday,
+        checker_workday AS checkerWorkday,
+        principal_workday AS principalWorkday,
+        headman_workday AS headmanWorkday,
+        t.type AS type,
+        t.submit,
+        #{submitDate} as `date`,
+        1 AS task,
+        0 as advance
+        FROM
+        project_task t
+        left join `user` u on t.designer = u.id
+        left join `user` u1 on t.checker = u1.id
+        left join `user` u2 on t.principal = u2.id
+        left join `user` u3 on t.headman = u3.id
+        WHERE
+        t.project_id = #{id}
+        AND t.submit = 1
+        and t.submit_date = #{submitDate}
+        and t.principal = #{handlerId}
+        union
+        SELECT
+        t.project_id,
+        a.id,
+        t.id as task_id,
+        t.number,
+        t.`name`,
+        t.tec,
+        u.name as designer,
+        u1.name as checker,
+        u2.name as principal,
+        u3.name as headman,
+        u.id as designerId,
+        u1.id as checkerId,
+        u2.id as principalId,
+        u3.id as headmanId,
+        IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 ) AS workday,
+        a.advance AS designerWorkday,
+        0 AS checkerWorkday,
+        0 AS principalWorkday,
+        0 AS headmanWorkday,
+        t.type AS type,
+        a.submit,
+        #{submitDate} as `date`,
+        1 AS task,
+        1 as advance
+        FROM
+        project_task t
+        left join `user` u on t.designer = u.id
+        left join `user` u1 on t.checker = u1.id
+        left join `user` u2 on t.principal = u2.id
+        left join `user` u3 on t.headman = u3.id,
+        task_advance a
+        WHERE
+        project_id = #{id}
+        AND a.submit = 1
+        and a.submit_date = #{submitDate}
+        and a.task_id = t.id
+        and t.principal = #{handlerId}
+    </select>
+    <select id="queryLog" resultMap="checkLog">
+        select l.id, p.number, p.name, l.type, l.tec, l.workday, l.manage, l.volume, l.backup,
+               l.check, l.designer_ratio, l.principal_ratio, l.headman_ratio, l.checker_ratio, l.check, u.name as handler
+        from project p ,
+            check_log_project l left join
+            `user` u on u.id = l.submit_handler
+        where  p.id = l.project_id
+          and l.handler = #{id}
+        and DATE_FORMAT(l.handler_time,'%Y-%m') = #{date}
+    </select>
+    <select id="queryLogList" resultType="java.util.Map">
+    <choose>
+        <when test="type == 0 || type == 1">
+        select tec, workday, `check`
+        from check_log_volume
+        where check_log_id = #{id}
+        </when>
+        <when test="type == 4">
+            select v.number, v.name, l.workday, l.designer, l.principal, l.headman, l.checker
+            from check_log_volume l,
+                volume v
+            where l.check_log_id = #{id}
+            and v.id = l.task_id
+        </when>
+        <when test="type == 5 or type == 6">
+            SELECT
+            l.workday,
+            l.designer AS designerWorkday,
+            l.principal AS principalWorkday,
+            l.headman AS headmanWorkday,
+            l.checker AS checkerWorkday,
+            v.designer,
+            v.principal,
+            v.headman,
+            v.checker,
+            v.number AS number,
+            v.`name` AS `name`,
+            l.task,
+            l.advance
+            FROM
+            check_log_volume l
+            LEFT JOIN volume v ON v.id = l.task_id
+            WHERE
+            check_log_id = #{id}
+            AND l.task = 0 UNION
+            SELECT
+            l.workday,
+            l.designer AS designerWorkday,
+            l.principal AS principalWorkday,
+            l.headman AS headmanWorkday,
+            l.checker AS checkerWorkday,
+            u1.`name` AS designer,
+            u3.`name` AS principal,
+            u4.`name` AS headman,
+            u2.`name` AS checker,
+            t.number AS number,
+            t.`name` AS `name`,
+            l.task,
+            l.advance
+            FROM
+            check_log_volume l
+            LEFT JOIN project_task t ON t.id = l.task_id
+            LEFT JOIN `user` u1 ON t.designer = u1.id
+            LEFT JOIN `user` u2 ON t.checker = u2.id
+            LEFT JOIN `user` u3 ON t.principal = u3.id
+            LEFT JOIN `user` u4 ON t.headman = u4.id
+            WHERE
+            check_log_id = #{id}
+
+            AND l.task = 1
+        </when>
+        <otherwise>
+            select null
+        </otherwise>
+    </choose>
+    </select>
+    <select id="queryByGeneral2" resultMap="queryByGeneral2">
+        select type,
+               id,
+               number,
+               `name`,
+               tec,
+               handler,
+               submit_date,
+               handlerId,
+               result,
+               userId
+        from (
+                 SELECT 6       AS type,
+                        p.id,
+                        p.number,
+                        p.`name`,
+                        v.tec,
+                        w.submit_date,
+                        u1.name as handler,
+                        u1.id as handlerId,
+                        FALSE   AS result,
+                        #{id}   as userId
+                 FROM project p,
+                      `user` u,
+                      `user` u1,
+                      volume v,
+                      volume_workday w
+                 WHERE p.general = u.`name`
+                   AND u.id = #{id}
+                   and u1.id = w.handler
+                   AND v.id = w.volume_id
+                   AND v.project_id = p.id
+                   AND w.backOff = 1
+                 GROUP BY v.tec,
+                          w.`handler`
+                 union
+                 SELECT 6     AS type,
+                        p.id,
+                        p.number,
+                        p.`name`,
+                        v.tec,
+                        h.submit_date,
+                        u1.`name` as handler,
+                        u1.id as handlerId,
+                        FALSE AS result,
+                        #{id} as userId
+                 FROM project p,
+                      `user` u,
+                      `user` u1,
+                      volume v,
+                      volume_workday w,
+                      volume_workday_high h
+                 WHERE p.general = u.`name`
+                   AND u.id = #{id}
+                   and u1.id = w.`handler`
+                   AND v.id = w.volume_id
+                   AND v.project_id = p.id
+                   and h.volume_id = w.volume_id
+                   AND h.backOff = 1
+                 GROUP BY v.tec,
+                          w.`handler`
+                 union
+                 SELECT 6     AS type,
+                        p.id,
+                        p.number,
+                        p.`name`,
+                        t.tec,
+                        t.submit_date,
+                        u1.`name` as handler,
+                        u1.id as handlerId,
+                        FALSE AS result,
+                        #{id} as userId
+                 FROM project p,
+                      `user` u,
+                      `user` u1,
+                      project_task t
+                 WHERE p.general = u.`name`
+                   AND u.id = #{id}
+                   AND u1.id = t.`handler`
+                   AND t.project_id = p.id
+                   AND t.backOff = 1
+                 GROUP BY t.tec,
+                          t.`handler`
+                 union
+                 SELECT 6     AS type,
+                        p.id,
+                        p.number,
+                        p.`name`,
+                        t.tec,
+                        a.submit_date,
+                        u1.`name` as handler,
+                        u1.id as handlerId,
+                        FALSE AS result,
+                        #{id} as userId
+                 FROM project p,
+                      `user` u,
+                      `user` u1,
+                      project_task t,
+                      task_advance a
+                 WHERE p.general = u.`name`
+                   AND u.id = #{id}
+                   AND u1.id = t.`handler`
+                   AND t.project_id = p.id
+                   and a.task_id = t.id
+                   AND a.backOff = 1
+                 GROUP BY t.tec,
+                          t.`handler`
+             )as t
+        group by t.tec, t.handler,submit_date
+    </select>
+    <select id="queryByGeneral2List" resultType="map">
+        SELECT
+            v.project_id,
+            w.id,
+            v.id as task_id,
+            v.number,
+            v.`name`,
+            v.tec,
+            v.designer,
+            v.checker,
+            v.actual_principal as principal,
+            v.headman,
+            vu.designer as designerId,
+            vu.checker as checkerId,
+            vu.principal as principalId,
+            vu.headman as headmanId,
+            w.workday,
+            w.workday * ifnull( r.designer, t.designer ) AS designerWorkday,
+            w.workday * ifnull( r.checker, t.checker ) AS checkerWorkday,
+            w.workday * ifnull( r.principal, t.principal ) AS principalWorkday,
+            w.workday * ifnull( r.headman, t.headman ) AS headmanWorkday,
+            w.type AS type,
+            w.submit,
+            #{submitDate} as `date`,
+            0 as task,
+            0 as advance
+        FROM
+            volume v
+                LEFT JOIN volume_user vu on v.id = vu.volume_id
+                LEFT JOIN tec_ratio t ON v.tec = t.tec
+                AND t.project_id = v.project_id
+                LEFT JOIN volume_ratio r ON r.volume_id = v.id,
+            volume_workday w
+
+        WHERE
+            v.id = w.volume_id
+          AND v.project_id = #{id}
+          AND w.backOff = 1
+          AND w.`check` = 1
+          and w.submit_date = #{submitDate}
+          and w.handler = #{handlerId}
+        union
+        SELECT
+            v.project_id,
+            h.id,
+            v.id as task_id,
+            v.number,
+            v.`name`,
+            v.tec,
+            v.designer,
+            v.checker,
+            v.actual_principal as principal,
+            v.headman,
+            vu.designer as designerId,
+            vu.checker as checkerId,
+            vu.principal as principalId,
+            vu.headman as headmanId,
+            w.workday,
+            h.`grant` AS designerWorkday,
+            0 AS checkerWorkday,
+            0 AS principalWorkday,
+            0 AS headmanWorkday,
+            w.type AS type,
+            h.submit,
+            #{submitDate} as `date`,
+            0 as task,
+            1 as advance
+        FROM
+            volume v
+                LEFT JOIN volume_user vu on v.id = vu.volume_id,
+            volume_workday w,
+            volume_workday_high h
+        WHERE
+            v.id = w.volume_id
+          AND v.project_id = #{id}
+          and h.volume_id = v.id
+          and h.backOff = 1
+          and w.`check` = 1
+          and h.submit_date = #{submitDate}
+          and w.handler = #{handlerId}
+        union
+        SELECT
+            t.project_id,
+            t.id,
+            t.id as task_id,
+            t.number,
+            t.`name`,
+            t.tec,
+            u.name as designer,
+            u1.name as checker,
+            u2.name as principal,
+            u3.name as headman,
+            u.id as designerId,
+            u1.id as checkerId,
+            u2.id as principalId,
+            u3.id as headmanId,
+            IFNULL( designer_workday, 0 ) + IFNULL( checker_workday, 0 ) + IFNULL( principal_workday, 0 ) + IFNULL( headman_workday, 0 ) AS workday,
+            designer_workday AS designerWorkday,
+            checker_workday AS checkerWorkday,
+            principal_workday AS principalWorkday,
+            headman_workday AS headmanWorkday,
+            t.type AS type,
+            t.submit,
+            #{submitDate} as `date`,
+            1 AS task,
+            0 as advance
+        FROM
+            project_task t
+                left join `user` u on t.designer = u.id
+                left join `user` u1 on t.checker = u1.id
+                left join `user` u2 on t.principal = u2.id
+                left join `user` u3 on t.headman = u3.id
+        WHERE
+            t.project_id = #{id}
+          AND t.backOff = 1
+          and t.submit_date = #{submitDate}
+          and t.principal = #{handlerId}
+        union
+        SELECT
+            t.project_id,
+            a.id,
+            t.id as task_id,
+            t.number,
+            t.`name`,
+            t.tec,
+            u.name as designer,
+            u1.name as checker,
+            u2.name as principal,
+            u3.name as headman,
+            u.id as designerId,
+            u1.id as checkerId,
+            u2.id as principalId,
+            u3.id as headmanId,
+            IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 ) AS workday,
+            a.advance AS designerWorkday,
+            0 AS checkerWorkday,
+            0 AS principalWorkday,
+            0 AS headmanWorkday,
+            t.type AS type,
+            a.submit,
+            #{submitDate} as `date`,
+            1 AS task,
+            1 as advance
+        FROM
+            project_task t
+                left join `user` u on t.designer = u.id
+                left join `user` u1 on t.checker = u1.id
+                left join `user` u2 on t.principal = u2.id
+                left join `user` u3 on t.headman = u3.id,
+            task_advance a
+        WHERE
+            project_id = #{id}
+          AND a.backOff = 1
+          and a.submit_date = #{submitDate}
+          and a.task_id = t.id
+          and t.principal = #{handlerId}
+    </select>
+    <select id="queryByAdmin2" resultType="java.util.Map">
+        SELECT
+            7 AS type,
+            FALSE AS result,
+            p.id,
+            p.`name`,
+            p.number,
+            p.general AS `handler`,
+            n.scope,
+            n.stage,
+            n.money,
+            n.ratio,
+            ifnull(n.apply_workday,0) AS workday,
+            n.did,
+            n.tec,
+            n.other_tec AS otherTec,
+            CONVERT(n.planned_date, CHAR(10)) AS plannedDate,
+            n.note,
+            CASE
+                n.spider
+                WHEN 1 THEN n.spider_money ELSE "抓取失败" END as netMoney,
+            CASE
+                n.spider
+                WHEN 1 THEN n.spider_ratio ELSE "抓取失败" END as netRatio,
+            p.type AS typeCom,
+            n.type AS typeNote
+        FROM
+            project_note n,
+            project p
+        WHERE
+            p.id = n.project_id
+          AND n.check_handler = #{id}
+          AND n.`check` = 0
+          AND n.check_other = 1
+    </select>
+    <select id="queryByAdmin3" resultMap="queryChildren">
+        SELECT
+            8 AS type,
+            FALSE AS result,
+            p.`name`,
+            p.number,
+            p.general AS `handler`,
+            p.id as projectId,
+            #{id} as userId
+        FROM
+            project p
+        WHERE
+            p.type = 2
+          AND EXISTS (
+                SELECT
+                    id
+                FROM
+                    project_children c
+                WHERE
+                    p.id = c.project_id
+                    and c.`check` = 0
+                  AND c.check_handler = #{id}
+            )
+    </select>
+    <select id="queryChildren" resultType="java.util.Map">
+        SELECT
+            id,
+            `name`,
+            `number`,
+            `scope`,
+            stage,
+            money,
+            ratio,
+            tec,
+            other_tec as otherTec,
+            CONVERT(planned_date, CHAR(10)) as plannedDate,
+            note,
+            CASE
+                spider
+                WHEN 1 THEN spider_money ELSE "抓取失败" END as netMoney,
+            CASE
+                spider
+                WHEN 1 THEN spider_ratio ELSE "抓取失败" END as netRatio
+        FROM
+            project_children
+        WHERE
+            project_id = #{projectId}
+          AND check_handler = #{userId}
+          AND `check` = 0
+    </select>
+    <select id="scientificGeneral" resultMap="scientificTerm">
+        SELECT
+            t.id,
+            u.`name` AS handler,
+            t.`name`,
+            t.create_date,
+            t.plan_workday,
+            ifnull(t.workday,t.plan_workday) as workday,
+            FALSE AS result,
+            9 as `type`
+        FROM
+            `user` u,
+            scientific_project p,
+            scientific_term t
+                LEFT JOIN scientific_term_files f ON t.id = f.scientific_term_id,
+            scientific_leader l
+        WHERE
+            p.generalId = #{id}
+          AND p.id = t.scientific_id
+          and t.check = 0
+          AND t.scientific_leader_id = l.id
+          AND l.leader = u.id
+    </select>
+    <select id="scientificFiles" resultType="java.util.Map">
+        SELECT
+            f.id,
+            f.upload_location,
+            u.`name`,
+            f.upload_user,
+            CAST(
+                    f.upload_date AS CHAR ( 19 )) AS upload_date
+        FROM
+            scientific_term_files f,
+            `user` u
+        WHERE
+            scientific_term_id = #{id}
+          AND u.id = f.upload_user
+    </select>
+    <select id="scientificHeadman" resultMap="scientificTask">
+        SELECT
+            p.id,
+            u.id as handlerId,
+            p.number,
+            p.`name`,
+            u.`name` AS `handler`,
+            FALSE AS result,
+            10 as `type`
+        FROM
+            scientific_task_workday w,
+            scientific_task t,
+            scientific_project p,
+            `user` u
+        WHERE
+            w.submit_checker = 737
+          AND w.scientific_task_id = t.id
+          and w.submit = 1
+          AND p.id = t.scientific_id
+          AND u.id = t.creator
+        GROUP BY
+            p.id,
+            u.id
+    </select>
+    <select id="scientificTask" resultType="java.util.Map">
+        SELECT
+            w.id,
+            u.`name` AS `user`,
+            t.number,
+            t.`name`,
+            w.workday
+        FROM
+            scientific_task_workday w,
+            scientific_task t,
+            `user` u
+        WHERE
+            w.submit_checker = #{userId}
+          AND w.scientific_task_id = t.id
+          AND w.submit = 1
+          AND u.id = w.user_id
+          AND t.scientific_id = #{projectId}
+    </select>
+</mapper>

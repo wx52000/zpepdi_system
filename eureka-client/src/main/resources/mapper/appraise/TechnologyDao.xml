@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.TechnologyDao">
+    <resultMap id="tecMap" type="technology">
+        <result column="id" property="id" jdbcType="INTEGER"></result>
+        <result column="name" property="name" jdbcType="VARCHAR"></result>
+        <collection property="list" javaType="ARRAYLIST"
+                    column="id = id" select="getUser"/>
+    </resultMap>
+    <resultMap id="proTec" type="technology">
+        <result column="id" property="id" jdbcType="INTEGER"></result>
+        <result column="name" property="name" jdbcType="VARCHAR"></result>
+        <collection property="list" javaType="ARRAYLIST"
+                    column="tid = id" select="getPrincipal"/>
+    </resultMap>
+    <insert id="add" parameterType="technology" useGeneratedKeys="true" keyProperty="id">
+        insert into technology(`name`, did)
+        values (#{name} , #{did} )
+    </insert>
+    <delete id="del">
+        delete
+        from technology
+        where id = #{id}
+    </delete>
+
+    <select id="query" resultType="com.zpepdi.eureka_client.entity.Technology">
+        select *
+        from technology
+        <where>
+        <if test="id != null and id != 0">
+            did = #{id}
+        </if>
+        </where>
+    </select>
+    <select id="queryByUserId" resultType="com.zpepdi.eureka_client.entity.Technology">
+        select t.id, t.name
+        from `user` u,
+             technology t
+        where  t.did = u.did
+        and u.id = #{id}
+    </select>
+    <select id="querySelf" resultType="com.zpepdi.eureka_client.entity.Technology">
+        select t.id, t.name
+        from `user` u,
+             technology t
+        where  t.id = u.tid
+          and u.id = #{id}
+    </select>
+    <select id="queryByName" resultType="java.lang.Integer">
+        select id
+        from technology
+        where name = #{name}
+    </select>
+    <select id="queryToSelected" resultMap="tecMap">
+        select id , name
+        from technology
+    </select>
+    <select id="getUser" resultType="map">
+        select id , `name`
+        from
+        `user`
+        where  tid = #{id}
+    </select>
+    <select id="queryByPro" resultType="com.zpepdi.eureka_client.entity.Technology">
+        select id , `name`
+        from
+        technology t ,
+        project_tec pt
+        where pt.project_id = #{tid}
+        and pt.tec_id = #{id}
+    </select>
+    <select id="queryById" resultType="java.util.Map" parameterType="project">
+        select id , `name`
+        from technology
+        where id in
+        <foreach collection="projectTec" open="(" close=")" item="item" separator=",">
+            #{item}
+        </foreach>
+    </select>
+    <select id="queryNotUser" resultType="com.zpepdi.eureka_client.entity.Technology">
+        select *
+        from technology t
+        where exists (
+        select u.*
+        from `user` u
+        where u.tid = t.id
+        )
+    </select>
+  <select id="evaluate" resultType="java.util.Map">
+    select d.name as department , t.name as technology , t.id as tecId ,
+    ts.designer , ts.personal , ts.coordinate
+    from technology t
+    left join department d
+    on t.did = d.id
+    left  join tec_score ts
+    on t.id = ts.tec_id and ts.grade_id = #{id}
+    where
+     exists (
+    select u.*
+    from `user` u
+    where u.tid = t.id
+    )
+  </select>
+    <select id="queryBydepNoU" resultType="java.util.Map">
+        select *
+        from technology t
+        where
+        t.did = #{id}
+        and exists (
+        select u.*
+        from `user` u
+        where u.tid = t.id
+        )
+    </select>
+    <select id="queryAll" resultType="com.zpepdi.eureka_client.entity.Technology">
+        select id, `name`
+        from technology
+    </select>
+    <select id="queryByPrincipal" resultType="java.util.Map">
+        SELECT
+            volume_tec
+        FROM
+            workday_tec
+        WHERE
+            FIND_IN_SET( #{userId}, principal)
+        and project_id = #{id}
+    </select>
+
+
+</mapper>
