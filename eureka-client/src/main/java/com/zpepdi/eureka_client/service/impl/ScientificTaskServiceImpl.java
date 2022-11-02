@@ -38,6 +38,11 @@ public class ScientificTaskServiceImpl implements ScientificTaskService {
     }
 
     @Override
+    public Result queryTaskBySubmitDate(Integer userId, Map<String, Object> map) {
+        return Result.ok(scientificTaskDao.queryTaskBySubmitDate(userId,map));
+    }
+
+    @Override
     public Result taskSubmit(Map<String, Object> map) {
         scientificTaskDao.taskSubmit(map);
         return Result.ok();

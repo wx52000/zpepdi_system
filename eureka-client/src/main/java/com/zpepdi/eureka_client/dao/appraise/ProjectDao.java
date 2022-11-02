@@ -112,8 +112,9 @@ public interface ProjectDao {
 
     void setShow(@Param("id")Integer id,@Param("map")Map<String,Object> map);
 
-    List<Map> personalProject(@Param("id")Integer id);
+    void setScientificShow(@Param("id")Integer id,@Param("map")Map<String,Object> map);
 
+    List<Map> personalProject(@Param("id")Integer id);
 
     List<Map<String,Object>> getCheckerList(Integer type);
 

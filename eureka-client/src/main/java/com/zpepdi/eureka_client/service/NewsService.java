@@ -9,9 +9,13 @@ public interface NewsService {
 
   Result newsCount(Integer id);
 
+  Result queryCountByType(Integer id);
+
+  Result queryByType(Integer id,Integer type);
+
   Result query(Integer id);
 
-  Result queryLog(Integer id, String date);
+  Result queryLog(Integer id, Integer index);
 
   Result check(Integer id, List<Map<String,Object>> list, Integer check);
 }

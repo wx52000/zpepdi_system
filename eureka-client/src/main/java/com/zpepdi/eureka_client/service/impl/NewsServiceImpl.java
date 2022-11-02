@@ -2,6 +2,9 @@ package com.zpepdi.eureka_client.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.entity.User;
 import com.zpepdi.eureka_client.tools.DateUtils;
@@ -30,14 +33,57 @@ public class NewsServiceImpl implements NewsService {
   public void setNewsDao(NewsDao newsDao){
     this.newsDao = newsDao;
   }
+
   @Override
   public Result newsCount(Integer id) {
     return Result.ok(newsDao.count(id));
   }
 
   @Override
+  public Result queryCountByType(Integer id) {
+    return Result.ok(newsDao.queryCountByType(id));
+  }
+
+  @Override
+  public Result queryByType(Integer id,Integer type) {
+    List<Map<String,Object>> mapList = new ArrayList<>();
+    switch (type){
+      case 0:
+        mapList = newsDao.queryByAdmin(id);
+        break;
+      case 1:
+        mapList = newsDao.queryByAdmin1(id);
+        break;
+      case 3:
+        mapList = newsDao.queryByHeadman(id);
+        break;
+      case 4:
+        mapList = newsDao.queryByHeadman2(id);
+        break;
+      case 5:
+        mapList = newsDao.queryByGeneral1(id);
+        break;
+      case 6:
+        mapList = newsDao.queryByGeneral2(id);
+        break;
+      case 7:
+        mapList.addAll(newsDao.queryByAdmin2(id));
+        mapList.addAll(newsDao.queryByAdmin3(id));
+        break;
+      case 9:
+        mapList = newsDao.scientificGeneral(id);
+        break;
+      case 10:
+        mapList = newsDao.scientificHeadman(id);
+        break;
+      default:
+        break;
+    }
+    return Result.ok(mapList);
+  }
+
+  @Override
   public Result  query(Integer id) {
-    User user = userDao.queryById(id);
     List<Map<String,Object>> maps = new ArrayList<>();
     List<Callable<List<Map<String,Object>>>> callables = new ArrayList<>();
     ThreadPoolExecutor executor = new ThreadPoolExecutor(3,12,
@@ -81,8 +127,10 @@ public class NewsServiceImpl implements NewsService {
   }
 
   @Override
-  public Result queryLog(Integer id, String date) {
-    return Result.ok(newsDao.queryLog(id,date));
+  public Result queryLog(Integer id, Integer index) {
+    PageHelper.startPage(index,30);
+    PageInfo<Map<String,Object>> pageInfo = new PageInfo<>(newsDao.queryLog(id));
+    return Result.ok(pageInfo);
   }
 
   @Override

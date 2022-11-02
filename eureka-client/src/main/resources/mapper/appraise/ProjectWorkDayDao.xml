@@ -56,18 +56,29 @@
   </resultMap>
   <insert id="setProWorkday">
     insert into project_workday
-            (project_id, `num` , `date`)
+            (project_id,
+              <if test="workdayState == null || workdayState == 0">
+             `num`,
+              </if>
+              `date`, `limit`)
      values
-          (#{project_id}, #{num}, now())
+          (#{project_id},
+    <if test="workdayState == null || workdayState == 0">
+           #{num},
+    </if>
+           now(), #{limit})
         on duplicate key update
+    <if test="workdayState == null || workdayState == 0">
         `num` = values(`num`),
-        `date` = values(`date`)
+    </if>
+        `date` = values(`date`),
+        `limit` = values(`limit`)
   </insert>
   <update id="setTec" useGeneratedKeys="true" keyColumn="id" keyProperty="map.wtId">
     insert ignore into workday_tec
     (project_id, volume_tec, `amount`, `type`, `time`, `handler`)
     values
-          (#{map.id}, #{map.tec}, 0, #{map.type}, now(), #{id})
+          (#{map.projectId}, #{map.tec}, 0, #{map.type}, now(), #{id})
   </update>
   <update id="setPrincipal">
     insert ignore into workday_tec_principal(workday_tec_id, user_id)
@@ -1023,6 +1034,20 @@
              AND tec = #{tec}
          ) as tab
     order by `time`
+  </select>
+  <select id="queryLimitAndAddSum" resultType="java.util.Map">
+    select
+    project_id,
+    `limit` as maxLimit,
+    addSum,
+    `limit` - addSum as `limit`
+    from (
+           SELECT project_id,
+                  w.`limit`,
+                  ifnull((SELECT SUM(num) FROM project_workday_add a WHERE a.project_id = w.project_id and  a.`check` = 1), 0) AS addSum
+           FROM project_workday w
+           WHERE w.project_id = #{id}
+         ) as tab
   </select>
 
 </mapper>

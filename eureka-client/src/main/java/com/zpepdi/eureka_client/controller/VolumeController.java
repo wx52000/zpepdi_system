@@ -2,6 +2,8 @@ package com.zpepdi.eureka_client.controller;
 
 
 import com.zpepdi.eureka_client.annotation.UserId;
+import com.zpepdi.eureka_client.dao.appraise.DataTransmissionDao;
+import com.zpepdi.eureka_client.service.DataTransmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.zpepdi.eureka_client.entity.Project;
@@ -17,6 +19,8 @@ import java.util.Map;
 @RequestMapping("volume")
 public class VolumeController {
     private VolumeService volumeService;
+    @Autowired
+    private DataTransmissionService dataTransmissionService;
     @Autowired
     public void  setVolumeService(VolumeService volumeService){
         this.volumeService = volumeService;
@@ -153,6 +157,11 @@ public class VolumeController {
     @RequestMapping("queryRecently10Day")
     public Result queryRecently10Day(@UserId Integer id){
         return volumeService.queryRecently10Day(id);
+    }
+
+    @RequestMapping("queryCheckerList")
+    public Result queryCheckerList(@RequestHeader("processInstanceId") String processInstanceId){
+        return dataTransmissionService.queryCheckerList(processInstanceId);
     }
 
 }

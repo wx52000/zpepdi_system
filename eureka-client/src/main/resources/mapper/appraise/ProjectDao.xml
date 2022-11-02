@@ -431,10 +431,18 @@
         where id = 1
     </update>
     <update id="setShow">
-        insert into project_show(project_id, user_id, `show`)
-        values (#{map.id}, #{id}, #{map.show})
+        insert into project_show(project_id, user_id, `show`, `auth`)
+        values (#{map.id}, #{id}, #{map.show}, 0)
         on duplicate key update
-        `show` = values(`show`)
+        `show` = values(`show`),
+        `auth` = values(auth)
+    </update>
+    <update id="setScientificShow">
+        insert into scientific_show(scientific_id, user_id, `show`, `auth`)
+        values (#{map.id}, #{id}, #{map.show}, 0)
+            on duplicate key update
+            `show` = values(`show`),
+            `auth` = values(auth)
     </update>
     <update id="backOff">
         update
@@ -457,7 +465,6 @@
     <select id="queryProjectRole" resultType="java.lang.Integer" statementType="CALLABLE">
         call queryProjectRole(#{userId,mode=IN}, #{projectId,mode = IN})
     </select>
-
     <select id="queryByAdmin" resultType="java.util.Map" >
         SELECT
         id,
@@ -467,6 +474,7 @@
         general,
         generalId,
         workday,
+        `limit`,
         workdayState,
         distributeState,
         CASE
@@ -490,6 +498,7 @@
         p.general,
         p.generalId,
         ifnull( w.num, 0 ) + IFNULL( a.workday, 0 ) AS workday,
+        w.`limit`,
         IF
         ( d.id IS NOT NULL, 1, 0 ) AS workdayState,
         IF
@@ -534,6 +543,7 @@
         project_workday_add a
         WHERE
         a.project_id = p.id
+        and a.`check` = 1
         GROUP BY
         p.id
         ) AS a ON a.id = p.id
@@ -1232,6 +1242,7 @@
             planned_publication_date,
             actual_publication_date,
             complete_time,
+            wfInstId,
             workday_state,
             workday,
             designer_workday,
@@ -1245,6 +1256,7 @@
             spider,
             `check`,
             submit,
+            submit_date,
             IF
                 ( p.volume_tec IS NOT NULL, TRUE, FALSE ) AS principalRole
         FROM
@@ -1269,6 +1281,7 @@
                     planned_publication_date,
                     actual_publication_date,
                     complete_time,
+                    wfInstId,
                     workday_state,
                     workday,
                     designer_workday,
@@ -1285,7 +1298,8 @@
                     TRUE AS hasChildren,
                     1 AS spider,
                     `check`,
-                    submit
+                    submit,
+                    submit_date
                 FROM
                     (
                         SELECT DISTINCT
@@ -1308,6 +1322,7 @@
                             v.planned_publication_date,
                             v.actual_publication_date,
                             v.complete_time,
+                            v.wfInstId,
                             CASE
                                 w.CHECK
                                 WHEN 0 THEN
@@ -1333,7 +1348,8 @@
                             s.reason,
                             w.type,
                             w.`check`,
-                            w.submit
+                            w.submit,
+                            w.submit_date
                         FROM
                             volume v
                                 LEFT JOIN volume_workday w ON v.id = w.volume_id
@@ -1364,6 +1380,7 @@
                             v.planned_publication_date,
                             v.actual_publication_date,
                             v.complete_time,
+                            v.wfInstId,
                             CASE
                                 w.CHECK
                                 WHEN 0 THEN
@@ -1389,7 +1406,8 @@
                             s.reason,
                             w.type,
                             w.`check`,
-                            w.submit
+                            w.submit,
+                            w.submit_date
                         FROM
                             volume v
                                 LEFT JOIN volume_workday w ON v.id = w.volume_id
@@ -1425,6 +1443,7 @@
                     NULL AS planned_publication_date,
                     NULL AS actual_publication_date,
                     `end` AS complete_time,
+                    null as wfInstId,
                     CASE
                         t.submit
                         WHEN 0 THEN
@@ -1451,7 +1470,8 @@
                     TRUE AS hasChildren,
                     0 AS spider,
                     1 AS `check`,
-                    t.submit
+                    t.submit,
+                    t.submit_date
                 FROM
                     `user` u,
                     project_task t
@@ -1486,6 +1506,7 @@
                     NULL AS planned_publication_date,
                     NULL AS actual_publication_date,
                     `end` AS complete_time,
+                    null as wfInstId,
                     CASE
                         t.submit
                         WHEN 0 THEN
@@ -1512,7 +1533,8 @@
                     TRUE AS hasChildren,
                     0 AS spider,
                     1 AS `check`,
-                    t.submit
+                    t.submit,
+                    t.submit_date
                 FROM
                     `user` u,
                     project_task t
@@ -1546,6 +1568,7 @@
                     NULL AS planned_publication_date,
                     NULL AS actual_publication_date,
                     t.`date` AS complete_time,
+                    null as wfInstId,
                     "已发放" AS workday_state,
                     t.workday AS workday,
                     NULL AS designer_workday,
@@ -1558,7 +1581,8 @@
                     TRUE AS hasChildren,
                     0 AS spider,
                     1 AS `check`,
-                    1 AS submit
+                    1 AS submit,
+                    t.`date` as submit_date
                 FROM
                     `user` u,
                     project p,
@@ -1616,6 +1640,7 @@
             spider,
             `check`,
             submit,
+            submit_date,
             principalRole
         FROM
             (
@@ -1639,6 +1664,7 @@
                     planned_publication_date,
                     actual_publication_date,
                     complete_time,
+                    wfInstId,
                     workday_state,
                     workday,
                     designer_workday,
@@ -1656,6 +1682,7 @@
                     1 AS spider,
                     `check`,
                     submit,
+                    submit_date,
                     principalRole
                 FROM
                     (
@@ -1679,6 +1706,7 @@
                             v.planned_publication_date,
                             v.actual_publication_date,
                             v.complete_time,
+                            v.wfInstId,
                             CASE
                                 w.CHECK
                                 WHEN 0 THEN
@@ -1705,6 +1733,7 @@
                             w.type,
                             w.`check`,
                             w.submit,
+                            w.submit_date,
                             TRUE AS principalRole
                         FROM
                             volume v
@@ -1741,6 +1770,7 @@
                             v.planned_publication_date,
                             v.actual_publication_date,
                             v.complete_time,
+                            v.wfInstId,
                             CASE
                                 w.CHECK
                                 WHEN 0 THEN
@@ -1767,6 +1797,7 @@
                             w.type,
                             w.`check`,
                             w.submit,
+                            w.submit_date,
                             FALSE AS principalRole
                         FROM
                             volume v
@@ -1808,6 +1839,7 @@
                     NULL AS planned_publication_date,
                     NULL AS actual_publication_date,
                     `end` AS complete_time,
+                    null as wfInstId,
                     CASE
                         t.submit
                         WHEN 0 THEN
@@ -1835,6 +1867,7 @@
                     0 AS spider,
                     1 AS `check`,
                     t.submit,
+                    t.submit_date,
                     TRUE AS principalRole
                 FROM
                     `user` u,
@@ -1875,6 +1908,7 @@
                     NULL AS planned_publication_date,
                     NULL AS actual_publication_date,
                     `end` AS complete_time,
+                    null as wfInstId,
                     CASE
                         t.submit
                         WHEN 0 THEN
@@ -1902,6 +1936,7 @@
                     0 AS spider,
                     1 AS `check`,
                     t.submit,
+                    t.submit_date,
                     FALSE AS principalRole
                 FROM
                     `user` u,
@@ -1932,12 +1967,12 @@
             p.general,
             p.director,
             p.create_time,
-            IFNULL( num.num, 0 ) AS amount,
+            IFNULL( num.workday, 0 ) AS amount,
             p.principal,
             p.`show`,
             p.type,
             p.frozen,
-            0 as `mode`
+            0 AS `mode`
         FROM
             (
                 SELECT
@@ -1954,218 +1989,92 @@
                     IFNULL( s.`show`, 1 ) AS `sShow`
                 FROM
                     (
-                        SELECT DISTINCT
+                        SELECT
                             p.id,
                             p.number,
                             p.`name`,
                             p.general,
                             p.director,
                             p.create_time,
-                            TRUE AS principal,
-                            TRUE AS `show`,
+                            max( tab.principal ) AS principal,
+                            p.generalId = #{id} `show`,
                             p.type,
-                            frozen
+                            p.frozen
                         FROM
                             (
                                 SELECT
                                     p.id,
-                                    p.`number`,
-                                    p.`name`,
-                                    p.director,
-                                    p.`general`,
-                                    p.generalId,
-                                    p.`state`,
-                                    projectPhaseID,
-                                    p.spider,
-                                    p.error,
-                                    p.frozen,
-                                    p.type,
-                                    p.create_time
+                                    FALSE AS principal
                                 FROM
                                     project p
                                         LEFT JOIN project_note n ON p.id = n.project_id
                                 WHERE
                                     IFNULL( n.`check`, 1 ) = 1
-                                  AND IFNULL( n.`check_other`, 1 ) = 1
-                                  AND p.generalId = #{id}
-
-                            ) AS p
-                                LEFT JOIN workday_tec t ON p.id = t.project_id,
-                             workday_tec_principal tp
-                        WHERE
-                            t.id = tp.workday_tec_id
-                          AND tp.user_id = #{id}
-
-                        GROUP BY
-                            p.id UNION
-                        SELECT DISTINCT
-                            p.id,
-                            p.number,
-                            p.`name`,
-                            p.general,
-                            p.director,
-                            p.create_time,
-                            FALSE AS principal,
-                            TRUE AS `show`,
-                            p.type,
-                            frozen
-                        FROM
-                            (
-                            SELECT
-                            p.id,
-                            p.`number`,
-                            p.`name`,
-                            p.director,
-                            p.`general`,
-                            p.generalId,
-                            p.`state`,
-                            projectPhaseID,
-                            p.spider,
-                            p.error,
-                            p.frozen,
-                            p.type,
-                            p.create_time
-                            FROM
+                                  AND IFNULL( n.check_other, 1 ) = 1
+                                  AND p.generalId = #{id} UNION
+                                SELECT
+                                    t.project_id AS id,
+                                    TRUE principal
+                                FROM
+                                    workday_tec t,
+                                    workday_tec_principal tp
+                                WHERE
+                                    t.id = tp.workday_tec_id
+                                  AND tp.user_id = #{id} UNION
+                                SELECT
+                                    vu.project_id AS id,
+                                    FALSE AS principal
+                                FROM
+                                    volume_user vu
+                                WHERE
+                                    vu.designer = #{id} UNION
+                                SELECT
+                                    vu.project_id AS id,
+                                    FALSE AS principal
+                                FROM
+                                    volume_user vu
+                                WHERE
+                                    vu.checker = #{id} UNION
+                                SELECT
+                                    t.project_id AS id,
+                                    FALSE AS principal
+                                FROM
+                                    project_task t
+                                WHERE
+                                    t.designer = #{id} UNION
+                                SELECT
+                                    t.project_id AS id,
+                                    FALSE AS principal
+                                FROM
+                                    project_task t
+                                WHERE
+                                    t.checker = #{id} UNION
+                                SELECT
+                                    t.project_id AS id,
+                                    FALSE AS principal
+                                FROM
+                                    project_task t
+                                WHERE
+                                    t.headman = #{id}
+                            ) AS tab,
                             project p
-                            LEFT JOIN project_note n ON p.id = n.project_id
-                            WHERE
-                            IFNULL( n.`check`, 1 ) = 1
-                            AND IFNULL( n.`check_other`, 1 ) = 1
-                            AND p.generalId = #{id}
-
-                            ) AS p
-                        GROUP BY
-                            p.id UNION
-                        SELECT DISTINCT
-                            p.id,
-                            p.number,
-                            p.`name`,
-                            p.general,
-                            p.director,
-                            p.create_time,
-                            TRUE AS principal,
-                            FALSE AS `show`,
-                            p.type,
-                            frozen
-                        FROM
-                            project p
-                            LEFT JOIN workday_tec t ON p.id = t.project_id,
-                            workday_tec_principal tp
                         WHERE
-                            t.id = tp.workday_tec_id
-                          AND tp.user_id = #{id}
-                        GROUP BY
-                            p.id UNION
-                        SELECT DISTINCT
-                            p.id,
-                            p.number,
-                            p.`name`,
-                            p.general,
-                            p.director,
-                            p.create_time,
-                            FALSE AS principal,
-                            FALSE AS `show`,
-                            p.type,
-                            frozen
-                        FROM
-                            project p
-                            LEFT JOIN volume v ON v.project_id = p.id
-                            LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            vu.designer = #{id}
-
-                        GROUP BY
-                            p.id UNION
-                        SELECT DISTINCT
-                            p.id,
-                            p.number,
-                            p.`name`,
-                            p.general,
-                            p.director,
-                            p.create_time,
-                            FALSE AS principal,
-                            FALSE AS `show`,
-                            p.type,
-                            frozen
-                        FROM
-                            project p
-                            LEFT JOIN volume v ON v.project_id = p.id
-                            LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            vu.checker = #{id}
-
-                        GROUP BY
-                            p.id UNION
-                        SELECT DISTINCT
-                            p.id,
-                            p.number,
-                            p.`name`,
-                            p.general,
-                            p.director,
-                            p.create_time,
-                            FALSE AS principal,
-                            FALSE AS `show`,
-                            p.type,
-                            frozen
-                        FROM
-                            project p
-                            LEFT JOIN project_task t ON p.id = t.project_id
-                        WHERE
-                            t.designer = #{id}
-
-                        GROUP BY
-                            p.id UNION
-                        SELECT DISTINCT
-                            p.id,
-                            p.number,
-                            p.`name`,
-                            p.general,
-                            p.director,
-                            p.create_time,
-                            FALSE AS principal,
-                            FALSE AS `show`,
-                            p.type,
-                            frozen
-                        FROM
-                            project p
-                            LEFT JOIN project_task t ON p.id = t.project_id
-                        WHERE
-                            t.checker = #{id}
-
-                        GROUP BY
-                            p.id UNION
-                        SELECT DISTINCT
-                            p.id,
-                            p.number,
-                            p.`name`,
-                            p.general,
-                            p.director,
-                            p.create_time,
-                            FALSE AS principal,
-                            FALSE AS `show`,
-                            p.type,
-                            frozen
-                        FROM
-                            project p
-                            LEFT JOIN project_task t ON p.id = t.project_id
-                        WHERE
-                            t.headman = #{id}
-
+                            tab.id = p.id
                         GROUP BY
                             p.id
                     ) AS p
                         LEFT JOIN project_show s ON p.id = s.project_id
                         AND s.user_id = #{id}
-
             ) AS p
                 LEFT JOIN (
                 SELECT
-                    COUNT( id ) AS num,
+                    SUM( workday ) AS workday,
                     t.project_id
                 FROM
                     (
                         SELECT
                             w.id,
+                            w.workday,
                             v.project_id,
                             v.tec
                         FROM
@@ -2173,10 +2082,11 @@
                             volume_workday w
                         WHERE
                             w.submit_date = #{date}
-
+                          AND w.`handler` = #{id}
                           AND v.id = w.volume_id UNION
                         SELECT
                             h.id,
+                            h.`grant` AS workday,
                             v.project_id,
                             v.tec
                         FROM
@@ -2184,26 +2094,18 @@
                             volume_workday_high h
                         WHERE
                             h.volume_id = v.id
+                          AND h.`handler` = #{id}
                           AND h.submit_date = #{date} UNION
                         SELECT
                             t.id,
+                            t.designer_workday + t.checker_workday + t.checker_workday + t.principal_workday AS workday,
                             t.project_id,
                             t.tec
                         FROM
                             project_task t
                         WHERE
-                            submit_date = #{date} UNION
-                        SELECT
-                            a.id,
-                            t.project_id,
-                            t.tec
-                        FROM
-                            project_task t,
-                            task_advance a
-                        WHERE
-                            a.submit_date = #{date}
-
-                          AND a.task_id = t.id
+                            submit_date = #{date}
+                          AND t.principal = #{id}
                     ) AS tab,
                     (
                         SELECT
@@ -2214,8 +2116,8 @@
                             workday_tec_principal tp
                         WHERE
                             t.id = tp.workday_tec_id
-                          AND tp.user_id = #{id} ) AS t
-
+                          AND tp.user_id = #{id}
+                    ) AS t
                 WHERE
                     tab.tec = t.volume_tec
                   AND tab.project_id = t.project_id
@@ -2225,162 +2127,249 @@
         WHERE
             p.sShow = 1
         GROUP BY
-            p.id
-        union
+            p.id UNION
         SELECT
-            p.id,
-            p.number,
-            p.`name`,
-            p.general,
-            u.`name` AS director,
-            p.create_time,
-            0 AS amount,
-            1 AS principal,
-            1 AS `show`,
-            0 AS type,
-            0 AS frozen,
-            1 as `mold`
+            sci.id,
+            sci.number,
+            sci.`name`,
+            sci.general,
+            sci.`name` AS director,
+            sci.create_time,
+            IFNULL( sworkday.workdaySum, 0 ) AS amount,
+            sci.principal,
+            IFNULL( s.`show`, 1 ) = 1 AS `show`,
+            sci.type,
+            sci.frozen,
+            sci.`mold`
         FROM
-            scientific_project p,
-            `user` u
+            (
+                SELECT
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    p.general,
+                    u.`name` AS director,
+                    p.create_time,
+                    1 AS principal,
+                    0 AS type,
+                    0 AS frozen,
+                    1 AS `mold`
+                FROM
+                    scientific_project p,
+                    `user` u
+                WHERE
+                    p.generalId = #{id}
+                  AND p.creator = u.id UNION
+                SELECT
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    p.general,
+                    u.`name` AS director,
+                    p.create_time,
+                    1 AS principal,
+                    0 AS type,
+                    0 AS frozen,
+                    1 AS `mold`
+                FROM
+                    scientific_project p,
+                    `user` u,
+                    scientific_leader l
+                WHERE
+                    p.id = l.scientific_id
+                  AND p.creator = u.id
+                  AND l.`leader` = #{id}
+            ) sci
+                LEFT JOIN (
+                SELECT
+                    l.scientific_id,
+                    SUM( w.workday ) AS workdaySum
+                FROM
+                    scientific_leader l,
+                    scientific_task t,
+                    scientific_task_workday w
+                WHERE
+                    l.leader = #{id}
+                  AND w.scientific_task_id = t.id
+                  AND t.scientific_leader_id = l.id
+                  AND submit_date = #{date}
+                GROUP BY
+                    l.scientific_id
+            ) sworkday ON sworkday.scientific_id = sci.id
+                LEFT JOIN scientific_show s ON sci.id = s.scientific_id
         WHERE
-            p.generalId = #{id}
-          AND p.creator = u.id UNION
-        SELECT
-            p.id,
-            p.number,
-            p.`name`,
-            p.general,
-            u.`name` AS director,
-            p.create_time,
-            0 AS amount,
-            1 AS principal,
-            1 AS `show`,
-            0 AS type,
-            0 AS frozen,
-            1 as `mold`
-        FROM
-            scientific_project p,
-            `user` u,
-            scientific_leader l
-        WHERE
-            p.id = l.scientific_id
-          AND p.creator = u.id
-          AND l.`leader` = #{id}
+            IFNULL( s.`show`, 1 ) = 1
     </select>
     <select id="personalProject" resultType="map">
-        SELECT DISTINCT
+        SELECT
             p.id,
             p.number,
             p.`name`,
-            ifnull( s.`show`, TRUE ) AS `show`
+            `show`,
+            type
         FROM
-            project p
-                LEFT JOIN project_show s ON p.id = s.project_id
-                AND s.user_id = #{id}
-        WHERE
-            p.generalId = #{id} UNION
-        SELECT DISTINCT
-            p.id,
-            p.number,
-            p.`name`,
-            ifnull( s.`show`, TRUE ) AS `show`
+            (
+                SELECT
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    IFNULL( s.`show`, 1 ) AS `show`,
+                    0 AS type
+                FROM
+                    (
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`
+                        FROM
+                            (
+                                SELECT
+                                    p.id,
+                                    p.`number`,
+                                    p.`name`
+                                FROM
+                                    project p
+                                        LEFT JOIN project_note n ON p.id = n.project_id
+                                WHERE
+                                    IFNULL( n.`check`, 1 ) = 1
+                                  AND IFNULL( n.`check_other`, 1 ) = 1
+                                  AND p.generalId = #{id}
+                            ) AS p
+                                LEFT JOIN workday_tec t ON p.id = t.project_id,
+                            workday_tec_principal tp
+                        WHERE
+                            t.id = tp.workday_tec_id
+                          AND tp.user_id = #{id}
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`
+                        FROM
+                            (
+                                SELECT
+                                    p.id,
+                                    p.`number`,
+                                    p.`name`
+                                FROM
+                                    project p
+                                        LEFT JOIN project_note n ON p.id = n.project_id
+                                WHERE
+                                    IFNULL( n.`check`, 1 ) = 1
+                                  AND IFNULL( n.`check_other`, 1 ) = 1
+                                  AND p.generalId = #{id}
+                            ) AS p
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`
+                        FROM
+                            project p
+                                LEFT JOIN workday_tec t ON p.id = t.project_id,
+                            workday_tec_principal tp
+                        WHERE
+                            t.id = tp.workday_tec_id
+                          AND tp.user_id = #{id}
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`
+                        FROM
+                            project p
+                                LEFT JOIN volume v ON v.project_id = p.id
+                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
+                        WHERE
+                            vu.designer = #{id}
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`
+                        FROM
+                            project p
+                                LEFT JOIN volume v ON v.project_id = p.id
+                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
+                        WHERE
+                            vu.checker = #{id}
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`
+                        FROM
+                            project p
+                                LEFT JOIN project_task t ON p.id = t.project_id
+                        WHERE
+                            t.designer = #{id}
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`
+                        FROM
+                            project p
+                                LEFT JOIN project_task t ON p.id = t.project_id
+                        WHERE
+                            t.checker = #{id}
+                        GROUP BY
+                            p.id UNION
+                        SELECT DISTINCT
+                            p.id,
+                            p.number,
+                            p.`name`
+                        FROM
+                            project p
+                                LEFT JOIN project_task t ON p.id = t.project_id
+                        WHERE
+                            t.headman = #{id}
+                        GROUP BY
+                            p.id
+                    ) AS p
+                        LEFT JOIN project_show s ON p.id = s.project_id
+                        AND s.user_id = #{id}
+            ) AS p
+        GROUP BY
+            p.id UNION
+        SELECT
+            sci.id,
+            sci.number,
+            sci.`name`,
+            IFNULL( ss.`show`, 1 ) AS `show`,
+            1 as type
         FROM
-            project p
-                LEFT JOIN project_show s ON p.id = s.project_id
-                AND s.user_id = #{id}
-                LEFT JOIN volume v ON v.project_id = p.id
-                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-        WHERE
-            vu.designer = #{id} UNION
-        SELECT DISTINCT
-            p.id,
-            p.number,
-            p.`name`,
-            ifnull( s.`show`, TRUE ) AS `show`
-        FROM
-            project p
-                LEFT JOIN project_show s ON p.id = s.project_id
-                AND s.user_id = #{id}
-                LEFT JOIN volume v ON v.project_id = p.id
-                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-        WHERE
-            vu.checker = #{id} UNION
-        SELECT DISTINCT
-            p.id,
-            p.number,
-            p.`name`,
-            ifnull( s.`show`, TRUE ) AS `show`
-        FROM
-            project p
-                LEFT JOIN project_show s ON p.id = s.project_id
-                AND s.user_id = #{id}
-                LEFT JOIN volume v ON v.project_id = p.id
-                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-        WHERE
-            vu.principal = #{id} UNION
-        SELECT DISTINCT
-            p.id,
-            p.number,
-            p.`name`,
-            ifnull( s.`show`, TRUE ) AS `show`
-        FROM
-            project p
-                LEFT JOIN project_show s ON p.id = s.project_id
-                AND s.user_id = #{id}
-                LEFT JOIN volume v ON v.project_id = p.id
-                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-        WHERE
-            vu.headman = #{id} UNION
-        SELECT DISTINCT
-            p.id,
-            p.number,
-            p.`name`,
-            ifnull( s.`show`, TRUE ) AS `show`
-        FROM
-            project p
-                LEFT JOIN project_show s ON p.id = s.project_id
-                AND s.user_id = #{id}
-                LEFT JOIN workday_tec w ON w.project_id = p.id
-                LEFT JOIN project_task t ON t.project_id = p.id
-        WHERE
-            FIND_IN_SET( #{id}, w.principal ) UNION
-        SELECT DISTINCT
-            p.id,
-            p.number,
-            p.`name`,
-            ifnull( s.`show`, TRUE ) AS `show`
-        FROM
-            project p
-                LEFT JOIN project_show s ON p.id = s.project_id
-                AND s.user_id = #{id}
-                LEFT JOIN project_task t ON t.project_id = p.id
-        WHERE
-            t.designer = #{id} UNION
-        SELECT DISTINCT
-            p.id,
-            p.number,
-            p.`name`,
-            ifnull( s.`show`, TRUE ) AS `show`
-        FROM
-            project p
-                LEFT JOIN project_show s ON p.id = s.project_id
-                AND s.user_id = #{id}
-                LEFT JOIN project_task t ON t.project_id = p.id
-        WHERE
-            t.checker = #{id} UNION
-        SELECT DISTINCT
-            p.id,
-            p.number,
-            p.`name`,
-            ifnull( s.`show`, TRUE ) AS `show`
-        FROM
-            project p
-                LEFT JOIN project_show s ON p.id = s.project_id
-                AND s.user_id = #{id}
-                LEFT JOIN project_task t ON t.project_id = p.id
-        WHERE
-            t.headman = #{id}
+            (
+                SELECT
+                    p.id,
+                    p.number,
+                    p.`name`
+                FROM
+                    scientific_project p,
+                    `user` u
+                WHERE
+                    p.generalId = #{id}
+                  AND p.creator = u.id UNION
+                SELECT
+                    p.id,
+                    p.number,
+                    p.`name`
+                FROM
+                    scientific_project p,
+                    `user` u,
+                    scientific_leader l
+                WHERE
+                    p.id = l.scientific_id
+                  AND p.creator = u.id
+                  AND l.`leader` = #{id}
+            ) sci
+                LEFT JOIN scientific_show ss ON sci.id = ss.scientific_id
     </select>
     <select id="queryAmountByMajor" resultType="java.lang.String">
         SELECT
@@ -3281,12 +3270,13 @@
             v.checker as `checkerName`,
             v.principal as principalName,
             v.headman as headmanName,
-            w.workday * ifnull( r.designer, t.designer ) AS designer,
-            w.workday * ifnull( r.checker, t.checker ) AS checker,
-            w.workday * ifnull( r.principal, t.principal ) AS principal,
-            w.workday * ifnull( r.headman, t.headman ) AS headman,
+            w.designer_workday AS designer,
+            w.checker_workday AS checker,
+            w.principal_workday AS principal,
+            w.headman_workday AS headman,
             w.type AS type,
             w.submit_date,
+            w.submit,
             CASE w.backOff
                 WHEN 1 THEN
                     "申请回退"
@@ -3307,10 +3297,7 @@
             0 AS task,
             0 AS advance
         FROM
-            volume v
-                LEFT JOIN tec_ratio t ON v.tec = t.tec
-                AND t.project_id = v.project_id
-                LEFT JOIN volume_ratio r ON r.volume_id = v.id,
+            volume v,
             volume_workday w
         WHERE
             v.tec = #{tec}
@@ -3332,6 +3319,7 @@
             0 AS headman,
             w.type AS type,
             h.submit_date,
+            h.submit,
             CASE h.backOff
                 WHEN 1 THEN
                     "申请回退"
@@ -3377,6 +3365,7 @@
             t.headman_workday AS headman,
             t.type AS type,
             t.submit_date,
+            t.submit,
             CASE t.backOff
                 WHEN 1 THEN
                     "申请回退"
@@ -3405,50 +3394,7 @@
         WHERE
             t.project_id = #{id}
           AND t.tec = #{tec}
-          AND submit_date = #{date} UNION
-        SELECT
-            a.id,
-            t.number,
-            t.`name`,
-            IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 ) AS workday,
-            u1.`name` AS designerName,
-            NULL AS checkerName,
-            NULL AS principalName,
-            NULL AS headmanName,
-            a.advance AS designer,
-            0 AS checker,
-            0 AS principal,
-            0 AS headman,
-            t.type AS type,
-            a.submit_date,
-            CASE a.backOff
-                WHEN 1 THEN
-                    "申请回退"
-                WHEN 2 THEN
-                    "回退被拒" ELSE
-                    CASE
-                        a.submit
-                        WHEN 0 THEN
-                            "未申报"
-                        WHEN 1 THEN
-                            "已申报"
-                        WHEN 2 THEN
-                            "已发放"
-                        WHEN 3 THEN
-                            "申报被拒" ELSE "未填报"
-                        END
-                END AS submitState,
-            1 AS task,
-            1 AS advance
-        FROM
-            project_task t
-                LEFT JOIN `user` u1 ON t.designer = u1.id,
-            task_advance a
-        WHERE
-            t.project_id = #{id}
-          AND t.tec = #{tec}
-          AND a.submit_date = #{date}
-          AND a.task_id = t.id
+          AND submit_date = #{date}
     </select>
     <select id="declareLog" resultMap="declareLog">
         select
@@ -4054,13 +4000,15 @@
         SELECT
             v.number,
             v.`name`,
+            v.state,
             v.designer,
             v.headman,
             v.actual_principal AS principal,
             v.checker,
             v.start_date,
-        v.planned_publication_date,
+            v.planned_publication_date,
             v.actual_publication_date,
+            v.wfInstId,
                w.workday
         FROM
             `volume` v left join volume_workday w on v.id = w.volume_id
@@ -4087,6 +4035,7 @@
         SELECT
             v.number,
             v.`name`,
+            v.state,
             v.designer,
             v.headman,
             v.principal AS principal,
@@ -4094,6 +4043,7 @@
             v.start_date,
             v.planned_publication_date,
             v.actual_publication_date,
+            v.wfInstId,
             w.workday
         FROM
             `volume` v
@@ -4106,6 +4056,7 @@
         SELECT
             v.number,
             v.`name`,
+            v.state,
             v.designer,
             v.headman,
             v.actual_principal AS principal,
@@ -4113,6 +4064,7 @@
             v.start_date,
             v.planned_publication_date,
             v.actual_publication_date,
+            v.wfInstId,
             w.workday
         FROM
             `volume` v
@@ -4127,6 +4079,7 @@
         SELECT
         v.number,
         v.`name`,
+        v.state,
         v.designer,
         v.headman,
         v.principal AS principal,
@@ -4134,6 +4087,7 @@
         v.start_date,
         v.planned_publication_date,
         v.actual_publication_date,
+        v.wfInstId,
         w.workday
         FROM
         `volume` v left join volume_workday w on v.id = w.volume_id

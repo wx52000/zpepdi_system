@@ -18,7 +18,6 @@ public class UploadUtils {
         //获取文件的原名称 getOriginalFilename
         String OriginalFilename = multipartFile.getOriginalFilename();
         //获取时间戳和文件的扩展名，拼接成一个全新的文件名； 用时间戳来命名是为了避免文件名冲突
-        String oldFileName = OriginalFilename.substring(OriginalFilename.lastIndexOf("."));
         String fileName = System.currentTimeMillis()+"."+OriginalFilename.substring(OriginalFilename.lastIndexOf(".")+1);
         //定义文件存放路径
         String filePath = "D:\\zpepdi_system\\scientificFile\\" + map.get("projectId").toString() + "\\";
@@ -37,7 +36,7 @@ public class UploadUtils {
             //拷贝失败要有提示
             return null;
         }
-        map.put("name", oldFileName);
+        map.put("name", OriginalFilename);
         map.put("path", filePath + fileName);
         return map;
     }

@@ -11,4 +11,6 @@ public interface DataTransmissionService {
     void dataTransmissionService();
 
     void queryIncomeInformation();
+
+    Result queryCheckerList(String processInstanceId);
 }

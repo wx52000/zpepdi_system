@@ -217,8 +217,7 @@ public class VolumeServiceImpl implements VolumeService {
             return Result.build(666,"卷册已完成，工时将全部发放");
         }
         map.put("state",2);
-        map.put("grant" ,Double.parseDouble(map1.get("workday").toString()) *  Double.parseDouble(map.get("ratio").toString())
-        * Double.parseDouble(map1.get("designer").toString())/100);
+        map.put("grant" ,Double.parseDouble(map1.get("designer_workday").toString()) *  Double.parseDouble(map.get("ratio").toString()));
         volumeDao.setWorkdayStateById(map);
         volumeDao.setWorkdayAdvance(userId, map);
         return Result.ok();

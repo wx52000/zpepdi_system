@@ -826,6 +826,7 @@
                 w.workday,
                 w.state,
                 w.type,
+                w.designer_workday,
                 IFNUll( max(h.`ratio`), 0 ) AS `ratio`,
                 IFNULL(max(h1.ratio),0) as `max`
             FROM
@@ -1992,7 +1993,8 @@
         v.principal,
         v.state,
         v.planned_publication_date,
-        v.start_date
+        v.start_date,
+        v.wfInstId
         FROM
         project p,
         volume v
@@ -2012,7 +2014,8 @@
         v.principal,
         v.state,
         v.planned_publication_date,
-        v.start_date
+        v.start_date,
+        v.wfInstId
         FROM
         project p,
         volume v
@@ -2032,7 +2035,8 @@
         v.principal,
         v.state,
         v.planned_publication_date,
-        v.start_date
+        v.start_date,
+        v.wfInstId
         FROM
         project p,
         volume v,
@@ -2055,7 +2059,8 @@
         v.principal,
         v.state,
         v.planned_publication_date,
-        v.start_date
+        v.start_date,
+        v.wfInstId
         FROM
         project p,
         volume v,

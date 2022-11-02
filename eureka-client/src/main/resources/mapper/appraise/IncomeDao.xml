@@ -16,7 +16,9 @@
             money_ratio*100 as moneyRatio,
             `value`,
             dep_value as depValue,
-            value_ratio*100 as valueRatio
+            value_ratio*100 as valueRatio,
+            activity_instance_id,
+            process_instance_id
         FROM
             income_information
     </select>

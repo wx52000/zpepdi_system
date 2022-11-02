@@ -33,6 +33,11 @@ public class ScientificTaskController {
         return scientificTaskService.queryTask(userId,id);
     }
 
+    @RequestMapping("queryTaskBySubmitDate")
+    public Result queryTaskBySubmitDate(@UserId Integer userId,@RequestBody Map<String,Object> map){
+        return scientificTaskService.queryTaskBySubmitDate(userId,map);
+    }
+
     @RequestMapping("taskSubmit")
     public Result taskSubmit(@UserId Integer userId,@RequestBody Map<String,Object> map){
         return scientificTaskService.taskSubmit(map);

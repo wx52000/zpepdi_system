@@ -40,6 +40,8 @@ spring:
       appraise:
         driver-class-name: com.mysql.cj.jdbc.Driver
         url: jdbc:mysql://localhost:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+        #        useSSL=false为连接linux服务器使用
+#        url: jdbc:mysql://10.136.238.23:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
     #    url: jdbc:mysql://10.136.238.22:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
         username: root
         password: 7499
@@ -77,7 +79,7 @@ security:
       check-token-access: http://localhost:9100/oauth/check_token
 
 server:
-  port: 9001
+  port: 9002
   servlet:
     encoding:
       enabled: true

@@ -163,8 +163,8 @@
         SELECT
             f.id,
             f.upload_location,
-            u.`name`,
-            f.upload_user,
+            f.name,
+            u.`name` as upload_user,
             CAST(
                     f.upload_date AS CHAR ( 19 )) AS upload_date
         FROM
@@ -178,8 +178,8 @@
         SELECT
             f.id,
             f.upload_location,
-            u.`name`,
-            f.upload_user,
+            f.name,
+            u.`name` as upload_user,
             CAST(
                     f.upload_date AS CHAR ( 19 )) AS upload_date
         FROM

@@ -99,4 +99,6 @@ public interface ProjectWorkdayDao {
   Map<String,Object> queryNewWorkdayByAddId(Integer id);
 
   List<Map<String,Object>> queryTecWorkdayList(Integer id);
+
+  Map<String,Object> queryLimitAndAddSum(Integer id);
 }

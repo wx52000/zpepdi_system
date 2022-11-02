@@ -55,4 +55,11 @@ public class DataTransmissionServiceImpl implements DataTransmissionService {
         dataTransmissionDao.delIncome();
         Result.ok();
     }
+
+    @Override
+    public Result queryCheckerList(String processInstanceId) {
+        return Result.ok(transmissionDao.queryCheckerList(processInstanceId));
+    }
+
+
 }

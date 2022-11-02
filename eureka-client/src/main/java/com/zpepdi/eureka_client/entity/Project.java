@@ -14,6 +14,8 @@ public class Project {
 
   private double workday;
 
+  private double limit;
+
   private Integer state;
 
   private String general;
@@ -79,6 +81,14 @@ public class Project {
 
   public void setWorkday(double workday) {
     this.workday = workday;
+  }
+
+  public double getLimit() {
+    return limit;
+  }
+
+  public void setLimit(double limit) {
+    this.limit = limit;
   }
 
   public Integer getState() {

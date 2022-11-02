@@ -11,6 +11,8 @@ public interface NewsDao {
 
   Integer count(Integer id);
 
+  Map<String,Object> queryCountByType(Integer id);
+
   //项目工时分配
   List<Map<String,Object>> queryByAdmin(Integer id);
 
@@ -102,7 +104,7 @@ public interface NewsDao {
    * @param date
    * @return
    */
-  List<Map<String,Object>> queryLog(@Param("id")Integer id, @Param("date")String date);
+  List<Map<String,Object>> queryLog(@Param("id")Integer id);
 
   List<Map<String,Object>> queryLogList(@Param("id") Integer id, @Param("type") Integer type);
 
@@ -113,6 +115,9 @@ public interface NewsDao {
 
   List<Map<String,Object>> scientificHeadman(Integer id);
 
-  List<Map<String,Object>> scientificTask(@Param("userId") Integer userId,@Param("projectId") Integer projectId);
+  List<Map<String,Object>> scientificTask(@Param("userId") Integer userId,
+                                          @Param("projectId") Integer projectId,
+                                          @Param("submitDate") String submitDate,
+                                          @Param("creator") Integer creator);
 }
 

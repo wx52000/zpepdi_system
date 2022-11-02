@@ -17,6 +17,7 @@
                       `position` p
                  WHERE username = #{username}
                    and u.pid = p.id
+                    and u.alive = 1
                  union
                  SELECT id,
                         `name`,

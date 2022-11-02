@@ -14,6 +14,8 @@ public interface ProjectWorkdayService {
 
   Result queryProjectWorkday(Integer id);
 
+  Result queryLimitAndAddSum(Integer id);
+
   Result queryProjectSumWorkday(Integer id);
 
   Result queryProjectTecWorkdayLog(Map<String,Object> map);

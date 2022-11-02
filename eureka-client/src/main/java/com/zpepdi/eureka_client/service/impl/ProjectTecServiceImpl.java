@@ -1,5 +1,6 @@
 package com.zpepdi.eureka_client.service.impl;
 
+import com.zpepdi.eureka_client.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.zpepdi.eureka_client.dao.appraise.ProjectTecDao;
@@ -25,4 +26,15 @@ public class ProjectTecServiceImpl implements ProjectTecService {
   public List<String> queryById(Integer id) {
     return projectTecDao.queryById(id);
   }
+
+    @Override
+    public Result queryProjectByGeneral(Integer userId, Map<String,Object> map) {
+        return Result.ok(projectTecDao.queryProjectByGeneral(userId,map));
+    }
+
+    @Override
+    public Result insertProjectTec(Integer userId, Map<String, Object> map) {
+        projectTecDao.insertProjectTec(userId,map);
+        return Result.ok();
+    }
 }

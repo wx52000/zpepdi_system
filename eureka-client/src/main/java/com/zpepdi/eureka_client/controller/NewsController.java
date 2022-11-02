@@ -30,18 +30,29 @@ public class NewsController {
     return newsService.newsCount(id);
     }
 
+  @RequestMapping("queryCountByType")
+  public Result queryCountByType(@UserId Integer id){
+    return newsService.queryCountByType(id);
+  }
+
+    @RequestMapping("queryByType")
+    public Result queryByType(@UserId Integer id,@RequestHeader Integer type){
+      return newsService.queryByType(id,type);
+    }
+
     @RequestMapping("query")
     public Result query(@UserId Integer id){
       return newsService.query(id);
     }
 
     @RequestMapping("queryLog")
-    public Result query(@UserId Integer id, @RequestHeader("queryDate")String date){
-      return newsService.queryLog(id,date);
+    public Result query(@UserId Integer id, @RequestHeader("index")Integer index){
+      return newsService.queryLog(id,index);
     }
 
     @RequestMapping("check")
     public Result query(@UserId Integer id, @RequestBody List<Map<String,Object>> list,@RequestHeader Integer check){
         return newsService.check(id,list,check);
     }
+
 }

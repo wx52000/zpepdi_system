@@ -24,6 +24,8 @@
     <insert id="add" parameterType="user" useGeneratedKeys="true" keyProperty="id">
         insert into user(pid , did , tid , `name` , username , paw , grade)
         values (#{pid} , #{did} , #{tid} , #{name} , #{username} ,AES_ENCRYPT("1234",'zpepdi') , 0)
+            ON DUPLICATE KEY UPDATE
+            alive = 1
     </insert>
     <insert id="addExcel" parameterType="list" useGeneratedKeys="true" keyProperty="id">
         insert into user(pid , did , tid , `name` , username ,grade)
@@ -34,7 +36,8 @@
         ON DUPLICATE KEY UPDATE
         did = values(did),
         tid = values(tid),
-        grade = values(grade)
+        grade = values(grade),
+        alive = 1
     </insert>
     <update id="upd">
         update `user`
@@ -62,11 +65,11 @@
         set paw = AES_ENCRYPT("1234",'zpepdi') , paw_state = 0
         where id = #{id}
     </update>
-    <delete id="del">
-        delete u
-        from  `user` u
-        where u.id = #{id}
-    </delete>
+    <update id="del">
+        update `user`
+        set alive = 0
+        where  id = #{id}
+    </update>
      <select id="queryById" resultType="com.zpepdi.eureka_client.entity.User">
         select u.id, u.name, u.did, u.tid, u.pid, d.name as department,grade,
                t.name as technology, p.name as `position`, u.username,
@@ -100,6 +103,7 @@
         LEFT JOIN technology t ON u.tid = t.id
         LEFT JOIN department d ON u.did = d.id
         <where>
+        u.alive = 1
         <if test="name != null and name != ''">
          and u.name like concat("%",#{name},"%")
         </if>
@@ -108,6 +112,7 @@
         </if>
         </where>
       GROUP BY u.id
+        order by d.id, t.id, u.username
     </select>
     <select id="queryByTid" resultType="java.util.Map">
         select id , `name` , username
@@ -184,11 +189,13 @@
         from
         `user`
         where `name` like concat("%",#{name},"%")
+          and alive = 1
         union distinct
         select id, username, `name`
         from
         `user`
         where `username` like concat("%",#{name},"%")
+        and alive = 1
     </select>
     <select id="selectByName" resultType="java.lang.Integer">
         select id
@@ -231,7 +238,7 @@
       FROM
       volume v,
       project p,
-      `USER` u
+      `user` u
       LEFT JOIN user_score us ON us.grade_id = #{id}
 
       AND u.id = us.score_id,
@@ -275,7 +282,7 @@
       FROM
       volume v,
     project p,
-      `USER` u
+      `user` u
       LEFT JOIN user_score us ON us.grade_id = #{id}
       AND u.id = us.score_id,
       department d,
@@ -318,7 +325,7 @@
       FROM
       volume v,
            project p,
-      `USER` u
+      `user` u
       LEFT JOIN user_score us ON us.grade_id = #{id}
 
       AND u.id = us.score_id,
@@ -734,7 +741,7 @@
     FROM
     volume v,
     project p,
-    `USER` u
+    `user` u
     LEFT JOIN user_score us ON us.grade_id = #{id}
     AND u.id = us.score_id,
     department d,
@@ -970,7 +977,7 @@
           FROM
               volume v,
               project p,
-              `USER` u
+              `user` u
                   LEFT JOIN user_score us ON us.grade_id = #{id}
 
                   AND u.id = us.score_id,
@@ -1014,7 +1021,7 @@
           FROM
               volume v,
                project p,
-              `USER` u
+              `user` u
                   LEFT JOIN user_score us ON us.grade_id = #{id}
 
                   AND u.id = us.score_id,
@@ -1057,7 +1064,7 @@
     FROM
         volume v,
          project p,
-        `USER` u
+        `user` u
             LEFT JOIN user_score us ON us.grade_id = #{id}
 
             AND u.id = us.score_id,
@@ -1122,7 +1129,7 @@
     FROM
       volume v,
       project p,
-      `USER` u
+      `user` u
     WHERE
       p.id = v.project_id
       AND u.`name` = v.designer
@@ -1276,7 +1283,7 @@
     FROM
       volume v,
       project p,
-      `USER` u
+      `user` u
     WHERE
       p.id = v.project_id
       AND u.`name` = v.designer
@@ -1429,7 +1436,7 @@
         FROM
           volume v,
           project p,
-          `USER` u
+          `user` u
         WHERE
           p.id = v.project_id
           AND u.`name` = v.designer
@@ -1851,7 +1858,7 @@
                     5 AS role
                 FROM
                     project p,
-                    USER u,
+                    `user` u,
                     project_workday_manage m
                 WHERE
                     m.project_id = p.id
@@ -2174,7 +2181,7 @@
                     5 AS role
                 FROM
                     project p,
-                    USER u,
+                    `user` u,
                     project_workday_manage m
                 WHERE
                     m.project_id = p.id
@@ -2429,8 +2436,10 @@
                     ) AS m ON m.designer = u.id
                         LEFT JOIN ( SELECT sum( workday ) AS workday, user_id AS userId FROM workday_deduct WHERE `date` = #{date} GROUP BY user_id ) AS de ON de.userId = u.id
                         LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date = #{date} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id
+                    where u.alive = 1
                 GROUP BY
                     u.id
+                order by d.id, t.id, u.username
             ) AS u
     </select>
     <select id="workdayByManager" resultType="java.util.Map">
@@ -2654,10 +2663,10 @@
                             scientific_task_workday
                         WHERE
                             submit_date = #{date} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id,
-                    USER u1
+                     `user` u1
                 WHERE
                     u1.id = #{id}
-
+                  and u.alive = 1
                   AND u.did = u1.did
                 GROUP BY
                     u.id

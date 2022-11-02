@@ -9,6 +9,8 @@ import com.zpepdi.eureka_client.tools.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,11 +44,13 @@ public class ProjectTaskServiceImpl implements ProjectTaskService {
                 map1.put("backup",Double.parseDouble(map1.get("amount").toString()) -
                         Double.parseDouble(map1.get("volume").toString()) - Double.parseDouble(map1.get("manage").toString()));
             }
-            double used = Double.parseDouble(map1.get(usedField).toString());
-            double num = Double.parseDouble(map1.get(numField).toString());
-            double workday = Double.parseDouble(map.get("designer_workday").toString()) + Double.parseDouble(map.get("principal_workday").toString())
-            + Double.parseDouble(map.get("checker_workday").toString()) + Double.parseDouble(map.get("headman_workday").toString());
-            if ((num - used) >= workday) {
+            BigDecimal used = new BigDecimal(map1.get(usedField).toString()).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal num = new BigDecimal(map1.get(numField).toString()).setScale(2,RoundingMode.HALF_UP);
+            BigDecimal workday = new BigDecimal(map.get("designer_workday").toString())
+                    .add(new BigDecimal(map.get("principal_workday").toString()))
+                    .add(new BigDecimal(map.get("checker_workday").toString()))
+                    .add(new BigDecimal(map.get("headman_workday").toString()));
+            if (num.subtract(used).compareTo(workday) > -1)  {
                 projectTaskDao.addTask(id,map);
             }else {
                 return Result.build(560,"工时超出上限，请在任务列表重新输入");

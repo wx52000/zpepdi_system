@@ -29,6 +29,7 @@
             r.FactOutOfCollegeDate,
             r.PlanSentCustomerDate,
             s.RollStateName as state,
+            vrcf.ExtendedAttribute as wfInst,
             p.checker,
             p.headman,
             p.principal
@@ -47,11 +48,12 @@
         AND e.OperatorDate != ''
         GROUP BY
         p.RollID
-        ) AS p ON r.RollID = p.RollID,
+        ) AS p ON r.RollID = p.RollID
+        left join EPMS_VerifyRecordCardForm vrcf on r.RollID = vrcf.RollID,
         ParamRollState s
         WHERE
         s.RollStateID = r.rollStateID
-        and r.ProjectPhaseCode = #{name}
+        and r.ProjectPhaseCode = #{number}
     </select>
     <select id="queryIncomeInformation" resultType="java.util.Map">
         SELECT
@@ -169,6 +171,7 @@
         WHERE
         cs.ParamSingleID = sdr.ParamSingleID
         AND cs.MarketProjectID = sdr.MarketProjectID
+        AND sdr.ContractID = cs.ContractID
         AND sdr.DeptID = 'ba1debfe-1e6b-4e37-a6a3-0f9fa592c7d3'
         GROUP BY
         sdr.MarketProjectID
@@ -194,5 +197,23 @@
         GROUP BY
         p.MarketProjectID
         ) AS projv ON projv.MarketProjectID = tab.MarketProjectID
+        WHERE ActivityInstanceId is not null
+    </select>
+    <select id="queryCheckerList" resultType="java.util.Map">
+        SELECT
+            p.ActivityId,
+            p.ActivityName,
+            p.PartName,
+            p.PartOrganizationName,
+            CONVERT(VARCHAR(20),p.FinishDateTime,20) as FinishDateTime,
+            e.OpinionContent
+        FROM
+            [WorkflowTrackingDataZJ].[dbo].[WorkflowProcessInstance] wpi,
+            [WorkflowTrackingDataZJ].[dbo].ProcessActivityInstance p,
+            [WorkflowTrackingDataZJ].[dbo].ActivityInstanceExtend e
+        WHERE wpi.ProcessInstanceId = #{processInstanceId}
+          AND p.ProcessInstanceId = wpi.ProcessInstanceId
+          AND e.ActivityInstanceId = p.ActivityInstanceId
+        ORDER BY ReceiveDateTime DESC
     </select>
 </mapper>

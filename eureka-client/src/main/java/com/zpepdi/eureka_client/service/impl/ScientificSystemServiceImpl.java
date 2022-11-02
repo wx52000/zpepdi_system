@@ -19,6 +19,8 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -92,7 +94,11 @@ public class ScientificSystemServiceImpl implements ScientificSystemService {
 
     @Override
     public Result fdDataTransmit(){
-        if (!scientificSystemDao.queryIsCreate(DateUtils.getDateMonth())){
+        Path path = Paths.get(this.getPath());
+        String date = DateUtils.getDateMonth();
+        File file = new File(path +"\\" + date +"工时.zip");
+        if (!scientificSystemDao.queryIsCreate(DateUtils.getDateMonth()) || !file.exists()){
+            createScientificProduce(DateUtils.getDateMonth(new Date().getTime() - 2592000));
             creatDepartmentExcel();
         }
         try {
@@ -114,7 +120,6 @@ public class ScientificSystemServiceImpl implements ScientificSystemService {
 
     @Override
     public HttpServletResponse down(HttpServletResponse response) throws Exception {
-//        createScientificProduce(DateUtils.getDateMonth(new Date().getTime() - 2592000));
         String name= DateUtils.getDateMonth() + "工时.zip";
         Download.zip("D:\\excel\\" + name,this.getPath());
         Download.downloadFile(response,"D://excel/" + name,name);
@@ -147,7 +152,13 @@ public class ScientificSystemServiceImpl implements ScientificSystemService {
                 }
                 list = scientificWorkdayTimeDao.queryDepartment(map);
             }else {
+
                 list = scientificSystemDao.queryProduce(date);
+                if (list.size() == 0){
+                    createScientificProduce(date);
+                    creatDepartmentExcel();
+                    list = scientificSystemDao.queryProduce(date);
+                }
             }
         }
         return Result.ok(list);

@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zpepdi.eureka_client.dao.appraise.ProjectTecDao">
+    <resultMap id="queryProjectByGeneral" type="java.util.Map">
+        <result column="id" property="id"/>
+        <result column="number" property="number"/>
+        <result column="name" property="name"/>
+        <collection property="list" column="id = id"
+                    javaType="ArrayList" select="queryTecByProjectId"></collection>
+    </resultMap>
     <insert id="add" parameterType="project">
         insert into project_tec(project_id , tec_id )
         values
@@ -11,6 +18,43 @@
     <insert id="addExcel" parameterType="excelProject">
         insert ignore into project_tec(project_id , tec_id )
         values (#{pid} , #{tid})
+    </insert>
+    <insert id="insertProjectTec">
+        INSERT workday_tec (project_id,volume_tec,amount,`time`,`handler`,`type`)
+        SELECT
+            #{map.insertId},
+            t.volume_tec,
+            0.0 AS amount,
+            now() AS `time`,
+            #{userId} AS `handler`,
+            0 AS type
+        FROM
+            workday_tec t
+        WHERE
+            t.project_id = #{map.selectId}
+        ON DUPLICATE key UPDATE
+                             `time` = VALUES(`time`),
+                             `handler` = VALUES(`handler`);
+        INSERT IGNORE INTO workday_tec_principal ( workday_tec_id, user_id )
+        SELECT
+            wt.id,
+            p.user_id
+        FROM
+            workday_tec wt,
+            (
+                SELECT DISTINCT
+                    t.volume_tec,
+                    user_id
+                FROM
+                    workday_tec t,
+                    workday_tec_principal p
+                WHERE
+                    t.project_id = #{map.selectId}
+                  AND p.workday_tec_id = t.id
+            ) p
+        WHERE
+            project_id = #{map.insertId}
+          AND wt.volume_tec = p.volume_tec
     </insert>
     <delete id="del" parameterType="project">
         delete
@@ -31,4 +75,34 @@
       volume
     where project_id = #{id}
   </select>
+    <select id="queryProjectByGeneral" resultMap="queryProjectByGeneral">
+        SELECT
+        id, `number`, `name`
+        FROM project
+        WHERE
+         id &lt;&gt; #{map.projectId}
+        <if test="map.search == null or map.search ==''">
+        and    generalId = #{userId}
+        </if>
+        <if test="map.search != null and map.search !=''">
+        and (`number` like CONCAT( "%", #{map.search}, "%" )
+        or `name` like CONCAT( "%", #{map.search}, "%" ))
+        </if>
+    </select>
+    <select id="queryTecByProjectId" resultType="java.util.Map">
+        SELECT
+            t.id,
+            t.volume_tec as tec,
+            GROUP_CONCAT(u.`name`) as principal
+        FROM
+            workday_tec t,
+            workday_tec_principal p,
+            `user` u
+        WHERE
+            t.project_id = #{id}
+          AND p.workday_tec_id = t.id
+          AND u.id = p.user_id
+        GROUP BY
+            t.id
+    </select>
 </mapper>

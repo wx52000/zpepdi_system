@@ -26,41 +26,123 @@
             t.have,
             IFNULL( w.used, 0 ) AS used
         FROM
-             scientific_project p,
+            scientific_project p,
             `scientific_leader` l,
             ( SELECT scientific_leader_id, SUM( workday ) AS have FROM `scientific_term` GROUP BY scientific_leader_id ) AS t
-                LEFT JOIN scientific_task ta ON t.scientific_leader_id = ta.scientific_leader_id
-                LEFT JOIN ( SELECT scientific_task_id, SUM( workday ) AS used FROM scientific_task_workday GROUP BY scientific_task_id ) AS w ON ta.id = w.scientific_task_id
+                LEFT JOIN (
+                SELECT
+                    t.scientific_leader_id,
+                    SUM( workday ) AS used
+                FROM
+                    scientific_task_workday w,
+                    scientific_task t
+                WHERE
+                    w.scientific_task_id = t.id
+                GROUP BY
+                    t.scientific_leader_id
+            ) AS w ON t.scientific_leader_id = w.scientific_leader_id
         WHERE
             l.scientific_id = #{id}
-          and p.id = l.scientific_id
           AND l.leader = #{userId}
+          AND p.id = l.scientific_id
           AND l.id = t.scientific_leader_id
     </select>
     <select id="queryTask" resultType="java.util.Map">
         SELECT
-            w.id,
-            t.id AS taskId,
-            t.number,
-            t.`name`,
-            u.`name` AS creator,
-            u1.`name` AS userName,
-            w.workday,
-            cast(
-                    t.create_date AS CHAR ( 19 )) AS createDate,
+            id,
+            taskId,
+            number,
+            `name`,
+            creator,
+            userName,
+            workday,
+            createDate,
+            checkRole,
             submit
         FROM
-            scientific_project p,
+            (
+                SELECT
+                    w.id,
+                    t.id AS taskId,
+                    t.number,
+                    t.`name`,
+                    u.`name` AS creator,
+                    u1.`name` AS userName,
+                    w.workday,
+                    cast(
+                            t.create_date AS CHAR ( 19 )) AS createDate,
+                    t.creator = #{userId} AS checkRole,
+                    submit
+                FROM
+                    scientific_project p,
+                    scientific_task t,
+                    scientific_task_workday w,
+                    `user` u,
+                    `user` u1
+                WHERE
+                    p.id = #{id}
+                  AND p.generalId = #{userId}
+                  AND t.scientific_id = p.id
+                  AND w.scientific_task_id = t.id
+                  AND t.creator = u.id
+                  AND w.user_id = u1.id UNION
+                SELECT
+                    w.id,
+                    t.id AS taskId,
+                    t.number,
+                    t.`name`,
+                    u.`name` AS creator,
+                    u1.`name` AS userName,
+                    w.workday,
+                    cast(
+                            t.create_date AS CHAR ( 19 )) AS createDate,
+                    t.creator = #{userId} AS checkRole,
+                    submit
+                FROM
+                    scientific_project p,
+                    scientific_task t,
+                    scientific_task_workday w,
+                    `user` u,
+                    `user` u1
+                WHERE
+                    p.id = #{id}
+                  AND t.creator = #{userId}
+                  AND t.scientific_id = p.id
+                  AND w.scientific_task_id = t.id
+                  AND t.creator = u.id
+                  AND w.user_id = u1.id
+            ) AS tab
+        GROUP BY
+            id
+    </select>
+    <select id="queryTaskBySubmitDate" resultType="java.util.Map">
+        SELECT
+            t.number,
+            t.`name`,
+            w.submit,
+            CASE
+                w.submit
+                WHEN 2 THEN
+                    "已发放"
+                WHEN 1 THEN
+                    "已申报"
+                WHEN 3 THEN
+                    "被回退" ELSE "未申报"
+                END AS submitState,
+            w.submit_date,
+            u.`name`,
+            w.workday
+        FROM
+            scientific_leader l,
             scientific_task t,
             scientific_task_workday w,
-            `user` u,
-            `user` u1
+            `user` u
         WHERE
-            p.id = #{id}
-          AND p.generalId = #{userId}
-          AND t.scientific_id = p.id
+            l.scientific_id = #{map.id}
+          AND l.leader = #{userId}
+          AND t.scientific_leader_id = l.id
           AND w.scientific_task_id = t.id
-          AND t.creator = u.id
-          AND w.user_id = u1.id
+          AND w.submit_date = #{map.date}
+          AND w.user_id = u.id
     </select>
 </mapper>

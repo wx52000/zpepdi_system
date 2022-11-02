@@ -109,10 +109,13 @@
         <result column="handlerId" property="handlerId"></result>
         <result column="number" property="number"></result>
         <result column="name" property="name"></result>
+        <result column="submit_date" property="submit_date"></result>
+        <result column="creator" property="creator"></result>
         <result column="handler" property="handler"></result>
         <result column="result" property="result"></result>
         <result column="type" property="type"></result>
-        <collection property="list" column="userId = handlerId, projectId = id"
+        <collection property="list" column="userId = handlerId, projectId = id,
+        submitDate = submit_date, creator = creator"
                     select="scientificTask"
                     javaType="ARRAYLIST"></collection>
     </resultMap>
@@ -517,7 +520,6 @@
                     workday_tec_distribute b
                 WHERE
                     c.checker = #{id}
-                  AND c.checker = b.`handler`
                   AND c.principal = b.`handler`
                   AND c.project_id = b.project_id
                   AND p.id = b.project_id
@@ -525,6 +527,7 @@
                   AND b.`check` = 0
                 GROUP BY
                     p.id,
+                    b.tec,
                     b.`handler` UNION ALL
                 SELECT
                     p.id
@@ -544,31 +547,361 @@
                 GROUP BY
                     p.id,
                     c.tec,
-                    c.principal
-                union all
+                    c.principal UNION ALL
                 SELECT
                     n.id
                 FROM
                     project_note n
                 WHERE
                     n.check_handler = #{id}
+                  AND `check` = 0 UNION ALL
+                SELECT
+                    project_id
+                FROM
+                    project_children
+                WHERE
+                    check_handler = #{id}
                   AND `check` = 0
-                union all
-                    SELECT
-                        project_id
-                    FROM
-                        project_children
-                    WHERE
-                        check_handler = #{id}
-                        AND `check` = 0
-                    GROUP BY project_id
+                GROUP BY
+                    project_id UNION ALL
+                SELECT DISTINCT
+                    t.id
+                FROM
+                    scientific_project p,
+                    scientific_term t
+                WHERE
+                    p.generalId = #{id}
+                  AND p.id = t.scientific_id
+                  AND t.`check` = 0
+                GROUP BY
+                    t.id UNION ALL
+                SELECT
+                    t.scientific_id
+                FROM
+                    scientific_task_workday w,
+                    scientific_task t
+                WHERE
+                    w.submit_checker = #{id}
+                  AND w.scientific_task_id = t.id
+                  AND w.submit = 1
+                GROUP BY
+                    t.scientific_id,
+                    t.creator
             ) AS tab
+    </select>
+    <select id="queryCountByType" resultType="java.util.Map">
+        SELECT
+            (
+                SELECT DISTINCT
+                    COUNT( p.id )
+                FROM
+                    project p,
+                    project_checker c,
+                    project_workday_distribute d
+                WHERE
+                    c.project_id = p.id
+                  AND c.checker = #{id}
+                  AND p.id = d.project_id
+                  AND d.`check` = 0
+            ) AS count0,
+            (
+                SELECT
+                    COUNT( p.id )
+                FROM
+                    project p,
+                    project_workday_add a,
+                    project_checker c
+                WHERE
+                    p.id = a.project_id
+                  AND a.`check` = 0
+                  AND c.project_id = p.id
+                  AND c.checker = #{id}
+            ) AS count1,
+            (
+                SELECT
+                    COUNT( id )
+                FROM
+                    (
+                        SELECT
+                            id
+                        FROM
+                            (
+                                SELECT
+                                    p.id,
+                                    v.tec,
+                                    w.`handler`,
+                                    w.submit_date
+                                FROM
+                                    project p,
+                                    volume v,
+                                    volume_workday w
+                                WHERE
+                                    p.generalId = #{id}
+                                  AND v.id = w.volume_id
+                                  AND v.project_id = p.id
+                                  AND w.submit = 1
+                                GROUP BY
+                                    v.tec,
+                                    w.`handler` UNION
+                                SELECT
+                                    p.id,
+                                    v.tec,
+                                    h.`handler`,
+                                    h.submit_date
+                                FROM
+                                    project p,
+                                    volume v,
+                                    volume_workday w,
+                                    volume_workday_high h
+                                WHERE
+                                    p.generalId = #{id}
+                                  AND v.id = w.volume_id
+                                  AND v.project_id = p.id
+                                  AND h.volume_id = w.volume_id
+                                  AND h.submit = 1
+                                GROUP BY
+                                    v.tec,
+                                    w.`handler` UNION
+                                SELECT
+                                    p.id,
+                                    t.tec,
+                                    t.`handler`,
+                                    t.submit_date
+                                FROM
+                                    project p,
+                                    project_task t
+                                WHERE
+                                    p.generalId = #{id}
+                                  AND t.project_id = p.id
+                                  AND submit = 1
+                                GROUP BY
+                                    t.tec,
+                                    t.`handler` UNION
+                                SELECT
+                                    p.id,
+                                    t.tec,
+                                    t.`handler`,
+                                    a.submit_date
+                                FROM
+                                    project p,
+                                    project_task t,
+                                    task_advance a
+                                WHERE
+                                    p.generalId = #{id}
+                                  AND t.project_id = p.id
+                                  AND a.task_id = t.id
+                                  AND a.submit = 1
+                                GROUP BY
+                                    t.tec,
+                                    t.`handler`
+                            ) AS t
+                        GROUP BY
+                            t.tec,
+                            t.`handler`,
+                            submit_date
+                    ) tab
+            ) AS count5,
+            (
+                SELECT
+                    COUNT( id )
+                FROM
+                    (
+                        SELECT
+                            id
+                        FROM
+                            (
+                                SELECT
+                                    p.id,
+                                    v.tec,
+                                    w.`handler`,
+                                    w.submit_date
+                                FROM
+                                    project p,
+                                    volume v,
+                                    volume_workday w
+                                WHERE
+                                    p.generalId = #{id}
+                                  AND v.id = w.volume_id
+                                  AND v.project_id = p.id
+                                  AND w.backOff = 1
+                                GROUP BY
+                                    v.tec,
+                                    w.`handler` UNION
+                                SELECT
+                                    p.id,
+                                    v.tec,
+                                    h.`handler`,
+                                    h.submit_date
+                                FROM
+                                    project p,
+                                    volume v,
+                                    volume_workday w,
+                                    volume_workday_high h
+                                WHERE
+                                    p.generalId = #{id}
+                                  AND v.id = w.volume_id
+                                  AND v.project_id = p.id
+                                  AND h.volume_id = w.volume_id
+                                  AND h.backOff = 1
+                                GROUP BY
+                                    v.tec,
+                                    w.`handler` UNION
+                                SELECT
+                                    p.id,
+                                    t.tec,
+                                    t.`handler`,
+                                    t.submit_date
+                                FROM
+                                    project p,
+                                    project_task t
+                                WHERE
+                                    p.generalId = #{id}
+                                  AND t.project_id = p.id
+                                  AND t.backOff = 1
+                                GROUP BY
+                                    t.tec,
+                                    t.`handler` UNION
+                                SELECT
+                                    p.id,
+                                    t.tec,
+                                    t.`handler`,
+                                    a.submit_date
+                                FROM
+                                    project p,
+                                    project_task t,
+                                    task_advance a
+                                WHERE
+                                    p.generalId = #{id}
+                                  AND t.project_id = p.id
+                                  AND a.task_id = t.id
+                                  AND a.backOff = 1
+                                GROUP BY
+                                    t.tec,
+                                    t.`handler`
+                            ) AS t
+                        GROUP BY
+                            t.tec,
+                            t.`handler`,
+                            submit_date
+                    ) tab
+            ) AS count6,
+            (
+                SELECT
+                    COUNT( id )
+                FROM
+                    (
+                        SELECT
+                            p.id
+                        FROM
+                            project_tec_checker c,
+                            project p,
+                            workday_tec_distribute b
+                        WHERE
+                            c.checker = #{id}
+                          AND c.principal = b.`handler`
+                          AND c.project_id = b.project_id
+                          AND p.id = b.project_id
+                          AND b.tec = c.tec
+                          AND b.`check` = 0
+                        GROUP BY
+                            p.id,
+                            b.tec,
+                            b.`handler`
+                    ) tab
+            ) AS count3,
+            (
+                SELECT
+                    COUNT( id )
+                FROM
+                    (
+                        SELECT
+                            p.id
+                        FROM
+                            project p,
+                            project_tec_checker c,
+                            volume v
+                        WHERE
+                            c.checker = #{id}
+                          AND p.id = c.project_id
+                          AND c.tec = v.tec
+                          AND v.project_id = p.id
+                          AND (
+                                EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
+                                OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
+                            )
+                        GROUP BY
+                            p.id,
+                            c.tec,
+                            c.principal
+                    ) AS tab
+            ) count4,
+            (
+                SELECT
+                    COUNT( id )
+                FROM
+                    (
+                        SELECT
+                            project_id AS id
+                        FROM
+                            project_note n
+                        WHERE
+                            n.check_handler = #{id}
+                          AND `check` = 0 UNION ALL
+                        SELECT
+                            id
+                        FROM
+                            project_children
+                        WHERE
+                            check_handler = #{id}
+                          AND `check` = 0
+                        GROUP BY
+                            project_id
+                    ) AS tab
+            ) AS count7,
+            (
+                SELECT DISTINCT
+                    COUNT( t.id )
+                FROM
+                    scientific_project p,
+                    scientific_term t
+                WHERE
+                    p.generalId = #{id}
+                  AND p.id = t.scientific_id
+                  AND t.`check` = 0
+            ) AS count9,
+            (
+                SELECT
+                    COUNT( id )
+                FROM
+                    (
+                        SELECT
+                            t.scientific_id AS id
+                        FROM
+                            scientific_task_workday w,
+                            scientific_task t
+                        WHERE
+                            w.submit_checker = #{id}
+                          AND w.scientific_task_id = t.id
+                          AND w.submit = 1
+                        GROUP BY
+                            t.scientific_id,
+                            t.creator
+                    ) tab
+            ) AS count10
     </select>
     <select id="queryByAdmin" resultMap="queryByAdminList">
       select 0 as type, p.id as id,
-             p.number,p.`name`,u.name, d.handler as handlerId,  false  as result
+             p.number,p.`name`,
+             d.manage,
+             d.backup,
+             d.tec,
+             w.num as workday,
+             u.name as handler,
+             d.handler as handlerId,
+             false  as result
       from
-          project p,
+          project p left  join
+            project_workday w on p.id = w.project_id,
            project_checker c,
           project_workday_distribute d,
            `user` u
@@ -579,26 +912,28 @@
     and u.id = d.handler
   </select>
     <select id="queryByAdminList" resultType="java.util.Map">
-        select id, "管理" as tec, manage as workday, 0 as type
-        from project_workday_distribute
-        where project_id = #{id}
-        union
-        select id, "卷册" as tec, tec as workday, 0 as type
-        from project_workday_distribute
-        where  project_id = #{id}
-        union
-        select id, "备用" as tec, backup as workday, 0 as type
-        from project_workday_distribute
-        where  project_id = #{id}
-        union
         select id, volume_tec as tec, amount as workday, 1 as type
         from workday_tec
         where  project_id = #{id}
     </select>
       <select id="queryByAdmin1" resultMap="queryByAdmin1List">
-        select 1 as type,p.id, a.id  as tid, p.number, p.name, a.handler as handlerId, u.name as handler, false  as result
+        select 1 as type,
+               p.id,
+               a.id  as tid,
+               p.number,
+               p.name,
+               a.num as workday,
+               a.date,
+               da.manage,
+               da.backup,
+               da.tec,
+               a.reason,
+               a.handler as handlerId,
+               u.name as handler,
+               false  as result
         from  project p,
-            project_workday_add a,
+            project_workday_add a
+             left join project_workday_distribute_add da on a.id = da.add_id,
             project_checker c,
              `user` u
         where p.id = a.project_id
@@ -606,24 +941,9 @@
           and c.project_id = p.id
           and c.checker = #{id}
             and u.id = a.handler
+         and a.num > 0
     </select>
     <select id="queryByAdmin1List" resultType="java.util.Map">
-        select id, "管理" as tec, manage as workday, 0 as type
-        from project_workday_distribute_add
-        where add_id = #{id}
-        union
-        select id, "卷册" as tec, tec as workday, 0 as type
-        from project_workday_distribute_add
-        where  add_id = #{id}
-        union
-        select id, "备用" as tec, backup as workday, 0 as type
-        from project_workday_distribute_add
-        where  add_id = #{id}
-        union
-        select id, "原因" as tec, reason as workday, 0 as type
-        from project_workday_add
-        where  id = #{id}
-        union
         select id, volume_tec as tec, amount as workday, 1 as type
         from workday_tec_add
         where  add_id = #{id}
@@ -763,15 +1083,17 @@
             v.name,
             w.workday,
             w.id,
-            w.workday * IFNULL(r.principal,t.principal) AS principal,
-            w.workday * IFNULL(r.designer,t.designer) AS designer,
-            w.workday * IFNULL(r.checker,t.checker) AS checker,
-            w.workday * IFNULL(r.headman,t.headman) AS headman
+            v.designer,
+            v.checker,
+            v.principal,
+            v.headman,
+            w.designer_workday,
+            w.checker_workday,
+            w.principal_workday,
+            w.headman_workday
         FROM
             volume_workday w
                 LEFT JOIN volume v ON v.id = w.volume_id
-                LEFT JOIN volume_ratio r ON w.volume_id = r.volume_id
-                LEFT JOIN tec_ratio t ON t.tec = v.tec
         WHERE
             v.project_id = #{id}
           AND v.tec = #{tec}
@@ -783,24 +1105,6 @@
             AND w.`check` = 2
         </if>
         group by v.id
-        union all
-        select distinct
-            1  as  type, v.id as task_id, v.number, v.name, (ifnull(w.principal,0) +  ifnull(w.checker,0)
-                + ifnull(w.designer,0) + ifnull(w.headman,0))as workday,w.id,
-            w.principal as principal, w.designer as designer, w.checker as checker, w.headman as headman
-        from
-            volume v,
-            volume_ratio w
-        where v.project_id = #{id}
-          and v.tec = #{tec}
-          and w.handler = #{handlerId}
-          and v.id = w.volume_id
-        <if test="check == 0">
-            AND w.`check` in (0 , 2)
-        </if>
-        <if test="check == 2">
-            AND w.`check` = 2
-        </if>
     </select>
     <select id="resultByGeneral" resultMap="queryByAdminList">
         select 0 as type, p.id as id,
@@ -1035,10 +1339,10 @@
         vu.principal as principalId,
         vu.headman as headmanId,
         w.workday,
-        w.workday * ifnull( r.designer, t.designer ) AS designerWorkday,
-        w.workday * ifnull( r.checker, t.checker ) AS checkerWorkday,
-        w.workday * ifnull( r.principal, t.principal ) AS principalWorkday,
-        w.workday * ifnull( r.headman, t.headman ) AS headmanWorkday,
+        w.designer_workday AS designerWorkday,
+        w.checker_workday AS checkerWorkday,
+        w.principal_workday AS principalWorkday,
+        w.headman_workday AS headmanWorkday,
         w.type AS type,
         w.submit,
         #{submitDate} as `date`,
@@ -1046,10 +1350,7 @@
         0 as advance
         FROM
         volume v
-        LEFT JOIN volume_user vu on v.id = vu.volume_id
-        LEFT JOIN tec_ratio t ON v.tec = t.tec
-        AND t.project_id = v.project_id
-        LEFT JOIN volume_ratio r ON r.volume_id = v.id,
+        LEFT JOIN volume_user vu on v.id = vu.volume_id,
         volume_workday w
         WHERE
         v.id = w.volume_id
@@ -1175,14 +1476,32 @@
         and t.principal = #{handlerId}
     </select>
     <select id="queryLog" resultMap="checkLog">
-        select l.id, p.number, p.name, l.type, l.tec, l.workday, l.manage, l.volume, l.backup,
-               l.check, l.designer_ratio, l.principal_ratio, l.headman_ratio, l.checker_ratio, l.check, u.name as handler
-        from project p ,
-            check_log_project l left join
-            `user` u on u.id = l.submit_handler
-        where  p.id = l.project_id
-          and l.handler = #{id}
-        and DATE_FORMAT(l.handler_time,'%Y-%m') = #{date}
+        SELECT
+            l.id,
+            p.number,
+            p.`name`,
+            l.type,
+            l.tec,
+            l.workday,
+            l.manage,
+            l.volume,
+            l.`backup`,
+            l.`check`,
+            l.designer_ratio,
+            l.principal_ratio,
+            l.headman_ratio,
+            l.checker_ratio,
+            l.`check`,
+            u.`name` AS `handler`
+        FROM
+            project p,
+            check_log_project l
+                LEFT JOIN `user` u ON u.id = l.submit_handler
+        WHERE
+            p.id = l.project_id
+          AND l.`handler` = #{id}
+        ORDER BY
+            handler_time
     </select>
     <select id="queryLogList" resultType="java.util.Map">
     <choose>
@@ -1377,10 +1696,10 @@
             vu.principal as principalId,
             vu.headman as headmanId,
             w.workday,
-            w.workday * ifnull( r.designer, t.designer ) AS designerWorkday,
-            w.workday * ifnull( r.checker, t.checker ) AS checkerWorkday,
-            w.workday * ifnull( r.principal, t.principal ) AS principalWorkday,
-            w.workday * ifnull( r.headman, t.headman ) AS headmanWorkday,
+            w.designer_workday AS designerWorkday,
+            w.checker_workday AS checkerWorkday,
+            w.principal_workday AS principalWorkday,
+            w.headman_workday AS headmanWorkday,
             w.type AS type,
             w.submit,
             #{submitDate} as `date`,
@@ -1388,10 +1707,7 @@
             0 as advance
         FROM
             volume v
-                LEFT JOIN volume_user vu on v.id = vu.volume_id
-                LEFT JOIN tec_ratio t ON v.tec = t.tec
-                AND t.project_id = v.project_id
-                LEFT JOIN volume_ratio r ON r.volume_id = v.id,
+                LEFT JOIN volume_user vu on v.id = vu.volume_id,
             volume_workday w
 
         WHERE
@@ -1542,7 +1858,13 @@
                 n.spider
                 WHEN 1 THEN n.spider_ratio ELSE "抓取失败" END as netRatio,
             p.type AS typeCom,
-            n.type AS typeNote
+            n.type AS typeNote,
+            case n.type
+                when 0 then "发电有产值"
+                when 1 then "发电无产值"
+                when 2 then "外部门无产值"
+                when 3 then "外部有产值"
+                else  "项目申请" end as typeName
         FROM
             project_note n,
             project p
@@ -1560,7 +1882,8 @@
             p.number,
             p.general AS `handler`,
             p.id as projectId,
-            #{id} as userId
+            #{id} as userId,
+            "外部门有产值" as typeName
         FROM
             project p
         WHERE
@@ -1603,27 +1926,30 @@
           AND `check` = 0
     </select>
     <select id="scientificGeneral" resultMap="scientificTerm">
-        SELECT
+        SELECT DISTINCT
             t.id,
-            u.`name` AS handler,
+            p.name as pName,
+            p.number as pNumber,
+            u.`name` AS `handler`,
             t.`name`,
             t.create_date,
             t.plan_workday,
-            ifnull(t.workday,t.plan_workday) as workday,
+            t.plan_complete_date,
+            ifnull( t.workday, t.plan_workday ) AS workday,
             FALSE AS result,
-            9 as `type`
+            9 AS `type`
         FROM
             `user` u,
             scientific_project p,
-            scientific_term t
-                LEFT JOIN scientific_term_files f ON t.id = f.scientific_term_id,
+            scientific_term t,
             scientific_leader l
         WHERE
             p.generalId = #{id}
           AND p.id = t.scientific_id
-          and t.check = 0
+          AND t.`check` = 0
           AND t.scientific_leader_id = l.id
           AND l.leader = u.id
+        GROUP BY t.id
     </select>
     <select id="scientificFiles" resultType="java.util.Map">
         SELECT
@@ -1643,9 +1969,11 @@
     <select id="scientificHeadman" resultMap="scientificTask">
         SELECT
             p.id,
-            u.id as handlerId,
+            #{id} as handlerId,
             p.number,
             p.`name`,
+            w.submit_date,
+            t.creator as creator,
             u.`name` AS `handler`,
             FALSE AS result,
             10 as `type`
@@ -1655,14 +1983,15 @@
             scientific_project p,
             `user` u
         WHERE
-            w.submit_checker = 737
+            w.submit_checker = #{id}
           AND w.scientific_task_id = t.id
           and w.submit = 1
           AND p.id = t.scientific_id
           AND u.id = t.creator
         GROUP BY
             p.id,
-            u.id
+            u.id,
+            w.submit_date
     </select>
     <select id="scientificTask" resultType="java.util.Map">
         SELECT
@@ -1680,6 +2009,9 @@
           AND w.scientific_task_id = t.id
           AND w.submit = 1
           AND u.id = w.user_id
+          and w.submit_date = #{submitDate}
           AND t.scientific_id = #{projectId}
+          and t.creator = #{creator}
     </select>
+
 </mapper>

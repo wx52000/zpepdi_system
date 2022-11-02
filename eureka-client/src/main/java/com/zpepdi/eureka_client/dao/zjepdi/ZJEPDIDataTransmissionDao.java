@@ -8,7 +8,9 @@ import java.util.Map;
 @Repository
 public interface ZJEPDIDataTransmissionDao {
 
-    List<Map<String,Object>> queryFromZJEPDI(String name);
+    List<Map<String,Object>> queryFromZJEPDI(String number);
 
     List<Map<String,Object>> queryIncomeInformation();
+
+    List<Map<String,Object>> queryCheckerList(String processInstanceId);
 }

@@ -31,4 +31,5 @@ public class ScientificController {
     public Result addScientific(@UserId Integer userId, @RequestBody Map<String, Object> map) {
         return scientificService.addScientific(userId,map);
     }
+
 }

@@ -22,7 +22,6 @@
         from technology
         where id = #{id}
     </delete>
-
     <select id="query" resultType="com.zpepdi.eureka_client.entity.Technology">
         select *
         from technology

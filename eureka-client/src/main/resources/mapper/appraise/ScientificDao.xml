@@ -30,6 +30,7 @@
         p.number,
         p.`name`,
         p.general,
+        p.workday,
         IF
         ( p.generalId = #{userId}, TRUE, FALSE ) AS generalRole,
         IF

@@ -6,7 +6,7 @@
         SELECT
         id,
         project_id,
-        (volume_workday + advance_workday + task_workday + `manage` + ifnull( deduct, 0 ))* ${ratio} AS workday,
+        (volume_workday + advance_workday + task_workday + `manage` + ifnull( deduct, 0 ))* 0.1 AS workday,
         #{scientific_date} as `date`
         FROM
         (
@@ -396,7 +396,7 @@
         where d.id = p.did
     </select>
     <select id="queryProduce" resultType="java.util.Map">
-        select u.username, u.name, sum(workday) as workday
+        select u.username as LoginId, u.name, sum(workday) as workday
         from scientific_system_data s,
             `user` u
         where u.id = s.user_id

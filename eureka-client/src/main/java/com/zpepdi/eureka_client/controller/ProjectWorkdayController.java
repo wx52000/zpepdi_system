@@ -36,6 +36,11 @@ public class ProjectWorkdayController {
     return proWorkdayService.queryProjectWorkday(id);
   }
 
+  @RequestMapping("queryLimitAndAddSum")
+  public Result queryLimitAndAddSum(@RequestHeader Integer id){
+    return proWorkdayService.queryLimitAndAddSum(id);
+  }
+
   @RequestMapping("queryProjectSumWorkday")
   public Result queryProjectSumWorkday(@RequestHeader Integer id){
     return proWorkdayService.queryProjectSumWorkday(id);

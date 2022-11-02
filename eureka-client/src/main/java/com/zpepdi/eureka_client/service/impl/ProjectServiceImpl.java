@@ -71,6 +71,7 @@ public class ProjectServiceImpl implements ProjectService {
             Map<String,Object> map = new HashMap<>();
             map.put("project_id",project.getId());
             map.put("num",project.getWorkday());
+            map.put("limit",project.getLimit());
             projectWorkDayDao.setProWorkday(map);
         }
         return Result.ok();
@@ -101,7 +102,6 @@ public class ProjectServiceImpl implements ProjectService {
         String officeAbbr = map.get("abbreviate").toString();
         String type = map.get("type").toString();
         JSONObject handlerNote = JSON.parseObject(JSONObject.toJSONString(map.get("handlerNote")));
-        System.out.println(handlerNote);
         Date date = new Date();
         String YearMonth = DateUtils.dateToString(date,"yyyyMM");
         User user = userDao.queryById(id);
@@ -112,6 +112,7 @@ public class ProjectServiceImpl implements ProjectService {
             String scope = (map.get("scope").toString());
             map.put("scope",scope.substring(1,(scope.length()-1)));
         }
+//        判断是否是发电
         if (officeAbbr.equals("FD")){
             if (map.get("projectId") == null && projectDao.queryByNameAndNum(map)){
                 return Result.build(864,"该项目已建立");
@@ -373,7 +374,6 @@ public class ProjectServiceImpl implements ProjectService {
         if (map1.get("mold").toString().equals("1")){
             map.put("check",1);
         }
-
         double used = Double.parseDouble(map1.get("backupUsed").toString());
         if (amount >= (manage + volume + used)) {
             projectDao.distributeTecWorkday(userId,map);
@@ -817,7 +817,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result setShowProject(Integer userId, Map<String,Object> map) {
-        projectDao.setShow(userId,map);
+        if (map.get("type").toString().equals("0")) {
+            projectDao.setShow(userId, map);
+        }else if (map.get("type").toString().equals("1")){
+            projectDao.setScientificShow(userId, map);
+        }
         return Result.ok();
     }
 

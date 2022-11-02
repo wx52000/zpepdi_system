@@ -24,9 +24,10 @@
             `proofreading_date`,
             `complete_time`,
             `formId`,
+            `wfInstId`,
             `actual_principal`,
             `tips`,
-                `alive`
+            `alive`
         )
         VALUES <foreach collection="list" item="item" separator=",">
         (#{id}, #{item.RollCode}, #{item.RollName}, #{item.RollID}, #{item.SpecialtyName},
@@ -34,7 +35,7 @@
          #{item.RollOwnerName}, #{item.checker}, #{item.headman}, #{item.PlanStartDate},
          #{item.FactStartDate}, #{item.PlanToPublishDate}, #{item.ToPublishDate},
          #{item.PlanDesignedDate}, #{item.FactDesignedDate}, #{item.MutualVerifyDate},
-         #{item.FactOutOfCollegeDate}, 85, #{item.principal},0, 1)
+         #{item.FactOutOfCollegeDate}, 85,#{item.wfInst}, #{item.principal},0, 1)
              </foreach>
          on duplicate key update
         `name` = values(`name`),
@@ -51,6 +52,7 @@
         `shot_date` = values(`shot_date`),
         `proofreading_date` = values(`proofreading_date`),
         `complete_time` = values(`complete_time`),
+        `wfInstId` = values(`wfInstId`),
         `actual_principal` = values(`actual_principal`),
         `tips` = 1,
         `alive` = 1
