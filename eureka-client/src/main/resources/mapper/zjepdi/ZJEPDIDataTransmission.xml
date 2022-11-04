@@ -216,4 +216,19 @@
           AND e.ActivityInstanceId = p.ActivityInstanceId
         ORDER BY ReceiveDateTime DESC
     </select>
+    <select id="queryProjectVal" resultType="java.util.Map">
+        SELECT
+            p.OrganizationId,
+            p.EstimateValue,
+            pssd.DeptValueRate,
+            p.EstimateValue * pssd.DeptValueRate as val
+        FROM
+            ZJEPDI.[dbo].ProjectPhaseEntity p,
+	MM_ProjValSingleSplitOfDept pssd
+
+        WHERE
+            pssd.ProjectPhaseID = p.OrganizationId
+          AND p.ProjectPhaseCode = #{number}
+          AND pssd.DeptID= 'BA1DEBFE-1E6B-4E37-A6A3-0F9FA592C7D3'
+    </select>
 </mapper>

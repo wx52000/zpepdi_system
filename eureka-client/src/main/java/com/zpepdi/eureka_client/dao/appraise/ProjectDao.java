@@ -23,6 +23,8 @@ public interface ProjectDao {
 
     void setOtherProject(@Param("id") Integer id,@Param("map")Map<String,Object> map, @Param("type")Integer type);
 
+    int valWorkdayrate (Map<String,Integer> map);
+
     void setProjectChildren(Map<String,Object> map);
 
     void setOtherProjectNote(Map<String,Object> map);

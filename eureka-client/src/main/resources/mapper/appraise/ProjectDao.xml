@@ -95,6 +95,15 @@
             <if test="note != null and note != ''">
                 `note`,
             </if>
+            <if test="spireMoney != null and spireMoney != ''">
+                `spire_money`,
+            </if>
+            <if test="spireRatio != null and spireRatio != ''">
+                `spire_ratio`,
+            </if>
+            <if test="calculation != null and calculation != ''">
+                `calculation`,
+            </if>
         </trim>
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -132,6 +141,15 @@
         <if test="note != null and note != ''">
             #{note},
         </if>
+            <if test="spireMoney != null and spireMoney != ''">
+                #{spireMoney},
+            </if>
+            <if test="spireRatio != null and spireRatio != ''">
+                #{spireRatio},
+            </if>
+            <if test="calculation != null and calculation != ''">
+                #{calculation},
+            </if>
         </trim>
         on duplicate key update
         project_id = values(`project_id`),
@@ -4131,6 +4149,14 @@
           AND p.id = #{id}
         GROUP BY
             u.id
+    </select>
+    <select id="valWorkdayrate" resultType="java.lang.Integer">
+        select
+        ratio
+        from value_project_ratio
+        where  type = #{type}
+        and stage = #{stage}
+        and grade = #{grade}
     </select>
 
 
