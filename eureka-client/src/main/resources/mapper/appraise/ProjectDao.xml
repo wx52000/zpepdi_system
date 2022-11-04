@@ -4127,6 +4127,7 @@
             u.id,
             u.`name`,
             u.username,
+            p.forzen,
             max(
                     IF
                         ( r.id IS NULL, FALSE, TRUE )) AS admin,
@@ -4150,11 +4151,11 @@
         GROUP BY
             u.id
     </select>
-    <select id="valWorkdayrate" resultType="java.lang.Integer">
+    <select id="valWorkdayRate" resultType="java.lang.Integer">
         select
         ratio
         from value_project_ratio
-        where  type = #{type}
+        where  `type` = #{type}
         and stage = #{stage}
         and grade = #{grade}
     </select>

@@ -179,9 +179,10 @@ public class ProjectServiceImpl implements ProjectService {
                         map.put("spireRatio",0);
                     }
                     Map<String,Integer> typeMap = new HashMap<>();
-                    typeMap.put("state",0);
+                    typeMap.put("stage",0);
                     typeMap.put("grade",0);
                     if(map.get("departmentId").toString().equals("2")){
+                        typeMap.put("type",0);
                         int indexKV = projectName.toUpperCase().indexOf("KV");
                         if (indexKV == -1){
                             indexKV = projectName.indexOf("千伏");
@@ -201,7 +202,7 @@ public class ProjectServiceImpl implements ProjectService {
                             int len = projectNumber.length();
                             String stageChar = projectNumber.substring(len-1).toUpperCase();
                             if ( !stageChar.equals("S")&& !stageChar.equals("Z")){
-                                typeMap.put("state",1);
+                                typeMap.put("stage",1);
                             }
                         }else {
                             return Result.build(3323,"卷册编号不能为空");
@@ -211,7 +212,8 @@ public class ProjectServiceImpl implements ProjectService {
                     }else {
                         typeMap.put("type",2);
                     }
-                    int valWorkdayRate = projectDao.valWorkdayrate(typeMap);
+                    System.out.println(typeMap);
+                    int valWorkdayRate = projectDao.valWorkdayRate(typeMap);
                     double calculation = Double.parseDouble(map.get("spireMoney").toString())/valWorkdayRate;
                     map.put("calculation",calculation);
                     projectDao.setProjectChildren(map);
