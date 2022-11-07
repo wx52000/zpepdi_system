@@ -1,0 +1,13 @@
+2022-11-05 00:00:00.435 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 00:00:01.874 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 02:00:01.281 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 04:00:02.117 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 06:00:01.291 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 08:00:01.404 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 10:00:01.366 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 12:00:02.214 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 14:00:01.438 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 16:00:01.609 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 18:00:01.544 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 20:00:01.815 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
+2022-11-05 22:00:01.552 [Druid-ConnectionPool-Create-1481610391] WARN  com.microsoft.sqlserver.jdbc.internals.TDS.Channel - TLSv1 was negotiated. Please update server and client to use TLSv1.2 at minimum.
