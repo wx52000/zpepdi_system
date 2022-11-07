@@ -4109,6 +4109,7 @@
             u.id,
             u.`name`,
             u.username,
+            p.frozen,
             max(
                     IF
                         ( r.id IS NULL, FALSE, TRUE )) AS admin,

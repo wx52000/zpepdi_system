@@ -53,22 +53,22 @@ public class ScheduledConfig implements SchedulingConfigurer {
     public ScientificSystemService scientificSystemService;
 
 
-//    @Scheduled(cron = "0 0 3 23 * ?")
-//    public void createScientificProduce(){
-//        scientificSystemService.createScientificProduce(DateUtils.getDateMonth());
-//    }
-//
-//    @Scheduled(cron = "0 0 0/2 * * ?")
-//    @Async("taskExecutor")
-////    @PostConstruct
-//    public void dataTransmission(){
-//        service.dataTransmissionService();
-//    }
-//
-//    @Scheduled(cron = "0 0 0 * * ?")
-//    public void queryIncomeInformation(){
-//        service.queryIncomeInformation();
-//    }
+    @Scheduled(cron = "0 0 3 23 * ?")
+    public void createScientificProduce(){
+        scientificSystemService.createScientificProduce(DateUtils.getDateMonth());
+    }
+
+    @Scheduled(cron = "0 0 0/2 * * ?")
+    @Async("taskExecutor")
+//    @PostConstruct
+    public void dataTransmission(){
+        service.dataTransmissionService();
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void queryIncomeInformation(){
+        service.queryIncomeInformation();
+    }
 
 
 
