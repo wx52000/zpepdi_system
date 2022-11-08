@@ -231,4 +231,14 @@
           AND p.ProjectPhaseCode = #{number}
           AND pssd.DeptID= 'BA1DEBFE-1E6B-4E37-A6A3-0F9FA592C7D3'
     </select>
+    <select id="queryTecList" resultType="java.util.Map">
+        SELECT
+            SpecialtyName,
+            ParentDeptName
+        FROM
+            [dbo].[SpecialtyOfProjectEntity]
+        WHERE
+            ProjectPhaseCode = '33-FC3033E19S'
+          AND ParentDeptName LIKE '发电%'
+    </select>
 </mapper>

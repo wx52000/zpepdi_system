@@ -125,15 +125,15 @@ public class ProjectServiceImpl implements ProjectService {
             if (type.equals("0")) {
                 map.put("typeNote",0);
 //                cmdMethod(map.get("number").toString(),"0");
-                Map<String,Object> spireMap = zjepdiDataTransmissionDao.queryProjectVal(map.get("number").toString());
-                map.put("spire",1);
-                if (spireMap != null && spireMap.size() > 0){
-                    map.put("spireMoney",spireMap.get("val"));
-                    map.put("spireRatio",spireMap.get("DeptValueRate"));
+                Map<String,Object> spiderMap = zjepdiDataTransmissionDao.queryProjectVal(map.get("number").toString());
+                if (spiderMap != null && spiderMap.size() > 0){
+                    map.put("spiderMoney",spiderMap.get("val"));
+                    map.put("spiderRatio",spiderMap.get("DeptValueRate"));
                 }else {
-                    map.put("spireMoney",0);
-                    map.put("spireRatio",0);
+                    map.put("spiderMoney",0);
+                    map.put("spiderRatio",0);
                 }
+                map.put("spider",1);
             }else {
                 if (map.get("projectId") == null) {
                     map.put("name", map.get("name").toString() + YearMonth);
@@ -169,14 +169,14 @@ public class ProjectServiceImpl implements ProjectService {
                         projectDao.setOtherProject(id, map, 2);
                     }
                     //从院网数据库抓取产值
-                    Map<String,Object> spireMap = zjepdiDataTransmissionDao.queryProjectVal(projectNumber);
-                    map.put("spire",1);
-                    if (spireMap != null && spireMap.size() > 0){
-                        map.put("spireMoney",spireMap.get("val"));
-                        map.put("spireRatio",spireMap.get("DeptValueRate"));
+                    Map<String,Object> spiderMap = zjepdiDataTransmissionDao.queryProjectVal(projectNumber);
+                    map.put("spider",1);
+                    if (spiderMap != null && spiderMap.size() > 0){
+                        map.put("spiderMoney",spiderMap.get("val"));
+                        map.put("spiderRatio",spiderMap.get("DeptValueRate"));
                     }else {
-                        map.put("spireMoney",0);
-                        map.put("spireRatio",0);
+                        map.put("spiderMoney",0);
+                        map.put("spiderRatio",0);
                     }
                     Map<String,Integer> typeMap = new HashMap<>();
                     typeMap.put("stage",0);
@@ -212,10 +212,19 @@ public class ProjectServiceImpl implements ProjectService {
                     }else {
                         typeMap.put("type",2);
                     }
-                    System.out.println(typeMap);
                     int valWorkdayRate = projectDao.valWorkdayRate(typeMap);
-                    double calculation = Double.parseDouble(map.get("spireMoney").toString())/valWorkdayRate;
+                    map.put("calculationRatio",valWorkdayRate);
+                    double calculation = Double.parseDouble(map.get("spiderMoney").toString())/valWorkdayRate;
                     map.put("calculation",calculation);
+                    List<Map<String,Object>> tecList = zjepdiDataTransmissionDao.queryTecList(projectNumber);
+                    if (tecList != null && tecList.size() > 0){
+                        if (map.get("tec").toString().equals("综合")) {
+                            map.put("thisCalculation", calculation);
+                        }else {
+                            map.put("thisCalculation", calculation/tecList.size());
+                        }
+                    }
+                    map.put("spider",1);
                     projectDao.setProjectChildren(map);
                 }else {
                     if (map.get("projectId") == null && projectDao.queryByNameAndNum(map)){

@@ -95,14 +95,20 @@
             <if test="note != null and note != ''">
                 `note`,
             </if>
-            <if test="spireMoney != null and spireMoney != ''">
-                `spire_money`,
+            <if test="spiderMoney != null and spiderMoney != ''">
+                `spider_money`,
             </if>
-            <if test="spireRatio != null and spireRatio != ''">
-                `spire_ratio`,
+            <if test="spiderRatio != null and spiderRatio != ''">
+                `spider_ratio`,
+            </if>
+            <if test="calculationRatio != null and calculationRatio != ''">
+                `calculation_ratio`,
             </if>
             <if test="calculation != null and calculation != ''">
                 `calculation`,
+            </if>
+            <if test="thisCalculation != null and thisCalculation != ''">
+                `this_calculation`,
             </if>
         </trim>
         values
@@ -141,15 +147,22 @@
         <if test="note != null and note != ''">
             #{note},
         </if>
-            <if test="spireMoney != null and spireMoney != ''">
-                #{spireMoney},
+            <if test="spiderMoney != null and spiderMoney != ''">
+                #{spiderMoney},
             </if>
-            <if test="spireRatio != null and spireRatio != ''">
-                #{spireRatio},
+            <if test="spiderRatio != null and spiderRatio != ''">
+                #{spiderRatio},
+            </if>
+            <if test="calculationRatio != null and calculationRatio != ''">
+                `calculation_ratio`,
             </if>
             <if test="calculation != null and calculation != ''">
                 #{calculation},
             </if>
+            <if test="thisCalculation != null and thisCalculation != ''">
+                #{thisCalculation},
+            </if>
+
         </trim>
         on duplicate key update
         project_id = values(`project_id`),
@@ -4127,7 +4140,7 @@
             u.id,
             u.`name`,
             u.username,
-            p.forzen,
+            p.frozen,
             max(
                     IF
                         ( r.id IS NULL, FALSE, TRUE )) AS admin,

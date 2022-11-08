@@ -16,4 +16,7 @@ public interface ZJEPDIDataTransmissionDao {
 
     Map<String,Object> queryProjectVal(String number);
 
+    List<Map<String,Object>> queryTecList(String number);
+
+
 }
