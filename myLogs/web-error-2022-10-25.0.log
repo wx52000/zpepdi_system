@@ -1,2 +1,0 @@
-2022-10-25 08:49:47.577 [Thread-76] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1666658987577, current=DOWN, previous=UP]
-2022-10-25 11:10:38.379 [Thread-43] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1666667438379, current=DOWN, previous=UP]
