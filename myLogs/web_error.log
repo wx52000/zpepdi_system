@@ -1290,3 +1290,5 @@ java.sql.SQLSyntaxErrorException: Unknown column 'this_calculation' in 'field li
 2022-11-08 15:25:05.740 [Thread-36] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1667892305740, current=DOWN, previous=UP]
 2022-11-08 15:25:38.209 [Thread-59] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1667892338209, current=DOWN, previous=UP]
 2022-11-08 15:38:52.785 [Thread-67] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1667893132785, current=DOWN, previous=UP]
+2022-11-08 16:04:43.114 [Thread-75] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1667894683114, current=DOWN, previous=UP]
+2022-11-08 16:05:40.858 [Thread-87] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1667894740858, current=DOWN, previous=UP]
