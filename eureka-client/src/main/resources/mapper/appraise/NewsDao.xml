@@ -1917,7 +1917,10 @@
                 WHEN 1 THEN spider_money ELSE "抓取失败" END as netMoney,
             CASE
                 spider
-                WHEN 1 THEN spider_ratio ELSE "抓取失败" END as netRatio
+                WHEN 1 THEN spider_ratio ELSE "抓取失败" END as netRatio,
+            this_calculation as workday,
+        calculation_ratio as calculationRatio,
+        calculation as calculation
         FROM
             project_children
         WHERE

@@ -261,15 +261,15 @@
       </choose>
   </foreach>
     on duplicate key update
+    `state` = values(`state`),
     workday = values(workday),
     designer_workday = values(designer_workday),
     checker_workday = values(checker_workday),
     principal_workday = values(principal_workday),
     headman_workday = values(headman_workday),
-    `state` = values(`state`),
-    `handler` = values(`handler`),
+    `check` = values(`check`),
     `time` = values(`time`),
-    `check` = values(`check`)
+    `handler` = values(`handler`)
   </update>
   <insert id="setBWorkdayByGeneral">
     insert  into project_workday_backup( project_id, `number`, `name`, dep, tec,  workday, `time`, `handler`, apply, `check`)

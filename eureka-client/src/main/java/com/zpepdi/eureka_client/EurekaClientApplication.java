@@ -21,7 +21,7 @@ import java.util.concurrent.Executor;
 @SpringBootApplication(scanBasePackages = {"com.zpepdi.eureka_client"})
 @ServletComponentScan(basePackages = "com.zpepdi.eureka_client.interceptor")
 //@MapperScan(basePackages = "com.zpepdi.eureka_client.dao")
-public class EurekaClientApplication {
+public class  EurekaClientApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(EurekaClientApplication.class, args);

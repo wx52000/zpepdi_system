@@ -13,4 +13,10 @@ public interface ZJEPDIDataTransmissionDao {
     List<Map<String,Object>> queryIncomeInformation();
 
     List<Map<String,Object>> queryCheckerList(String processInstanceId);
+
+    Map<String,Object> queryProjectVal(String number);
+
+    List<Map<String,Object>> queryTecList(String number);
+
+
 }

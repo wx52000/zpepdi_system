@@ -95,6 +95,21 @@
             <if test="note != null and note != ''">
                 `note`,
             </if>
+            <if test="spiderMoney != null and spiderMoney != ''">
+                `spider_money`,
+            </if>
+            <if test="spiderRatio != null and spiderRatio != ''">
+                `spider_ratio`,
+            </if>
+            <if test="calculationRatio != null and calculationRatio != ''">
+                `calculation_ratio`,
+            </if>
+            <if test="calculation != null and calculation != ''">
+                `calculation`,
+            </if>
+            <if test="thisCalculation != null and thisCalculation != ''">
+                `this_calculation`,
+            </if>
         </trim>
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -132,6 +147,22 @@
         <if test="note != null and note != ''">
             #{note},
         </if>
+            <if test="spiderMoney != null and spiderMoney != ''">
+                #{spiderMoney},
+            </if>
+            <if test="spiderRatio != null and spiderRatio != ''">
+                #{spiderRatio},
+            </if>
+            <if test="calculationRatio != null and calculationRatio != ''">
+                `calculation_ratio`,
+            </if>
+            <if test="calculation != null and calculation != ''">
+                #{calculation},
+            </if>
+            <if test="thisCalculation != null and thisCalculation != ''">
+                #{thisCalculation},
+            </if>
+
         </trim>
         on duplicate key update
         project_id = values(`project_id`),
@@ -4132,6 +4163,14 @@
           AND p.id = #{id}
         GROUP BY
             u.id
+    </select>
+    <select id="valWorkdayRate" resultType="java.lang.Integer">
+        select
+        ratio
+        from value_project_ratio
+        where  `type` = #{type}
+        and stage = #{stage}
+        and grade = #{grade}
     </select>
 
 
