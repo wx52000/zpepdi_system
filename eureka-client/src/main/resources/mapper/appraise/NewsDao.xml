@@ -2019,14 +2019,61 @@
     </select>
     <select id="adminQueryApply" resultMap="queryByAdminList">
         SELECT
+            7 AS `type`,
             p.id AS id,
             p.number,
             p.`name`,
-            d.manage,
-            d.`backup`,
-            d.tec,
-            w.num AS workday,
+            "项目" AS tec,
             u.`name` AS applicant,
+            n.application_time,
+            CASE
+                `check`
+                WHEN 1 THEN
+                    '审核通过'
+                WHEN 1 THEN
+                    '审核回退' ELSE '未知状态'
+                END AS `check`,
+            n.check_time
+        FROM
+            project p,
+            project_note n,
+            `user` u
+        WHERE
+            p.id = n.project_id
+          AND n.check_handler = #{id}
+          AND `check` > 0
+          AND n.applicant = u.id UNION
+        SELECT
+            8 AS `type`,
+            p.id AS id,
+            p.number,
+            p.`name`,
+            "项目" AS tec,
+            p.general AS applicant,
+            p.create_time AS application_time,
+            "审核通过" AS `check`,
+            p.create_time AS check_time
+        FROM
+            project p
+        WHERE
+            EXISTS (
+                    SELECT
+                        c.id
+                    FROM
+                        project_children c
+                    WHERE
+                        c.project_id = p.id
+                      AND c.`check` > 0
+                      AND c.check_handler = #{id}
+                ) UNION
+        SELECT
+            0 AS `type`,
+            p.id AS id,
+            p.number,
+            p.`name`,
+            "项目" AS tec,
+            u.`name` AS applicant,
+            d.time AS application_time,
             CASE
                 `check`
                 WHEN 1 THEN
@@ -2036,15 +2083,14 @@
                 END AS `check`,
             check_time
         FROM
-            project p
-                LEFT JOIN project_workday w ON p.id = w.project_id,
+            project p,
             project_workday_distribute d,
             `user` u
         WHERE
             p.id = d.project_id
           AND d.`check` > 0
           AND u.id = d.`handler`
-          AND d.check_handler = 737
+          AND d.check_handler = #{id}
     </select>
 
 </mapper>
