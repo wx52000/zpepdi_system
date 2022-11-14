@@ -2090,7 +2090,8 @@
             p.id = d.project_id
           AND d.`check` > 0
           AND u.id = d.`handler`
-          AND d.check_handler = #{id}
+          AND d.check_handler = 737
+        union
     </select>
 
 </mapper>
