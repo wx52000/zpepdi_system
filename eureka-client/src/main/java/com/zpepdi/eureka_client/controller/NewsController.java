@@ -55,4 +55,11 @@ public class NewsController {
         return newsService.check(id,list,check);
     }
 
+  @RequestMapping("querySelfCheck")
+  public Result querySelfCheck(@UserId Integer id){
+    return newsService.querySelfCheck(id);
+  }
+
+
+
 }

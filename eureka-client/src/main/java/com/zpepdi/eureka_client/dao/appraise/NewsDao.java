@@ -119,5 +119,9 @@ public interface NewsDao {
                                           @Param("projectId") Integer projectId,
                                           @Param("submitDate") String submitDate,
                                           @Param("creator") Integer creator);
+
+  List<Map<String,Object>> adminQueryApply(Integer userId);
+
+
 }
 

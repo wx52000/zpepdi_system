@@ -264,6 +264,7 @@
             set
                 <trim suffixOverrides=",">
                 `check` = #{check},
+                `check_time` = now(),
                 <if test="check == 2 and item.typeNote == 2">
                     check_other = 2
                 </if>
@@ -282,7 +283,7 @@
         <if test="item.type == 8">
             <foreach collection="item.list" item="i" separator=";">
             update project_children
-            set `check` = #{check}, `workday` = #{i.workday}
+            set `check` = #{check}, `workday` = #{i.workday},`check_time` = now()
             where id = #{i.id}
             </foreach>
         </if>
@@ -2015,6 +2016,35 @@
           and w.submit_date = #{submitDate}
           AND t.scientific_id = #{projectId}
           and t.creator = #{creator}
+    </select>
+    <select id="adminQueryApply" resultMap="queryByAdminList">
+        SELECT
+            p.id AS id,
+            p.number,
+            p.`name`,
+            d.manage,
+            d.`backup`,
+            d.tec,
+            w.num AS workday,
+            u.`name` AS applicant,
+            CASE
+                `check`
+                WHEN 1 THEN
+                    '审核通过'
+                WHEN 1 THEN
+                    '审核回退' ELSE '未知状态'
+                END AS `check`,
+            check_time
+        FROM
+            project p
+                LEFT JOIN project_workday w ON p.id = w.project_id,
+            project_workday_distribute d,
+            `user` u
+        WHERE
+            p.id = d.project_id
+          AND d.`check` > 0
+          AND u.id = d.`handler`
+          AND d.check_handler = 737
     </select>
 
 </mapper>

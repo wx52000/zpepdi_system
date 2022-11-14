@@ -18,4 +18,6 @@ public interface NewsService {
   Result queryLog(Integer id, Integer index);
 
   Result check(Integer id, List<Map<String,Object>> list, Integer check);
+
+  Result querySelfCheck(Integer id);
 }

@@ -183,7 +183,7 @@
     <insert id="setOtherProjectNote" parameterType="map" >
         insert into project_note
             <trim prefix="(" suffix=")" suffixOverrides=",">
-                `project_id` , `check`, `check_handler`, `office_id`, `check_other`, `type`,
+                `project_id` , `check`, `check_handler`, `office_id`, `check_other`, `type`, applicant, application_time,
             <if test="stage != null and stage != ''">
                 `stage`,
             </if>
@@ -220,7 +220,7 @@
         </trim>
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
-                #{projectId} , 0 , #{handler}, #{departmentId}, #{checkOther},#{typeNote},
+                #{projectId} , 0 , #{handler}, #{departmentId}, #{checkOther},#{typeNote},#{generalId}, now(),
             <if test="stage != null and stage != ''">
                 #{stage},
             </if>

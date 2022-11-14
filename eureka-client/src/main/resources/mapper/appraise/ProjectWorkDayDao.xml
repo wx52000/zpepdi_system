@@ -1049,5 +1049,22 @@
            WHERE w.project_id = #{id}
          ) as tab
   </select>
+  <select id="queryBackupList" resultType="java.util.Map">
+    SELECT
+      b.number,
+      b.`name`,
+      b.dep,
+      b.tec,
+      b.workday,
+      u.`name` as handler,
+      b.time
+    FROM
+      project_workday_backup b,
+      `user` u
+    WHERE
+      b.`handler` = u.id
+      AND b.project_id = #{id}
+    order by `time` desc
+  </select>
 
 </mapper>

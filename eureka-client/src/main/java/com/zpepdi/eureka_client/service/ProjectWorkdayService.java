@@ -61,4 +61,6 @@ public interface ProjectWorkdayService {
   List<Map<String,String>> everyone(Map map);
 
   List<Map<String,Object>> personal(Integer id);
+
+  Result queryBackupList(Integer id);
 }

@@ -214,4 +214,8 @@ public class NewsServiceImpl implements NewsService {
     return Result.ok();
   }
 
+  @Override
+  public Result querySelfCheck(Integer id) {
+    return Result.ok(newsDao.adminQueryApply(id));
+  }
 }

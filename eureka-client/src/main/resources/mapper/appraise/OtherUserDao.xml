@@ -5,6 +5,7 @@
             update project_note
             set <trim  suffixOverrides=",">
                 `check_other` = #{check},
+                `check_other_time` = now(),
                 <if test="check == 2">
                     `check` = 2
                 </if>
