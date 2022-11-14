@@ -102,4 +102,9 @@ public class ProjectWorkdayController {
   public Result queryNewWorkdayByAddId(@UserId Integer userId,@RequestHeader("id")Integer id){
     return proWorkdayService.queryNewWorkdayByAddId(id);
   }
+
+  @RequestMapping("queryBackupList")
+  public Result queryBackupList(@UserId Integer userId,@RequestHeader("id")Integer id){
+    return proWorkdayService.queryBackupList(id);
+  }
 }

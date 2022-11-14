@@ -19,9 +19,9 @@ public interface NewsDao {
   List<Map<String,Object>> queryByAdminList(Integer id);
   //项目额外工时申请
   List<Map<String,Object>> queryByAdmin1(Integer id);
-
+//project_note 类型数据
   List<Map<String,Object>> queryByAdmin2(Integer id);
-
+// project_children
   List<Map<String,Object>> queryByAdmin3(Integer id);
 
   List<Map<String,Object>> queryChildren(@Param("userId") Integer userId,@Param("projectId") Integer projectId);
@@ -119,5 +119,9 @@ public interface NewsDao {
                                           @Param("projectId") Integer projectId,
                                           @Param("submitDate") String submitDate,
                                           @Param("creator") Integer creator);
+
+  List<Map<String,Object>> adminQueryApply(Integer userId);
+
+
 }
 

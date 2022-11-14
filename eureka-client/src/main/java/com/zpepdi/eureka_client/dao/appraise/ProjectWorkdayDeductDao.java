@@ -18,4 +18,5 @@ public interface ProjectWorkdayDeductDao {
     Map<String,Object> queryLogById(Integer id);
 
     List<Map<String,Object>> queryLogByProject(Integer id);
+
 }

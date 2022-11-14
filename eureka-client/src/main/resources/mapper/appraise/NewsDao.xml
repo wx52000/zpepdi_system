@@ -264,6 +264,7 @@
             set
                 <trim suffixOverrides=",">
                 `check` = #{check},
+                `check_time` = now(),
                 <if test="check == 2 and item.typeNote == 2">
                     check_other = 2
                 </if>
@@ -282,7 +283,7 @@
         <if test="item.type == 8">
             <foreach collection="item.list" item="i" separator=";">
             update project_children
-            set `check` = #{check}, `workday` = #{i.workday}
+            set `check` = #{check}, `workday` = #{i.workday},`check_time` = now()
             where id = #{i.id}
             </foreach>
         </if>
@@ -1917,7 +1918,10 @@
                 WHEN 1 THEN spider_money ELSE "抓取失败" END as netMoney,
             CASE
                 spider
-                WHEN 1 THEN spider_ratio ELSE "抓取失败" END as netRatio
+                WHEN 1 THEN spider_ratio ELSE "抓取失败" END as netRatio,
+            this_calculation as workday,
+        calculation_ratio as calculationRatio,
+        calculation as calculation
         FROM
             project_children
         WHERE
@@ -2012,6 +2016,82 @@
           and w.submit_date = #{submitDate}
           AND t.scientific_id = #{projectId}
           and t.creator = #{creator}
+    </select>
+    <select id="adminQueryApply" resultMap="queryByAdminList">
+        SELECT
+            7 AS `type`,
+            p.id AS id,
+            p.number,
+            p.`name`,
+            "项目" AS tec,
+            u.`name` AS applicant,
+            n.application_time,
+            CASE
+                `check`
+                WHEN 1 THEN
+                    '审核通过'
+                WHEN 1 THEN
+                    '审核回退' ELSE '未知状态'
+                END AS `check`,
+            n.check_time
+        FROM
+            project p,
+            project_note n,
+            `user` u
+        WHERE
+            p.id = n.project_id
+          AND n.check_handler = #{id}
+          AND `check` > 0
+          AND n.applicant = u.id UNION
+        SELECT
+            8 AS `type`,
+            p.id AS id,
+            p.number,
+            p.`name`,
+            "项目" AS tec,
+            p.general AS applicant,
+            p.create_time AS application_time,
+            "审核通过" AS `check`,
+            p.create_time AS check_time
+        FROM
+            project p
+        WHERE
+            EXISTS (
+                    SELECT
+                        c.id
+                    FROM
+                        project_children c
+                    WHERE
+                        c.project_id = p.id
+                      AND c.`check` > 0
+                      AND c.check_handler = #{id}
+                ) UNION
+        SELECT
+            0 AS `type`,
+            p.id AS id,
+            p.number,
+            p.`name`,
+            "项目" AS tec,
+            u.`name` AS applicant,
+            d.time AS application_time,
+            CASE
+                `check`
+                WHEN 1 THEN
+                    '审核通过'
+                WHEN 1 THEN
+                    '审核回退' ELSE '未知状态'
+                END AS `check`,
+            check_time
+        FROM
+            project p,
+            project_workday_distribute d,
+            `user` u
+        WHERE
+            p.id = d.project_id
+          AND d.`check` > 0
+          AND u.id = d.`handler`
+          AND d.check_handler = 737
+        union
     </select>
 
 </mapper>

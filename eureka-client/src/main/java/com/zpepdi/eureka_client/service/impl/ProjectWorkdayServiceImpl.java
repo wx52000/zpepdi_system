@@ -268,4 +268,9 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
 //    User user = userDao.queryById(id);
     return userDao.workdayLogById(id,date);
   }
+
+  @Override
+  public Result queryBackupList(Integer id) {
+    return Result.ok(proWorkdayDao.queryBackupList(id));
+  }
 }

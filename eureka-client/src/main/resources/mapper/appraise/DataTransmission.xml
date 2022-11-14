@@ -160,12 +160,14 @@
                             "'待送业主','已完成','院交出')
     </update>
     <update id="reSetUser">
-        INSERT INTO volume_user ( volume_id, designer, checker, principal, headman ) SELECT
-                                                                                         v.id,
-                                                                                         IFNULL( u1.`id`, vu.designer ) AS designer,
-                                                                                         IFNULL( u2.`id`, vu.checker ) AS checker,
-                                                                                         IFNULL( u3.`id`, vu.principal ) AS principal,
-                                                                                         IFNULL( u4.id, vu.headman ) AS headman
+        INSERT INTO volume_user (project_id, volume_id, designer, checker, principal, headman )
+        SELECT
+            v.project_id,
+            v.id,
+            IFNULL( u1.`id`, vu.designer ) AS designer,
+            IFNULL( u2.`id`, vu.checker ) AS checker,
+            IFNULL( u3.`id`, vu.principal  ) AS principal,
+            IFNULL( u4.id, vu.headman ) AS headman
         FROM
             volume v
                 LEFT JOIN volume_user vu ON v.id = vu.volume_id
@@ -175,20 +177,12 @@
                 LEFT JOIN ( SELECT id, `name` FROM `user` GROUP BY `name` HAVING COUNT(*) = 1 ) AS u4 ON u4.`name` = v.headman
         GROUP BY
             v.id
-            ON DUPLICATE KEY UPDATE designer =
-                             VALUES
-                                 ( designer ),
-                                 checker =
-                             VALUES
-                                 ( checker ),
-                                 principal =
-                             VALUES
-                                 ( principal ),
-                                 headman =
-                             VALUES
-                                 (
-                                 headman
-                                 )
+            ON DUPLICATE KEY UPDATE
+                                 project_id = VALUES(project_id),
+                                 designer = VALUES( designer ),
+                                 checker = VALUES( checker ),
+                                 principal = VALUES( principal ),
+                                 headman = VALUES(headman )
     </update>
     <update id="setIncomeState">
         update income_information

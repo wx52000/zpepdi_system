@@ -6,10 +6,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.eureka_client.dao.appraise.*;
+import com.zpepdi.eureka_client.dao.zjepdi.ZJEPDIDataTransmissionDao;
 import com.zpepdi.eureka_client.excel.PlanDateListener;
 import com.zpepdi.eureka_client.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.zpepdi.eureka_client.entity.*;
@@ -33,6 +35,8 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectTecDao projectTecDao;
     private TechnologyDao technologyDao;
     private ProjectWorkdayDao projectWorkDayDao;
+    @Autowired
+    private ZJEPDIDataTransmissionDao zjepdiDataTransmissionDao;
     @Autowired
     private RedisTemplate<String,Object> redisTemplate;
     @Autowired
@@ -120,7 +124,16 @@ public class ProjectServiceImpl implements ProjectService {
             map.put("checkOther", 1);
             if (type.equals("0")) {
                 map.put("typeNote",0);
-                cmdMethod(map.get("number").toString(),"0");
+//                cmdMethod(map.get("number").toString(),"0");
+                Map<String,Object> spiderMap = zjepdiDataTransmissionDao.queryProjectVal(map.get("number").toString());
+                if (spiderMap != null && spiderMap.size() > 0){
+                    map.put("spiderMoney",spiderMap.get("val"));
+                    map.put("spiderRatio",spiderMap.get("DeptValueRate"));
+                }else {
+                    map.put("spiderMoney",0);
+                    map.put("spiderRatio",0);
+                }
+                map.put("spider",1);
             }else {
                 if (map.get("projectId") == null) {
                     map.put("name", map.get("name").toString() + YearMonth);
@@ -143,8 +156,10 @@ public class ProjectServiceImpl implements ProjectService {
                     } else {
                         projectId = projectDao.queryByNumber(id, number);
                     }
-                    map.put("cNumber", map.get("number").toString());
-                    map.put("cName", map.get("name").toString());
+                    String projectNumber = map.get("number").toString();
+                    String projectName = map.get("name").toString();
+                    map.put("cNumber", projectNumber);
+                    map.put("cName", projectName);
                     if (projectId != null) {
                         map.put("projectId", projectId);
                     } else {
@@ -153,8 +168,64 @@ public class ProjectServiceImpl implements ProjectService {
                         map.put("name", name);
                         projectDao.setOtherProject(id, map, 2);
                     }
+                    //从院网数据库抓取产值
+                    Map<String,Object> spiderMap = zjepdiDataTransmissionDao.queryProjectVal(projectNumber);
+                    map.put("spider",1);
+                    if (spiderMap != null && spiderMap.size() > 0){
+                        map.put("spiderMoney",spiderMap.get("val"));
+                        map.put("spiderRatio",spiderMap.get("DeptValueRate"));
+                    }else {
+                        map.put("spiderMoney",0);
+                        map.put("spiderRatio",0);
+                    }
+                    Map<String,Integer> typeMap = new HashMap<>();
+                    typeMap.put("stage",0);
+                    typeMap.put("grade",0);
+                    if(map.get("departmentId").toString().equals("2")){
+                        typeMap.put("type",0);
+                        int indexKV = projectName.toUpperCase().indexOf("KV");
+                        if (indexKV == -1){
+                            indexKV = projectName.indexOf("千伏");
+                        }
+                        String kv = "0";
+                        if (indexKV >= 4) {
+                            kv = projectName.substring(indexKV-4,indexKV);
+                        }else if (indexKV > 0){
+                            kv = projectName.substring(0,indexKV);
+                        }
+                        kv.replace("/[^0-9]/ig", "");
+                        int kvInt = Integer.parseInt(kv);
+                        if (kvInt >= 500){
+                            typeMap.put("grade",0);
+                        }
+                        if (projectNumber != null && !projectNumber.equals("")){
+                            int len = projectNumber.length();
+                            String stageChar = projectNumber.substring(len-1).toUpperCase();
+                            if ( !stageChar.equals("S")&& !stageChar.equals("Z")){
+                                typeMap.put("stage",1);
+                            }
+                        }else {
+                            return Result.build(3323,"卷册编号不能为空");
+                        }
+                    }else if(map.get("departmentId").toString().equals("3")){
+                        typeMap.put("type",1);
+                    }else {
+                        typeMap.put("type",2);
+                    }
+                    int valWorkdayRate = projectDao.valWorkdayRate(typeMap);
+                    map.put("calculationRatio",valWorkdayRate);
+                    double calculation = Double.parseDouble(map.get("spiderMoney").toString())/valWorkdayRate;
+                    map.put("calculation",calculation);
+                    List<Map<String,Object>> tecList = zjepdiDataTransmissionDao.queryTecList(projectNumber);
+                    if (tecList != null && tecList.size() > 0){
+                        if (map.get("tec").toString().equals("综合")) {
+                            map.put("thisCalculation", calculation);
+                        }else {
+                            map.put("thisCalculation", calculation/tecList.size());
+                        }
+                    }
+                    map.put("spider",1);
                     projectDao.setProjectChildren(map);
-                    cmdMethod(map.get("cNumber").toString(), "1");
                 }else {
                     if (map.get("projectId") == null && projectDao.queryByNameAndNum(map)){
                         return Result.build(864,"该项目已建立");
