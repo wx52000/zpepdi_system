@@ -394,6 +394,23 @@
         where u.id = c.checkerId
         and `type` = #{type}
     </select>
+
+    <select id="getNoteisnotList" resultType="java.util.Map">
+        SELECT
+            stage,
+            tec,
+            other_tec,
+            note,
+            check_other_handler,
+            p.director,
+            p.general
+        FROM
+            project_note n LEFT JOIN
+            project p on n.project_id = p.id
+        WHERE
+            check_other_handler IS NOT NULL
+          and n.type = 2
+    </select>
     <select id="getCheckerByProjectId" resultType="java.util.Map">
         select DISTINCT u.id, u.name, false as disabled
         from  `user` u,
