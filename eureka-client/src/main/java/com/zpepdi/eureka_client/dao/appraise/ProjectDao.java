@@ -120,7 +120,7 @@ public interface ProjectDao {
 
     List<Map<String,Object>> getCheckerList(Integer type);
 
-    List<Map<String,Object>> getOtherDeoProjectList(Integer type);
+    List<Map<String,Object>> getOtherProjectList();
 
     Map<String,Object> getCheckerByProjectId(Integer id);
 

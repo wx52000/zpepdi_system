@@ -91,7 +91,7 @@ public interface ProjectService {
 
     Result getCheckerList( Integer type);
 
-    Result getOtherDeoProjectList( Integer type);
+    Result getOtherProjectList();
 
     Result getCheckerListByProjectId( Integer id);
 

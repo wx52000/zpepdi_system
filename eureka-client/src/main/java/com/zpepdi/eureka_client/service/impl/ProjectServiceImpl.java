@@ -916,8 +916,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Result getOtherDeoProjectList( Integer type) {
-        return Result.ok(projectDao.getOtherDeoProjectList(type));
+    public Result getOtherProjectList() {
+        return Result.ok(projectDao.getOtherProjectList());
     }
 
     @Override
