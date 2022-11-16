@@ -42,8 +42,8 @@ spring:
         driver-class-name: com.mysql.cj.jdbc.Driver
 
 #                useSSL=false为连接linux服务器使用
-#        url: jdbc:mysql://10.136.238.23:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-        url: jdbc:mysql://localhost:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+        url: jdbc:mysql://10.136.238.23:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+#        url: jdbc:mysql://localhost:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
         username: root
         password: 7499
       zjepdi:
