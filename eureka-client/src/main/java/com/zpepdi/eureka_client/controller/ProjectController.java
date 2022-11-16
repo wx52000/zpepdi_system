@@ -236,14 +236,12 @@ public class ProjectController {
 
     @RequestMapping("getCheckerList")
     public Result getCheckerList(@RequestHeader Integer type){
-        Result checkerList = projectService.getCheckerList(type);
-        return checkerList;
+        return projectService.getCheckerList(type);
     }
-
-    @RequestMapping("getNoteisnotList")
-    public Result getNoteisnotList(@RequestHeader Integer type){
-        Result noteisnotList = projectService.getNoteisnotList(type);
-        return noteisnotList;
+    //无产值项目列表
+    @RequestMapping("getOtherDeoProjectList")
+    public Result getOtherDeoProjectList(@RequestHeader Integer type){
+        return projectService.getOtherDeoProjectList(type);
     }
 
     @RequestMapping("getCheckerListByProjectId")

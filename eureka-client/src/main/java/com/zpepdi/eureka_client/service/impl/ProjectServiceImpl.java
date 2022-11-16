@@ -916,17 +916,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Result getNoteisnotList( Integer type) {
-        Object object;
-        String listName = "projectnoteisnot";
-        object = redisTemplate.opsForValue().get(listName);
-        if (object == null){
-            object = projectDao.getNoteisnotList(type);
-            redisTemplate.opsForValue().set(listName, JSONArray.toJSONString(object));
-        }else {
-            object = JSONArray.parseArray(object.toString());
-        }
-        return Result.ok(object);
+    public Result getOtherDeoProjectList( Integer type) {
+        return Result.ok(projectDao.getOtherDeoProjectList(type));
     }
 
     @Override

@@ -400,7 +400,7 @@
           and `type` = #{type}
     </select>
 
-    <select id="getNoteisnotList" resultType="java.util.Map">
+    <select id="getOtherDeoProjectList" resultType="java.util.Map">
         SELECT
             stage,
             tec,
