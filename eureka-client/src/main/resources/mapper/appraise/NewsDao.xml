@@ -2115,32 +2115,7 @@
             a.project_id = p.id
           AND a.`check` > 0
           AND a.check_handler = 737
-          AND a.`handler` = u.id UNION
-        SELECT
-            3 AS `type`,
-            p.id AS id,
-            p.number,
-            p.`name`,
-            "项目" AS tec,
-            u.`name` AS applicant,
-            d.time AS application_time,
-            CASE
-                `check`
-                WHEN 1 THEN
-                    '审核通过'
-                WHEN 1 THEN
-                    '审核回退' ELSE '未知状态'
-                END AS `check`,
-            check_time
-        FROM
-            project p,
-            workday_tec_distribute d,
-            `user` u
-        WHERE
-            p.id = d.project_id
-          AND d.check_handler = 737
-          AND d.`check` > 0
-          AND u.id = d.`handler`
+          AND a.`handler` = u.id
     </select>
 
 </mapper>
