@@ -236,7 +236,14 @@ public class ProjectController {
 
     @RequestMapping("getCheckerList")
     public Result getCheckerList(@RequestHeader Integer type){
-        return projectService.getCheckerList(type);
+        Result checkerList = projectService.getCheckerList(type);
+        return checkerList;
+    }
+
+    @RequestMapping("getNoteisnotList")
+    public Result getNoteisnotList(@RequestHeader Integer type){
+        Result noteisnotList = projectService.getNoteisnotList(type);
+        return noteisnotList;
     }
 
     @RequestMapping("getCheckerListByProjectId")

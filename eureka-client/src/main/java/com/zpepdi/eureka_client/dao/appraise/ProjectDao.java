@@ -120,6 +120,8 @@ public interface ProjectDao {
 
     List<Map<String,Object>> getCheckerList(Integer type);
 
+    List<Map<String,Object>> getNoteisnotList(Integer type);
+
     Map<String,Object> getCheckerByProjectId(Integer id);
 
     void setChecker(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
