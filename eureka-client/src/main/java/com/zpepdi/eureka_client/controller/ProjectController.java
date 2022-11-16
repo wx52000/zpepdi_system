@@ -239,9 +239,9 @@ public class ProjectController {
         return projectService.getCheckerList(type);
     }
     //无产值项目列表
-    @RequestMapping("getOtherDeoProjectList")
-    public Result getOtherDeoProjectList(@RequestHeader Integer type){
-        return projectService.getOtherDeoProjectList(type);
+    @RequestMapping("getOtherProjectList")
+    public Result getOtherProjectList(){
+        return projectService.getOtherProjectList();
     }
 
     @RequestMapping("getCheckerListByProjectId")
