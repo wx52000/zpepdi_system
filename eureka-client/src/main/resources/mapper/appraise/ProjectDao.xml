@@ -401,22 +401,17 @@
     </select>
 
     <select id="getNoteisnotList" resultType="java.util.Map">
-        SELECT
-            stage,
-            tec,
-            p.general ,
-            u.username,
-            u.`name`,
-            p.`name` pname,
-            p.number
-        FROM
-            project_note n
-                LEFT JOIN project p ON n.project_id = p.id
-                LEFT JOIN other_user u on n.check_other_handler = u.id
-        WHERE
-
-            n.type = 2
-          and `check` = 1 and check_other = 1
+        SELECT stage,
+               tec,
+               p.general,
+               u.username,
+               u.`name`,
+               p.`name` pname
+        FROM project_note n
+                 LEFT JOIN project p ON n.project_id = p.id
+                 LEFT JOIN other_user u on n.check_other_handler = u.id
+        WHERE check_other_handler IS NOT NULL
+          AND n.type = 2
     </select>
     <select id="getCheckerByProjectId" resultType="java.util.Map">
         select DISTINCT u.id, u.name, false as disabled
@@ -1981,195 +1976,250 @@
         GROUP BY id
     </select>
     <select id="homepageProject" resultType="java.util.Map">
-        SELECT p.id,
-               p.number,
-               p.`name`,
-               p.general,
-               p.director,
-               p.create_time,
-               IFNULL(num.workday, 0) AS amount,
-               p.principal,
-               p.`show`,
-               p.type,
-               p.frozen,
-               0                      AS `mode`
-        FROM (
-                 SELECT p.id,
-                        p.number,
-                        p.`name`,
-                        p.general,
-                        p.director,
-                        p.create_time,
-                        p.principal,
-                        p.`show`,
-                        p.frozen,
-                        p.type,
-                        IFNULL(s.`show`, 1) AS `sShow`
-                 FROM (
-                          SELECT p.id,
-                                 p.number,
-                                 p.`name`,
-                                 p.general,
-                                 p.director,
-                                 p.create_time,
-                                 max(tab.principal) AS principal,
-                                 p.generalId = #{id}   `show`,
-                                 p.type,
-                                 p.frozen
-                          FROM (
-                                   SELECT p.id,
-                                          FALSE AS principal
-                                   FROM project p
-                                            LEFT JOIN project_note n ON p.id = n.project_id
-                                   WHERE IFNULL(n.`check`, 1) = 1
-                                     AND IFNULL(n.check_other, 1) = 1
-                                     AND p.generalId = #{id}
-                                   UNION
-                                   SELECT t.project_id AS id,
-                                          TRUE            principal
-                                   FROM workday_tec t,
-                                        workday_tec_principal tp
-                                   WHERE t.id = tp.workday_tec_id
-                                     AND tp.user_id = #{id}
-                                   UNION
-                                   SELECT vu.project_id AS id,
-                                          FALSE         AS principal
-                                   FROM volume_user vu
-                                   WHERE vu.designer = #{id}
-                                   UNION
-                                   SELECT vu.project_id AS id,
-                                          FALSE         AS principal
-                                   FROM volume_user vu
-                                   WHERE vu.checker = #{id}
-                                   UNION
-                                   SELECT t.project_id AS id,
-                                          FALSE        AS principal
-                                   FROM project_task t
-                                   WHERE t.designer = #{id}
-                                   UNION
-                                   SELECT t.project_id AS id,
-                                          FALSE        AS principal
-                                   FROM project_task t
-                                   WHERE t.checker = #{id}
-                                   UNION
-                                   SELECT t.project_id AS id,
-                                          FALSE        AS principal
-                                   FROM project_task t
-                                   WHERE t.headman = #{id}
-                               ) AS tab,
-                               project p
-                          WHERE tab.id = p.id
-                          GROUP BY p.id
-                      ) AS p
-                          LEFT JOIN project_show s ON p.id = s.project_id
-                     AND s.user_id = #{id}
-             ) AS p
-                 LEFT JOIN (
-            SELECT SUM(workday) AS workday,
-                   t.project_id
-            FROM (
-                     SELECT w.id,
-                            w.workday,
-                            v.project_id,
-                            v.tec
-                     FROM volume v,
-                          volume_workday w
-                     WHERE w.submit_date = #{date}
-                       AND w.`handler` = #{id}
-                       AND v.id = w.volume_id
-                     UNION
-                     SELECT h.id,
-                            h.`grant` AS workday,
-                            v.project_id,
-                            v.tec
-                     FROM volume v,
-                          volume_workday_high h
-                     WHERE h.volume_id = v.id
-                       AND h.`handler` = #{id}
-                       AND h.submit_date = #{date}
-                     UNION
-                     SELECT t.id,
-                            t.designer_workday + t.checker_workday + t.checker_workday + t.principal_workday AS workday,
-                            t.project_id,
-                            t.tec
-                     FROM project_task t
-                     WHERE submit_date = #{date}
-                       AND t.principal = #{id}
-                 ) AS tab,
-                 (
-                     SELECT t.project_id,
-                            t.volume_tec
-                     FROM workday_tec t,
-                          workday_tec_principal tp
-                     WHERE t.id = tp.workday_tec_id
-                       AND tp.user_id = #{id}
-                 ) AS t
-            WHERE tab.tec = t.volume_tec
-              AND tab.project_id = t.project_id
-            GROUP BY tab.project_id
-        ) AS num ON p.id = num.project_id
-        WHERE p.sShow = 1
-        GROUP BY p.id
-        UNION
-        SELECT sci.id,
-               sci.number,
-               sci.`name`,
-               sci.general,
-               sci.`name`                     AS director,
-               sci.create_time,
-               IFNULL(sworkday.workdaySum, 0) AS amount,
-               sci.principal,
-               IFNULL(s.`show`, 1) = 1        AS `show`,
-               sci.type,
-               sci.frozen,
-               sci.`mold`
-        FROM (
-                 SELECT p.id,
-                        p.number,
-                        p.`name`,
-                        p.general,
-                        u.`name` AS director,
-                        p.create_time,
-                        1        AS principal,
-                        0        AS type,
-                        0        AS frozen,
-                        1        AS `mold`
-                 FROM scientific_project p,
-                      `user` u
-                 WHERE p.generalId = #{id}
-                   AND p.creator = u.id
-                 UNION
-                 SELECT p.id,
-                        p.number,
-                        p.`name`,
-                        p.general,
-                        u.`name` AS director,
-                        p.create_time,
-                        1        AS principal,
-                        0        AS type,
-                        0        AS frozen,
-                        1        AS `mold`
-                 FROM scientific_project p,
-                      `user` u,
-                      scientific_leader l
-                 WHERE p.id = l.scientific_id
-                   AND p.creator = u.id
-                   AND l.`leader` = #{id}
-             ) sci
-                 LEFT JOIN (
-            SELECT l.scientific_id,
-                   SUM(w.workday) AS workdaySum
-            FROM scientific_leader l,
-                 scientific_task t,
-                 scientific_task_workday w
-            WHERE l.leader = #{id}
-              AND w.scientific_task_id = t.id
-              AND t.scientific_leader_id = l.id
-              AND submit_date = #{date}
-            GROUP BY l.scientific_id
-        ) sworkday ON sworkday.scientific_id = sci.id
-                 LEFT JOIN scientific_show s ON sci.id = s.scientific_id
-        WHERE IFNULL(s.`show`, 1) = 1
+        SELECT
+            *
+        FROM(
+                SELECT
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    p.general,
+                    p.director,
+                    p.create_time,
+                    IFNULL( num.workday, 0 ) AS amount,
+                    p.principal,
+                    p.`show`,
+                    p.type,
+                    p.frozen,
+                    0 AS `mode`
+                FROM
+                    (
+                        SELECT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            p.director,
+                            p.create_time,
+                            p.principal,
+                            p.`show`,
+                            p.frozen,
+                            p.type,
+                            IFNULL( s.`show`, 1 ) AS `sShow`
+                        FROM
+                            (
+                                SELECT
+                                    p.id,
+                                    p.number,
+                                    p.`name`,
+                                    p.general,
+                                    p.director,
+                                    p.create_time,
+                                    max( tab.principal ) AS principal,
+                                    p.generalId = 737 `show`,
+                                    p.type,
+                                    p.frozen
+                                FROM
+                                    (
+                                        SELECT
+                                            p.id,
+                                            FALSE AS principal
+                                        FROM
+                                            project p
+                                                LEFT JOIN project_note n ON p.id = n.project_id
+                                        WHERE
+                                            IFNULL( n.`check`, 1 ) = 1
+                                          AND IFNULL( n.check_other, 1 ) = 1
+                                          AND p.generalId = 737 UNION
+                                        SELECT
+                                            t.project_id AS id,
+                                            TRUE principal
+                                        FROM
+                                            workday_tec t,
+                                            workday_tec_principal tp
+                                        WHERE
+                                            t.id = tp.workday_tec_id
+                                          AND tp.user_id = 737 UNION
+                                        SELECT
+                                            vu.project_id AS id,
+                                            FALSE AS principal
+                                        FROM
+                                            volume_user vu
+                                        WHERE
+                                            vu.designer = 737 UNION
+                                        SELECT
+                                            vu.project_id AS id,
+                                            FALSE AS principal
+                                        FROM
+                                            volume_user vu
+                                        WHERE
+                                            vu.checker = 737 UNION
+                                        SELECT
+                                            t.project_id AS id,
+                                            FALSE AS principal
+                                        FROM
+                                            project_task t
+                                        WHERE
+                                            t.designer = 737 UNION
+                                        SELECT
+                                            t.project_id AS id,
+                                            FALSE AS principal
+                                        FROM
+                                            project_task t
+                                        WHERE
+                                            t.checker = 737 UNION
+                                        SELECT
+                                            t.project_id AS id,
+                                            FALSE AS principal
+                                        FROM
+                                            project_task t
+                                        WHERE
+                                            t.headman = 737
+                                    ) AS tab,
+                                    project p
+                                WHERE
+                                    tab.id = p.id
+                                GROUP BY
+                                    p.id
+                            ) AS p
+                                LEFT JOIN project_show s ON p.id = s.project_id
+                                AND s.user_id = 737
+                    ) AS p
+                        LEFT JOIN (
+                        SELECT
+                            SUM( workday ) AS workday,
+                            t.project_id
+                        FROM
+                            (
+                                SELECT
+                                    w.id,
+                                    w.workday,
+                                    v.project_id,
+                                    v.tec
+                                FROM
+                                    volume v,
+                                    volume_workday w
+                                WHERE
+                                    w.submit_date = "2022-12"
+                                  AND w.`handler` = 737
+                                  AND v.id = w.volume_id UNION
+                                SELECT
+                                    h.id,
+                                    h.`grant` AS workday,
+                                    v.project_id,
+                                    v.tec
+                                FROM
+                                    volume v,
+                                    volume_workday_high h
+                                WHERE
+                                    h.volume_id = v.id
+                                  AND h.`handler` = 737
+                                  AND h.submit_date = "2022-12" UNION
+                                SELECT
+                                    t.id,
+                                    t.designer_workday + t.checker_workday + t.checker_workday + t.principal_workday AS workday,
+                                    t.project_id,
+                                    t.tec
+                                FROM
+                                    project_task t
+                                WHERE
+                                    submit_date = "2022-12"
+                                  AND t.principal = 737
+                            ) AS tab,
+                            (
+                                SELECT
+                                    t.project_id,
+                                    t.volume_tec
+                                FROM
+                                    workday_tec t,
+                                    workday_tec_principal tp
+                                WHERE
+                                    t.id = tp.workday_tec_id
+                                  AND tp.user_id = 737
+                            ) AS t
+                        WHERE
+                            tab.tec = t.volume_tec
+                          AND tab.project_id = t.project_id
+                        GROUP BY
+                            tab.project_id
+                    ) AS num ON p.id = num.project_id
+                WHERE
+                    p.sShow = 1
+                GROUP BY
+                    p.id UNION
+                SELECT
+                    sci.id,
+                    sci.number,
+                    sci.`name`,
+                    sci.general,
+                    sci.`name` AS director,
+                    sci.create_time,
+                    IFNULL( sworkday.workdaySum, 0 ) AS amount,
+                    sci.principal,
+                    IFNULL( s.`show`, 1 ) = 1 AS `show`,
+                    sci.type,
+                    sci.frozen,
+                    sci.`mold`
+                FROM
+                    (
+                        SELECT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            u.`name` AS director,
+                            p.create_time,
+                            1 AS principal,
+                            0 AS type,
+                            0 AS frozen,
+                            1 AS `mold`
+                        FROM
+                            scientific_project p,
+                            `user` u
+                        WHERE
+                            p.generalId = 737
+                          AND p.creator = u.id UNION
+                        SELECT
+                            p.id,
+                            p.number,
+                            p.`name`,
+                            p.general,
+                            u.`name` AS director,
+                            p.create_time,
+                            1 AS principal,
+                            0 AS type,
+                            0 AS frozen,
+                            1 AS `mold`
+                        FROM
+                            scientific_project p,
+                            `user` u,
+                            scientific_leader l
+                        WHERE
+                            p.id = l.scientific_id
+                          AND p.creator = u.id
+                          AND l.`leader` = 737
+                    ) sci
+                        LEFT JOIN (
+                        SELECT
+                            l.scientific_id,
+                            SUM( w.workday ) AS workdaySum
+                        FROM
+                            scientific_leader l,
+                            scientific_task t,
+                            scientific_task_workday w
+                        WHERE
+                            l.leader = 737
+                          AND w.scientific_task_id = t.id
+                          AND t.scientific_leader_id = l.id
+                          AND submit_date = "2022-12"
+                        GROUP BY
+                            l.scientific_id
+                    ) sworkday ON sworkday.scientific_id = sci.id
+                        LEFT JOIN scientific_show s ON sci.id = s.scientific_id
+                WHERE
+                    IFNULL( s.`show`, 1 ) = 1
+            ) as tab
+        ORDER BY `show` DESC,principal DESC
     </select>
     <select id="personalProject" resultType="map">
         SELECT p.id,

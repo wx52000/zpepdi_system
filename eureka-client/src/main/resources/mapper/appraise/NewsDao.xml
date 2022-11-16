@@ -2040,7 +2040,7 @@
             `user` u
         WHERE
             p.id = n.project_id
-          AND n.check_handler = #{id}
+          AND n.check_handler = 737
           AND `check` > 0
           AND n.applicant = u.id UNION
         SELECT
@@ -2064,7 +2064,7 @@
                     WHERE
                         c.project_id = p.id
                       AND c.`check` > 0
-                      AND c.check_handler = #{id}
+                      AND c.check_handler = 737
                 ) UNION
         SELECT
             0 AS `type`,
@@ -2090,8 +2090,32 @@
             p.id = d.project_id
           AND d.`check` > 0
           AND u.id = d.`handler`
-          AND d.check_handler = 737
-        union
+          AND d.check_handler = 737 UNION
+        SELECT
+            3 AS `type`,
+            p.id AS id,
+            p.number,
+            p.`name`,
+            "项目" AS tec,
+            u.`name` AS applicant,
+            a.date AS application_time,
+            CASE
+                a.`check`
+                WHEN 1 THEN
+                    '审核通过'
+                WHEN 1 THEN
+                    '审核回退' ELSE '未知状态'
+                END AS `check`,
+            a.check_time
+        FROM
+            project p,
+            project_workday_add a,
+            `user` u
+        WHERE
+            a.project_id = p.id
+          AND a.`check` > 0
+          AND a.check_handler = 737
+          AND a.`handler` = u.id
     </select>
 
 </mapper>
