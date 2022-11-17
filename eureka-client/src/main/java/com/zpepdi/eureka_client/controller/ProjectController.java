@@ -224,8 +224,8 @@ public class ProjectController {
         return projectService.homepageProject(userId);
     }
 
-    @RequestMapping("PersonalProject")
-    public Result PersonalProject(@UserId Integer userId){
+    @RequestMapping("personalProject")
+    public Result personalProject(@UserId Integer userId){
         return projectService.personalProject(userId);
     }
 //    修改项目页面显示状态
