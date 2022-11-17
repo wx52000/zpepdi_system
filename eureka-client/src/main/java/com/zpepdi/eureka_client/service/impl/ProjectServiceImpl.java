@@ -916,6 +916,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public Result getOtherProjectList() {
+        return Result.ok(projectDao.getOtherProjectList());
+    }
+
+    @Override
     public Result getCheckerListByProjectId(Integer id) {
         Object object;
         String listName = "directorList";

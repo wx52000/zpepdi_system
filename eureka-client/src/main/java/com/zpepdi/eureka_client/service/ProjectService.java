@@ -91,6 +91,8 @@ public interface ProjectService {
 
     Result getCheckerList( Integer type);
 
+    Result getOtherProjectList();
+
     Result getCheckerListByProjectId( Integer id);
 
     Result setChecker(Integer userId,Map<String,Object> map);

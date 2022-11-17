@@ -238,6 +238,11 @@ public class ProjectController {
     public Result getCheckerList(@RequestHeader Integer type){
         return projectService.getCheckerList(type);
     }
+    //无产值项目列表
+    @RequestMapping("getOtherProjectList")
+    public Result getOtherProjectList(){
+        return projectService.getOtherProjectList();
+    }
 
     @RequestMapping("getCheckerListByProjectId")
     public Result getCheckerListByProjectId(@RequestHeader Integer id){

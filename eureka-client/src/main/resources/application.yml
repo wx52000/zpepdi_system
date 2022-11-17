@@ -1,3 +1,5 @@
+#myIp : localhost
+myIp : 10.136.238.23
 spring:
   application:
     name: eureka-client
@@ -13,8 +15,8 @@ spring:
     static-path-pattern: /excel/**
   redis:
     database: 0
-#    host: 127.0.0.1
-    host: 10.136.238.23
+    host: ${myIp}
+#    host: 10.136.238.23
     port: 7001
     password: 7499
 #     连接超时时间（毫秒）
@@ -43,7 +45,7 @@ spring:
 
 #                useSSL=false为连接linux服务器使用
 #        url: jdbc:mysql://10.136.238.23:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-        url: jdbc:mysql://localhost:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+        url: jdbc:mysql://${myIp}:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
         username: root
         password: 7499
       zjepdi:
