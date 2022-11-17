@@ -229,7 +229,7 @@
                 <if test="i.task == 1 and i.advance == 1">
                     task_advance
                 </if>
-                set submit = #{check} + 1, submit_time = now(), submit_date = #{item.submit_date}
+                set submit = #{check} + 1, submit_time = now(), submit_date = #{item.submit_date}, `submit_handler` = #{id}
                 where
                 id = #{i.id}
             </foreach>
@@ -1222,106 +1222,128 @@
             v.principal
     </select>
     <select id="queryByGeneral1" resultMap="queryByGeneral">
-        select type,
-               id,
-               number,
-               `name`,
-               tec,
-               handler,
-               submit_date,
-               handlerId,
-               result,
-               userId
-        from (
-                 SELECT 5       AS type,
-                        p.id,
-                        p.number,
-                        p.`name`,
-                        v.tec,
-                        w.submit_date,
-                        u1.name as handler,
-                        u1.id as handlerId,
-                        FALSE   AS result,
-                        #{id}   as userId
-                 FROM project p,
-                      `user` u1,
-                      volume v,
-                      volume_workday w
-                 WHERE p.generalId = #{id}
-                   and u1.id = w.handler
-                   AND v.id = w.volume_id
-                   AND v.project_id = p.id
-                   AND w.submit = 1
-                 GROUP BY v.tec,
-                          w.`handler`
-                 union
-                 SELECT 5     AS type,
-                        p.id,
-                        p.number,
-                        p.`name`,
-                        v.tec,
-                        h.submit_date,
-                        u1.`name` as handler,
-                        u1.id as handlerId,
-                        FALSE AS result,
-                        #{id} as userId
-                 FROM project p,
-                      `user` u1,
-                      volume v,
-                      volume_workday w,
-                      volume_workday_high h
-                 WHERE p.generalId = #{id}
-                   and u1.id = w.`handler`
-                   AND v.id = w.volume_id
-                   AND v.project_id = p.id
-                   and h.volume_id = w.volume_id
-                   AND h.submit = 1
-                 GROUP BY v.tec,
-                          w.`handler`
-                 union
-                 SELECT 5     AS type,
-                        p.id,
-                        p.number,
-                        p.`name`,
-                        t.tec,
-                        t.submit_date,
-                        u1.`name` as handler,
-                        u1.id as handlerId,
-                        FALSE AS result,
-                        #{id} as userId
-                 FROM project p,
-                      `user` u1,
-                      project_task t
-                 WHERE p.generalId = #{id}
-                   AND u1.id = t.`handler`
-                   AND t.project_id = p.id
-                   AND submit = 1
-                 GROUP BY t.tec,
-                          t.`handler`
-                 union
-                 SELECT 5     AS type,
-                        p.id,
-                        p.number,
-                        p.`name`,
-                        t.tec,
-                        a.submit_date,
-                        u1.`name` as handler,
-                        u1.id as handlerId,
-                        FALSE AS result,
-                        #{id} as userId
-                 FROM project p,
-                      `user` u1,
-                      project_task t,
-                      task_advance a
-                 WHERE p.generalId = #{id}
-                   AND u1.id = t.`handler`
-                   AND t.project_id = p.id
-                   and a.task_id = t.id
-                   AND a.submit = 1
-                 GROUP BY t.tec,
-                          t.`handler`
-             )as t
-        group by t.tec, t.handler,submit_date
+        SELECT
+            type,
+            id,
+            number,
+            `name`,
+            tec,
+            `handler`,
+            submit_date,
+            handlerId,
+            result,
+            userId
+        FROM
+            (
+                SELECT
+                    5 AS type,
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    v.tec,
+                    w.submit_date,
+                    u1.`name` AS `handler`,
+                    u1.id AS handlerId,
+                    FALSE AS result,
+                    #{id} AS userId
+                FROM
+                    project p,
+                    `user` u1,
+                    volume v,
+                    volume_workday w
+                WHERE
+                    p.generalId = #{id}
+                  AND u1.id = w.`handler`
+                  AND v.id = w.volume_id
+                  AND v.project_id = p.id
+                  AND w.submit = 1
+                GROUP BY
+                    v.tec,
+                    w.`handler`,
+                    w.submit_date UNION
+                SELECT
+                    5 AS type,
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    v.tec,
+                    h.submit_date,
+                    u1.`name` AS `handler`,
+                    u1.id AS handlerId,
+                    FALSE AS result,
+                    #{id} AS userId
+                FROM
+                    project p,
+                    `user` u1,
+                    volume v,
+                    volume_workday w,
+                    volume_workday_high h
+                WHERE
+                    p.generalId = #{id}
+                  AND u1.id = w.`handler`
+                  AND v.id = w.volume_id
+                  AND v.project_id = p.id
+                  AND h.volume_id = w.volume_id
+                  AND h.submit = 1
+                GROUP BY
+                    v.tec,
+                    w.`handler`,
+                    w.submit_date UNION
+                SELECT
+                    5 AS type,
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    t.tec,
+                    t.submit_date,
+                    u1.`name` AS `handler`,
+                    u1.id AS handlerId,
+                    FALSE AS result,
+                    #{id} AS userId
+                FROM
+                    project p,
+                    `user` u1,
+                    project_task t
+                WHERE
+                    p.generalId = #{id}
+                  AND u1.id = t.`handler`
+                  AND t.project_id = p.id
+                  AND submit = 1
+                GROUP BY
+                    t.tec,
+                    t.`handler`,
+                    t.submit_date UNION
+                SELECT
+                    5 AS type,
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    t.tec,
+                    a.submit_date,
+                    u1.`name` AS `handler`,
+                    u1.id AS handlerId,
+                    FALSE AS result,
+                    #{id} AS userId
+                FROM
+                    project p,
+                    `user` u1,
+                    project_task t,
+                    task_advance a
+                WHERE
+                    p.generalId = #{id}
+                  AND u1.id = t.`handler`
+                  AND t.project_id = p.id
+                  AND a.task_id = t.id
+                  AND a.submit = 1
+                GROUP BY
+                    t.tec,
+                    t.`handler`,
+                    t.submit_date
+            ) AS t
+        GROUP BY
+            t.tec,
+            t.`handler`,
+            submit_date
     </select>
     <select id="queryByGeneralList" resultType="java.util.Map">
         SELECT
@@ -2040,7 +2062,7 @@
             `user` u
         WHERE
             p.id = n.project_id
-          AND n.check_handler = 737
+          AND n.check_handler = #{id}
           AND `check` > 0
           AND n.applicant = u.id UNION
         SELECT
@@ -2064,7 +2086,7 @@
                     WHERE
                         c.project_id = p.id
                       AND c.`check` > 0
-                      AND c.check_handler = 737
+                      AND c.check_handler = #{id}
                 ) UNION
         SELECT
             0 AS `type`,
@@ -2090,7 +2112,7 @@
             p.id = d.project_id
           AND d.`check` > 0
           AND u.id = d.`handler`
-          AND d.check_handler = 737 UNION
+          AND d.check_handler = #{id} UNION
         SELECT
             3 AS `type`,
             p.id AS id,
@@ -2114,7 +2136,7 @@
         WHERE
             a.project_id = p.id
           AND a.`check` > 0
-          AND a.check_handler = 737
+          AND a.check_handler = #{id}
           AND a.`handler` = u.id
     </select>
 
