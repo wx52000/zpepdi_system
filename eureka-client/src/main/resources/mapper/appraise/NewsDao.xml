@@ -119,6 +119,26 @@
                     select="scientificTask"
                     javaType="ARRAYLIST"></collection>
     </resultMap>
+    <resultMap id="queryInformation0" type="map">
+        <result column="id" property="id"></result>
+        <result column="workday" property="workday"></result>
+        <result column="tec" property="tec"></result>
+        <result column="manage" property="manage"></result>
+        <result column="backup" property="backup" ></result>
+        <collection property="list" column="id = id"
+                    select="queryInformationList0"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
+    <resultMap id="queryInformation1" type="map">
+        <result column="id" property="id"></result>
+        <result column="workday" property="workday"></result>
+        <result column="tec" property="tec"></result>
+        <result column="manage" property="manage"></result>
+        <result column="backup" property="backup" ></result>
+        <collection property="list" column="id = id"
+                    select="queryInformationList1"
+                    javaType="ARRAYLIST"></collection>
+    </resultMap>
     <insert id="checkLog0" keyColumn="id" useGeneratedKeys="true" keyProperty="map.logId">
         insert into check_log_project( project_id,
                                       <if test="map.workday != null and map.workday != ''">
@@ -330,6 +350,51 @@
         update project_workday_distribute
         set `backup` = `backup` + ${num}
         where  project_id = #{id}
+    </update>
+    <update id="withdrawOverAll0">
+        UPDATE project_workday_distribute
+        SET `check` = 0
+        WHERE
+        project_id = #{id}
+    </update>
+    <update id="withdrawOverAll3">
+        UPDATE workday_tec_distribute
+        SET `check` = 0
+        WHERE
+            project_id = #{id}
+          AND tec = #{tec}
+    </update>
+    <update id="withdrawOverAll7">
+        UPDATE project_note
+        SET `check` = 0
+        WHERE
+            project_id = #{id};
+        delete
+        from project_workday
+        where project_id= #{id};
+    </update>
+    <update id="withdrawOverAll8">
+        UPDATE project_children
+        SET `check` = 0
+        WHERE
+            project_id = #{id};
+        delete
+        from project_workday
+        where project_id= #{id};
+    </update>
+    <update id="withdrawOver5">
+        <if test="type == 0">
+            UPDATE volume_workday
+            SET `submit` = 2
+            WHERE
+            id = #{id};
+        </if>
+        <if test="type == 1">
+            UPDATE project_task
+            SET `submit` = 2
+            WHERE
+            id = #{id};
+        </if>
     </update>
     <select id="count" resultType="java.lang.Integer">
         SELECT
@@ -2041,103 +2106,603 @@
     </select>
     <select id="adminQueryApply" resultMap="queryByAdminList">
         SELECT
-            7 AS `type`,
-            p.id AS id,
+            *,
+            false as loading,
+            null as data
+        FROM
+            (
+                SELECT
+                    7 AS `type`,
+                    n.type as typeNote,
+                    p.id AS id,
+                    p.number,
+                    p.`name`,
+                    "项目" AS tec,
+                    u.id AS applicantId,
+                    u.`name` AS applicant,
+                    n.application_time,
+                    CASE
+                        `check`
+                        WHEN 1 THEN
+                            '审核通过'
+                        WHEN 1 THEN
+                            '审核回退' ELSE '未知状态'
+                        END AS `check`,
+                    n.check_time,
+                    EXISTS ( SELECT 1 FROM project_workday_distribute WHERE project_id = p.id ) AS state
+                FROM
+                    project p,
+                    project_note n,
+                    `user` u
+                WHERE
+                    p.id = n.project_id
+                  AND n.check_handler = #{userId}
+                  AND `check` > 0
+                  AND n.applicant = u.id UNION
+                SELECT DISTINCT
+                    8 AS `type`,
+                    null as typeNote,
+                    p.id AS id,
+                    p.number,
+                    p.`name`,
+                    "项目" AS tec,
+                    p.generalId AS applicantId,
+                    p.general AS applicant,
+                    p.create_time AS application_time,
+                    "审核通过" AS `check`,
+                    p.create_time AS check_time,
+                    EXISTS ( SELECT 1 FROM project_workday_distribute WHERE project_id = p.id ) AS state
+                FROM
+                    project p
+                WHERE
+                    EXISTS (
+                            SELECT
+                                c.id
+                            FROM
+                                project_children c
+                            WHERE
+                                c.project_id = p.id
+                              AND c.`check` > 0
+                              AND c.check_handler = #{userId}
+                        ) UNION
+                SELECT
+                    0 AS `type`,
+                    null as typeNote,
+                    p.id AS id,
+                    p.number,
+                    p.`name`,
+                    "项目" AS tec,
+                    u.id AS applicantId,
+                    u.`name` AS applicant,
+                    d.time AS application_time,
+                    CASE
+                        `check`
+                        WHEN 1 THEN
+                            '审核通过'
+                        WHEN 1 THEN
+                            '审核回退' ELSE '未知状态'
+                        END AS `check`,
+                    check_time,
+                    EXISTS ( SELECT 1 FROM workday_tec_distribute WHERE project_id = p.id ) AS state
+                FROM
+                    project p,
+                    project_workday_distribute d,
+                    `user` u
+                WHERE
+                    p.id = d.project_id
+                  AND d.`check` > 0
+                  AND u.id = d.`handler`
+                  AND d.check_handler = #{userId} UNION
+                SELECT
+                    1 AS `type`,
+                    null as typeNote,
+                    a.id AS id,
+                    p.number,
+                    p.`name`,
+                    "项目" AS tec,
+                    u.id AS applicantId,
+                    u.`name` AS applicant,
+                    a.date AS application_time,
+                    CASE
+                        a.`check`
+                        WHEN 1 THEN
+                            '审核通过'
+                        WHEN 1 THEN
+                            '审核回退' ELSE '未知状态'
+                        END AS `check`,
+                    a.check_time,
+                    0 AS state
+                FROM
+                    project p,
+                    project_workday_add a,
+                    `user` u
+                WHERE
+                    a.project_id = p.id
+                  AND a.`check` > 0
+                  AND a.check_handler = #{userId}
+                  AND a.`handler` = u.id UNION
+                SELECT
+                    3 AS `type`,
+                    null as typeNote,
+                    p.id AS id,
+                    p.number,
+                    p.`name`,
+                    d.tec AS tec,
+                    u.id AS applicantId,
+                    u.`name` AS applicant,
+                    d.time AS application_time,
+                    CASE
+                        `check`
+                        WHEN 1 THEN
+                            '审核通过'
+                        WHEN 1 THEN
+                            '审核回退' ELSE '未知状态'
+                        END AS `check`,
+                    check_time,
+                    EXISTS (
+                            SELECT
+                                1
+                            FROM
+                                volume v,
+                                volume_workday w
+                            WHERE
+                                v.id = w.volume_id
+                              AND v.project_id = p.id
+                              AND v.tec = d.tec UNION
+                            SELECT
+                                1
+                            FROM
+                                project_task
+                            WHERE
+                                project_id = p.id
+                              AND tec = d.tec
+                        ) AS state
+                FROM
+                    project p,
+                    workday_tec_distribute d,
+                    `user` u
+                WHERE
+                    p.id = d.project_id
+                  AND d.check_handler = #{userId}
+                  AND d.`check` > 0
+                  AND u.id = d.`handler` UNION
+                SELECT
+                    4 AS `type`,
+                    null as typeNote,
+                    p.id AS id,
+                    p.number,
+                    p.`name`,
+                    v.tec AS tec,
+                    u.id AS applicantId,
+                    u.`name` AS applicant,
+                    w.time AS application_time,
+                    CASE
+                        `check`
+                        WHEN 1 THEN
+                            '审核通过'
+                        WHEN 1 THEN
+                            '审核回退' ELSE '未知状态'
+                        END AS `check`,
+                    check_time,
+                    - 1 AS state
+                FROM
+                    project p,
+                    volume_workday w,
+                    volume v,
+                    `user` u
+                WHERE
+                    p.id = v.project_id
+                  AND w.`check` > 0
+                  AND w.volume_id = v.id
+                  AND w.check_handler = #{userId}
+                  AND w.`handler` = u.id
+                GROUP BY
+                    p.id,
+                    v.tec UNION
+                SELECT
+                    5 AS `type`,
+                    null as typeNote,
+                    p.id AS id,
+                    p.number,
+                    p.`name`,
+                    tab.tec AS tec,
+                    u.id AS applicantId,
+                    u.`name` AS applicant,
+                    tab.submit_date AS application_time,
+                    CASE
+                        `submit`
+                        WHEN 2 THEN
+                            '审核通过'
+                        WHEN 3 THEN
+                            '审核回退' ELSE '未知状态'
+                        END AS `check`,
+                    submit_date AS check_time,
+                    - 1 AS state
+                FROM
+                    project p,
+                    (
+                        SELECT
+                            v.project_id,
+                            v.tec,
+                            w.submit,
+                            w.submit_date,
+                            w.`handler`
+                        FROM
+                            volume_workday w,
+                            volume v
+                        WHERE
+                            v.id = w.volume_id
+                          AND w.submit > 1
+                          AND w.submit_handler = #{userId}
+                        GROUP BY
+                            v.project_id,
+                            v.tec,
+                            w.submit_date,
+                            w.`handler` UNION
+                        SELECT
+                            project_id,
+                            tec,
+                            submit,
+                            submit_date,
+                            principal AS `handler`
+                        FROM
+                            project_task
+                        WHERE
+                            submit > 1
+                          AND submit_handler = #{userId}
+                        GROUP BY
+                            project_id,
+                            tec,
+                            submit_date,
+                            `handler`
+                    ) AS tab,
+                    `user` u
+                WHERE
+                    p.id = tab.project_id
+                  AND tab.`handler` = u.id
+                GROUP BY
+                    p.id,
+                    tab.tec,
+                    tab.submit_date,
+                    tab.`handler` UNION
+                SELECT
+                    9 AS `type`,
+                    null as typeNote,
+                    s.id AS id,
+                    s.number,
+                    s.`name`,
+                    "科技项" AS tec,
+                    u.id AS applicantId,
+                    u.`name` AS applicant,
+                    t.create_date AS application_time,
+                    CASE
+                        `check`
+                        WHEN 1 THEN
+                            '审核通过'
+                        WHEN 2 THEN
+                            '审核回退' ELSE '未知状态'
+                        END AS `check`,
+                    t.check_date AS check_time,
+                    - 1 AS state
+                FROM
+                    scientific_term t,
+                    scientific_leader l,
+                    `user` u,
+                    scientific_project s
+                WHERE
+                    s.id = t.scientific_id
+                  AND t.`check` > 0
+                  AND t.checker = #{userId}
+                  AND l.leader = u.id
+                  AND l.id = t.scientific_leader_id UNION
+                SELECT
+                    10 AS `type`,
+                    null as typeNote,
+                    s.id AS id,
+                    s.number,
+                    s.`name`,
+                    "科技任务" AS tec,
+                    u.id AS applicantId,
+                    u.`name` AS applicant,
+                    w.submit_date AS application_time,
+                    CASE
+                        `submit`
+                        WHEN 2 THEN
+                            '审核通过'
+                        WHEN 3 THEN
+                            '审核回退' ELSE '未知状态'
+                        END AS `check`,
+                    w.submit_date AS check_time,
+                    - 1 AS state
+                FROM
+                    scientific_project s,
+                    scientific_leader l,
+                    scientific_task t,
+                    scientific_task_workday w,
+                    `user` u
+                WHERE
+                    s.id = t.scientific_id
+                  AND l.id = t.scientific_leader_id
+                  AND l.leader = u.id
+                  AND t.id = w.scientific_task_id
+                  AND w.submit > 1
+                  AND w.submit_checker = #{userId}
+                GROUP BY
+                    s.id,
+                    l.id,
+                    w.submit_date ) as tab
+        order by check_time desc
+    </select>
+    <select id="isWithdrawOverAll0" resultType="java.lang.Boolean">
+        select exists(
+                       SELECT 1 FROM workday_tec_distribute WHERE project_id = #{id}
+                   )
+    </select>
+    <select id="isWithdrawOverAll3" resultType="java.lang.Boolean">
+        select exists(SELECT
+                          1
+                      FROM
+                          volume v,
+                          volume_workday w
+                      WHERE
+                          v.id = w.volume_id
+                        AND v.project_id = #{id}
+                        AND v.tec = #{tec} UNION
+                      SELECT
+                          1
+                      FROM
+                          project_task
+                      WHERE
+                          project_id = #{id}
+                        AND tec = #{tec} )
+    </select>
+    <select id="isWithdrawOverAll7Or8" resultType="java.lang.Boolean">
+        select exists(
+                       SELECT 1 FROM project_workday_distribute WHERE project_id = #{id}
+                   )
+    </select>
+    <select id="queryInformation7" resultType="java.util.Map">
+        SELECT
+            p.id,
             p.number,
             p.`name`,
-            "项目" AS tec,
-            u.`name` AS applicant,
-            n.application_time,
-            CASE
-                `check`
-                WHEN 1 THEN
-                    '审核通过'
-                WHEN 1 THEN
-                    '审核回退' ELSE '未知状态'
-                END AS `check`,
-            n.check_time
+            p.general,
+            n.stage,
+            n.tec,
+            n.ratio,
+            n.money,
+            n.spider_ratio,
+            n.spider_money,
+            n.other_tec,
+            n.scope,
+            n.planned_date,
+            n.note,
+            n.apply_workday,
+            n.type as typeNote,
+            o.`name` AS office
         FROM
             project p,
+            project_workday w,
             project_note n,
-            `user` u
+            office o
         WHERE
-            p.id = n.project_id
-          AND n.check_handler = #{id}
-          AND `check` > 0
-          AND n.applicant = u.id UNION
+            p.id = #{id}
+          and p.id = w.project_id
+          AND p.id = n.project_id
+          AND n.office_id = o.id
+    </select>
+    <select id="queryInformation8" resultType="java.util.Map">
         SELECT
-            8 AS `type`,
-            p.id AS id,
-            p.number,
-            p.`name`,
-            "项目" AS tec,
-            p.general AS applicant,
-            p.create_time AS application_time,
-            "审核通过" AS `check`,
-            p.create_time AS check_time
+            n.id,
+            n.number,
+            n.`name`,
+            n.general,
+            n.stage,
+            n.tec,
+            n.ratio,
+            n.money,
+            n.spider_ratio,
+            n.spider_money,
+            n.other_tec,
+            n.scope,
+            n.planned_date,
+            n.note,
+            o.`name` AS office,
+            n.workday
         FROM
-            project p
+            project_children n,
+            office o
         WHERE
-            EXISTS (
-                    SELECT
-                        c.id
-                    FROM
-                        project_children c
-                    WHERE
-                        c.project_id = p.id
-                      AND c.`check` > 0
-                      AND c.check_handler = #{id}
-                ) UNION
+            n.project_id = #{id}
+          AND n.office_id = o.id
+    </select>
+    <select id="queryInformation0" resultMap="queryInformation0">
         SELECT
-            0 AS `type`,
-            p.id AS id,
-            p.number,
-            p.`name`,
-            "项目" AS tec,
-            u.`name` AS applicant,
-            d.time AS application_time,
-            CASE
-                `check`
-                WHEN 1 THEN
-                    '审核通过'
-                WHEN 1 THEN
-                    '审核回退' ELSE '未知状态'
-                END AS `check`,
-            check_time
+            w.project_id as id,
+            w.num AS workday,
+            d.tec,
+            d.`backup`,
+            d.manage
         FROM
-            project p,
-            project_workday_distribute d,
-            `user` u
+            project_workday w,
+            project_workday_distribute d
         WHERE
-            p.id = d.project_id
-          AND d.`check` > 0
-          AND u.id = d.`handler`
-          AND d.check_handler = #{id} UNION
+            w.project_id = d.project_id
+          AND w.project_id = #{id}
+    </select>
+    <select id="queryInformationList0" resultType="java.util.Map">
         SELECT
-            3 AS `type`,
-            p.id AS id,
-            p.number,
-            p.`name`,
-            "项目" AS tec,
-            u.`name` AS applicant,
-            a.date AS application_time,
-            CASE
-                a.`check`
-                WHEN 1 THEN
-                    '审核通过'
-                WHEN 1 THEN
-                    '审核回退' ELSE '未知状态'
-                END AS `check`,
-            a.check_time
+            t.volume_tec AS tec,
+            t.amount
         FROM
-            project p,
-            project_workday_add a,
-            `user` u
+            workday_tec t
         WHERE
-            a.project_id = p.id
-          AND a.`check` > 0
-          AND a.check_handler = #{id}
-          AND a.`handler` = u.id
+            t.project_id = #{id}
+    </select>
+    <select id="queryInformation1" resultMap="queryInformation1">
+        SELECT
+            w.id as id,
+            w.num AS workday,
+            d.tec,
+            d.`backup`,
+            d.manage
+        FROM
+            project_workday_add w,
+            project_workday_distribute_add d
+        WHERE
+            w.project_id = d.project_id
+          AND w.id = #{id}
+    </select>
+    <select id="queryInformationList1" resultType="java.util.Map">
+        SELECT
+            t.volume_tec AS tec,
+            t.amount
+        FROM
+            workday_tec_add t
+        WHERE
+            t.add_id = #{id}
+    </select>
+    <select id="queryInformation3" resultType="java.util.Map">
+        SELECT
+            IFNULL( w.amount, 0 ) + IFNULL( a.workday, 0 ) + IFNULL( b.workday, 0 ) AS workday,
+            d.`manage`,
+            d.volume,
+            r.designer,
+            r.checker,
+            r.principal,
+            r.headman
+        FROM
+            workday_tec w
+                LEFT JOIN ( SELECT project_id AS id, sum( amount ) AS workday FROM workday_tec_add WHERE project_id = #{id} AND volume_tec = #{tec}) AS a ON w.project_id = a.id
+                LEFT JOIN ( SELECT project_id AS id, SUM( workday ) AS workday FROM project_workday_backup WHERE project_id = #{id} AND tec = #{tec}) AS b ON w.project_id = b.id,
+            workday_tec_distribute d,
+            tec_ratio r
+        WHERE
+            w.project_id = #{id}
+          AND w.project_id = d.project_id
+          AND w.volume_tec = #{tec}
+          AND w.volume_tec = d.tec
+          AND r.project_id = w.project_id
+          AND r.tec = w.volume_tec
+    </select>
+    <select id="queryInformation4" resultType="java.util.Map">
+        SELECT
+            v.number,
+            v.`name`,
+            w.workday,
+            v.designer,
+            w.designer_workday,
+            v.checker,
+            w.checker_workday,
+            v.actual_principal AS principal,
+            w.principal_workday,
+            v.headman,
+            w.headman_workday
+        FROM
+            volume_workday w,
+            volume v
+        WHERE
+            w.volume_id = v.id
+          AND v.project_id = #{id}
+          and w.`check` = 1
+          AND v.tec = #{tec}
+    </select>
+    <select id="queryInformation5" resultType="java.util.Map">
+        SELECT
+            0 as type,
+            w.id,
+            v.number,
+            v.`name`,
+            w.workday,
+            v.designer,
+            w.designer_workday,
+            v.checker,
+            w.checker_workday,
+            v.actual_principal AS principal,
+            w.principal_workday,
+            v.headman,
+            w.headman_workday,
+            w.submit_date = d.actual_date AS state
+        FROM
+            volume_workday w,
+            volume v,
+            (
+                SELECT
+                    IF
+                        (
+                        DAY (
+			NOW()) > `day`,
+                            DATE_FORMAT( NOW(), "%Y-%m" ),
+                            DATE_FORMAT( DATE_SUB( NOW(), INTERVAL 1 MONTH ), "%Y-%m" )) AS actual_date
+                FROM
+                    declare_day
+                WHERE
+                    id = 1
+            ) AS d
+        WHERE
+            w.volume_id = v.id
+          AND v.project_id = #{map.id}
+          AND v.tec = #{map.tec}
+          AND w.submit_handler = #{userId}
+          AND submit_date = #{map.application_time}
+          AND submit = 2 UNION
+        SELECT
+            1 as type,
+            t.id,
+            t.number,
+            t.`name`,
+            t.designer + t.headman + t.principal + t.headman AS workday,
+            u1.`name` AS designer,
+            t.designer AS designer_workday,
+            u2.`name` AS checker,
+            t.checker AS checker_workday,
+            u3.`name` AS principal,
+            t.principal AS principal_workday,
+            u4.`name` AS headman,
+            t.headman AS headman_workday,
+            t.submit_date = d.actual_date AS state
+        FROM
+            project_task t,
+            `user` u1,
+            `user` u2,
+            `user` u3,
+            `user` u4,
+            (
+                SELECT
+                    IF
+                        (
+                        DAY (
+			NOW()) > `day`,
+                            DATE_FORMAT( NOW(), "%Y-%m" ),
+                            DATE_FORMAT( DATE_SUB( NOW(), INTERVAL 1 MONTH ), "%Y-%m" )) AS actual_date
+                FROM
+                    declare_day
+                WHERE
+                    id = 1
+            ) AS d
+        WHERE
+            t.project_id = #{map.id}
+          AND t.tec = #{map.tec}
+          AND t.submit_handler = #{userId}
+          AND submit_date = #{map.submit_date}
+          AND submit = 2
+          AND u1.id = t.designer
+          AND u2.id = t.checker
+          AND u3.id = t.principal
+          AND u4.id = t.headman
+    </select>
+    <select id="querySubmitDateNow" resultType="java.lang.String">
+        SELECT
+            IF
+                (
+                DAY (
+			NOW()) > `day`,
+                    DATE_FORMAT( NOW(), "%Y-%m" ),
+                    DATE_FORMAT( DATE_SUB( NOW(), INTERVAL 1 MONTH ), "%Y-%m" )) AS actual_date
+        FROM
+            declare_day
+        WHERE
+            id = 1
     </select>
 
 </mapper>

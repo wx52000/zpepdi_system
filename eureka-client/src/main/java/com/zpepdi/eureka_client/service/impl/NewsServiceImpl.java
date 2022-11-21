@@ -218,4 +218,87 @@ public class NewsServiceImpl implements NewsService {
   public Result querySelfCheck(Integer id) {
     return Result.ok(newsDao.adminQueryApply(id));
   }
+
+  @Override
+  public Result queryExtend(Integer userId, Map<String, Object> map) {
+    Integer type = Integer.valueOf(map.get("type").toString());
+    Object object = null;
+    switch (type){
+      case 0:
+        object = newsDao.queryInformation0(map);
+        break;
+      case 1:
+        object = newsDao.queryInformation1(map);
+        break;
+      case 3:
+        object = newsDao.queryInformation3(map);
+        break;
+      case 4:
+        object = newsDao.queryInformation4(map);
+        break;
+      case 5:
+        object = newsDao.queryInformation5(userId,map);
+        break;
+      case 7:
+        object = newsDao.queryInformation7(map);
+        break;
+      case 8:
+        object = newsDao.queryInformation8(map);
+        break;
+      default:
+        break;
+    }
+    return Result.ok(object);
+  }
+
+  @Override
+  public Result withdrawOverAll(Map<String, Object> map) {
+    Integer type = Integer.valueOf(map.get("type").toString());
+    boolean re = true;
+    switch (type){
+      case 0:
+        if (!newsDao.isWithdrawOverAll0(map)){
+          newsDao.withdrawOverAll0(map);
+        }else {
+          re = false;
+        }
+        break;
+      case 3:
+        if (!newsDao.isWithdrawOverAll3(map)){
+          newsDao.withdrawOverAll3(map);
+        }else {
+          re = false;
+        }
+        break;
+      case 5:
+        String nowSubmitDate = newsDao.querySubmitDateNow();
+        if (nowSubmitDate.equals(map.get("submit_date").toString())){
+          newsDao.withdrawOver5(map);
+        }else {
+          re = false;
+        }
+        break;
+      case 7:
+        if (!newsDao.isWithdrawOverAll7Or8(map)){
+          newsDao.withdrawOverAll7(map);
+        }else {
+          re = false;
+        }
+        break;
+      case 8:
+        if (!newsDao.isWithdrawOverAll7Or8(map)){
+          newsDao.withdrawOverAll8(map);
+        }else {
+          re = false;
+        }
+        break;
+      default:
+        break;
+    }
+    if (re) {
+      return Result.ok();
+    }else {
+      return Result.build(843,"当前项目已不可撤回");
+    }
+  }
 }

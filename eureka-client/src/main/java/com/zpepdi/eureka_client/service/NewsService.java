@@ -20,4 +20,8 @@ public interface NewsService {
   Result check(Integer id, List<Map<String,Object>> list, Integer check);
 
   Result querySelfCheck(Integer id);
+
+  Result queryExtend(Integer userId,Map<String,Object> map);
+
+  Result withdrawOverAll(Map<String,Object> map);
 }

@@ -55,10 +55,24 @@ public class NewsController {
         return newsService.check(id,list,check);
     }
 
-  @RequestMapping("querySelfCheck")
-  public Result querySelfCheck(@UserId Integer id){
-    return newsService.querySelfCheck(id);
-  }
+    @RequestMapping("querySelfCheck")
+    public Result querySelfCheck(@UserId Integer id){
+      return newsService.querySelfCheck(id);
+    }
+
+    @RequestMapping("queryExtend")
+    public Result queryExtend(@UserId Integer userId, @RequestBody Map<String,Object> map){
+      return newsService.queryExtend(userId,map);
+    }
+    @RequestMapping("withdrawOverAll")
+    public Result withdrawOverAll(@UserId Integer id, @RequestBody Map<String,Object> map){
+      return newsService.withdrawOverAll(map);
+    }
+
+
+
+
+
 
 
 

@@ -99,11 +99,6 @@ public interface NewsDao {
   void checkLog7(@Param("map") Map<String,Object> map,
           @Param("check") Integer check, @Param("id")Integer id);
 
-  /**
-   * @param id
-   * @param date
-   * @return
-   */
   List<Map<String,Object>> queryLog(@Param("id")Integer id);
 
   List<Map<String,Object>> queryLogList(@Param("id") Integer id, @Param("type") Integer type);
@@ -120,7 +115,51 @@ public interface NewsDao {
                                           @Param("submitDate") String submitDate,
                                           @Param("creator") Integer creator);
 
+  //查询个人审核的实现的记录
   List<Map<String,Object>> adminQueryApply(Integer userId);
+
+  //个人审核项目的信息
+  Map<String,Object> queryInformation7(Map<String,Object> map);
+
+  //个人审核项目的信息
+  List<Map<String,Object>> queryInformation8(Map<String,Object> map);
+
+  //个人审核的项目分配信息
+  Map<String,Object> queryInformation0(Map<String,Object> map);
+
+
+  //个人审核的项目分配到各专业的信息
+  Map<String,Object> queryInformationList0(Integer id);
+
+  //个人审核的项目外审申请分配信息
+  Map<String,Object> queryInformation1(Map<String,Object> map);
+  //个人审核的项目外审申请分配到各专业信息
+  Map<String,Object> queryInformationList1(Integer id);
+
+  Map<String,Object> queryInformation3(Map<String,Object> map);
+
+  List<Map<String,Object>> queryInformation4(Map<String,Object> map);
+
+  List<Map<String,Object>> queryInformation5(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
+
+  void withdrawOverAll0(Map<String,Object> map);
+
+  void withdrawOverAll3(Map<String,Object> map);
+
+  void withdrawOver5(Map<String,Object> map);
+
+  String querySubmitDateNow();
+
+  void withdrawOverAll7(Map<String,Object> map);
+
+  void withdrawOverAll8(Map<String,Object> map);
+
+  boolean isWithdrawOverAll0(Map<String,Object> map);
+
+  boolean isWithdrawOverAll3(Map<String,Object> map);
+
+  boolean isWithdrawOverAll7Or8(Map<String,Object> map);
+
 
 
 }
