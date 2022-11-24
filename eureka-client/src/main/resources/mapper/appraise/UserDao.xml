@@ -2242,10 +2242,10 @@
     <select id="workday" resultType="java.util.Map">
         SELECT
             id,
+            `username`,
             `name`,
             dep,
             tec,
-            username,
             volume_workday + advance_workday + task_workday + `manage` + ifnull( deduct, 0 ) + scientific AS workday,
             volume_workday,
             advance_workday,
@@ -2257,10 +2257,12 @@
             (
                 SELECT
                     u.id,
-                    u.`name`,
-                    d.`name` AS dep,
-                    t.`name` AS tec,
                     u.username,
+                    u.`name`,
+                    d.id as did,
+                    d.`name` AS dep,
+                    t.id as tid,
+                    t.`name` AS tec,
                     (
                             ifnull( d.workday, 0 ) + ifnull( c.workday, 0 ) + ifnull( p.workday, 0 ) + ifnull( h.workday, 0 )) AS volume_workday,
                     (
@@ -2439,8 +2441,8 @@
                     where u.alive = 1
                 GROUP BY
                     u.id
-                order by d.id, t.id, u.username
             ) AS u
+            order by did, tid, username
     </select>
     <select id="workdayByManager" resultType="java.util.Map">
         SELECT
@@ -2670,6 +2672,7 @@
                   AND u.did = u1.did
                 GROUP BY
                     u.id
+                order by t.id, u.username
             ) AS u
     </select>
     <select id="queryByProject" resultType="java.util.Map">

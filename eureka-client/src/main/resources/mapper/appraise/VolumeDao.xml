@@ -1982,97 +1982,99 @@
                 )
     </select>
     <select id="queryRecently10Day" resultType="java.util.Map">
-        SELECT
-        p.number AS pNumber,
-        p.`name` AS pName,
-        v.number,
-        v.`name`,
-        v.designer,
-        v.checker,
-        v.headman,
-        v.principal,
-        v.state,
-        v.planned_publication_date,
-        v.start_date,
-        v.wfInstId
-        FROM
-        project p,
-        volume v
-        WHERE
-        p.generalId = #{userId}
-        AND p.id = v.project_id
-        AND v.planned_publication_date &gt;= DATE_FORMAT( NOW(), '%Y-%m-%d' )
-        AND v.planned_publication_date &lt; DATE_FORMAT( DATE_ADD( NOW(), INTERVAL 10 DAY ), '%Y-%m-%d' ) UNION
-        SELECT
-        p.number AS pNumber,
-        p.`name` AS pName,
-        v.number,
-        v.`name`,
-        v.designer,
-        v.checker,
-        v.headman,
-        v.principal,
-        v.state,
-        v.planned_publication_date,
-        v.start_date,
-        v.wfInstId
-        FROM
-        project p,
-        volume v
-        WHERE
-        p.generalId = #{userId}
-        AND p.id = v.project_id
-        AND v.planned_publication_date &lt; DATE_FORMAT( NOW(), '%Y-%m-%d' )
-        AND v.actual_publication_date IS NULL UNION
-        SELECT
-        p.number AS pNumber,
-        p.`name` AS pName,
-        v.number,
-        v.`name`,
-        v.designer,
-        v.checker,
-        v.headman,
-        v.principal,
-        v.state,
-        v.planned_publication_date,
-        v.start_date,
-        v.wfInstId
-        FROM
-        project p,
-        volume v,
-        workday_tec t
-        WHERE
-        FIND_IN_SET( #{userId}, t.principal )
-        AND t.project_id = p.id
-        AND t.project_id = v.project_id
-        AND t.volume_tec = v.tec
-        AND v.planned_publication_date &gt;= DATE_FORMAT( NOW(), '%Y-%m-%d' )
-        AND v.planned_publication_date &lt; DATE_FORMAT( DATE_ADD( NOW(), INTERVAL 10 DAY ), '%Y-%m-%d' ) UNION
-        SELECT
-        p.number AS pNumber,
-        p.`name` AS pName,
-        v.number,
-        v.`name`,
-        v.designer,
-        v.checker,
-        v.headman,
-        v.principal,
-        v.state,
-        v.planned_publication_date,
-        v.start_date,
-        v.wfInstId
-        FROM
-        project p,
-        volume v,
-        workday_tec t
-        WHERE
-        FIND_IN_SET( #{userId}, t.principal )
-        AND t.project_id = v.project_id
-        AND t.volume_tec = v.tec
-        AND p.id = v.project_id
-        AND v.planned_publication_date &lt;DATE_FORMAT( NOW(), '%Y-%m-%d' )
-        AND v.actual_publication_date IS NULL
-
+        select *
+        from (SELECT p.number AS pNumber,
+                     p.`name` AS pName,
+                     v.id as vid,
+                     v.number,
+                     v.`name`,
+                     v.designer,
+                     v.checker,
+                     v.headman,
+                     v.principal,
+                     v.state,
+                     v.planned_publication_date, v.start_date,
+                     v.wfInstId,
+                     true as isGeneral
+              FROM project p,
+                   volume v
+              WHERE p.generalId = #{userId}
+                AND p.id = v.project_id
+                AND v.planned_publication_date &gt;= DATE_FORMAT(NOW(), '%Y-%m-%d')
+                AND v.planned_publication_date &lt; DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 10 DAY ), '%Y-%m-%d')
+              UNION
+              SELECT p.number AS pNumber,
+                     p.`name` AS pName,
+                     v.id as vid,
+                     v.number,
+                     v.`name`,
+                     v.designer,
+                     v.checker,
+                     v.headman,
+                     v.principal,
+                     v.state,
+                     v.planned_publication_date,
+                     v.start_date,
+                     v.wfInstId,
+                     true as isGeneral
+              FROM project p,
+                   volume v
+              WHERE p.generalId = #{userId}
+                AND p.id = v.project_id
+                AND v.planned_publication_date &lt; DATE_FORMAT(NOW(), '%Y-%m-%d')
+                AND v.actual_publication_date IS NULL
+              UNION
+              SELECT p.number AS pNumber,
+                     p.`name` AS pName,
+                     v.id as vid,
+                     v.number,
+                     v.`name`,
+                     v.designer,
+                     v.checker,
+                     v.headman,
+                     v.principal,
+                     v.state,
+                     v.planned_publication_date,
+                     v.start_date,
+                     v.wfInstId,
+                     false as isGeneral
+              FROM project p,
+                   volume v,
+                   workday_tec t,
+                   workday_tec_principal tp
+              WHERE tp.user_id = #{userId}
+                AND tp.workday_tec_id = t.id
+                AND t.project_id = p.id
+                AND t.project_id = v.project_id
+                AND t.volume_tec = v.tec
+                AND v.planned_publication_date &gt;= DATE_FORMAT(NOW(), '%Y-%m-%d')
+                AND v.planned_publication_date &lt; DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 10 DAY ), '%Y-%m-%d')
+              UNION
+              SELECT p.number AS pNumber,
+                     p.`name` AS pName,
+                     v.id as vid,
+                     v.number,
+                     v.`name`,
+                     v.designer,
+                     v.checker,
+                     v.headman,
+                     v.principal,
+                     v.state,
+                     v.planned_publication_date,
+                     v.start_date,
+                     v.wfInstId,
+                     false as isGeneral
+              FROM project p,
+                   volume v,
+                   workday_tec t,
+                   workday_tec_principal tp
+              WHERE tp.user_id = #{userId}
+                AND tp.workday_tec_id = t.id
+                AND t.project_id = v.project_id
+                AND t.volume_tec = v.tec
+                AND p.id = v.project_id
+                AND v.planned_publication_date &lt; DATE_FORMAT(NOW(), '%Y-%m-%d')
+                AND v.actual_publication_date IS NULL ) as tab
     </select>
     <select id="queryVolumeWorkdayAndRatio" resultType="java.util.Map">
         SELECT
