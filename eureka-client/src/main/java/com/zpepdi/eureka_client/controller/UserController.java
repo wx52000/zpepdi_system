@@ -72,15 +72,15 @@ public class UserController {
 
 //    用户详细信息
     @RequestMapping("information")
-    public Result information(@UserId Integer userId,@RequestHeader("queryDate")String date){
-        return userService.information(userId,date);
+    public Result information(@UserId Integer userId,@RequestBody Map<String,Object> map){
+        return userService.information(userId,map);
     }
 
 
 //个人工时日志
     @RequestMapping("workdayLogById")
-    public Result workdayLogById(@UserId Integer userId,@RequestHeader("queryDate")String date){
-        return userService.workdayLogById(userId,date);
+    public Result workdayLogById(@UserId Integer userId,@RequestBody Map<String,Object> map){
+        return userService.workdayLogById(userId,map);
     }
 
 
@@ -96,8 +96,8 @@ public class UserController {
     }
 
     @RequestMapping("workday")
-    public Result workday(@RequestHeader("queryDate") String queryDate){
-        return  userService.workday(queryDate);
+    public Result workday(@RequestBody Map<String,Object> map){
+        return  userService.workday(map);
     }
 
     @RequestMapping("projectRole")
@@ -136,14 +136,13 @@ public class UserController {
     }
 
     @RequestMapping("workdayByManager")
-    public Result workdayByManager(@UserId Integer id, @RequestHeader("queryDate") String queryDate){
-        return  userService.workdayByManager(id, queryDate);
+    public Result workdayByManager(@UserId Integer id, @RequestBody Map<String,Object> map){
+        return  userService.workdayByManager(id, map);
     }
 
     @RequestMapping("workdayByGeneral")
-    public Result workdayByGeneral(@UserId Integer userId,@RequestHeader("id")Integer id,
-                                   @RequestHeader("queryDate") String queryDate){
-        return  userService.workdayByGeneral( queryDate, userId, id);
+    public Result workdayByGeneral(@UserId Integer userId,@RequestBody Map<String,Object> map){
+        return  userService.workdayByGeneral( userId, map);
     }
 
     @RequestMapping("logByGeneral")

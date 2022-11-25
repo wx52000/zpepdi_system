@@ -85,14 +85,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result information(Integer id,String date) {
-        return Result.ok(userDao.information(id,date));
+    public Result information(Integer id,Map<String,Object> map) {
+        return Result.ok(userDao.information(id,map));
     }
 
     @Override
-    public Result workdayLogById(Integer id, String date) {
+    public Result workdayLogById(Integer id, Map<String,Object> map) {
 //        User user = userDao.queryById(id);
-        return Result.ok(userDao.workdayLogById(id,date));
+        return Result.ok(userDao.workdayLogById(id,map));
     }
 
     @Override
@@ -102,9 +102,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result workdayLog(Map<String, Object> map) {
-        int id = Integer.parseInt(map.get("id").toString());
-//        User user = userDao.queryById(id);
-        return Result.ok(userDao.workdayAllLogById(id,map.get("date").toString()));
+        return Result.ok(userDao.workdayAllLogById(map));
     }
 
     @Override
@@ -113,8 +111,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result workday(String date) {
-        return Result.ok(userDao.workday(date));
+    public Result workday(Map<String,Object> map) {
+        return Result.ok(userDao.workday(map));
     }
 
     @Override
@@ -153,13 +151,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result workdayByManager(Integer id, String date) {
-        return Result.ok(userDao.workdayByManager(id, date));
+    public Result workdayByManager(Integer id, Map<String,Object> map) {
+        return Result.ok(userDao.workdayByManager(id, map));
     }
 
     @Override
-    public Result workdayByGeneral(String date, Integer userId, Integer id) {
-        return Result.ok(userDao.workdayByGeneral(date,userId,id));
+    public Result workdayByGeneral(Integer userId, Map<String,Object> map) {
+        return Result.ok(userDao.workdayByGeneral(userId,map));
     }
 
     @Override

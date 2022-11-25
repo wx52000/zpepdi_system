@@ -49,12 +49,12 @@ public interface UserDao {
 
     List<Map<String,Object>> volumeHeadman(Integer id);
 
-    Map<String,Object> information(@Param("id") Integer id, @Param("date") String date);
+    Map<String,Object> information(@Param("id") Integer id, @Param("map")Map<String,Object> map);
 
     //个人工时日志
-    List<Map<String,Object>> workdayLogById(@Param("userId")Integer userId, @Param("date")String date);
+    List<Map<String,Object>> workdayLogById(@Param("userId")Integer userId, @Param("map")Map<String,Object> map);
     //个人工时日志包含奖惩
-    List<Map<String,Object>> workdayAllLogById(@Param("userId")Integer userId, @Param("date")String date);
+    List<Map<String,Object>> workdayAllLogById(Map<String,Object> map);
 
     List<Map> query(User user);
 
@@ -62,12 +62,12 @@ public interface UserDao {
     * 查询所有角色的工时
     */
 
-    List<Map<String,Object>> workday(@Param("date") String date);
+    List<Map<String,Object>> workday(Map<String,Object> map);
 
-    List<Map<String,Object>> workdayByManager(@Param("id")Integer id, @Param("date") String date);
+    List<Map<String,Object>> workdayByManager(@Param("id")Integer id, @Param("map")Map<String,Object> map);
 
-    List<Map<String,Object>> workdayByGeneral(@Param("date") String date, @Param("userId") Integer userId,
-                                                @Param("id") Integer id);
+    List<Map<String,Object>> workdayByGeneral( @Param("userId") Integer userId,
+                                                @Param("map") Map<String,Object> map);
 
     List<Map<String,Object>> logByGeneral(@Param("id")Integer id, @Param("map")Map<String,Object> map);
 
