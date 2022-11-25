@@ -225,24 +225,10 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
   }
 
   @Override
-  public List<Map<String, Object>> userAll(String date) {
-    return userDao.workday(date);
-  }
-
-  @Override
-  public List<Map<String, Object>> userByManage(String date, Integer userId) {
-    return userDao.workdayByManager(userId,date);
-  }
-
-  @Override
   public List<Map<String, Object>> userByPrincipal(String date,Integer userId, Integer id) {
     return userDao.workdayByPrincipal(date,userId,id);
   }
 
-  @Override
-  public List<Map<String, Object>> userByProject(String date, Integer userId, Integer id) {
-    return userDao.workdayByGeneral(date,userId,id);
-  }
 
   @Override
   public List<Map<String,String>> statistic(Integer id) {
@@ -261,13 +247,6 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
     return proWorkdayDao.everyone(map);
   }
 
-  @Override
-  public List<Map<String, Object>> personal(Integer id) {
-    Calendar calendar = Calendar.getInstance();
-    String date = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1);
-//    User user = userDao.queryById(id);
-    return userDao.workdayLogById(id,date);
-  }
 
   @Override
   public Result queryBackupList(Integer id) {

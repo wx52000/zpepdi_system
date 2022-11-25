@@ -27,9 +27,9 @@ public interface UserService {
 
     void pwdReset(Integer id);
 
-    Result information(Integer id,String date);
+    Result information(Integer id,Map<String,Object> map);
 
-    Result workdayLogById(Integer id, String date);
+    Result workdayLogById(Integer id, Map<String,Object> map);
 
     Result queryByProject(Integer id);
 
@@ -37,7 +37,7 @@ public interface UserService {
 
     List<Map> query(User user);
 
-    Result workday(String date);
+    Result workday(Map<String,Object> map);
 
     Result projectRole();
 
@@ -53,10 +53,10 @@ public interface UserService {
 
     Result volumeHeadman(Integer id);
 
-    Result workdayByManager(Integer id, String date);
+    Result workdayByManager(Integer id, Map<String,Object> map);
 
-    Result workdayByGeneral( String date,  Integer userId,
-                               Integer id);
+    Result workdayByGeneral(Integer userId,
+                            Map<String,Object> map);
 
     Result logByGeneral(Integer id, Map<String,Object> map);
 

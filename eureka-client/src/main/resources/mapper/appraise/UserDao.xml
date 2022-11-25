@@ -1572,875 +1572,898 @@
   </select>
     <select id="workdayLogById" resultType="java.util.Map">
         SELECT
-            pnum,
-            pname,
-            `handler`,
-            number,
-            `name`,
-            tec,
-            workday,
-            type,
-            role
+        pnum,
+        pname,
+        `handler`,
+        number,
+        `name`,
+        tec,
+        workday,
+        submit_date,
+        type,
+        role
         FROM
-            (
-                SELECT
-                    v.pnum,
-                    v.pname,
-                    v.`handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    v.workday - ifnull( SUM( h.`grant` ), 0 ) AS workday,
-                    2 AS type,
-                    0 AS role
-                FROM
-                    (
-                        SELECT
-                            p.number AS pnum,
-                            p.`name` AS pname,
-                            u.`name` AS `handler`,
-                            v.id,
-                            v.number,
-                            v.`name`,
-                            v.tec,
-                            IFNULL( w.designer_workday, 0 ) AS workday
-                        FROM
-                            project p,
-                            `user` u,
-                            volume_workday w,
-                            volume v
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.volume_id = v.id
-                          AND v.project_id = p.id
-                          AND w.`handler` = u.id
-                          AND w.submit = 2
-                          AND w.submit_date = #{date}
-
-                          AND w.`check` = 1
-                          AND vu.designer = #{userId}
-
-                    ) AS v
-                        LEFT JOIN volume_workday_high h ON v.id = h.volume_id
-                        AND h.submit = 2
-                GROUP BY
-                    v.id UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    IFNULL( w.checker_workday, 0 ) AS workday,
-                    2 AS type,
-                    1 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    volume_workday w,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    w.volume_id = v.id
-                  AND v.project_id = p.id
-                  AND w.`handler` = u.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{date}
-
-                  AND w.`check` = 1
-                  AND vu.checker = #{userId}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    IFNULL( w.principal_workday, 0 ) AS workday,
-                    2 AS type,
-                    2 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    volume_workday w,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    w.volume_id = v.id
-                  AND v.project_id = p.id
-                  AND w.`handler` = u.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{date}
-
-                  AND w.`check` = 1
-                  AND vu.principal = #{userId}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    IFNULL( w.headman_workday, 0 ) AS workday,
-                    2 AS type,
-                    3 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    volume_workday w,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    w.volume_id = v.id
-                  AND v.project_id = p.id
-                  AND w.`handler` = u.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{date}
-
-                  AND w.`check` = 1
-                  AND vu.headman = #{userId}
-                UNION ALL
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    h.`grant` AS workday,
-                    3 AS type,
-                    0 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    volume_workday w,
-                    volume_workday_high h,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    v.id = h.volume_id
-                  AND v.project_id = p.id
-                  AND w.`handler` = u.id
-                  AND w.volume_id = h.volume_id
-                  AND h.submit = 2
-                  AND h.submit_date = #{date}
-
-                  AND vu.designer = #{userId}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    t.designer_workday - ifnull( SUM( a.advance ), 0 ) AS workday,
-                    t.type AS type,
-                    0 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t
-                        LEFT JOIN task_advance a ON t.id = a.task_id
-                        AND a.submit != 2
-                WHERE
-                    t.designer = #{userId}
-
-                  AND t.project_id = p.id
-                  AND t.principal = u.id
-                  AND t.submit = 2
-                  AND t.submit_date = #{date}
-
-                GROUP BY
-                    t.id UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    a.advance AS workday,
-                    3 AS type,
-                    0 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t,
-                    task_advance a
-                WHERE
-                    t.id = a.task_id
-                  AND t.project_id = p.id
-                  AND t.principal = u.id
-                  AND a.submit_date = #{date}
-
-                  AND a.submit = 2
-                  AND t.designer = #{userId}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    t.checker_workday AS workday,
-                    t.type AS type,
-                    1 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t
-                WHERE
-                    t.checker = #{userId}
-
-                  AND t.project_id = p.id
-                  AND t.principal = u.id
-                  AND t.submit = 2
-                  AND t.submit_date = #{date}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    t.principal_workday AS workday,
-                    t.type AS type,
-                    2 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t
-                WHERE
-                    t.principal = #{userId}
-
-                  AND t.submit = 2
-                  AND t.submit_date = #{date}
-
-                  AND t.project_id = p.id
-                  AND t.principal = u.id UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    headman_workday AS workday,
-                    t.type AS type,
-                    3 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t
-                WHERE
-                    t.headman = #{userId}
-
-                  AND t.project_id = p.id
-                  AND t.principal = u.id
-                  AND t.submit = 2
-                  AND t.submit_date = #{date}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    m.number,
-                    m.`name`,
-                    "设总管理" AS tec,
-                    m.workday AS workday,
-                    0 AS type,
-                    5 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_workday_manage m
-                WHERE
-                    m.project_id = p.id
-                  AND m.date = #{date}
-
-                  AND m.designer = #{userId}
-
-                  AND m.`handler` = u.id UNION
-                SELECT
-                    p.number AS pnumber,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    "科技工时" AS tec,
-                    w.workday,
-                    6 AS `type`,
-                    0 AS designer
-                FROM
-                    scientific_task t,
-                    `user` u,
-                    scientific_task_workday w,
-                    scientific_project p
-                WHERE
-                    w.user_id = #{userId}
-                  AND w.scientific_task_id = t.id
-                  AND t.scientific_id = p.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{date}
-                  AND t.creator = u.id
-            ) AS d
+        (
+        SELECT
+        v.pnum,
+        v.pname,
+        v.`handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        v.workday - ifnull( SUM( h.`grant` ), 0 ) AS workday,
+        v.submit_date,
+        2 AS type,
+        0 AS role
+        FROM
+        (
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.id,
+        v.number,
+        v.`name`,
+        v.tec,
+        IFNULL( w.designer_workday, 0 ) AS workday,
+        w.submit_date
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
         WHERE
-            d.workday != 0
+        w.volume_id = v.id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND w.`check` = 1
+        AND vu.designer = #{userId}
+        ) AS v
+        LEFT JOIN volume_workday_high h ON v.id = h.volume_id
+        AND h.submit = 2
+        GROUP BY
+        v.id UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        IFNULL( w.checker_workday, 0 ) AS workday,
+        w.submit_date,
+        2 AS type,
+        1 AS role
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.volume_id = v.id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND w.`check` = 1
+        AND vu.checker = #{userId} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        IFNULL( w.principal_workday, 0 ) AS workday,
+        w.submit_date,
+        2 AS type,
+        2 AS role
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.volume_id = v.id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND w.`check` = 1
+        AND vu.principal = #{userId} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        IFNULL( w.headman_workday, 0 ) AS workday,
+        w.submit_date,
+        2 AS type,
+        3 AS role
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.volume_id = v.id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND w.`check` = 1
+        AND vu.headman = #{userId} UNION ALL
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        h.`grant` AS workday,
+        h.submit_date,
+        3 AS type,
+        0 AS role
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume_workday_high h,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        v.id = h.volume_id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.volume_id = h.volume_id
+        AND h.submit = 2
+        AND h.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND vu.designer = #{userId} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        t.designer_workday - ifnull( SUM( a.advance ), 0 ) AS workday,
+        t.submit_date,
+        t.type AS type,
+        0 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t
+        LEFT JOIN task_advance a ON t.id = a.task_id
+        AND a.submit = 2
+        WHERE
+        t.designer = #{userId}
+        AND t.project_id = p.id
+        AND t.principal = u.id
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        t.id UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        a.advance AS workday,
+        a.submit_date,
+        3 AS type,
+        0 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t,
+        task_advance a
+        WHERE
+        t.id = a.task_id
+        AND t.project_id = p.id
+        AND t.principal = u.id
+        AND a.submit_date &gt;= #{map.startMonth}
+        AND a.submit_date &lt;= #{map.endMonth}
+        AND a.submit = 2
+        AND t.designer = #{userId} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        t.checker_workday AS workday,
+        t.submit_date,
+        t.type AS type,
+        1 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t
+        WHERE
+        t.checker = #{userId}
+        AND t.project_id = p.id
+        AND t.principal = u.id
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        t.principal_workday AS workday,
+        t.submit_date,
+        t.type AS type,
+        2 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t
+        WHERE
+        t.principal = #{userId}
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        AND t.project_id = p.id
+        AND t.principal = u.id UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        headman_workday AS workday,
+        t.submit_date,
+        t.type AS type,
+        3 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t
+        WHERE
+        t.headman = #{userId}
+        AND t.project_id = p.id
+        AND t.principal = u.id
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        m.number,
+        m.`name`,
+        "设总管理" AS tec,
+        m.workday AS workday,
+        m.date AS submit_date,
+        0 AS type,
+        5 AS role
+        FROM
+        project p,
+        `user` u,
+        project_workday_manage m
+        WHERE
+        m.project_id = p.id
+        AND m.date &gt;= #{map.startMonth}
+        AND m.date &lt;= #{map.endMonth}
+        AND m.designer = #{userId}
+        AND m.`handler` = u.id UNION
+        SELECT
+        p.number AS pnumber,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        "科技工时" AS tec,
+        w.workday,
+        w.submit_date,
+        6 AS `type`,
+        0 AS designer
+        FROM
+        scientific_task t,
+        `user` u,
+        scientific_task_workday w,
+        scientific_project p
+        WHERE
+        w.user_id = #{userId}
+        AND w.scientific_task_id = t.id
+        AND t.scientific_id = p.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND t.creator = u.id
+        ) AS d
+        WHERE
+        d.workday != 0
     </select>
     <select id="workdayAllLogById" resultType="java.util.Map">
         SELECT
-            pnum,
-            pname,
-            `handler`,
-            number,
-            `name`,
-            tec,
-            workday,
-            type,
-            role
+        pnum,
+        pname,
+        `handler`,
+        number,
+        `name`,
+        tec,
+        workday,
+        submit_date,
+        type,
+        role
         FROM
-            (
-                SELECT
-                    v.pnum,
-                    v.pname,
-                    v.`handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    v.workday - ifnull( SUM( h.`grant` ), 0 ) AS workday,
-                    2 AS type,
-                    0 AS role
-                FROM
-                    (
-                        SELECT
-                            p.number AS pnum,
-                            p.`name` AS pname,
-                            u.`name` AS `handler`,
-                            v.id,
-                            v.number,
-                            v.`name`,
-                            v.tec,
-                            IFNULL( w.designer_workday, 0 ) AS workday
-                        FROM
-                            project p,
-                            `user` u,
-                            volume_workday w,
-                            volume v
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.volume_id = v.id
-                          AND v.project_id = p.id
-                          AND w.`handler` = u.id
-                          AND w.submit = 2
-                          AND w.submit_date = #{date}
-
-                          AND w.`check` = 1
-                          AND vu.designer = #{userId}
-
-                    ) AS v
-                        LEFT JOIN volume_workday_high h ON v.id = h.volume_id
-                        AND h.submit = 2
-                GROUP BY
-                    v.id UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    IFNULL( w.checker_workday, 0 ) AS workday,
-                    2 AS type,
-                    1 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    volume_workday w,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    w.volume_id = v.id
-                  AND v.project_id = p.id
-                  AND w.`handler` = u.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{date}
-
-                  AND w.`check` = 1
-                  AND vu.checker = #{userId}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    IFNULL( w.principal_workday, 0 ) AS workday,
-                    2 AS type,
-                    2 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    volume_workday w,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    w.volume_id = v.id
-                  AND v.project_id = p.id
-                  AND w.`handler` = u.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{date}
-
-                  AND w.`check` = 1
-                  AND vu.principal = #{userId}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    IFNULL( w.headman_workday, 0 ) AS workday,
-                    2 AS type,
-                    3 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    volume_workday w,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    w.volume_id = v.id
-                  AND v.project_id = p.id
-                  AND w.`handler` = u.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{date}
-
-                  AND w.`check` = 1
-                  AND vu.headman = #{userId}
-                UNION ALL
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    v.number,
-                    v.`name`,
-                    v.tec,
-                    h.`grant` AS workday,
-                    3 AS type,
-                    0 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    volume_workday w,
-                    volume_workday_high h,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    v.id = h.volume_id
-                  AND v.project_id = p.id
-                  AND w.`handler` = u.id
-                  AND w.volume_id = h.volume_id
-                  AND h.submit = 2
-                  AND h.submit_date = #{date}
-
-                  AND vu.designer = #{userId}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    t.designer_workday - ifnull( SUM( a.advance ), 0 ) AS workday,
-                    t.type AS type,
-                    0 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t
-                        LEFT JOIN task_advance a ON t.id = a.task_id
-                        AND a.submit != 2
-                WHERE
-                    t.designer = #{userId}
-
-                  AND t.project_id = p.id
-                  AND t.principal = u.id
-                  AND t.submit = 2
-                  AND t.submit_date = #{date}
-
-                GROUP BY
-                    t.id UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    a.advance AS workday,
-                    3 AS type,
-                    0 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t,
-                    task_advance a
-                WHERE
-                    t.id = a.task_id
-                  AND t.project_id = p.id
-                  AND t.principal = u.id
-                  AND a.submit_date = #{date}
-
-                  AND a.submit = 2
-                  AND t.designer = #{userId}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    t.checker_workday AS workday,
-                    t.type AS type,
-                    1 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t
-                WHERE
-                    t.checker = #{userId}
-
-                  AND t.project_id = p.id
-                  AND t.principal = u.id
-                  AND t.submit = 2
-                  AND t.submit_date = #{date}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    t.principal_workday AS workday,
-                    t.type AS type,
-                    2 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t
-                WHERE
-                    t.principal = #{userId}
-
-                  AND t.submit = 2
-                  AND t.submit_date = #{date}
-
-                  AND t.project_id = p.id
-                  AND t.principal = u.id UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    t.tec,
-                    headman_workday AS workday,
-                    t.type AS type,
-                    3 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_task t
-                WHERE
-                    t.headman = #{userId}
-
-                  AND t.project_id = p.id
-                  AND t.principal = u.id
-                  AND t.submit = 2
-                  AND t.submit_date = #{date}
-                UNION
-                SELECT
-                    p.number AS pnum,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    m.number,
-                    m.`name`,
-                    "设总管理" AS tec,
-                    m.workday AS workday,
-                    0 AS type,
-                    5 AS role
-                FROM
-                    project p,
-                    `user` u,
-                    project_workday_manage m
-                WHERE
-                    m.project_id = p.id
-                  AND m.date = #{date}
-
-                  AND m.designer = #{userId}
-
-                  AND m.`handler` = u.id UNION
-                SELECT
-                    p.number AS pnum,
-                    p.NAME AS pname,
-                    u.NAME AS HANDLER,
-                    t.task_number AS number,
-                    t.task_name AS NAME,
-                    t.tec,
-                    t.workday,
-                    6 AS `type`,
-                    t.role
-                FROM
-                    workday_deduct t,
-                    `user` u,
-                    project p
-                WHERE
-                    user_id = #{userId}
-
-                  AND `date` = #{date}
-
-                  AND u.id = t.HANDLER
-                  AND p.id = t.project_id UNION
-                SELECT
-                    p.number AS pnumber,
-                    p.`name` AS pname,
-                    u.`name` AS `handler`,
-                    t.number,
-                    t.`name`,
-                    "科技工时" AS tec,
-                    w.workday,
-                    5 AS `type`,
-                    0 AS role
-                FROM
-                    scientific_task t,
-                    `user` u,
-                    scientific_task_workday w,
-                    scientific_project p
-                WHERE
-                    w.user_id = #{userId}
-
-                  AND w.scientific_task_id = t.id
-                  AND t.scientific_id = p.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{date}
-
-                  AND t.creator = u.id
-            ) AS d
+        (
+        SELECT
+        v.pnum,
+        v.pname,
+        v.`handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        v.workday - ifnull( SUM( h.`grant` ), 0 ) AS workday,
+        v.submit_date,
+        2 AS type,
+        0 AS role
+        FROM
+        (
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.id,
+        v.number,
+        v.`name`,
+        v.tec,
+        IFNULL( w.designer_workday, 0 ) AS workday,
+        w.submit_date
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
         WHERE
-            d.workday != 0
+        w.volume_id = v.id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        AND w.`check` = 1
+        AND vu.designer = #{id}
+        ) AS v
+        LEFT JOIN volume_workday_high h ON v.id = h.volume_id
+        AND h.submit = 2
+        GROUP BY
+        v.id UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        IFNULL( w.checker_workday, 0 ) AS workday,
+        w.submit_date,
+        2 AS type,
+        1 AS role
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.volume_id = v.id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        AND w.`check` = 1
+        AND vu.checker = #{id} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        IFNULL( w.principal_workday, 0 ) AS workday,
+        w.submit_date,
+        2 AS type,
+        2 AS role
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.volume_id = v.id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        AND w.`check` = 1
+        AND vu.principal = #{id} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        IFNULL( w.headman_workday, 0 ) AS workday,
+        w.submit_date,
+        2 AS type,
+        3 AS role
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.volume_id = v.id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        AND w.`check` = 1
+        AND vu.headman = #{id} UNION ALL
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.number,
+        v.`name`,
+        v.tec,
+        h.`grant` AS workday,
+        h.submit_date,
+        3 AS type,
+        0 AS role
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume_workday_high h,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        v.id = h.volume_id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.volume_id = h.volume_id
+        AND h.submit = 2
+        AND h.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        AND vu.designer = #{id} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        t.designer_workday - ifnull( SUM( a.advance ), 0 ) AS workday,
+        t.submit_date,
+        t.type AS type,
+        0 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t
+        LEFT JOIN task_advance a ON t.id = a.task_id
+        AND a.submit = 2
+        WHERE
+        t.designer = #{id}
+        AND t.project_id = p.id
+        AND t.principal = u.id
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{startMonth}
+        AND t.submit_date &lt;= #{endMonth}
+        GROUP BY
+        t.id UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        a.advance AS workday,
+        a.submit_date,
+        3 AS type,
+        0 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t,
+        task_advance a
+        WHERE
+        t.id = a.task_id
+        AND t.project_id = p.id
+        AND t.principal = u.id
+        AND a.submit_date &gt;= #{startMonth}
+        AND a.submit_date &lt;= #{endMonth}
+        AND a.submit = 2
+        AND t.designer = #{id} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        t.checker_workday AS workday,
+        t.submit_date,
+        t.type AS type,
+        1 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t
+        WHERE
+        t.checker = #{id}
+        AND t.project_id = p.id
+        AND t.principal = u.id
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{startMonth}
+        AND t.submit_date &lt;= #{endMonth} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        t.principal_workday AS workday,
+        t.submit_date,
+        t.type AS type,
+        2 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t
+        WHERE
+        t.principal = #{id}
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{startMonth}
+        AND t.submit_date &lt;= #{endMonth}
+        AND t.project_id = p.id
+        AND t.principal = u.id UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        t.tec,
+        headman_workday AS workday,
+        t.submit_date,
+        t.type AS type,
+        3 AS role
+        FROM
+        project p,
+        `user` u,
+        project_task t
+        WHERE
+        t.headman = #{id}
+        AND t.project_id = p.id
+        AND t.principal = u.id
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{startMonth}
+        AND t.submit_date &lt;= #{endMonth} UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        m.number,
+        m.`name`,
+        "设总管理" AS tec,
+        m.workday AS workday,
+        m.date AS submit_date,
+        0 AS type,
+        5 AS role
+        FROM
+        project p,
+        `user` u,
+        project_workday_manage m
+        WHERE
+        m.project_id = p.id
+        AND m.date &gt;= #{startMonth}
+        AND m.date &lt;= #{endMonth}
+        AND m.designer = #{id}
+        AND m.`handler` = u.id UNION
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.task_number AS number,
+        t.task_name AS `name`,
+        t.tec,
+        t.workday,
+        t.date AS submit_date,
+        6 AS `type`,
+        t.role
+        FROM
+        workday_deduct t,
+        `user` u,
+        project p
+        WHERE
+        user_id = #{id}
+        AND `date` &gt;= #{startMonth}
+        AND `date` &lt;= #{endMonth}
+        AND u.id = t.`handler`
+        AND p.id = t.project_id UNION
+        SELECT
+        p.number AS pnumber,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        t.number,
+        t.`name`,
+        "科技工时" AS tec,
+        w.workday,
+        w.submit_date,
+        6 AS `type`,
+        0 AS designer
+        FROM
+        scientific_task t,
+        `user` u,
+        scientific_task_workday w,
+        scientific_project p
+        WHERE
+        w.user_id = #{id}
+        AND w.scientific_task_id = t.id
+        AND t.scientific_id = p.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        AND t.creator = u.id
+        ) AS d
+        WHERE
+        d.workday != 0
     </select>
     <select id="workday" resultType="java.util.Map">
         SELECT
-            id,
-            `name`,
-            dep,
-            tec,
-            username,
-            volume_workday + advance_workday + task_workday + `manage` + ifnull( deduct, 0 ) + scientific AS workday,
-            volume_workday,
-            advance_workday,
-            task_workday,
-            manage,
-            scientific,
-            ifnull( deduct, 0 ) AS deduct
+        id,
+        `username`,
+        `name`,
+        dep,
+        tec,
+        volume_workday + advance_workday + task_workday + `manage` + ifnull( deduct, 0 ) + scientific AS workday,
+        volume_workday,
+        advance_workday,
+        task_workday,
+        manage,
+        scientific,
+        ifnull( deduct, 0 ) AS deduct
         FROM
-            (
-                SELECT
-                    u.id,
-                    u.`name`,
-                    d.`name` AS dep,
-                    t.`name` AS tec,
-                    u.username,
-                    (
-                            ifnull( d.workday, 0 ) + ifnull( c.workday, 0 ) + ifnull( p.workday, 0 ) + ifnull( h.workday, 0 )) AS volume_workday,
-                    (
-                        ifnull( h1.workday, 0 ) + ifnull( hd.advance, 0 )) AS advance_workday,
-                    (
-                            ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday,
-                    ifnull( m.workday, 0 ) AS `manage`,
-                    IFNULL( sci.workday, 0 ) AS scientific,
-                    de.workday AS deduct
-                FROM
-                    `user` u
-                        LEFT JOIN department d ON d.id = u.did
-                        LEFT JOIN technology t ON t.id = u.tid
-                        LEFT JOIN (
-                        SELECT
-                            vu.designer,
-                            SUM(
-                                    IFNULL( w.designer_workday, 0 ) - ifnull( h.`grant`, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN ( SELECT volume_id, IFNULL( SUM( `grant` ), 0 ) AS `grant` FROM volume_workday_high WHERE submit = 2 GROUP BY volume_id ) AS h ON h.volume_id = w.volume_id
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-                        GROUP BY
-                            vu.designer
-                    ) AS d ON d.designer = u.`id`
-                        LEFT JOIN (
-                        SELECT
-                            vu.checker,
-                            SUM(
-                                    IFNULL( checker_workday, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-                        GROUP BY
-                            vu.checker
-                    ) AS c ON u.`id` = c.checker
-                        LEFT JOIN (
-                        SELECT
-                            vu.principal,
-                            SUM(
-                                    IFNULL( principal_workday, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-                        GROUP BY
-                            vu.principal
-                    ) AS p ON u.`id` = p.principal
-                        LEFT JOIN (
-                        SELECT
-                            vu.headman,
-                            SUM(
-                                    IFNULL( w.headman_workday, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-                        GROUP BY
-                            vu.headman
-                    ) AS h ON u.`id` = h.headman
-                        LEFT JOIN (
-                        SELECT
-                            vu.designer,
-                            SUM( h.`grant` ) AS workday
-                        FROM
-                            volume_workday_high h
-                                LEFT JOIN volume v ON h.volume_id = v.id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            h.submit = 2
-                          AND h.submit_date = #{date}
-                        GROUP BY
-                            vu.designer
-                    ) AS h1 ON h1.designer = u.`id`
-                        LEFT JOIN (
-                        SELECT
-                            t.designer,
-                            t.designer_workday,
-                            ifnull( SUM( a.advance ), 0 ) AS advance
-                        FROM
-                            project_task t,
-                            task_advance a
-                        WHERE
-                            t.id = a.task_id
-                          AND a.submit = 2
-                          AND a.submit_date = #{date}
-                        GROUP BY
-                            t.designer
-                    ) AS hd ON hd.designer = u.id
-                        LEFT JOIN (
-                        SELECT
-                            t.designer,
-                            SUM( designer_workday - advance ) AS workday
-                        FROM
-                            (
-                                SELECT
-                                    t.designer,
-                                    t.designer_workday,
-                                    ifnull( SUM( a.advance ), 0 ) AS advance
-                                FROM
-                                    project_task t
-                                        LEFT JOIN task_advance a ON t.id = a.task_id
-                                        AND a.submit = 2
-                                WHERE
-                                    t.submit = 2
-                                  AND t.submit_date = #{date}
-                                GROUP BY
-                                    t.id
-                            ) AS t
-                        GROUP BY
-                            designer
-                    ) AS td ON td.designer = u.id
-                        LEFT JOIN (
-                        SELECT
-                            tc.checker,
-                            sum( checker_workday ) AS checker_workday
-                        FROM
-                            project_task tc
-                        WHERE
-                            submit = 2
-                          AND submit_date = #{date}
-                        GROUP BY
-                            tc.checker
-                    ) AS tc ON tc.checker = u.id
-                        LEFT JOIN (
-                        SELECT
-                            tc.principal,
-                            sum( principal_workday ) AS principal_workday
-                        FROM
-                            project_task tc
-                        WHERE
-                            submit = 2
-                          AND submit_date = #{date}
-                        GROUP BY
-                            tc.principal
-                    ) AS tp ON tp.principal = u.id
-                        LEFT JOIN (
-                        SELECT
-                            tc.headman,
-                            sum( headman_workday ) AS headman_workday
-                        FROM
-                            project_task tc
-                        WHERE
-                            submit = 2
-                          AND submit_date = #{date}
-                        GROUP BY
-                            tc.headman
-                    ) AS th ON th.headman = u.id
-                        LEFT JOIN (
-                        SELECT
-                            m.designer,
-                            sum( m.workday ) AS workday
-                        FROM
-                            project_workday_manage m
-                        WHERE
-                            m.date = #{date}
-                        GROUP BY
-                            m.designer
-                    ) AS m ON m.designer = u.id
-                        LEFT JOIN ( SELECT sum( workday ) AS workday, user_id AS userId FROM workday_deduct WHERE `date` = #{date} GROUP BY user_id ) AS de ON de.userId = u.id
-                        LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date = #{date} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id
-                    where u.alive = 1
-                GROUP BY
-                    u.id
-                order by d.id, t.id, u.username
-            ) AS u
+        (
+        SELECT
+        u.id,
+        u.username,
+        u.`name`,
+        d.id AS did,
+        d.`name` AS dep,
+        t.id AS tid,
+        t.`name` AS tec,
+        (
+        ifnull( d.workday, 0 ) + ifnull( c.workday, 0 ) + ifnull( p.workday, 0 ) + ifnull( h.workday, 0 )) AS volume_workday,
+        (
+        ifnull( h1.workday, 0 ) + ifnull( hd.advance, 0 )) AS advance_workday,
+        (
+        ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday,
+        ifnull( m.workday, 0 ) AS `manage`,
+        IFNULL( sci.workday, 0 ) AS scientific,
+        de.workday AS deduct
+        FROM
+        `user` u
+        LEFT JOIN department d ON d.id = u.did
+        LEFT JOIN technology t ON t.id = u.tid
+        LEFT JOIN (
+        SELECT
+        vu.designer,
+        SUM(
+        IFNULL( w.designer_workday, 0 ) - ifnull( h.`grant`, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN ( SELECT volume_id, IFNULL( SUM( `grant` ), 0 ) AS `grant` FROM volume_workday_high WHERE submit = 2 GROUP BY volume_id ) AS h ON h.volume_id = w.volume_id
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        GROUP BY
+        vu.designer
+        ) AS d ON d.designer = u.`id`
+        LEFT JOIN (
+        SELECT
+        vu.checker,
+        SUM(
+        IFNULL( checker_workday, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        GROUP BY
+        vu.checker
+        ) AS c ON u.`id` = c.checker
+        LEFT JOIN (
+        SELECT
+        vu.principal,
+        SUM(
+        IFNULL( principal_workday, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        GROUP BY
+        vu.principal
+        ) AS p ON u.`id` = p.principal
+        LEFT JOIN (
+        SELECT
+        vu.headman,
+        SUM(
+        IFNULL( w.headman_workday, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{startMonth}
+        AND w.submit_date &lt;= #{endMonth}
+        GROUP BY
+        vu.headman
+        ) AS h ON u.`id` = h.headman
+        LEFT JOIN (
+        SELECT
+        vu.designer,
+        SUM( h.`grant` ) AS workday
+        FROM
+        volume_workday_high h
+        LEFT JOIN volume v ON h.volume_id = v.id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        h.submit = 2
+        AND h.submit_date &gt;= #{startMonth}
+        AND h.submit_date &lt;= #{endMonth}
+        GROUP BY
+        vu.designer
+        ) AS h1 ON h1.designer = u.`id`
+        LEFT JOIN (
+        SELECT
+        t.designer,
+        t.designer_workday,
+        ifnull( SUM( a.advance ), 0 ) AS advance
+        FROM
+        project_task t,
+        task_advance a
+        WHERE
+        t.id = a.task_id
+        AND a.submit = 2
+        AND a.submit_date &gt;= #{startMonth}
+        AND a.submit_date &lt;= #{endMonth}
+        GROUP BY
+        t.designer
+        ) AS hd ON hd.designer = u.id
+        LEFT JOIN (
+        SELECT
+        t.designer,
+        SUM( designer_workday - advance ) AS workday
+        FROM
+        (
+        SELECT
+        t.designer,
+        t.designer_workday,
+        ifnull( SUM( a.advance ), 0 ) AS advance
+        FROM
+        project_task t
+        LEFT JOIN task_advance a ON t.id = a.task_id
+        AND a.submit = 2
+        WHERE
+        t.submit = 2
+        AND t.submit_date &gt;= #{startMonth}
+        AND t.submit_date &lt;= #{endMonth}
+        GROUP BY
+        t.id
+        ) AS t
+        GROUP BY
+        designer
+        ) AS td ON td.designer = u.id
+        LEFT JOIN (
+        SELECT
+        tc.checker,
+        sum( checker_workday ) AS checker_workday
+        FROM
+        project_task tc
+        WHERE
+        submit = 2
+        AND submit_date &gt;= #{startMonth}
+        AND submit_date &lt;= #{endMonth}
+        GROUP BY
+        tc.checker
+        ) AS tc ON tc.checker = u.id
+        LEFT JOIN (
+        SELECT
+        tc.principal,
+        sum( principal_workday ) AS principal_workday
+        FROM
+        project_task tc
+        WHERE
+        submit = 2
+        AND submit_date &gt;= #{startMonth}
+        AND submit_date &lt;= #{endMonth}
+        GROUP BY
+        tc.principal
+        ) AS tp ON tp.principal = u.id
+        LEFT JOIN (
+        SELECT
+        tc.headman,
+        sum( headman_workday ) AS headman_workday
+        FROM
+        project_task tc
+        WHERE
+        submit = 2
+        AND submit_date &gt;= #{startMonth}
+        AND submit_date &lt;= #{endMonth}
+        GROUP BY
+        tc.headman
+        ) AS th ON th.headman = u.id
+        LEFT JOIN (
+        SELECT
+        m.designer,
+        sum( m.workday ) AS workday
+        FROM
+        project_workday_manage m
+        WHERE
+        m.date &gt;= #{startMonth}
+        AND m.date &lt;= #{endMonth}
+        GROUP BY
+        m.designer
+        ) AS m ON m.designer = u.id
+        LEFT JOIN ( SELECT sum( workday ) AS workday, user_id AS userId FROM workday_deduct WHERE `date` &gt;= #{startMonth} AND `date` &lt;= #{endMonth} GROUP BY user_id ) AS de ON de.userId = u.id
+        LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date &gt;= #{startMonth} AND submit_date &lt;= #{endMonth} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id
+        WHERE
+        u.alive = 1
+        GROUP BY
+        u.id
+        ) AS u
+        ORDER BY
+        did,
+        tid,
+        username
     </select>
     <select id="workdayByManager" resultType="java.util.Map">
         SELECT
@@ -2456,221 +2479,212 @@
             scientific,
             ifnull( deduct, 0 ) AS deduct
         FROM
-            (
-                SELECT
-                    u.id,
-                    u.`name`,
-                    d.`name` AS dep,
-                    t.`name` AS tec,
-                    u.username,
-                    (
-                            ifnull( d.workday, 0 ) + ifnull( c.workday, 0 ) + ifnull( p.workday, 0 ) + ifnull( h.workday, 0 )) AS volume_workday,
-                    (
-                        ifnull( h1.workday, 0 ) + ifnull( hd.advance, 0 )) AS advance_workday,
-                    (
-                            ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday,
-                    ifnull( m.workday, 0 ) AS `manage`,
-                    IFNULL( sci.workday, 0 ) AS scientific,
-                    de.workday AS deduct
-                FROM
-                    `user` u
-                        LEFT JOIN department d ON d.id = u.did
-                        LEFT JOIN technology t ON t.id = u.tid
-                        LEFT JOIN (
-                        SELECT
-                            vu.designer,
-                            SUM(
-                                    IFNULL( w.designer_workday, 0 ) - ifnull( h.`grant`, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN ( SELECT volume_id, IFNULL( SUM( `grant` ), 0 ) AS `grant` FROM volume_workday_high WHERE submit = 2 GROUP BY volume_id ) AS h ON h.volume_id = w.volume_id
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
+        (
+        SELECT
+        u.id,
+        u.username,
+        u.`name`,
+        d.id AS did,
+        d.`name` AS dep,
+        t.id AS tid,
+        t.`name` AS tec,
+        (
+        ifnull( d.workday, 0 ) + ifnull( c.workday, 0 ) + ifnull( p.workday, 0 ) + ifnull( h.workday, 0 )) AS volume_workday,
+        (
+        ifnull( h1.workday, 0 ) + ifnull( hd.advance, 0 )) AS advance_workday,
+        (
+        ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday,
+        ifnull( m.workday, 0 ) AS `manage`,
+        IFNULL( sci.workday, 0 ) AS scientific,
+        de.workday AS deduct
+        FROM
+        `user` u
+        LEFT JOIN department d ON d.id = u.did
+        LEFT JOIN technology t ON t.id = u.tid
+        LEFT JOIN (
+        SELECT
+        vu.designer,
+        SUM(
+        IFNULL( w.designer_workday, 0 ) - ifnull( h.`grant`, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN ( SELECT volume_id, IFNULL( SUM( `grant` ), 0 ) AS `grant` FROM volume_workday_high WHERE submit = 2 GROUP BY volume_id ) AS h ON h.volume_id = w.volume_id
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.designer
+        ) AS d ON d.designer = u.`id`
+        LEFT JOIN (
+        SELECT
+        vu.checker,
+        SUM(
+        IFNULL( checker_workday, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.checker
+        ) AS c ON u.`id` = c.checker
+        LEFT JOIN (
+        SELECT
+        vu.principal,
+        SUM(
+        IFNULL( principal_workday, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.principal
+        ) AS p ON u.`id` = p.principal
+        LEFT JOIN (
+        SELECT
+        vu.headman,
+        SUM(
+        IFNULL( w.headman_workday, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.headman
+        ) AS h ON u.`id` = h.headman
+        LEFT JOIN (
+        SELECT
+        vu.designer,
+        SUM( h.`grant` ) AS workday
+        FROM
+        volume_workday_high h
+        LEFT JOIN volume v ON h.volume_id = v.id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        h.submit = 2
+        AND h.submit_date &gt;= #{map.startMonth}
+        AND h.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.designer
+        ) AS h1 ON h1.designer = u.`id`
+        LEFT JOIN (
+        SELECT
+        t.designer,
+        t.designer_workday,
+        ifnull( SUM( a.advance ), 0 ) AS advance
+        FROM
+        project_task t,
+        task_advance a
+        WHERE
+        t.id = a.task_id
+        AND a.submit = 2
+        AND a.submit_date &gt;= #{map.startMonth}
+        AND a.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        t.designer
+        ) AS hd ON hd.designer = u.id
+        LEFT JOIN (
+        SELECT
+        t.designer,
+        SUM( designer_workday - advance ) AS workday
+        FROM
+        (
+        SELECT
+        t.designer,
+        t.designer_workday,
+        ifnull( SUM( a.advance ), 0 ) AS advance
+        FROM
+        project_task t
+        LEFT JOIN task_advance a ON t.id = a.task_id
+        AND a.submit = 2
+        WHERE
+        t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        t.id
+        ) AS t
+        GROUP BY
+        designer
+        ) AS td ON td.designer = u.id
+        LEFT JOIN (
+        SELECT
+        tc.checker,
+        sum( checker_workday ) AS checker_workday
+        FROM
+        project_task tc
+        WHERE
+        submit = 2
+        AND submit_date &gt;= #{map.startMonth}
+        AND submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        tc.checker
+        ) AS tc ON tc.checker = u.id
+        LEFT JOIN (
+        SELECT
+        tc.principal,
+        sum( principal_workday ) AS principal_workday
+        FROM
+        project_task tc
+        WHERE
+        submit = 2
+        AND submit_date &gt;= #{map.startMonth}
+        AND submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        tc.principal
+        ) AS tp ON tp.principal = u.id
+        LEFT JOIN (
+        SELECT
+        tc.headman,
+        sum( headman_workday ) AS headman_workday
+        FROM
+        project_task tc
+        WHERE
+        submit = 2
+        AND submit_date &gt;= #{map.startMonth}
+        AND submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        tc.headman
+        ) AS th ON th.headman = u.id
+        LEFT JOIN (
+        SELECT
+        m.designer,
+        sum( m.workday ) AS workday
+        FROM
+        project_workday_manage m
+        WHERE
+        m.date &gt;= #{map.startMonth}
+        AND m.date &lt;= #{map.endMonth}
+        GROUP BY
+        m.designer
+        ) AS m ON m.designer = u.id
+        LEFT JOIN ( SELECT sum( workday ) AS workday, user_id AS userId FROM workday_deduct WHERE `date` &gt;= #{map.startMonth} AND `date` &lt;= #{map.endMonth} GROUP BY user_id ) AS de ON de.userId = u.id
+        LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date &gt;= #{map.startMonth} AND submit_date &lt;= #{map.endMonth} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id, `user` u1
+        WHERE
+        u1.id = #{id}
 
-                        GROUP BY
-                            vu.designer
-                    ) AS d ON d.designer = u.`id`
-                        LEFT JOIN (
-                        SELECT
-                            vu.checker,
-                            SUM(
-                                    IFNULL( checker_workday, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.checker
-                    ) AS c ON u.`id` = c.checker
-                        LEFT JOIN (
-                        SELECT
-                            vu.principal,
-                            SUM(
-                                    IFNULL( principal_workday, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.principal
-                    ) AS p ON u.`id` = p.principal
-                        LEFT JOIN (
-                        SELECT
-                            vu.headman,
-                            SUM(
-                                    IFNULL( w.headman_workday, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.headman
-                    ) AS h ON u.`id` = h.headman
-                        LEFT JOIN (
-                        SELECT
-                            vu.designer,
-                            SUM( h.`grant` ) AS workday
-                        FROM
-                            volume_workday_high h
-                                LEFT JOIN volume v ON h.volume_id = v.id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            h.submit = 2
-                          AND h.submit_date = #{date}
-
-                        GROUP BY
-                            vu.designer
-                    ) AS h1 ON h1.designer = u.`id`
-                        LEFT JOIN (
-                        SELECT
-                            t.designer,
-                            t.designer_workday,
-                            ifnull( SUM( a.advance ), 0 ) AS advance
-                        FROM
-                            project_task t,
-                            task_advance a
-                        WHERE
-                            t.id = a.task_id
-                          AND a.submit = 2
-                          AND a.submit_date = #{date}
-
-                        GROUP BY
-                            t.designer
-                    ) AS hd ON hd.designer = u.id
-                        LEFT JOIN (
-                        SELECT
-                            t.designer,
-                            SUM( designer_workday - advance ) AS workday
-                        FROM
-                            (
-                                SELECT
-                                    t.designer,
-                                    t.designer_workday,
-                                    ifnull( SUM( a.advance ), 0 ) AS advance
-                                FROM
-                                    project_task t
-                                        LEFT JOIN task_advance a ON t.id = a.task_id
-                                        AND a.submit = 2
-                                WHERE
-                                    t.submit = 2
-                                  AND t.submit_date = #{date}
-
-                                GROUP BY
-                                    t.id
-                            ) AS t
-                        GROUP BY
-                            designer
-                    ) AS td ON td.designer = u.id
-                        LEFT JOIN (
-                        SELECT
-                            tc.checker,
-                            sum( checker_workday ) AS checker_workday
-                        FROM
-                            project_task tc
-                        WHERE
-                            submit = 2
-                          AND submit_date = #{date}
-
-                        GROUP BY
-                            tc.checker
-                    ) AS tc ON tc.checker = u.id
-                        LEFT JOIN (
-                        SELECT
-                            tc.principal,
-                            sum( principal_workday ) AS principal_workday
-                        FROM
-                            project_task tc
-                        WHERE
-                            submit = 2
-                          AND submit_date = #{date}
-
-                        GROUP BY
-                            tc.principal
-                    ) AS tp ON tp.principal = u.id
-                        LEFT JOIN (
-                        SELECT
-                            tc.headman,
-                            sum( headman_workday ) AS headman_workday
-                        FROM
-                            project_task tc
-                        WHERE
-                            submit = 2
-                          AND submit_date = #{date}
-
-                        GROUP BY
-                            tc.headman
-                    ) AS th ON th.headman = u.id
-                        LEFT JOIN (
-                        SELECT
-                            m.designer,
-                            sum( m.workday ) AS workday
-                        FROM
-                            project_workday_manage m
-                        WHERE
-                            m.date = #{date}
-
-                        GROUP BY
-                            m.designer
-                    ) AS m ON m.designer = u.id
-                        LEFT JOIN (
-                        SELECT
-                            sum( workday ) AS workday,
-                            user_id AS userId
-                        FROM
-                            workday_deduct
-                        WHERE
-                            `date` = #{date} GROUP BY user_id ) AS de ON de.userId = u.id
-                        LEFT JOIN (
-                        SELECT
-                            SUM( workday ) AS workday,
-                            user_id
-                        FROM
-                            scientific_task_workday
-                        WHERE
-                            submit_date = #{date} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id,
-                     `user` u1
-                WHERE
-                    u1.id = #{id}
-                  and u.alive = 1
-                  AND u.did = u1.did
-                GROUP BY
-                    u.id
-            ) AS u
+        AND u.alive = 1
+        AND u.did = u1.did
+        GROUP BY
+        u.id
+        ) AS u
+        ORDER BY
+        tid,
+        username
     </select>
     <select id="queryByProject" resultType="java.util.Map">
         SELECT u.id , v.principal
@@ -2682,528 +2696,542 @@
     </select>
     <select id="workdayByGeneral" resultType="java.util.Map">
         SELECT
-            id,
-            `name`,
-            username,
-            tec,
-            volume_workday + advance_workday + task_workday + deduct AS workday,
-            volume_workday,
-            advance_workday,
-            task_workday,
-            deduct
+        id,
+        `name`,
+        username,
+        tec,
+        volume_workday + advance_workday + task_workday + deduct AS workday,
+        volume_workday,
+        advance_workday,
+        task_workday,
+        deduct
         FROM
-            (
-                SELECT
-                    u.id,
-                    u.`name`,
-                    u.username,
-                    t.volume_tec AS tec,
-                    ifnull( de.workday, 0 ) AS deduct,
-                    (
-                            ifnull( d.workday, 0 ) + ifnull( c.workday, 0 ) + ifnull( p.workday, 0 ) + ifnull( h.workday, 0 )
-                        ) AS volume_workday,
-                    ifnull( h1.workday, 0 ) + IFNULL( hd.advance, 0 ) AS advance_workday,
-                    (
-                            ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday
-                FROM
-                    `user` u
-                        LEFT JOIN workday_tec t ON t.project_id = #{id}
-                        LEFT JOIN (
-                        SELECT
-                            vu.designer,
-                            SUM(
-                                    IFNULL( w.designer_workday, 0 ) - IFNULL( h.`grant`, 0 )) AS workday,
-                            v.tec
-                        FROM
-                            volume_workday w
-                                LEFT JOIN ( SELECT volume_id, IFNULL( SUM( `grant` ), 0 ) AS `grant` FROM volume_workday_high WHERE submit = 2 GROUP BY volume_id ) AS h ON h.volume_id = w.volume_id
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            v.project_id = #{id}
-
-                          AND w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.designer,
-                            v.tec
-                    ) AS d ON d.designer = u.`id`
-                        AND d.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            vu.checker,
-                            SUM(
-                                    IFNULL( w.checker_workday, 0 )) AS workday,
-                            v.tec
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            v.project_id = #{id}
-
-                          AND w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.checker,
-                            v.tec
-                    ) AS c ON u.`id` = c.checker
-                        AND c.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            vu.principal,
-                            SUM(
-                                    IFNULL( w.principal_workday, 0 )) AS workday,
-                            v.tec
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            v.project_id = #{id}
-
-                          AND w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.principal,
-                            v.tec
-                    ) AS p ON u.`id` = p.principal
-                        AND p.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            vu.headman,
-                            SUM(
-                                    IFNULL( w.headman_workday, 0 )) AS workday,
-                            v.tec
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            v.project_id = #{id}
-
-                          AND w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.headman,
-                            v.tec
-                    ) AS h ON u.`id` = h.headman
-                        AND h.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            vu.designer,
-                            SUM( h.`grant` ) AS workday,
-                            v.tec
-                        FROM
-                            volume_workday_high h
-                                LEFT JOIN volume v ON h.volume_id = v.id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                                LEFT JOIN volume_workday w ON h.volume_id = w.volume_id
-                        WHERE
-                            h.submit_date = #{date}
-
-                          AND h.submit = 2
-                          AND v.project_id = #{id}
-
-                        GROUP BY
-                            vu.designer,
-                            v.tec
-                    ) AS h1 ON h1.designer = u.`id`
-                        AND h1.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            t.designer,
-                            t.designer_workday,
-                            SUM( a.advance ) AS advance,
-                            t.tec
-                        FROM
-                            project_task t,
-                            task_advance a
-                        WHERE
-                            t.id = a.task_id
-                          AND a.submit = 2
-                          AND t.project_id = #{id}
-
-                          AND a.submit_date = #{date}
-
-                        GROUP BY
-                            t.designer,
-                            t.tec
-                    ) AS hd ON hd.designer = u.id
-                        AND hd.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            t.designer,
-                            SUM( designer_workday - advance ) AS workday,
-                            t.tec
-                        FROM
-                            (
-                                SELECT
-                                    t.designer,
-                                    t.designer_workday,
-                                    ifnull( SUM( a.advance ), 0 ) AS advance,
-                                    t.tec
-                                FROM
-                                    project_task t
-                                        LEFT JOIN task_advance a ON t.id = a.task_id
-                                        AND a.submit = 2
-                                WHERE
-                                    t.submit_date = #{date}
-
-                                  AND t.submit = 2
-                                  AND t.project_id = #{id}
-
-                                GROUP BY
-                                    t.id
-                            ) AS t
-                        GROUP BY
-                            designer,
-                            t.tec
-                    ) AS td ON td.designer = u.id
-                        AND td.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            tc.checker,
-                            sum( checker_workday ) AS checker_workday,
-                            tc.tec
-                        FROM
-                            project_task tc
-                        WHERE
-                            tc.submit_date = #{date}
-
-                          AND tc.project_id = #{id}
-
-                          AND tc.submit = 2
-                        GROUP BY
-                            tc.checker,
-                            tc.tec
-                    ) AS tc ON tc.checker = u.id
-                        AND tc.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            tc.principal,
-                            sum( principal_workday ) AS principal_workday,
-                            tc.tec
-                        FROM
-                            project_task tc
-                        WHERE
-                            tc.submit_date = #{date}
-
-                          AND tc.project_id = #{id}
-
-                          AND tc.submit = 2
-                        GROUP BY
-                            tc.principal,
-                            tc.tec
-                    ) AS tp ON tp.principal = u.id
-                        AND tp.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            tc.headman,
-                            sum( headman_workday ) AS headman_workday,
-                            tc.tec
-                        FROM
-                            project_task tc
-                        WHERE
-                            tc.submit_date = #{date}
-
-                          AND tc.project_id = #{id}
-
-                          AND tc.submit = 2
-                        GROUP BY
-                            tc.headman,
-                            tc.tec
-                    ) AS th ON th.headman = u.id
-                        AND th.tec = t.volume_tec
-                        LEFT JOIN (
-                        SELECT
-                            tec,
-                            sum( workday ) AS workday,
-                            user_id AS userId
-                        FROM
-                            workday_deduct
-                        WHERE
-                            project_id = #{id}
-
-                          AND date = #{date}
-
-                        GROUP BY
-                            user_id,
-                            tec
-                    ) AS de ON de.userId = u.id
-                        AND de.tec = t.volume_tec
-                GROUP BY
-                    u.id,
-                    t.volume_tec
-            ) AS u
+        (
+        SELECT
+        u.id,
+        u.`name`,
+        u.username,
+        t.volume_tec AS tec,
+        ifnull( de.workday, 0 ) AS deduct,
+        (
+        ifnull( d.workday, 0 ) + ifnull( c.workday, 0 ) + ifnull( p.workday, 0 ) + ifnull( h.workday, 0 )
+        ) AS volume_workday,
+        ifnull( h1.workday, 0 ) + IFNULL( hd.advance, 0 ) AS advance_workday,
+        (
+        ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday
+        FROM
+        `user` u
+        LEFT JOIN workday_tec t ON t.project_id = #{map.id}
+        LEFT JOIN (
+        SELECT
+        vu.designer,
+        SUM(
+        IFNULL( w.designer_workday, 0 ) - IFNULL( h.`grant`, 0 )) AS workday,
+        v.tec
+        FROM
+        volume_workday w
+        LEFT JOIN ( SELECT volume_id, IFNULL( SUM( `grant` ), 0 ) AS `grant` FROM volume_workday_high WHERE submit = 2 GROUP BY volume_id ) AS h ON h.volume_id = w.volume_id
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
         WHERE
-            volume_workday != 0
-	OR advance_workday != 0
-	OR task_workday != 0
+        v.project_id = #{map.id}
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.designer,
+        v.tec
+        ) AS d ON d.designer = u.`id`
+        AND d.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        vu.checker,
+        SUM(
+        IFNULL( w.checker_workday, 0 )) AS workday,
+        v.tec
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        v.project_id = #{map.id}
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.checker,
+        v.tec
+        ) AS c ON u.`id` = c.checker
+        AND c.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        vu.principal,
+        SUM(
+        IFNULL( w.principal_workday, 0 )) AS workday,
+        v.tec
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        v.project_id = #{map.id}
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.principal,
+        v.tec
+        ) AS p ON u.`id` = p.principal
+        AND p.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        vu.headman,
+        SUM(
+        IFNULL( w.headman_workday, 0 )) AS workday,
+        v.tec
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        v.project_id = #{map.id}
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.headman,
+        v.tec
+        ) AS h ON u.`id` = h.headman
+        AND h.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        vu.designer,
+        SUM( h.`grant` ) AS workday,
+        v.tec
+        FROM
+        volume_workday_high h
+        LEFT JOIN volume v ON h.volume_id = v.id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        LEFT JOIN volume_workday w ON h.volume_id = w.volume_id
+        WHERE
+        h.submit_date &gt;= #{map.startMonth}
+        AND h.submit_date &lt;= #{map.endMonth}
+        AND h.submit = 2
+        AND v.project_id = #{map.id}
+        GROUP BY
+        vu.designer,
+        v.tec
+        ) AS h1 ON h1.designer = u.`id`
+        AND h1.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        t.designer,
+        t.designer_workday,
+        SUM( a.advance ) AS advance,
+        t.tec
+        FROM
+        project_task t,
+        task_advance a
+        WHERE
+        t.id = a.task_id
+        AND a.submit = 2
+        AND t.project_id = #{map.id}
+        AND a.submit_date &gt;= #{map.startMonth}
+        AND a.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        t.designer,
+        t.tec
+        ) AS hd ON hd.designer = u.id
+        AND hd.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        t.designer,
+        SUM( designer_workday - advance ) AS workday,
+        t.tec
+        FROM
+        (
+        SELECT
+        t.designer,
+        t.designer_workday,
+        ifnull( SUM( a.advance ), 0 ) AS advance,
+        t.tec
+        FROM
+        project_task t
+        LEFT JOIN task_advance a ON t.id = a.task_id
+        AND a.submit = 2
+        WHERE
+        t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        AND t.submit = 2
+        AND t.project_id = #{map.id}
+        GROUP BY
+        t.id
+        ) AS t
+        GROUP BY
+        designer,
+        t.tec
+        ) AS td ON td.designer = u.id
+        AND td.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        tc.checker,
+        sum( checker_workday ) AS checker_workday,
+        tc.tec
+        FROM
+        project_task tc
+        WHERE
+        tc.submit_date &gt;= #{map.startMonth}
+        AND tc.submit_date &lt;= #{map.endMonth}
+        AND tc.project_id = #{map.id}
+        AND tc.submit = 2
+        GROUP BY
+        tc.checker,
+        tc.tec
+        ) AS tc ON tc.checker = u.id
+        AND tc.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        tc.principal,
+        sum( principal_workday ) AS principal_workday,
+        tc.tec
+        FROM
+        project_task tc
+        WHERE
+        tc.submit_date &gt;= #{map.startMonth}
+        AND tc.submit_date &lt;= #{map.endMonth}
+        AND tc.project_id = #{map.id}
+        AND tc.submit = 2
+        GROUP BY
+        tc.principal,
+        tc.tec
+        ) AS tp ON tp.principal = u.id
+        AND tp.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        tc.headman,
+        sum( headman_workday ) AS headman_workday,
+        tc.tec
+        FROM
+        project_task tc
+        WHERE
+        tc.submit_date &gt;= #{map.startMonth}
+        AND tc.submit_date &lt;= #{map.endMonth}
+        AND tc.project_id = #{map.id}
+        AND tc.submit = 2
+        GROUP BY
+        tc.headman,
+        tc.tec
+        ) AS th ON th.headman = u.id
+        AND th.tec = t.volume_tec
+        LEFT JOIN (
+        SELECT
+        tec,
+        sum( workday ) AS workday,
+        user_id AS userId
+        FROM
+        workday_deduct
+        WHERE
+        project_id = #{map.id}
+        AND date &gt;= #{map.startMonth}
+        AND date &lt;= #{map.endMonth}
+        GROUP BY
+        user_id,
+        tec
+        ) AS de ON de.userId = u.id
+        AND de.tec = t.volume_tec
+        GROUP BY
+        u.id,
+        t.volume_tec
+        ) AS u
+        WHERE
+        volume_workday != 0
+        OR advance_workday != 0
+        OR task_workday != 0
         ORDER BY
-            tec
+        tec,
+        username
     </select>
     <select id="logByGeneral" resultType="java.util.Map">
         SELECT
-            `number`,
-            `name`,
-            `handler`,
-            tec,
-            workday,
-            type,
-            role
+        `number`,
+        `name`,
+        `handler`,
+        tec,
+        workday,
+        submit_date,
+        type,
+        role
         FROM
-            (
-                SELECT
-                    v.number,
-                    v.`name`,
-                    v.`handler`,
-                    v.tec,
-                    (
-                        v.workday - ifnull( SUM( h.`grant` ), 0 )) AS workday,
-                    2 AS type,
-                    0 AS role
-                FROM
-                    (
-                        SELECT
-                            p.number AS pnum,
-                            p.`name` AS pname,
-                            u.`name` AS `handler`,
-                            v.id,
-                            v.number,
-                            v.`name`,
-                            v.tec,
-                            ifnull( w.designer_workday, 0 ) AS workday
-                        FROM
-                            project p,
-                            `user` u,
-                            volume_workday w,
-                            volume v
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.volume_id = v.id
-                          AND v.project_id = p.id
-                          AND w.`handler` = u.id
-                          AND w.submit = 2
-                          AND w.submit_date = #{map.date}
-                          AND v.tec = #{map.tec}
-                          AND v.project_id = #{map.id}
-                          AND w.`check` = 1
-                          AND vu.designer = #{map.userId}
-                    ) AS v
-                        LEFT JOIN volume_workday_high h ON v.id = h.volume_id
-                        AND h.submit = 2
-                GROUP BY
-                    v.id UNION
-                SELECT
-                    v.number,
-                    v.`name`,
-                    u.`name` AS `handler`,
-                    v.tec,
-                    ifnull( w.checker_workday, 0 ) AS workday,
-                    2 AS type,
-                    1 AS role
-                FROM
-                    volume_workday w,
-                    `user` u,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    w.volume_id = v.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{map.date}
-                  AND w.`handler` = u.id
-                  AND w.`check` = 1
-                  AND v.tec = #{map.tec}
-                  AND v.project_id = #{map.id}
-                  AND vu.checker = #{map.userId} UNION
-                SELECT
-                    v.number,
-                    v.`name`,
-                    u.`name` AS `handler`,
-                    v.tec,
-                    IFNULL( w.principal_workday, 0 ) AS workday,
-                    2 AS type,
-                    2 AS role
-                FROM
-                    volume_workday w,
-                    `user` u,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    w.volume_id = v.id
-                  AND w.submit = 2
-                  AND w.`handler` = u.id
-                  AND w.submit_date = #{map.date}
-                  AND w.`check` = 1
-                  AND v.tec = #{map.tec}
-                  AND v.project_id = #{map.id}
-                  AND vu.principal = #{map.userId} UNION
-                SELECT
-                    v.number,
-                    v.`name`,
-                    u.`name` AS `handler`,
-                    v.tec,
-                    ifnull( w.headman_workday, 0 ) AS workday,
-                    2 AS type,
-                    3 AS role
-                FROM
-                    volume_workday w,
-                    `user` u,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    w.volume_id = v.id
-                  AND w.submit = 2
-                  AND w.submit_date = #{map.date}
-                  AND u.id = w.`handler`
-                  AND w.`check` = 1
-                  AND v.project_id = #{map.id}
-                  AND v.tec = #{map.tec}
-                  AND vu.headman = #{map.userId} UNION ALL
-                SELECT
-                    v.number,
-                    v.`name`,
-                    u.`name` AS `handler`,
-                    v.tec,
-                    h.`grant` AS workday,
-                    3 AS type,
-                    0 AS role
-                FROM
-                    volume_workday_high h,
-                    `user` u,
-                    volume_workday w,
-                    volume v
-                        LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                WHERE
-                    v.id = h.volume_id
-                  AND vu.designer = #{map.userId}
-                  AND w.`handler` = u.id
-                  AND h.submit = 2
-                  AND w.volume_id = h.volume_id
-                  AND h.submit_date = #{map.date}
-                  AND v.project_id = #{map.id}
-                  AND v.tec = #{map.tec} UNION
-                SELECT
-                    t.number,
-                    t.`name`,
-                    u.`name` AS `handler`,
-                    t.tec,
-                    t.designer_workday - ifnull( SUM( a.advance ), 0 ) AS workday,
-                    t.type AS type,
-                    0 AS role
-                FROM
-                    `user` u,
-                    project_task t
-                        LEFT JOIN task_advance a ON t.id = a.task_id
-                        AND a.date = 2
-                WHERE
-                    t.project_id = #{map.id}
-                  AND t.`handler` = u.id
-                  AND t.designer = #{map.userId}
-                  AND t.submit = 2
-                  AND t.submit_date = #{map.date}
-                  AND t.tec = #{map.tec}
-                GROUP BY
-                    t.id UNION
-                SELECT
-                    t.number,
-                    t.`name`,
-                    u.`name` AS `handler`,
-                    t.tec,
-                    a.advance AS workday,
-                    3 AS type,
-                    0 AS role
-                FROM
-                    project_task t,
-                    `user` u,
-                    task_advance a
-                WHERE
-                    t.id = a.task_id
-                  AND t.submit = 2
-                  AND t.submit_date = #{map.date}
-                  AND u.id = t.`handler`
-                  AND t.project_id = #{map.id}
-                  AND t.tec = #{map.tec}
-                  AND t.designer = #{map.userId} UNION
-                SELECT
-                    t.number,
-                    t.`name`,
-                    u.`name` AS `handler`,
-                    t.tec,
-                    t.checker_workday AS workday,
-                    t.`type` AS `type`,
-                    1 AS role
-                FROM
-                    project_task t,
-                    `user` u
-                WHERE
-                    t.checker = #{map.userId}
-                  AND u.id = t.`handler`
-                  AND t.submit = 2
-                  AND t.submit_date = #{map.date}
-                  AND t.tec = #{map.tec}
-                  AND t.project_id = #{map.id} UNION
-                SELECT
-                    t.number,
-                    t.`name`,
-                    u.`name` AS `handler`,
-                    t.tec,
-                    t.principal_workday AS workday,
-                    t.`type` AS `type`,
-                    2 AS role
-                FROM
-                    project_task t,
-                    `user` u
-                WHERE
-                    t.submit = 2
-                  AND t.submit_date = #{map.date}
-                  AND u.id = t.`handler`
-                  AND t.project_id = #{map.id}
-                  AND t.tec = #{map.tec}
-                  AND t.principal = #{map.userId} UNION
-                SELECT
-                    t.number,
-                    t.`name`,
-                    u.`name` AS `handler`,
-                    t.tec,
-                    t.headman_workday AS workday,
-                    t.`type` AS `type`,
-                    3 AS role
-                FROM
-                    project_task t,
-                    `user` u
-                WHERE
-                    t.headman = #{map.userId}
-                  AND u.id = t.`handler`
-                  AND t.submit = 2
-                  AND t.submit_date = #{map.date}
-                  AND t.tec = #{map.tec}
-                  AND t.project_id = #{map.id} UNION
-                SELECT
-                    t.task_number AS number,
-                    t.task_name AS `name`,
-                    u.`name` AS `handler`,
-                    t.tec,
-                    t.workday,
-                    5 AS type,
-                    t.role
-                FROM
-                    workday_deduct t,
-                    `user` u
-                WHERE
-                    tec = #{map.tec}
-                  AND project_id = #{map.id}
-                  AND user_id = #{map.userId}
-                  AND `date` = #{map.date}
-                  AND u.id = t.`handler`
-            ) AS d
+        (
+        SELECT
+        v.number,
+        v.`name`,
+        v.`handler`,
+        v.tec,
+        (
+        v.workday - ifnull( SUM( h.`grant` ), 0 )) AS workday,
+        v.submit_date,
+        2 AS type,
+        0 AS role
+        FROM
+        (
+        SELECT
+        p.number AS pnum,
+        p.`name` AS pname,
+        u.`name` AS `handler`,
+        v.id,
+        v.number,
+        v.`name`,
+        v.tec,
+        ifnull( w.designer_workday, 0 ) AS workday,
+        w.submit_date
+        FROM
+        project p,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
         WHERE
-            workday != 0
+        w.volume_id = v.id
+        AND v.project_id = p.id
+        AND w.`handler` = u.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND v.tec = #{map.tec}
+        AND v.project_id = #{map.id}
+        AND w.`check` = 1
+        AND vu.designer = #{map.userId}
+        ) AS v
+        LEFT JOIN volume_workday_high h ON v.id = h.volume_id
+        AND h.submit = 2
+        GROUP BY
+        v.id UNION
+        SELECT
+        v.number,
+        v.`name`,
+        u.`name` AS `handler`,
+        v.tec,
+        ifnull( w.checker_workday, 0 ) AS workday,
+        w.submit_date,
+        2 AS type,
+        1 AS role
+        FROM
+        volume_workday w,
+        `user` u,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.volume_id = v.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND w.`handler` = u.id
+        AND w.`check` = 1
+        AND v.tec = #{map.tec}
+        AND v.project_id = #{map.id}
+        AND vu.checker = #{map.userId} UNION
+        SELECT
+        v.number,
+        v.`name`,
+        u.`name` AS `handler`,
+        v.tec,
+        IFNULL( w.principal_workday, 0 ) AS workday,
+        w.submit_date,
+        2 AS type,
+        2 AS role
+        FROM
+        volume_workday w,
+        `user` u,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.volume_id = v.id
+        AND w.submit = 2
+        AND w.`handler` = u.id
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND w.`check` = 1
+        AND v.tec = #{map.tec}
+        AND v.project_id = #{map.id}
+        AND vu.principal = #{map.userId} UNION
+        SELECT
+        v.number,
+        v.`name`,
+        u.`name` AS `handler`,
+        v.tec,
+        ifnull( w.headman_workday, 0 ) AS workday,
+        w.submit_date,
+        2 AS type,
+        3 AS role
+        FROM
+        volume_workday w,
+        `user` u,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.volume_id = v.id
+        AND w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        AND u.id = w.`handler`
+        AND w.`check` = 1
+        AND v.project_id = #{map.id}
+        AND v.tec = #{map.tec}
+        AND vu.headman = #{map.userId} UNION ALL
+        SELECT
+        v.number,
+        v.`name`,
+        u.`name` AS `handler`,
+        v.tec,
+        h.`grant` AS workday,
+        h.submit_date,
+        3 AS type,
+        0 AS role
+        FROM
+        volume_workday_high h,
+        `user` u,
+        volume_workday w,
+        volume v
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        v.id = h.volume_id
+        AND vu.designer = #{map.userId}
+        AND w.`handler` = u.id
+        AND h.submit = 2
+        AND w.volume_id = h.volume_id
+        AND h.submit_date &gt;= #{map.startMonth}
+        AND h.submit_date &lt;= #{map.endMonth}
+        AND v.project_id = #{map.id}
+        AND v.tec = #{map.tec} UNION
+        SELECT
+        t.number,
+        t.`name`,
+        u.`name` AS `handler`,
+        t.tec,
+        t.designer_workday - ifnull( SUM( a.advance ), 0 ) AS workday,
+        t.submit_date,
+        t.type AS type,
+        0 AS role
+        FROM
+        `user` u,
+        project_task t
+        LEFT JOIN task_advance a ON t.id = a.task_id
+        AND a.date = 2
+        WHERE
+        t.project_id = #{map.id}
+        AND t.`handler` = u.id
+        AND t.designer = #{map.userId}
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        AND t.tec = #{map.tec}
+        GROUP BY
+        t.id UNION
+        SELECT
+        t.number,
+        t.`name`,
+        u.`name` AS `handler`,
+        t.tec,
+        a.advance AS workday,
+        a.submit_date,
+        3 AS type,
+        0 AS role
+        FROM
+        project_task t,
+        `user` u,
+        task_advance a
+        WHERE
+        t.id = a.task_id
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        AND u.id = t.`handler`
+        AND t.project_id = #{map.id}
+        AND t.tec = #{map.tec}
+        AND t.designer = #{map.userId} UNION
+        SELECT
+        t.number,
+        t.`name`,
+        u.`name` AS `handler`,
+        t.tec,
+        t.checker_workday AS workday,
+        t.submit_date,
+        t.`type` AS `type`,
+        1 AS role
+        FROM
+        project_task t,
+        `user` u
+        WHERE
+        t.checker = #{map.userId}
+        AND u.id = t.`handler`
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        AND t.tec = #{map.tec}
+        AND t.project_id = #{map.id} UNION
+        SELECT
+        t.number,
+        t.`name`,
+        u.`name` AS `handler`,
+        t.tec,
+        t.principal_workday AS workday,
+        t.submit_date,
+        t.`type` AS `type`,
+        2 AS role
+        FROM
+        project_task t,
+        `user` u
+        WHERE
+        t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        AND u.id = t.`handler`
+        AND t.project_id = #{map.id}
+        AND t.tec = #{map.tec}
+        AND t.principal = #{map.userId} UNION
+        SELECT
+        t.number,
+        t.`name`,
+        u.`name` AS `handler`,
+        t.tec,
+        t.headman_workday AS workday,
+        t.submit_date,
+        t.`type` AS `type`,
+        3 AS role
+        FROM
+        project_task t,
+        `user` u
+        WHERE
+        t.headman = #{map.userId}
+        AND u.id = t.`handler`
+        AND t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        AND t.tec = #{map.tec}
+        AND t.project_id = #{map.id} UNION
+        SELECT
+        t.task_number AS number,
+        t.task_name AS `name`,
+        u.`name` AS `handler`,
+        t.tec,
+        t.workday,
+        t.`date` as submit_date,
+        5 AS type,
+        t.role
+        FROM
+        workday_deduct t,
+        `user` u
+        WHERE
+        tec = #{map.tec}
+        AND project_id = #{map.id}
+        AND user_id = #{map.userId}
+        AND `date` &gt;= #{map.startMonth}
+        AND `date` &lt;= #{map.endMonth}
+        AND u.id = t.`handler`
+        ) AS d
+        WHERE
+        workday != 0
     </select>
     <select id="workdayByPrincipal" resultType="java.util.Map">
         SELECT
@@ -4822,198 +4850,206 @@
             manage,
             scientific
         FROM
-            (
-                SELECT
-                    u.id,
-                    u.`name`,
-                    d.`name` AS dep,
-                    t.`name` AS tec,
-                    u.username,
-                    (
-                            ifnull( d.workday, 0 ) + ifnull( c.workday, 0 ) + ifnull( p.workday, 0 ) + ifnull( h.workday, 0 )) AS volume_workday,
-                    (
-                        ifnull( h1.workday, 0 ) + ifnull( hd.advance, 0 )) AS advance_workday,
-                    (
-                            ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday,
-                    ifnull( m.workday, 0 ) AS `manage`,
-                    IFNULL( sci.workday, 0 ) AS scientific
-                FROM
-                    `user` u
-                        LEFT JOIN department d ON d.id = u.did
-                        LEFT JOIN technology t ON t.id = u.tid
-                        LEFT JOIN (
-                        SELECT
-                            vu.designer,
-                            SUM(
-                                    IFNULL( w.designer_workday, 0 ) - ifnull( h.`grant`, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN ( SELECT volume_id, IFNULL( SUM( `grant` ), 0 ) AS `grant` FROM volume_workday_high WHERE submit = 2 GROUP BY volume_id ) AS h ON h.volume_id = w.volume_id
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.designer
-                    ) AS d ON d.designer = u.`id`
-                        LEFT JOIN (
-                        SELECT
-                            vu.checker,
-                            SUM(
-                                    IFNULL( checker_workday, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.checker
-                    ) AS c ON u.`id` = c.checker
-                        LEFT JOIN (
-                        SELECT
-                            vu.principal,
-                            SUM(
-                                    IFNULL( principal_workday, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.principal
-                    ) AS p ON u.`id` = p.principal
-                        LEFT JOIN (
-                        SELECT
-                            vu.headman,
-                            SUM(
-                                    IFNULL( w.headman_workday, 0 )) AS workday
-                        FROM
-                            volume_workday w
-                                LEFT JOIN volume v ON v.id = w.volume_id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            w.submit = 2
-                          AND w.submit_date = #{date}
-
-                        GROUP BY
-                            vu.headman
-                    ) AS h ON u.`id` = h.headman
-                        LEFT JOIN (
-                        SELECT
-                            vu.designer,
-                            SUM( h.`grant` ) AS workday
-                        FROM
-                            volume_workday_high h
-                                LEFT JOIN volume v ON h.volume_id = v.id
-                                LEFT JOIN volume_user vu ON v.id = vu.volume_id
-                        WHERE
-                            h.submit = 2
-                          AND h.submit_date = #{date}
-
-                        GROUP BY
-                            vu.designer
-                    ) AS h1 ON h1.designer = u.`id`
-                        LEFT JOIN (
-                        SELECT
-                            t.designer,
-                            t.designer_workday,
-                            ifnull( SUM( a.advance ), 0 ) AS advance
-                        FROM
-                            project_task t,
-                            task_advance a
-                        WHERE
-                            t.id = a.task_id
-                          AND a.submit = 2
-                          AND a.submit_date = #{date}
-
-                        GROUP BY
-                            t.designer
-                    ) AS hd ON hd.designer = u.id
-                        LEFT JOIN (
-                        SELECT
-                            t.designer,
-                            SUM( designer_workday - advance ) AS workday
-                        FROM
-                            (
-                                SELECT
-                                    t.designer,
-                                    t.designer_workday,
-                                    ifnull( SUM( a.advance ), 0 ) AS advance
-                                FROM
-                                    project_task t
-                                        LEFT JOIN task_advance a ON t.id = a.task_id
-                                        AND a.submit = 2
-                                WHERE
-                                    t.submit = 2
-                                  AND t.submit_date = #{date}
-
-                                GROUP BY
-                                    t.id
-                            ) AS t
-                        GROUP BY
-                            designer
-                    ) AS td ON td.designer = u.id
-                        LEFT JOIN (
-                        SELECT
-                            tc.checker,
-                            sum( checker_workday ) AS checker_workday
-                        FROM
-                            project_task tc
-                        WHERE
-                            submit = 2
-                          AND submit_date = #{date}
-
-                        GROUP BY
-                            tc.checker
-                    ) AS tc ON tc.checker = u.id
-                        LEFT JOIN (
-                        SELECT
-                            tc.principal,
-                            sum( principal_workday ) AS principal_workday
-                        FROM
-                            project_task tc
-                        WHERE
-                            submit = 2
-                          AND submit_date = #{date}
-
-                        GROUP BY
-                            tc.principal
-                    ) AS tp ON tp.principal = u.id
-                        LEFT JOIN (
-                        SELECT
-                            tc.headman,
-                            sum( headman_workday ) AS headman_workday
-                        FROM
-                            project_task tc
-                        WHERE
-                            submit = 2
-                          AND submit_date = #{date}
-
-                        GROUP BY
-                            tc.headman
-                    ) AS th ON th.headman = u.id
-                        LEFT JOIN (
-                        SELECT
-                            m.designer,
-                            sum( m.workday ) AS workday
-                        FROM
-                            project_workday_manage m
-                        WHERE
-                            m.date = #{date}
-
-                        GROUP BY
-                            m.designer
-                    ) AS m ON m.designer = u.id
-                        LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date = #{date} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id
-                GROUP BY u.id ) AS u
+        (
+        SELECT
+        u.id,
+        u.username,
+        u.`name`,
+        d.id AS did,
+        d.`name` AS dep,
+        t.id AS tid,
+        t.`name` AS tec,
+        (
+        ifnull( d.workday, 0 ) + ifnull( c.workday, 0 ) + ifnull( p.workday, 0 ) + ifnull( h.workday, 0 )) AS volume_workday,
+        (
+        ifnull( h1.workday, 0 ) + ifnull( hd.advance, 0 )) AS advance_workday,
+        (
+        ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday,
+        ifnull( m.workday, 0 ) AS `manage`,
+        IFNULL( sci.workday, 0 ) AS scientific,
+        de.workday AS deduct
+        FROM
+        `user` u
+        LEFT JOIN department d ON d.id = u.did
+        LEFT JOIN technology t ON t.id = u.tid
+        LEFT JOIN (
+        SELECT
+        vu.designer,
+        SUM(
+        IFNULL( w.designer_workday, 0 ) - ifnull( h.`grant`, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN ( SELECT volume_id, IFNULL( SUM( `grant` ), 0 ) AS `grant` FROM volume_workday_high WHERE submit = 2 GROUP BY volume_id ) AS h ON h.volume_id = w.volume_id
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.designer
+        ) AS d ON d.designer = u.`id`
+        LEFT JOIN (
+        SELECT
+        vu.checker,
+        SUM(
+        IFNULL( checker_workday, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.checker
+        ) AS c ON u.`id` = c.checker
+        LEFT JOIN (
+        SELECT
+        vu.principal,
+        SUM(
+        IFNULL( principal_workday, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.principal
+        ) AS p ON u.`id` = p.principal
+        LEFT JOIN (
+        SELECT
+        vu.headman,
+        SUM(
+        IFNULL( w.headman_workday, 0 )) AS workday
+        FROM
+        volume_workday w
+        LEFT JOIN volume v ON v.id = w.volume_id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        w.submit = 2
+        AND w.submit_date &gt;= #{map.startMonth}
+        AND w.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.headman
+        ) AS h ON u.`id` = h.headman
+        LEFT JOIN (
+        SELECT
+        vu.designer,
+        SUM( h.`grant` ) AS workday
+        FROM
+        volume_workday_high h
+        LEFT JOIN volume v ON h.volume_id = v.id
+        LEFT JOIN volume_user vu ON v.id = vu.volume_id
+        WHERE
+        h.submit = 2
+        AND h.submit_date &gt;= #{map.startMonth}
+        AND h.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        vu.designer
+        ) AS h1 ON h1.designer = u.`id`
+        LEFT JOIN (
+        SELECT
+        t.designer,
+        t.designer_workday,
+        ifnull( SUM( a.advance ), 0 ) AS advance
+        FROM
+        project_task t,
+        task_advance a
+        WHERE
+        t.id = a.task_id
+        AND a.submit = 2
+        AND a.submit_date &gt;= #{map.startMonth}
+        AND a.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        t.designer
+        ) AS hd ON hd.designer = u.id
+        LEFT JOIN (
+        SELECT
+        t.designer,
+        SUM( designer_workday - advance ) AS workday
+        FROM
+        (
+        SELECT
+        t.designer,
+        t.designer_workday,
+        ifnull( SUM( a.advance ), 0 ) AS advance
+        FROM
+        project_task t
+        LEFT JOIN task_advance a ON t.id = a.task_id
+        AND a.submit = 2
+        WHERE
+        t.submit = 2
+        AND t.submit_date &gt;= #{map.startMonth}
+        AND t.submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        t.id
+        ) AS t
+        GROUP BY
+        designer
+        ) AS td ON td.designer = u.id
+        LEFT JOIN (
+        SELECT
+        tc.checker,
+        sum( checker_workday ) AS checker_workday
+        FROM
+        project_task tc
+        WHERE
+        submit = 2
+        AND submit_date &gt;= #{map.startMonth}
+        AND submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        tc.checker
+        ) AS tc ON tc.checker = u.id
+        LEFT JOIN (
+        SELECT
+        tc.principal,
+        sum( principal_workday ) AS principal_workday
+        FROM
+        project_task tc
+        WHERE
+        submit = 2
+        AND submit_date &gt;= #{map.startMonth}
+        AND submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        tc.principal
+        ) AS tp ON tp.principal = u.id
+        LEFT JOIN (
+        SELECT
+        tc.headman,
+        sum( headman_workday ) AS headman_workday
+        FROM
+        project_task tc
+        WHERE
+        submit = 2
+        AND submit_date &gt;= #{map.startMonth}
+        AND submit_date &lt;= #{map.endMonth}
+        GROUP BY
+        tc.headman
+        ) AS th ON th.headman = u.id
+        LEFT JOIN (
+        SELECT
+        m.designer,
+        sum( m.workday ) AS workday
+        FROM
+        project_workday_manage m
+        WHERE
+        m.date &gt;= #{map.startMonth}
+        AND m.date &lt;= #{map.endMonth}
+        GROUP BY
+        m.designer
+        ) AS m ON m.designer = u.id
+        LEFT JOIN ( SELECT sum( workday ) AS workday, user_id AS userId FROM workday_deduct WHERE `date` &gt;= #{map.startMonth} AND `date` &lt;= #{map.endMonth} GROUP BY user_id ) AS de ON de.userId = u.id
+        LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date &gt;= #{map.startMonth} AND submit_date &lt;= #{map.endMonth} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id
+        WHERE
+        u.alive = 1
+        GROUP BY
+        u.id
+        ) AS u
         WHERE u.id = #{id}
     </select>
 

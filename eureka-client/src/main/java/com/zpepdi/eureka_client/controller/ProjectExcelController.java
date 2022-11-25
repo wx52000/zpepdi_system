@@ -51,57 +51,39 @@ public class  ProjectExcelController {
   //所有人员工时数据
   @RequestMapping("userAll")
   public Result userAll(@RequestParam("date") String date, HttpServletResponse response){
-    List<String> listHeader = Arrays.asList("工号","姓名","总工时","卷册工时","任务工时","预发工时","设总管理工时");
-    List<Map<String,Object>> list = projectWorkDayService.userAll(date);
-    String fileName = "D:/excel/userAll.xlsx";
-    ExcelWriter excelWriter = null;
-    try {
-      excelWriter = EasyExcel.write(fileName).build();
-      EasyExcel.write(fileName).head(ExcelOutputHead.headList(listHeader))
-              .sheet("个人本项目卷册参与情况汇总").doWrite(ExcelOutData.userAll(list,0));
-      Download.downloadFile( response , "D://excel/" + "userAll.xlsx", date+"个人获得工时信息.xlsx");
-    }finally {
-      if (excelWriter != null)
-        excelWriter.finish();
-    }
+//    List<String> listHeader = Arrays.asList("工号","姓名","总工时","卷册工时","任务工时","预发工时","设总管理工时");
+//    String fileName = "D:/excel/userAll.xlsx";
+//    ExcelWriter excelWriter = null;
+//    try {
+//      excelWriter = EasyExcel.write(fileName).build();
+//      EasyExcel.write(fileName).head(ExcelOutputHead.headList(listHeader))
+//              .sheet("个人本项目卷册参与情况汇总").doWrite(ExcelOutData.userAll(list,0));
+//      Download.downloadFile( response , "D://excel/" + "userAll.xlsx", date+"个人获得工时信息.xlsx");
+//    }finally {
+//      if (excelWriter != null)
+//        excelWriter.finish();
+//    }
     return Result.ok();
   }
 
   @RequestMapping("userByManage")
   public Result userByManage(@RequestParam("date") String date, HttpServletResponse response,@UserId Integer userId){
-    List<String> listHeader = Arrays.asList("工号","姓名","专业","总工时","卷册工时","任务工时","预发工时","设总管理工时");
-    List<Map<String,Object>> list = projectWorkDayService.userByManage(date,userId);
-    String fileName = "D:/excel/userByManage.xlsx";
-    ExcelWriter excelWriter = null;
-    try {
-      excelWriter = EasyExcel.write(fileName).build();
-      EasyExcel.write(fileName).head(ExcelOutputHead.headList(listHeader))
-              .sheet("个人本项目卷册参与情况汇总").doWrite(ExcelOutData.userAll(list,0));
-      Download.downloadFile( response , "D://excel/" + "userByManage.xlsx", date+"个人获得工时信息.xlsx");
-    }finally {
-      if (excelWriter != null)
-        excelWriter.finish();
-    }
+//    List<String> listHeader = Arrays.asList("工号","姓名","专业","总工时","卷册工时","任务工时","预发工时","设总管理工时");
+//    List<Map<String,Object>> list = projectWorkDayService.userByManage(date,userId);
+//    String fileName = "D:/excel/userByManage.xlsx";
+//    ExcelWriter excelWriter = null;
+//    try {
+//      excelWriter = EasyExcel.write(fileName).build();
+//      EasyExcel.write(fileName).head(ExcelOutputHead.headList(listHeader))
+//              .sheet("个人本项目卷册参与情况汇总").doWrite(ExcelOutData.userAll(list,0));
+//      Download.downloadFile( response , "D://excel/" + "userByManage.xlsx", date+"个人获得工时信息.xlsx");
+//    }finally {
+//      if (excelWriter != null)
+//        excelWriter.finish();
+//    }
     return Result.ok();
   }
 
-  @RequestMapping("userByGeneral")
-  public Result userByProject(@RequestParam("date") String date, HttpServletResponse response,@UserId Integer userId, @RequestParam("id")Integer id){
-    List<String> listHeader = Arrays.asList("工号","姓名","专业","总工时","卷册工时","任务工时","预发工时");
-    List<Map<String,Object>> list = projectWorkDayService.userByProject(date,userId,id);
-    String fileName = "D:/excel/userByGeneral.xlsx";
-    ExcelWriter excelWriter = null;
-    try {
-      excelWriter = EasyExcel.write(fileName).build();
-      EasyExcel.write(fileName).head(ExcelOutputHead.headList(listHeader))
-              .sheet("个人本项目卷册参与情况汇总").doWrite(ExcelOutData.userAll(list,1));
-      Download.downloadFile( response , "D://excel/" + "userByGeneral.xlsx", date+"个人获得工时信息.xlsx");
-    }finally {
-      if (excelWriter != null)
-        excelWriter.finish();
-    }
-    return Result.ok();
-  }
 
   @RequestMapping("userByPrincipal")
   public Result userByPrincipal(@RequestParam("date") String date, HttpServletResponse response,@UserId Integer userId, @RequestParam("id")Integer id){
@@ -247,17 +229,6 @@ public class  ProjectExcelController {
   /*
   <=============================================>
    */
-
-  @RequestMapping("personal")
-  public Result personal(HttpServletResponse response, @UserId Integer id){
-    List<String> listHeader = Arrays.asList("发放人","工时数量","工时类型","卷册号/项目号");
-    List<Map<String, Object>> list = projectWorkDayService.personal(id);
-    String fileName = "D:/excel/personal.xlsx";
-    EasyExcel.write(fileName).head(ExcelOutputHead.headList(listHeader))
-      .sheet("个人工时获得情况汇总").doWrite(ExcelOutData.personal(list));
-    Download.downloadFile( response , "D://excel/" + "personal.xlsx", id +"施工图完成数量.xlsx");
-    return Result.ok();
-  }
   @RequestMapping("personalVolume")
   public Result personalVolume(HttpServletResponse response,@UserId Integer id,
                                @RequestParam("minDay")String min,@RequestParam("maxDay")String max) {

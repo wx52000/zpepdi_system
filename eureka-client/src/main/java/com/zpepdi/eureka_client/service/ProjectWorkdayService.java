@@ -45,13 +45,8 @@ public interface ProjectWorkdayService {
   //Excel 整体比例 所有项目
   List<ProjectExcelTec> statisticAll(String date);
 
-  List<Map<String,Object>> userAll(String date);
-
-  List<Map<String,Object>> userByManage(String date,Integer userId);
-
   List<Map<String,Object>> userByPrincipal(String date,Integer userId, Integer id);
 
-  List<Map<String,Object>> userByProject(String date,Integer userId, Integer id);
 
   //Excel 整体比例
   List<Map<String,String>> statistic(Integer id);
@@ -60,7 +55,6 @@ public interface ProjectWorkdayService {
 
   List<Map<String,String>> everyone(Map map);
 
-  List<Map<String,Object>> personal(Integer id);
 
   Result queryBackupList(Integer id);
 }
