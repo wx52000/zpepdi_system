@@ -659,3 +659,4 @@ org.apache.ibatis.binding.BindingException: Parameter 'date' not found. Availabl
 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
 	at java.lang.Thread.run(Thread.java:748)
+2022-11-28 14:50:13.142 [SpringContextShutdownHook] ERROR com.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1669618213142, current=DOWN, previous=UP]
