@@ -8579,3 +8579,15 @@ Unconditional classes:
 2022-11-28 14:42:01.416 [http-nio-9001-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
 2022-11-28 14:42:01.416 [http-nio-9001-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.zpepdi.eureka_client.result.Result@10a58090]
 2022-11-28 14:42:01.428 [http-nio-9001-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2022-11-28 14:44:23.898 [http-nio-9001-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.zpepdi.eureka_client.controller.NewsController#count(Integer)
+2022-11-28 14:44:23.900 [http-nio-9001-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/news/count", parameters={}
+2022-11-28 14:44:23.900 [http-nio-9001-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.zpepdi.eureka_client.controller.NewsController#count(Integer)
+2022-11-28 14:44:23.958 [http-nio-9001-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2022-11-28 14:44:23.959 [http-nio-9001-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.zpepdi.eureka_client.result.Result@44973648]
+2022-11-28 14:44:23.959 [http-nio-9001-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2022-11-28 14:44:23.898 [http-nio-9001-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.zpepdi.eureka_client.controller.NewsController#count(Integer)
+2022-11-28 14:44:23.900 [http-nio-9001-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/news/count", parameters={}
+2022-11-28 14:44:23.900 [http-nio-9001-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.zpepdi.eureka_client.controller.NewsController#count(Integer)
+2022-11-28 14:44:23.958 [http-nio-9001-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2022-11-28 14:44:23.959 [http-nio-9001-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Writing [com.zpepdi.eureka_client.result.Result@44973648]
+2022-11-28 14:44:23.959 [http-nio-9001-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
