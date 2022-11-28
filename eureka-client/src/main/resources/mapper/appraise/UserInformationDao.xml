@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.UserInformationDao">
+    <insert id="insert">
+
+    </insert>
+    <select id="query" resultType="java.util.Map">
+        SELECT
+            u.id,
+            u.`username`,
+            u.`name`,
+            d.`name` AS dep,
+            t.`name` AS tec,
+            CASE
+                sex
+                WHEN '男' THEN
+                    1 ELSE 0
+                END AS sex,
+            CAST( `birthday` AS CHAR ) AS birthday,
+            CAST( `hiredate` AS CHAR ) AS hiredate,
+            `education`,
+            `school`,
+            CAST( `graduation_date` AS CHAR ) AS graduation_date,
+            `title`,
+            `registration_certificate1`,
+            `registration_certificate2`,
+            `pressure_piping_qualification`,
+            `association_vip`
+        FROM
+            `user` u,
+            `user_information` i,
+            department d,
+            technology t
+        WHERE
+            u.id = i.user_id
+          AND u.did = d.id
+          AND u.tid = t.id
+        ORDER BY
+            d.id,
+            t.id,
+            u.username
+    </select>
+</mapper>
