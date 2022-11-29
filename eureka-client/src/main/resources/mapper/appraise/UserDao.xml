@@ -21,7 +21,7 @@
     <collection property="group" javaType="ARRAYLIST"
                 column="id=id,vid= vid" select="getGroup1"/>
   </resultMap>
-    <insert id="add" parameterType="user" useGeneratedKeys="true" keyProperty="id">
+    <insert id="add" parameterType="map" useGeneratedKeys="true" keyProperty="userId" keyColumn="id">
         insert into user(pid , did , tid , `name` , username , paw , grade)
         values (#{pid} , #{did} , #{tid} , #{name} , #{username} ,AES_ENCRYPT("1234",'zpepdi') , 0)
             ON DUPLICATE KEY UPDATE

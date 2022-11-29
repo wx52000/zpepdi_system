@@ -17,7 +17,7 @@ public interface UserService {
 
     Result queryByUserIdSameDep(Integer id, String name);
 
-    void add(User user);
+    void add(Map<String,Object> map);
 
     void addExcel(List<ExcelData> list);
 

@@ -20,7 +20,7 @@ public interface UserDao {
 
     Map queryLimits(Integer id);
 
-    void add(User user);
+    void add(Map<String,Object> map);
 
     void addExcel(List<ExcelData> list);
 

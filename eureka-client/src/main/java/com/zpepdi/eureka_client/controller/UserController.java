@@ -42,8 +42,8 @@ public class UserController {
     }
 
     @RequestMapping("add")
-    public Result add(@RequestBody User user){
-        userService.add(user);
+    public Result add(@RequestBody Map<String,Object> map){
+        userService.add(map);
         return Result.ok();
     }
 

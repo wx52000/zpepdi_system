@@ -21,7 +21,19 @@ public class UserInformationServiceImpl implements UserInformationService {
     }
 
     @Override
+    public Result queryById(Integer id) {
+        return Result.ok(userInformationDao.queryById(id));
+    }
+
+    @Override
+    public Result queryByManage(Integer id) {
+        return Result.ok(userInformationDao.queryByManage(id));
+    }
+
+    @Override
     public Result insert(Map<String,Object> map) {
+        map.put("userId",map.get("id"));
+        userInformationDao.insert(map);
         return Result.ok();
     }
 }

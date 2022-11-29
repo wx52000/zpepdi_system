@@ -8,5 +8,9 @@ public interface UserInformationService {
 
     Result query();
 
+    Result queryById(Integer id);
+
+    Result queryByManage(Integer id);
+
     Result insert(Map<String,Object> map);
 }

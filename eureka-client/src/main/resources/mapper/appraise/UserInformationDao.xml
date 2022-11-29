@@ -2,7 +2,71 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zpepdi.eureka_client.dao.appraise.UserInformationDao">
     <insert id="insert">
-
+        INSERT INTO `appraise`.user_information (
+            `user_id`,
+            `username`,
+            `name`,
+            `sex`,
+            `birthday`,
+            `hiredate`,
+            `education`,
+            `school`,
+            `graduation_date`,
+            `title`,
+            `registration_certificate1`,
+            `registration_certificate2`,
+            `pressure_piping_qualification`,
+            `association_vip`
+        )
+        VALUES
+            ( #{userId},
+              #{username},
+              #{name},
+              #{sex},
+              #{birthday},
+              #{hiredate},
+              #{education},
+              #{school},
+              #{graduation_date},
+              #{title},
+              #{registration_certificate1},
+              #{registration_certificate2},
+              #{pressure_piping_qualification},
+              #{association_vip}
+            )
+            ON DUPLICATE KEY UPDATE birthday =
+                             VALUES
+                                 ( birthday ),
+                                 hiredate =
+                             VALUES
+                                 ( hiredate ),
+                                 education =
+                             VALUES
+                                 ( education ),
+                                 birthday =
+                             VALUES
+                                 ( birthday ),
+                                 school =
+                             VALUES
+                                 ( school ),
+                                 graduation_date =
+                             VALUES
+                                 ( graduation_date ),
+                                 title =
+                             VALUES
+                                 ( title ),
+                                 registration_certificate1 =
+                             VALUES
+                                 ( registration_certificate1 ),
+                                 registration_certificate2 =
+                             VALUES
+                                 ( registration_certificate2 ),
+                                 pressure_piping_qualification =
+                             VALUES
+                                 ( pressure_piping_qualification ),
+                                 association_vip =
+                             VALUES
+                                 (association_vip)
     </insert>
     <select id="query" resultType="java.util.Map">
         SELECT
@@ -13,8 +77,8 @@
             t.`name` AS tec,
             CASE
                 sex
-                WHEN '男' THEN
-                    1 ELSE 0
+                WHEN 1 THEN
+                    '男' ELSE '女'
                 END AS sex,
             CAST( `birthday` AS CHAR ) AS birthday,
             CAST( `hiredate` AS CHAR ) AS hiredate,
@@ -38,6 +102,78 @@
         ORDER BY
             d.id,
             t.id,
-            u.username
+            u.username desc
+    </select>
+    <select id="queryByManage" resultType="java.util.Map">
+        SELECT
+            u.id,
+            u.`username`,
+            u.`name`,
+            d.`name` AS dep,
+            t.`name` AS tec,
+            CASE
+                sex
+                WHEN 1 THEN
+                    '男' ELSE '女'
+                END AS sex,
+            CAST( `birthday` AS CHAR ) AS birthday,
+            CAST( `hiredate` AS CHAR ) AS hiredate,
+            `education`,
+            `school`,
+            CAST( `graduation_date` AS CHAR ) AS graduation_date,
+            `title`,
+            `registration_certificate1`,
+            `registration_certificate2`,
+            `pressure_piping_qualification`,
+            `association_vip`
+        FROM
+            `user` u,
+            `user_information` i,
+            department d,
+            technology t,
+            user u1
+        WHERE
+            u.id = i.user_id
+          AND u.did = d.id
+          AND u.tid = t.id
+          and u1.id = #{id}
+          and u.did = u1.did
+        ORDER BY
+            d.id,
+            t.id,
+            u.username desc
+    </select>
+    <select id="queryById" resultType="java.util.Map">
+        SELECT
+            u.id,
+            u.`username`,
+            u.`name`,
+            d.`name` AS dep,
+            t.`name` AS tec,
+            i.sex,
+            CAST( `birthday` AS CHAR ) AS birthday,
+            CAST( `hiredate` AS CHAR ) AS hiredate,
+            `education`,
+            `school`,
+            CAST( `graduation_date` AS CHAR ) AS graduation_date,
+            `title`,
+            `registration_certificate1`,
+            `registration_certificate2`,
+            `pressure_piping_qualification`,
+            `association_vip`
+        FROM
+            `user` u,
+            `user_information` i,
+            department d,
+            technology t
+        WHERE
+            u.id = i.user_id
+          AND u.did = d.id
+          AND u.tid = t.id
+          and u.id = #{id}
+        ORDER BY
+            d.id,
+            t.id,
+            u.username desc
     </select>
 </mapper>

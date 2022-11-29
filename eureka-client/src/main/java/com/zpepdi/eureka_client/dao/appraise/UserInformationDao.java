@@ -10,6 +10,10 @@ public interface UserInformationDao {
 
     List<Map<String,Object>> query();
 
+    Map<String,Object> queryById(Integer id);
+
+    List<Map<String,Object>> queryByManage(Integer id);
+
     void insert(Map<String,Object> map);
 
 

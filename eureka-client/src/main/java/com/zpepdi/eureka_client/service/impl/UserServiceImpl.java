@@ -2,18 +2,16 @@ package com.zpepdi.eureka_client.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.zpepdi.eureka_client.dao.appraise.RangeDao;
+import com.zpepdi.eureka_client.dao.appraise.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.zpepdi.eureka_client.dao.appraise.DepartmentDao;
-import com.zpepdi.eureka_client.dao.appraise.TechnologyDao;
-import com.zpepdi.eureka_client.dao.appraise.UserDao;
 import com.zpepdi.eureka_client.entity.Department;
 import com.zpepdi.eureka_client.entity.ExcelData;
 import com.zpepdi.eureka_client.entity.User;
 import com.zpepdi.eureka_client.entity.UserOut;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.UserService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -25,6 +23,8 @@ public class UserServiceImpl implements UserService {
     private DepartmentDao departmentDao;
     private TechnologyDao technologyDao;
     private RangeDao rangeDao;
+    @Autowired
+    private UserInformationDao userInformationDao;
     @Autowired
     public void setDepartmentDao(DepartmentDao departmentDao){
       this.departmentDao = departmentDao;
@@ -54,8 +54,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void add(User user) {
-        userDao.add(user);
+    @Transactional
+    public void add(Map<String,Object> map) {
+        userDao.add(map);
+        userInformationDao.insert(map);
     }
 
     @Override

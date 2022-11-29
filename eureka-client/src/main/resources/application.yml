@@ -1,5 +1,5 @@
-#myIp : localhost
-myIp : 10.136.238.23
+myIp : localhost
+#myIp : 10.136.238.23
 spring:
   application:
     name: eureka-client
