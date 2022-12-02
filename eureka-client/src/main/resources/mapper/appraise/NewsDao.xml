@@ -1132,10 +1132,8 @@
           AND c.tec = v.tec
           AND v.project_id = p.id
           AND u.id = c.principal
-          AND (
+          AND
                 EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-                OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-            )
         GROUP BY
             p.id,
             tec,
@@ -2038,6 +2036,7 @@
             p.generalId = #{id}
           AND p.id = t.scientific_id
           AND t.`check` = 0
+          and t.`apply` = 1
           AND t.scientific_leader_id = l.id
           AND l.leader = u.id
         GROUP BY t.id

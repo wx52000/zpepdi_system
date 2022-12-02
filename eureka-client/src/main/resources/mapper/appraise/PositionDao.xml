@@ -159,6 +159,19 @@
         WHERE r.role_id = #{roleId}
         and r.button_id = b.id
     </select>
+    <select id="permissionByMenus" resultType="java.lang.Boolean">
+        SELECT EXISTS
+                   (
+                       SELECT
+                           1
+                       FROM
+                           `user` u,
+                           role_menus rm
+                       WHERE
+                           u.id = #{userId}
+                         AND u.pid = rm.role_id
+                         AND rm.menus_id = #{menusId})
+    </select>
 
 
 </mapper>

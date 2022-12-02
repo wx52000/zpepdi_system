@@ -44,11 +44,6 @@ public class ScientificLeaderController {
         return scientificLeaderService.delLeader(id);
     }
 
-    @RequestMapping("term")
-    public Result term(@RequestHeader Integer id) {
-        return scientificLeaderService.delLeader(id);
-    }
-
     @RequestMapping("addTermByGeneral")
     public Result addTermByGeneral(@UserId Integer userId, @RequestBody Map<String, Object> map) {
         return scientificLeaderService.addTermByGeneral(userId,map);

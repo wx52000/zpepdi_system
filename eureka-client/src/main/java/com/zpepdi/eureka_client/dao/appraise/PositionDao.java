@@ -13,6 +13,10 @@ public interface PositionDao {
 
   void newRole(String name);
 
+  //menusId查数据库
+  boolean permissionByMenus(@Param("userId") Integer userId, @Param("menusId")Integer menusId);
+
+
   void delRole(Integer id);
 
   List<Map> queryByWeight(Integer id);

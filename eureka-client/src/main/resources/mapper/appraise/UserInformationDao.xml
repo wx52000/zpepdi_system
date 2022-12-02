@@ -101,8 +101,8 @@
           AND u.tid = t.id
         ORDER BY
             d.id,
-            t.id,
-            u.username desc
+            u.username,
+            t.id
     </select>
     <select id="queryByManage" resultType="java.util.Map">
         SELECT
@@ -138,10 +138,6 @@
           AND u.tid = t.id
           and u1.id = #{id}
           and u.did = u1.did
-        ORDER BY
-            d.id,
-            t.id,
-            u.username desc
     </select>
     <select id="queryById" resultType="java.util.Map">
         SELECT
@@ -174,6 +170,6 @@
         ORDER BY
             d.id,
             t.id,
-            u.username desc
+            u.username
     </select>
 </mapper>
