@@ -22,29 +22,17 @@ public class SummaryProjectServiceImpl implements SummaryProjectService {
     @Override
     @Transactional
     public Result setSummaryProject(Integer userId, Map<String, Object> map) {
-        // 0 为新增 1为修改 2为数据新增
-        int mode = Integer.parseInt(map.get("mode").toString());
-        if (mode < 2) {
+        int projectId = 0;
+        if (map.get("id") == null || map.get("id").equals("")){
             summaryProjectDao.addBasic(userId, map);
-            Integer projectId = Integer.valueOf(map.get("id").toString());
-            if (map.get("contact") != null && !map.get("contact").toString().equals("")) {
-                if (mode == 1) {
-                    summaryProjectDao.delStaff(projectId, 0);
-                }
-                JSONArray jsonArray = JSONArray.parseArray(JSONObject.toJSONString(map.get("contact")));
-                summaryProjectDao.addStaff(projectId, jsonArray, 0);
-            }
-            if (map.get("tracker") != null && !map.get("tracker").toString().equals("")) {
-                if (mode == 1) {
-                    summaryProjectDao.delStaff(projectId, 1);
-                }
-                JSONArray jsonArray = JSONArray.parseArray(JSONObject.toJSONString(map.get("tracker")));
-                summaryProjectDao.addStaff(projectId, jsonArray, 1);
-            }
         }
-        if (mode != 1) {
-            summaryProjectDao.addInformation(userId, map);
-        }
+        projectId = Integer.parseInt(map.get("id").toString());
+        if (map.get("tracker") != null && !map.get("tracker").toString().equals("")) {
+            summaryProjectDao.delStaff(projectId, 1);
+            JSONArray jsonArray = JSONArray.parseArray(JSONObject.toJSONString(map.get("tracker")));
+            summaryProjectDao.addStaff(projectId, jsonArray, 1);
+            }
+        summaryProjectDao.addInformation(userId, map);
         return Result.ok();
     }
 

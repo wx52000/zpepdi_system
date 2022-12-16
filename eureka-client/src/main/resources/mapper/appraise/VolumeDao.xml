@@ -944,6 +944,18 @@
         IFNULL( `10`, 0 ) AS `10`,
         IFNULL( `11`, 0 ) AS `11`,
         IFNULL( `12`, 0 ) AS `12`,
+        IFNULL( `workday1`, 0 ) AS `workday1`,
+        IFNULL( `workday2`, 0 ) AS `workday2`,
+        IFNULL( `workday3`, 0 ) AS `workday3`,
+        IFNULL( `workday4`, 0 ) AS `workday4`,
+        IFNULL( `workday5`, 0 ) AS `workday5`,
+        IFNULL( `workday6`, 0 ) AS `workday6`,
+        IFNULL( `workday7`, 0 ) AS `workday7`,
+        IFNULL( `workday8`, 0 ) AS `workday8`,
+        IFNULL( `workday9`, 0 ) AS `workday9`,
+        IFNULL( `workday10`, 0 ) AS `workday10`,
+        IFNULL( `workday11`, 0 ) AS `workday11`,
+        IFNULL( `workday12`, 0 ) AS `workday12`,
         IFNULL( `plan1`, 0 ) AS `plan1`,
         IFNULL( `plan2`, 0 ) AS `plan2`,
         IFNULL( `plan3`, 0 ) AS `plan3`,
@@ -956,6 +968,18 @@
         IFNULL( `plan10`, 0 ) AS `plan10`,
         IFNULL( `plan11`, 0 ) AS `plan11`,
         IFNULL( `plan12`, 0 ) AS `plan12`,
+        IFNULL( `planWorkday1`, 0 ) AS `planWorkday1`,
+        IFNULL( `planWorkday2`, 0 ) AS `planWorkday2`,
+        IFNULL( `planWorkday3`, 0 ) AS `planWorkday3`,
+        IFNULL( `planWorkday4`, 0 ) AS `planWorkday4`,
+        IFNULL( `planWorkday5`, 0 ) AS `planWorkday5`,
+        IFNULL( `planWorkday6`, 0 ) AS `planWorkday6`,
+        IFNULL( `planWorkday7`, 0 ) AS `planWorkday7`,
+        IFNULL( `planWorkday8`, 0 ) AS `planWorkday8`,
+        IFNULL( `planWorkday9`, 0 ) AS `planWorkday9`,
+        IFNULL( `planWorkday10`, 0 ) AS `planWorkday10`,
+        IFNULL( `planWorkday11`, 0 ) AS `planWorkday11`,
+        IFNULL( `planWorkday12`, 0 ) AS `planWorkday12`,
         IFNULL( incomplete, 0 ) AS incomplete,
         IFNULL( num, 0 ) AS num,
         IFNULL( `avg`, 0 ) AS `avg`,
@@ -1004,6 +1028,42 @@
         ( m.`month` = 12, tab.num, 0 )) AS `12`,
         MAX(
         IF
+        ( m.`month` = 1, tab.workday, 0 )) AS `workday1`,
+        MAX(
+        IF
+        ( m.`month` = 2, tab.workday, 0 )) AS `workday2`,
+        MAX(
+        IF
+        ( m.`month` = 3, tab.workday, 0 )) AS `workday3`,
+        MAX(
+        IF
+        ( m.`month` = 4, tab.workday, 0 )) AS `workday4`,
+        MAX(
+        IF
+        ( m.`month` = 5, tab.workday, 0 )) AS `workday5`,
+        MAX(
+        IF
+        ( m.`month` = 6, tab.workday, 0 )) AS `workday6`,
+        MAX(
+        IF
+        ( m.`month` = 7, tab.workday, 0 )) AS `workday7`,
+        MAX(
+        IF
+        ( m.`month` = 8, tab.workday, 0 )) AS `workday8`,
+        MAX(
+        IF
+        ( m.`month` = 9, tab.workday, 0 )) AS `workday9`,
+        MAX(
+        IF
+        ( m.`month` = 10, tab.workday, 0 )) AS `workday10`,
+        MAX(
+        IF
+        ( m.`month` = 11, tab.workday, 0 )) AS `workday11`,
+        MAX(
+        IF
+        ( m.`month` = 12, tab.workday, 0 )) AS `workday12`,
+        MAX(
+        IF
         ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
         MAX(
         IF
@@ -1038,6 +1098,42 @@
         MAX(
         IF
         ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
+        MAX(
+        IF
+        ( m.`month` = 1, plan.workday, 0 )) AS `planWorkday1`,
+        MAX(
+        IF
+        ( m.`month` = 2, plan.workday, 0 )) AS `planWorkday2`,
+        MAX(
+        IF
+        ( m.`month` = 3, plan.workday, 0 )) AS `planWorkday3`,
+        MAX(
+        IF
+        ( m.`month` = 4, plan.workday, 0 )) AS `planWorkday4`,
+        MAX(
+        IF
+        ( m.`month` = 5, plan.workday, 0 )) AS `planWorkday5`,
+        MAX(
+        IF
+        ( m.`month` = 6, plan.workday, 0 )) AS `planWorkday6`,
+        MAX(
+        IF
+        ( m.`month` = 7, plan.workday, 0 )) AS `planWorkday7`,
+        MAX(
+        IF
+        ( m.`month` = 8, plan.workday, 0 )) AS `planWorkday8`,
+        MAX(
+        IF
+        ( m.`month` = 9, plan.workday, 0 )) AS `planWorkday9`,
+        MAX(
+        IF
+        ( m.`month` = 10, plan.workday, 0 )) AS `planWorkday10`,
+        MAX(
+        IF
+        ( m.`month` = 11, plan.workday, 0 )) AS `planWorkday11`,
+        MAX(
+        IF
+        ( m.`month` = 12, plan.workday, 0 )) AS `planWorkday12`,
         max(
         IF
         ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
@@ -1049,6 +1145,7 @@
         LEFT JOIN (
         SELECT
         COUNT(*) AS num,
+        SUM( w.workday ) AS workday,
         m.big_name AS tec,
         m.did,
         mon.`month` AS `month`
@@ -1057,37 +1154,41 @@
         major_contrast_technology m,
         `month` mon
         LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+        LEFT JOIN volume_workday w ON v.id = w.volume_id
         WHERE
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
-        AND YEAR ( v.actual_publication_date ) = #{year}
+        AND v.actual_publication_date LIKE CONCAT(#{year},"%")
         AND v.number NOT LIKE "%+%"
         GROUP BY
         m.big_name,
         mon.`month`
         ) AS tab ON tab.tec = m.big_name
         AND tab.`month` = m.`month`
-        left join (
-            SELECT
-                COUNT(*) AS num,
-                m.big_name AS tec
-            FROM
-                project p,
-                major_contrast_technology m,
-                 volume v
-            WHERE
-                p.id = v.project_id
-              AND v.tec = m.small_name
-              AND RIGHT ( p.number, 1 ) = "s"
-              AND YEAR ( v.actual_publication_date ) = #{year}
-              AND v.number NOT LIKE "%+%"
-            GROUP BY
-                m.big_name
-            ) as s on  s.tec = m.big_name
         LEFT JOIN (
         SELECT
         COUNT(*) AS num,
+        sum( w.workday ) AS workday,
+        m.big_name AS tec
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        LEFT JOIN volume_workday w ON w.volume_id = v.id
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        m.big_name
+        ) AS s ON s.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        SUM( w.workday ) AS workday,
         m.big_name AS tec,
         m.did,
         DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
@@ -1095,11 +1196,12 @@
         project p,
         major_contrast_technology m,
         volume v
+        LEFT JOIN volume_workday w ON w.volume_id = v.id
         WHERE
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
-        AND YEAR ( v.planned_publication_date ) = #{year}
+        AND v.planned_publication_date LIKE CONCAT(#{year},"%")
         AND v.number NOT LIKE "%+%"
         GROUP BY
         m.big_name,
@@ -1202,6 +1304,42 @@
         ( m.`month` = 12, tab.num, 0 )) AS `12`,
         MAX(
         IF
+        ( m.`month` = 1, tab.workday, 0 )) AS `workday1`,
+        MAX(
+        IF
+        ( m.`month` = 2, tab.workday, 0 )) AS `workday2`,
+        MAX(
+        IF
+        ( m.`month` = 3, tab.workday, 0 )) AS `workday3`,
+        MAX(
+        IF
+        ( m.`month` = 4, tab.workday, 0 )) AS `workday4`,
+        MAX(
+        IF
+        ( m.`month` = 5, tab.workday, 0 )) AS `workday5`,
+        MAX(
+        IF
+        ( m.`month` = 6, tab.workday, 0 )) AS `workday6`,
+        MAX(
+        IF
+        ( m.`month` = 7, tab.workday, 0 )) AS `workday7`,
+        MAX(
+        IF
+        ( m.`month` = 8, tab.workday, 0 )) AS `workday8`,
+        MAX(
+        IF
+        ( m.`month` = 9, tab.workday, 0 )) AS `workday9`,
+        MAX(
+        IF
+        ( m.`month` = 10, tab.workday, 0 )) AS `workday10`,
+        MAX(
+        IF
+        ( m.`month` = 11, tab.workday, 0 )) AS `workday11`,
+        MAX(
+        IF
+        ( m.`month` = 12, tab.workday, 0 )) AS `workday12`,
+        MAX(
+        IF
         ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
         MAX(
         IF
@@ -1236,6 +1374,42 @@
         MAX(
         IF
         ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
+        MAX(
+        IF
+        ( m.`month` = 1, plan.workday, 0 )) AS `planWorkday1`,
+        MAX(
+        IF
+        ( m.`month` = 2, plan.workday, 0 )) AS `planWorkday2`,
+        MAX(
+        IF
+        ( m.`month` = 3, plan.workday, 0 )) AS `planWorkday3`,
+        MAX(
+        IF
+        ( m.`month` = 4, plan.workday, 0 )) AS `planWorkday4`,
+        MAX(
+        IF
+        ( m.`month` = 5, plan.workday, 0 )) AS `planWorkday5`,
+        MAX(
+        IF
+        ( m.`month` = 6, plan.workday, 0 )) AS `planWorkday6`,
+        MAX(
+        IF
+        ( m.`month` = 7, plan.workday, 0 )) AS `planWorkday7`,
+        MAX(
+        IF
+        ( m.`month` = 8, plan.workday, 0 )) AS `planWorkday8`,
+        MAX(
+        IF
+        ( m.`month` = 9, plan.workday, 0 )) AS `planWorkday9`,
+        MAX(
+        IF
+        ( m.`month` = 10, plan.workday, 0 )) AS `planWorkday10`,
+        MAX(
+        IF
+        ( m.`month` = 11, plan.workday, 0 )) AS `planWorkday11`,
+        MAX(
+        IF
+        ( m.`month` = 12, plan.workday, 0 )) AS `planWorkday12`,
         max(
         IF
         ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
@@ -1247,6 +1421,7 @@
         LEFT JOIN (
         SELECT
         COUNT(*) AS num,
+        SUM( w.workday ) AS workday,
         m.big_name AS tec,
         m.did,
         mon.`month` AS `month`
@@ -1255,40 +1430,22 @@
         major_contrast_technology m,
         `month` mon
         LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+        LEFT JOIN volume_workday w ON v.id = w.volume_id
         WHERE
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
-        AND YEAR ( v.actual_publication_date ) = #{year}
+        AND v.actual_publication_date LIKE CONCAT(#{year},"%")
         AND v.number LIKE "%+%"
         GROUP BY
         m.big_name,
         mon.`month`
         ) AS tab ON tab.tec = m.big_name
         AND tab.`month` = m.`month`
-        left join (
-            SELECT
-                COUNT(*) AS num,
-                m.big_name AS tec
-            FROM
-                project p,
-                major_contrast_technology m,
-                volume v
-            WHERE
-                p.id = v.project_id
-              AND v.tec = m.small_name
-              AND RIGHT ( p.number, 1 ) = "s"
-              AND YEAR ( v.actual_publication_date ) = #{year}
-              AND v.number LIKE "%+%"
-            GROUP BY
-                m.big_name
-        ) as s on  s.tec = m.big_name
         LEFT JOIN (
         SELECT
         COUNT(*) AS num,
-        m.big_name AS tec,
-        m.did,
-        DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+        m.big_name AS tec
         FROM
         project p,
         major_contrast_technology m,
@@ -1297,7 +1454,28 @@
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
-        AND YEAR ( v.planned_publication_date ) = #{year}
+        AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+        AND v.number LIKE "%+%"
+        GROUP BY
+        m.big_name
+        ) AS s ON s.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        SUM( w.workday ) AS workday,
+        m.big_name AS tec,
+        m.did,
+        DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        LEFT JOIN volume_workday w ON v.id = w.volume_id
+        WHERE
+        p.id = v.project_id
+        AND v.tec = m.small_name
+        AND RIGHT ( p.number, 1 ) = "s"
+        AND v.planned_publication_date LIKE CONCAT(#{year},"%")
         AND v.number LIKE "%+%"
         GROUP BY
         m.big_name,
@@ -1368,442 +1546,620 @@
     </select>
     <select id="manageTecProgress" resultType="java.util.Map">
         SELECT
-        tec,
-        type,
-        IFNULL( `1`, 0 ) AS `1`,
-        IFNULL( `2`, 0 ) AS `2`,
-        IFNULL( `3`, 0 ) AS `3`,
-        IFNULL( `4`, 0 ) AS `4`,
-        IFNULL( `5`, 0 ) AS `5`,
-        IFNULL( `6`, 0 ) AS `6`,
-        IFNULL( `7`, 0 ) AS `7`,
-        IFNULL( `8`, 0 ) AS `8`,
-        IFNULL( `9`, 0 ) AS `9`,
-        IFNULL( `10`, 0 ) AS `10`,
-        IFNULL( `11`, 0 ) AS `11`,
-        IFNULL( `12`, 0 ) AS `12`,
-        IFNULL( `plan1`, 0 ) AS `plan1`,
-        IFNULL( `plan2`, 0 ) AS `plan2`,
-        IFNULL( `plan3`, 0 ) AS `plan3`,
-        IFNULL( `plan4`, 0 ) AS `plan4`,
-        IFNULL( `plan5`, 0 ) AS `plan5`,
-        IFNULL( `plan6`, 0 ) AS `plan6`,
-        IFNULL( `plan7`, 0 ) AS `plan7`,
-        IFNULL( `plan8`, 0 ) AS `plan8`,
-        IFNULL( `plan9`, 0 ) AS `plan9`,
-        IFNULL( `plan10`, 0 ) AS `plan10`,
-        IFNULL( `plan11`, 0 ) AS `plan11`,
-        IFNULL( `plan12`, 0 ) AS `plan12`,
-        IFNULL( incomplete, 0 ) AS incomplete,
-        IFNULL( num, 0 ) AS num,
-        IFNULL( avg, 0 ) AS avg,
-        IFNULL( ROUND( lastNum / avg, 1 ), 0 ) AS rate
+            tec,
+            type,
+            IFNULL( `1`, 0 ) AS `1`,
+            IFNULL( `2`, 0 ) AS `2`,
+            IFNULL( `3`, 0 ) AS `3`,
+            IFNULL( `4`, 0 ) AS `4`,
+            IFNULL( `5`, 0 ) AS `5`,
+            IFNULL( `6`, 0 ) AS `6`,
+            IFNULL( `7`, 0 ) AS `7`,
+            IFNULL( `8`, 0 ) AS `8`,
+            IFNULL( `9`, 0 ) AS `9`,
+            IFNULL( `10`, 0 ) AS `10`,
+            IFNULL( `11`, 0 ) AS `11`,
+            IFNULL( `12`, 0 ) AS `12`,
+            IFNULL( `workday1`, 0 ) AS `workday1`,
+            IFNULL( `workday2`, 0 ) AS `workday2`,
+            IFNULL( `workday3`, 0 ) AS `workday3`,
+            IFNULL( `workday4`, 0 ) AS `workday4`,
+            IFNULL( `workday5`, 0 ) AS `workday5`,
+            IFNULL( `workday6`, 0 ) AS `workday6`,
+            IFNULL( `workday7`, 0 ) AS `workday7`,
+            IFNULL( `workday8`, 0 ) AS `workday8`,
+            IFNULL( `workday9`, 0 ) AS `workday9`,
+            IFNULL( `workday10`, 0 ) AS `workday10`,
+            IFNULL( `workday11`, 0 ) AS `workday11`,
+            IFNULL( `workday12`, 0 ) AS `workday12`,
+            IFNULL( `plan1`, 0 ) AS `plan1`,
+            IFNULL( `plan2`, 0 ) AS `plan2`,
+            IFNULL( `plan3`, 0 ) AS `plan3`,
+            IFNULL( `plan4`, 0 ) AS `plan4`,
+            IFNULL( `plan5`, 0 ) AS `plan5`,
+            IFNULL( `plan6`, 0 ) AS `plan6`,
+            IFNULL( `plan7`, 0 ) AS `plan7`,
+            IFNULL( `plan8`, 0 ) AS `plan8`,
+            IFNULL( `plan9`, 0 ) AS `plan9`,
+            IFNULL( `plan10`, 0 ) AS `plan10`,
+            IFNULL( `plan11`, 0 ) AS `plan11`,
+            IFNULL( `plan12`, 0 ) AS `plan12`,
+            IFNULL( `planWorkday1`, 0 ) AS `planWorkday1`,
+            IFNULL( `planWorkday2`, 0 ) AS `planWorkday2`,
+            IFNULL( `planWorkday3`, 0 ) AS `planWorkday3`,
+            IFNULL( `planWorkday4`, 0 ) AS `planWorkday4`,
+            IFNULL( `planWorkday5`, 0 ) AS `planWorkday5`,
+            IFNULL( `planWorkday6`, 0 ) AS `planWorkday6`,
+            IFNULL( `planWorkday7`, 0 ) AS `planWorkday7`,
+            IFNULL( `planWorkday8`, 0 ) AS `planWorkday8`,
+            IFNULL( `planWorkday9`, 0 ) AS `planWorkday9`,
+            IFNULL( `planWorkday10`, 0 ) AS `planWorkday10`,
+            IFNULL( `planWorkday11`, 0 ) AS `planWorkday11`,
+            IFNULL( `planWorkday12`, 0 ) AS `planWorkday12`,
+            IFNULL( incomplete, 0 ) AS incomplete,
+            IFNULL( num, 0 ) AS num,
+            IFNULL( `avg`, 0 ) AS `avg`,
+            IFNULL( ROUND( lastNum / avg, 1 ), 0 ) AS rate
         FROM
-        (
-        SELECT
-        m.big_name AS tec,
-        m.did,
-        0 AS type,
-        MAX(
-        IF
-        ( m.`month` = 1, tab.num, 0 )) AS `1`,
-        MAX(
-        IF
-        ( m.`month` = 2, tab.num, 0 )) AS `2`,
-        MAX(
-        IF
-        ( m.`month` = 3, tab.num, 0 )) AS `3`,
-        MAX(
-        IF
-        ( m.`month` = 4, tab.num, 0 )) AS `4`,
-        MAX(
-        IF
-        ( m.`month` = 5, tab.num, 0 )) AS `5`,
-        MAX(
-        IF
-        ( m.`month` = 6, tab.num, 0 )) AS `6`,
-        MAX(
-        IF
-        ( m.`month` = 7, tab.num, 0 )) AS `7`,
-        MAX(
-        IF
-        ( m.`month` = 8, tab.num, 0 )) AS `8`,
-        MAX(
-        IF
-        ( m.`month` = 9, tab.num, 0 )) AS `9`,
-        MAX(
-        IF
-        ( m.`month` = 10, tab.num, 0 )) AS `10`,
-        MAX(
-        IF
-        ( m.`month` = 11, tab.num, 0 )) AS `11`,
-        MAX(
-        IF
-        ( m.`month` = 12, tab.num, 0 )) AS `12`,
-        MAX(
-        IF
-        ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
-        MAX(
-        IF
-        ( m.`month` = 2, plan.num, 0 )) AS `plan2`,
-        MAX(
-        IF
-        ( m.`month` = 3, plan.num, 0 )) AS `plan3`,
-        MAX(
-        IF
-        ( m.`month` = 4, plan.num, 0 )) AS `plan4`,
-        MAX(
-        IF
-        ( m.`month` = 5, plan.num, 0 )) AS `plan5`,
-        MAX(
-        IF
-        ( m.`month` = 6, plan.num, 0 )) AS `plan6`,
-        MAX(
-        IF
-        ( m.`month` = 7, plan.num, 0 )) AS `plan7`,
-        MAX(
-        IF
-        ( m.`month` = 8, plan.num, 0 )) AS `plan8`,
-        MAX(
-        IF
-        ( m.`month` = 9, plan.num, 0 )) AS `plan9`,
-        MAX(
-        IF
-        ( m.`month` = 10, plan.num, 0 )) AS `plan10`,
-        MAX(
-        IF
-        ( m.`month` = 11, plan.num, 0 )) AS `plan11`,
-        MAX(
-        IF
-        ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
-        max(
-        IF
-        ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
-        inc.incomplete,
-        s.num AS num,
-        ROUND( num6 / 6, 0 ) AS `avg`
-        FROM
-        ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
-        `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
-        LEFT JOIN (
-        SELECT
-        COUNT(*) AS num,
-        m.big_name AS tec,
-        m.did,
-        mon.`month` AS `month`
-        FROM
-        project p,
-        major_contrast_technology m,
-        `month` mon
-        LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
-        WHERE
-        p.id = v.project_id
-        AND v.tec = m.small_name
-        AND RIGHT ( p.number, 1 ) = "s"
-        AND YEAR ( v.actual_publication_date ) = #{year}
-        AND v.number NOT LIKE "%+%"
+            (
+                SELECT
+                    m.big_name AS tec,
+                    m.did,
+                    0 AS type,
+                    MAX(
+                            IF
+                                ( m.`month` = 1, tab.num, 0 )) AS `1`,
+                    MAX(
+                            IF
+                                ( m.`month` = 2, tab.num, 0 )) AS `2`,
+                    MAX(
+                            IF
+                                ( m.`month` = 3, tab.num, 0 )) AS `3`,
+                    MAX(
+                            IF
+                                ( m.`month` = 4, tab.num, 0 )) AS `4`,
+                    MAX(
+                            IF
+                                ( m.`month` = 5, tab.num, 0 )) AS `5`,
+                    MAX(
+                            IF
+                                ( m.`month` = 6, tab.num, 0 )) AS `6`,
+                    MAX(
+                            IF
+                                ( m.`month` = 7, tab.num, 0 )) AS `7`,
+                    MAX(
+                            IF
+                                ( m.`month` = 8, tab.num, 0 )) AS `8`,
+                    MAX(
+                            IF
+                                ( m.`month` = 9, tab.num, 0 )) AS `9`,
+                    MAX(
+                            IF
+                                ( m.`month` = 10, tab.num, 0 )) AS `10`,
+                    MAX(
+                            IF
+                                ( m.`month` = 11, tab.num, 0 )) AS `11`,
+                    MAX(
+                            IF
+                                ( m.`month` = 12, tab.num, 0 )) AS `12`,
+                    MAX(
+                            IF
+                                ( m.`month` = 1, tab.workday, 0 )) AS `workday1`,
+                    MAX(
+                            IF
+                                ( m.`month` = 2, tab.workday, 0 )) AS `workday2`,
+                    MAX(
+                            IF
+                                ( m.`month` = 3, tab.workday, 0 )) AS `workday3`,
+                    MAX(
+                            IF
+                                ( m.`month` = 4, tab.workday, 0 )) AS `workday4`,
+                    MAX(
+                            IF
+                                ( m.`month` = 5, tab.workday, 0 )) AS `workday5`,
+                    MAX(
+                            IF
+                                ( m.`month` = 6, tab.workday, 0 )) AS `workday6`,
+                    MAX(
+                            IF
+                                ( m.`month` = 7, tab.workday, 0 )) AS `workday7`,
+                    MAX(
+                            IF
+                                ( m.`month` = 8, tab.workday, 0 )) AS `workday8`,
+                    MAX(
+                            IF
+                                ( m.`month` = 9, tab.workday, 0 )) AS `workday9`,
+                    MAX(
+                            IF
+                                ( m.`month` = 10, tab.workday, 0 )) AS `workday10`,
+                    MAX(
+                            IF
+                                ( m.`month` = 11, tab.workday, 0 )) AS `workday11`,
+                    MAX(
+                            IF
+                                ( m.`month` = 12, tab.workday, 0 )) AS `workday12`,
+                    MAX(
+                            IF
+                                ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
+                    MAX(
+                            IF
+                                ( m.`month` = 2, plan.num, 0 )) AS `plan2`,
+                    MAX(
+                            IF
+                                ( m.`month` = 3, plan.num, 0 )) AS `plan3`,
+                    MAX(
+                            IF
+                                ( m.`month` = 4, plan.num, 0 )) AS `plan4`,
+                    MAX(
+                            IF
+                                ( m.`month` = 5, plan.num, 0 )) AS `plan5`,
+                    MAX(
+                            IF
+                                ( m.`month` = 6, plan.num, 0 )) AS `plan6`,
+                    MAX(
+                            IF
+                                ( m.`month` = 7, plan.num, 0 )) AS `plan7`,
+                    MAX(
+                            IF
+                                ( m.`month` = 8, plan.num, 0 )) AS `plan8`,
+                    MAX(
+                            IF
+                                ( m.`month` = 9, plan.num, 0 )) AS `plan9`,
+                    MAX(
+                            IF
+                                ( m.`month` = 10, plan.num, 0 )) AS `plan10`,
+                    MAX(
+                            IF
+                                ( m.`month` = 11, plan.num, 0 )) AS `plan11`,
+                    MAX(
+                            IF
+                                ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
+                    MAX(
+                            IF
+                                ( m.`month` = 1, plan.workday, 0 )) AS `planWorkday1`,
+                    MAX(
+                            IF
+                                ( m.`month` = 2, plan.workday, 0 )) AS `planWorkday2`,
+                    MAX(
+                            IF
+                                ( m.`month` = 3, plan.workday, 0 )) AS `planWorkday3`,
+                    MAX(
+                            IF
+                                ( m.`month` = 4, plan.workday, 0 )) AS `planWorkday4`,
+                    MAX(
+                            IF
+                                ( m.`month` = 5, plan.workday, 0 )) AS `planWorkday5`,
+                    MAX(
+                            IF
+                                ( m.`month` = 6, plan.workday, 0 )) AS `planWorkday6`,
+                    MAX(
+                            IF
+                                ( m.`month` = 7, plan.workday, 0 )) AS `planWorkday7`,
+                    MAX(
+                            IF
+                                ( m.`month` = 8, plan.workday, 0 )) AS `planWorkday8`,
+                    MAX(
+                            IF
+                                ( m.`month` = 9, plan.workday, 0 )) AS `planWorkday9`,
+                    MAX(
+                            IF
+                                ( m.`month` = 10, plan.workday, 0 )) AS `planWorkday10`,
+                    MAX(
+                            IF
+                                ( m.`month` = 11, plan.workday, 0 )) AS `planWorkday11`,
+                    MAX(
+                            IF
+                                ( m.`month` = 12, plan.workday, 0 )) AS `planWorkday12`,
+                    max(
+                            IF
+                                ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
+                    inc.incomplete,
+                    s.num AS num,
+                    ROUND( num6 / 6, 0 ) AS `avg`
+                FROM
+                    ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
+                                                                                        `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
+                        LEFT JOIN (
+                        SELECT
+                            COUNT(*) AS num,
+                            SUM( w.workday ) AS workday,
+                            m.big_name AS tec,
+                            m.did,
+                            mon.`month` AS `month`
+                        FROM
+                            project p,
+                            major_contrast_technology m,
+                            `month` mon
+                                LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+                                LEFT JOIN volume_workday w ON v.id = w.volume_id
+                        WHERE
+                            p.id = v.project_id
+                          AND v.tec = m.small_name
+                          AND RIGHT ( p.number, 1 ) = "s"
+                          AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+                          AND v.number NOT LIKE "%+%"
+                        GROUP BY
+                            m.big_name,
+                            mon.`month`
+                    ) AS tab ON tab.tec = m.big_name
+                        AND tab.`month` = m.`month`
+                        LEFT JOIN (
+                        SELECT
+                            COUNT(*) AS num,
+                            sum( w.workday ) AS workday,
+                            m.big_name AS tec
+                        FROM
+                            project p,
+                            major_contrast_technology m,
+                            volume v
+                                LEFT JOIN volume_workday w ON w.volume_id = v.id
+                        WHERE
+                            p.id = v.project_id
+                          AND v.tec = m.small_name
+                          AND RIGHT ( p.number, 1 ) = "s"
+                          AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+                          AND v.number NOT LIKE "%+%"
+                        GROUP BY
+                            m.big_name
+                    ) AS s ON s.tec = m.big_name
+                        LEFT JOIN (
+                        SELECT
+                            COUNT(*) AS num,
+                            SUM( w.workday ) AS workday,
+                            m.big_name AS tec,
+                            m.did,
+                            DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+                        FROM
+                            project p,
+                            major_contrast_technology m,
+                            volume v
+                                LEFT JOIN volume_workday w ON w.volume_id = v.id
+                        WHERE
+                            p.id = v.project_id
+                          AND v.tec = m.small_name
+                          AND RIGHT ( p.number, 1 ) = "s"
+                          AND v.planned_publication_date LIKE CONCAT(#{year},"%")
+                          AND v.number NOT LIKE "%+%"
+                        GROUP BY
+                            m.big_name,
+                            DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+                        AND plan.`month` = m.`month`
+                        LEFT JOIN (
+                        SELECT
+                            COUNT(*) AS incomplete,
+                            m.big_name AS tec
+                        FROM
+                            (
+                                SELECT
+                                    v.id,
+                                    v.tec
+                                FROM
+                                    project p,
+                                    volume v
+                                WHERE
+                                    RIGHT ( p.number, 1 ) = "s"
+                                  AND p.id = v.project_id
+                                  AND v.number NOT LIKE "%+%"
+                                  AND v.actual_publication_date IS NULL UNION
+                                SELECT
+                                    v.id,
+                                    v.tec
+                                FROM
+                                    project p,
+                                    volume v
+                                WHERE
+                                    RIGHT ( p.number, 1 ) = "s"
+                                  AND p.id = v.project_id
+                                  AND v.number NOT LIKE "%+%"
+                                  AND v.actual_publication_date = ""
+                            ) AS v,
+                            major_contrast_technology m
+                        WHERE
+                            v.tec = m.small_name
+                        GROUP BY
+                            m.big_name
+                    ) AS inc ON inc.tec = m.big_name
+                        LEFT JOIN (
+                        SELECT
+                            COUNT( v.id ) AS num6,
+                            m.big_name AS tec
+                        FROM
+                            project p,
+                            major_contrast_technology m,
+                            volume v
+                        WHERE
+                            RIGHT ( p.number, 1 ) = "s"
+                          AND v.tec = m.small_name
+                          AND p.id = v.project_id
+                          AND v.number NOT LIKE "%+%"
+                          AND v.actual_publication_date &gt;= DATE_FORMAT( NOW()- INTERVAL '6' MONTH, "%Y-%m-01" )
+                          AND v.actual_publication_date &lt; DATE_FORMAT( NOW(), "%Y-%m-01" )
+                        GROUP BY
+                            m.big_name
+                    ) AS a ON a.tec = m.big_name
+                GROUP BY
+                    tec UNION
+                SELECT
+                    m.big_name AS tec,
+                    m.did,
+                    1 AS type,
+                    MAX(
+                            IF
+                                ( m.`month` = 1, tab.num, 0 )) AS `1`,
+                    MAX(
+                            IF
+                                ( m.`month` = 2, tab.num, 0 )) AS `2`,
+                    MAX(
+                            IF
+                                ( m.`month` = 3, tab.num, 0 )) AS `3`,
+                    MAX(
+                            IF
+                                ( m.`month` = 4, tab.num, 0 )) AS `4`,
+                    MAX(
+                            IF
+                                ( m.`month` = 5, tab.num, 0 )) AS `5`,
+                    MAX(
+                            IF
+                                ( m.`month` = 6, tab.num, 0 )) AS `6`,
+                    MAX(
+                            IF
+                                ( m.`month` = 7, tab.num, 0 )) AS `7`,
+                    MAX(
+                            IF
+                                ( m.`month` = 8, tab.num, 0 )) AS `8`,
+                    MAX(
+                            IF
+                                ( m.`month` = 9, tab.num, 0 )) AS `9`,
+                    MAX(
+                            IF
+                                ( m.`month` = 10, tab.num, 0 )) AS `10`,
+                    MAX(
+                            IF
+                                ( m.`month` = 11, tab.num, 0 )) AS `11`,
+                    MAX(
+                            IF
+                                ( m.`month` = 12, tab.num, 0 )) AS `12`,
+                    MAX(
+                            IF
+                                ( m.`month` = 1, tab.workday, 0 )) AS `workday1`,
+                    MAX(
+                            IF
+                                ( m.`month` = 2, tab.workday, 0 )) AS `workday2`,
+                    MAX(
+                            IF
+                                ( m.`month` = 3, tab.workday, 0 )) AS `workday3`,
+                    MAX(
+                            IF
+                                ( m.`month` = 4, tab.workday, 0 )) AS `workday4`,
+                    MAX(
+                            IF
+                                ( m.`month` = 5, tab.workday, 0 )) AS `workday5`,
+                    MAX(
+                            IF
+                                ( m.`month` = 6, tab.workday, 0 )) AS `workday6`,
+                    MAX(
+                            IF
+                                ( m.`month` = 7, tab.workday, 0 )) AS `workday7`,
+                    MAX(
+                            IF
+                                ( m.`month` = 8, tab.workday, 0 )) AS `workday8`,
+                    MAX(
+                            IF
+                                ( m.`month` = 9, tab.workday, 0 )) AS `workday9`,
+                    MAX(
+                            IF
+                                ( m.`month` = 10, tab.workday, 0 )) AS `workday10`,
+                    MAX(
+                            IF
+                                ( m.`month` = 11, tab.workday, 0 )) AS `workday11`,
+                    MAX(
+                            IF
+                                ( m.`month` = 12, tab.workday, 0 )) AS `workday12`,
+                    MAX(
+                            IF
+                                ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
+                    MAX(
+                            IF
+                                ( m.`month` = 2, plan.num, 0 )) AS `plan2`,
+                    MAX(
+                            IF
+                                ( m.`month` = 3, plan.num, 0 )) AS `plan3`,
+                    MAX(
+                            IF
+                                ( m.`month` = 4, plan.num, 0 )) AS `plan4`,
+                    MAX(
+                            IF
+                                ( m.`month` = 5, plan.num, 0 )) AS `plan5`,
+                    MAX(
+                            IF
+                                ( m.`month` = 6, plan.num, 0 )) AS `plan6`,
+                    MAX(
+                            IF
+                                ( m.`month` = 7, plan.num, 0 )) AS `plan7`,
+                    MAX(
+                            IF
+                                ( m.`month` = 8, plan.num, 0 )) AS `plan8`,
+                    MAX(
+                            IF
+                                ( m.`month` = 9, plan.num, 0 )) AS `plan9`,
+                    MAX(
+                            IF
+                                ( m.`month` = 10, plan.num, 0 )) AS `plan10`,
+                    MAX(
+                            IF
+                                ( m.`month` = 11, plan.num, 0 )) AS `plan11`,
+                    MAX(
+                            IF
+                                ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
+                    MAX(
+                            IF
+                                ( m.`month` = 1, plan.workday, 0 )) AS `planWorkday1`,
+                    MAX(
+                            IF
+                                ( m.`month` = 2, plan.workday, 0 )) AS `planWorkday2`,
+                    MAX(
+                            IF
+                                ( m.`month` = 3, plan.workday, 0 )) AS `planWorkday3`,
+                    MAX(
+                            IF
+                                ( m.`month` = 4, plan.workday, 0 )) AS `planWorkday4`,
+                    MAX(
+                            IF
+                                ( m.`month` = 5, plan.workday, 0 )) AS `planWorkday5`,
+                    MAX(
+                            IF
+                                ( m.`month` = 6, plan.workday, 0 )) AS `planWorkday6`,
+                    MAX(
+                            IF
+                                ( m.`month` = 7, plan.workday, 0 )) AS `planWorkday7`,
+                    MAX(
+                            IF
+                                ( m.`month` = 8, plan.workday, 0 )) AS `planWorkday8`,
+                    MAX(
+                            IF
+                                ( m.`month` = 9, plan.workday, 0 )) AS `planWorkday9`,
+                    MAX(
+                            IF
+                                ( m.`month` = 10, plan.workday, 0 )) AS `planWorkday10`,
+                    MAX(
+                            IF
+                                ( m.`month` = 11, plan.workday, 0 )) AS `planWorkday11`,
+                    MAX(
+                            IF
+                                ( m.`month` = 12, plan.workday, 0 )) AS `planWorkday12`,
+                    max(
+                            IF
+                                ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
+                    inc.incomplete,
+                    s.num AS num,
+                    ROUND( num6 / 6, 0 ) AS `avg`
+                FROM
+                    ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
+                                                                                        `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
+                        LEFT JOIN (
+                        SELECT
+                            COUNT(*) AS num,
+                            SUM( w.workday ) AS workday,
+                            m.big_name AS tec,
+                            m.did,
+                            mon.`month` AS `month`
+                        FROM
+                            project p,
+                            major_contrast_technology m,
+                            `month` mon
+                                LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+                                LEFT JOIN volume_workday w ON v.id = w.volume_id
+                        WHERE
+                            p.id = v.project_id
+                          AND v.tec = m.small_name
+                          AND RIGHT ( p.number, 1 ) = "s"
+                          AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+                          AND v.number LIKE "%+%"
+                        GROUP BY
+                            m.big_name,
+                            mon.`month`
+                    ) AS tab ON tab.tec = m.big_name
+                        AND tab.`month` = m.`month`
+                        LEFT JOIN (
+                        SELECT
+                            COUNT(*) AS num,
+                            m.big_name AS tec
+                        FROM
+                            project p,
+                            major_contrast_technology m,
+                            volume v
+                        WHERE
+                            p.id = v.project_id
+                          AND v.tec = m.small_name
+                          AND RIGHT ( p.number, 1 ) = "s"
+                          AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+                          AND v.number LIKE "%+%"
+                        GROUP BY
+                            m.big_name
+                    ) AS s ON s.tec = m.big_name
+                        LEFT JOIN (
+                        SELECT
+                            COUNT(*) AS num,
+                            SUM( w.workday ) AS workday,
+                            m.big_name AS tec,
+                            m.did,
+                            DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+                        FROM
+                            project p,
+                            major_contrast_technology m,
+                            volume v
+                                LEFT JOIN volume_workday w ON v.id = w.volume_id
+                        WHERE
+                            p.id = v.project_id
+                          AND v.tec = m.small_name
+                          AND RIGHT ( p.number, 1 ) = "s"
+                          AND v.planned_publication_date LIKE CONCAT(#{year},"%")
+                          AND v.number LIKE "%+%"
+                        GROUP BY
+                            m.big_name,
+                            DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+                        AND plan.`month` = m.`month`
+                        LEFT JOIN (
+                        SELECT
+                            COUNT(*) AS incomplete,
+                            m.big_name AS tec
+                        FROM
+                            (
+                                SELECT
+                                    v.id,
+                                    v.tec
+                                FROM
+                                    project p,
+                                    volume v
+                                WHERE
+                                    RIGHT ( p.number, 1 ) = "s"
+                                  AND p.id = v.project_id
+                                  AND v.number LIKE "%+%"
+                                  AND v.actual_publication_date IS NULL UNION
+                                SELECT
+                                    v.id,
+                                    v.tec
+                                FROM
+                                    project p,
+                                    volume v
+                                WHERE
+                                    RIGHT ( p.number, 1 ) = "s"
+                                  AND p.id = v.project_id
+                                  AND v.number LIKE "%+%"
+                                  AND v.actual_publication_date = ""
+                            ) AS v,
+                            major_contrast_technology m
+                        WHERE
+                            v.tec = m.small_name
+                        GROUP BY
+                            m.big_name
+                    ) AS inc ON inc.tec = m.big_name
+                        LEFT JOIN (
+                        SELECT
+                            COUNT( v.id ) AS num6,
+                            m.big_name AS tec
+                        FROM
+                            project p,
+                            major_contrast_technology m,
+                            volume v
+                        WHERE
+                            RIGHT ( p.number, 1 ) = "s"
+                          AND v.tec = m.small_name
+                          AND p.id = v.project_id
+                          AND v.number LIKE "%+%"
+                          AND v.actual_publication_date &gt;= DATE_FORMAT( NOW()- INTERVAL '6' MONTH, "%Y-%m-01" )
+                          AND v.actual_publication_date &lt; DATE_FORMAT( NOW(), "%Y-%m-01" )
+                        GROUP BY
+                            m.big_name
+                    ) AS a ON a.tec = m.big_name
+                GROUP BY
+                    tec
+            ) AS tab
         GROUP BY
-        m.big_name,
-        mon.`month`
-        ) AS tab ON tab.tec = m.big_name
-        AND tab.`month` = m.`month`
-            left join (
-            SELECT
-            COUNT(*) AS num,
-            m.big_name AS tec
-            FROM
-            project p,
-            major_contrast_technology m,
-            volume v
-            WHERE
-            p.id = v.project_id
-            AND v.tec = m.small_name
-            AND RIGHT ( p.number, 1 ) = "s"
-            AND YEAR ( v.actual_publication_date ) = #{year}
-            AND v.number NOT LIKE "%+%"
-            GROUP BY
-            m.big_name
-            ) as s on  s.tec = m.big_name
-        LEFT JOIN (
-        SELECT
-        COUNT(*) AS num,
-        m.big_name AS tec,
-        m.did,
-        DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
-        FROM
-        project p,
-        major_contrast_technology m,
-        volume v
-        WHERE
-        p.id = v.project_id
-        AND v.tec = m.small_name
-        AND RIGHT ( p.number, 1 ) = "s"
-        AND YEAR ( v.planned_publication_date ) = #{year}
-        AND v.number NOT LIKE "%+%"
-        GROUP BY
-        m.big_name,
-        DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
-        AND plan.`month` = m.`month`
-        LEFT JOIN (
-        SELECT
-        COUNT(*) AS incomplete,
-        m.big_name AS tec
-        FROM
-        (
-        SELECT
-        v.id,
-        v.tec
-        FROM
-        project p,
-        volume v
-        WHERE
-        RIGHT ( p.number, 1 ) = "s"
-        AND p.id = v.project_id
-        AND v.number NOT LIKE "%+%"
-        AND v.actual_publication_date IS NULL UNION
-        SELECT
-        v.id,
-        v.tec
-        FROM
-        project p,
-        volume v
-        WHERE
-        RIGHT ( p.number, 1 ) = "s"
-        AND p.id = v.project_id
-        AND v.number NOT LIKE "%+%"
-        AND v.actual_publication_date = ""
-        ) AS v,
-        major_contrast_technology m
-        WHERE
-        v.tec = m.small_name
-        GROUP BY
-        m.big_name
-        ) AS inc ON inc.tec = m.big_name
-        LEFT JOIN (
-        SELECT
-        COUNT( v.id ) AS num6,
-        m.big_name AS tec
-        FROM
-        project p,
-        major_contrast_technology m,
-        volume v
-        WHERE
-        RIGHT ( p.number, 1 ) = "s"
-        AND v.tec = m.small_name
-        AND p.id = v.project_id
-        AND v.number NOT LIKE "%+%"
-        AND v.actual_publication_date &gt;= DATE_FORMAT( NOW()- INTERVAL '6' MONTH, "%Y-%m-01" )
-        AND v.actual_publication_date &lt; DATE_FORMAT( NOW(), "%Y-%m-01" )
-        GROUP BY
-        m.big_name
-        ) AS a ON a.tec = m.big_name
-        GROUP BY
-        tec UNION
-        SELECT
-        m.big_name AS tec,
-        m.did,
-        1 AS type,
-        MAX(
-        IF
-        ( m.`month` = 1, tab.num, 0 )) AS `1`,
-        MAX(
-        IF
-        ( m.`month` = 2, tab.num, 0 )) AS `2`,
-        MAX(
-        IF
-        ( m.`month` = 3, tab.num, 0 )) AS `3`,
-        MAX(
-        IF
-        ( m.`month` = 4, tab.num, 0 )) AS `4`,
-        MAX(
-        IF
-        ( m.`month` = 5, tab.num, 0 )) AS `5`,
-        MAX(
-        IF
-        ( m.`month` = 6, tab.num, 0 )) AS `6`,
-        MAX(
-        IF
-        ( m.`month` = 7, tab.num, 0 )) AS `7`,
-        MAX(
-        IF
-        ( m.`month` = 8, tab.num, 0 )) AS `8`,
-        MAX(
-        IF
-        ( m.`month` = 9, tab.num, 0 )) AS `9`,
-        MAX(
-        IF
-        ( m.`month` = 10, tab.num, 0 )) AS `10`,
-        MAX(
-        IF
-        ( m.`month` = 11, tab.num, 0 )) AS `11`,
-        MAX(
-        IF
-        ( m.`month` = 12, tab.num, 0 )) AS `12`,
-        MAX(
-        IF
-        ( m.`month` = 1, plan.num, 0 )) AS `plan1`,
-        MAX(
-        IF
-        ( m.`month` = 2, plan.num, 0 )) AS `plan2`,
-        MAX(
-        IF
-        ( m.`month` = 3, plan.num, 0 )) AS `plan3`,
-        MAX(
-        IF
-        ( m.`month` = 4, plan.num, 0 )) AS `plan4`,
-        MAX(
-        IF
-        ( m.`month` = 5, plan.num, 0 )) AS `plan5`,
-        MAX(
-        IF
-        ( m.`month` = 6, plan.num, 0 )) AS `plan6`,
-        MAX(
-        IF
-        ( m.`month` = 7, plan.num, 0 )) AS `plan7`,
-        MAX(
-        IF
-        ( m.`month` = 8, plan.num, 0 )) AS `plan8`,
-        MAX(
-        IF
-        ( m.`month` = 9, plan.num, 0 )) AS `plan9`,
-        MAX(
-        IF
-        ( m.`month` = 10, plan.num, 0 )) AS `plan10`,
-        MAX(
-        IF
-        ( m.`month` = 11, plan.num, 0 )) AS `plan11`,
-        MAX(
-        IF
-        ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
-        max(
-        IF
-        ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
-        inc.incomplete,
-        s.num AS num,
-        ROUND( num6 / 6, 0 ) AS `avg`
-        FROM
-        ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
-        `user` u WHERE u.id = #{userId} and u.did = m.did ) AS m
-        LEFT JOIN (
-        SELECT
-        COUNT(*) AS num,
-        m.big_name AS tec,
-        m.did,
-        mon.`month` AS `month`
-        FROM
-        project p,
-        major_contrast_technology m,
-        `month` mon
-        LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
-        WHERE
-        p.id = v.project_id
-        AND v.tec = m.small_name
-        AND RIGHT ( p.number, 1 ) = "s"
-        AND YEAR ( v.actual_publication_date ) = #{year}
-        AND v.number LIKE "%+%"
-        GROUP BY
-        m.big_name,
-        mon.`month`
-        ) AS tab ON tab.tec = m.big_name
-        AND tab.`month` = m.`month`
-            left join (
-            SELECT
-            COUNT(*) AS num,
-            m.big_name AS tec
-            FROM
-            project p,
-            major_contrast_technology m,
-            volume v
-            WHERE
-            p.id = v.project_id
-            AND v.tec = m.small_name
-            AND RIGHT ( p.number, 1 ) = "s"
-            AND YEAR ( v.actual_publication_date ) = #{year}
-            AND v.number LIKE "%+%"
-            GROUP BY
-            m.big_name
-            ) as s on  s.tec = m.big_name
-        LEFT JOIN (
-        SELECT
-        COUNT(*) AS num,
-        m.big_name AS tec,
-        m.did,
-        DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
-        FROM
-        project p,
-        major_contrast_technology m,
-        volume v
-        WHERE
-        p.id = v.project_id
-        AND v.tec = m.small_name
-        AND RIGHT ( p.number, 1 ) = "s"
-        AND YEAR ( v.planned_publication_date ) = #{year}
-        AND v.number LIKE "%+%"
-        GROUP BY
-        m.big_name,
-        DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
-        AND plan.`month` = m.`month`
-        LEFT JOIN (
-        SELECT
-        COUNT(*) AS incomplete,
-        m.big_name AS tec
-        FROM
-        (
-        SELECT
-        v.id,
-        v.tec
-        FROM
-        project p,
-        volume v
-        WHERE
-        RIGHT ( p.number, 1 ) = "s"
-        AND p.id = v.project_id
-        AND v.number LIKE "%+%"
-        AND v.actual_publication_date IS NULL UNION
-        SELECT
-        v.id,
-        v.tec
-        FROM
-        project p,
-        volume v
-        WHERE
-        RIGHT ( p.number, 1 ) = "s"
-        AND p.id = v.project_id
-        AND v.number LIKE "%+%"
-        AND v.actual_publication_date = ""
-        ) AS v,
-        major_contrast_technology m
-        WHERE
-        v.tec = m.small_name
-        GROUP BY
-        m.big_name
-        ) AS inc ON inc.tec = m.big_name
-        LEFT JOIN (
-        SELECT
-        COUNT( v.id ) AS num6,
-        m.big_name AS tec
-        FROM
-        project p,
-        major_contrast_technology m,
-        volume v
-        WHERE
-        RIGHT ( p.number, 1 ) = "s"
-        AND v.tec = m.small_name
-        AND p.id = v.project_id
-        AND v.number LIKE "%+%"
-        AND v.actual_publication_date &gt;= DATE_FORMAT( NOW()- INTERVAL '6' MONTH, "%Y-%m-01" )
-        AND v.actual_publication_date &lt; DATE_FORMAT( NOW(), "%Y-%m-01" )
-        GROUP BY
-        m.big_name
-        ) AS a ON a.tec = m.big_name
-        GROUP BY
-        tec
-        ) AS tab
-        GROUP BY
-        tec,
-        `type`
+            tec,
+            `type`
         ORDER BY
-        tec
+            tec
     </select>
     <select id="tecVolumeCompleteByDate" resultType="java.util.Map">
         SELECT
@@ -1815,8 +2171,10 @@
         v.headman,
         v.actual_principal AS principal,
         v.checker,
+        v.state,
         v.start_date,
         v.actual_publication_date,
+        v.wfInstId,
         w.workday
         FROM
         project p,
@@ -1851,8 +2209,10 @@
             v.headman,
             v.principal AS principal,
             v.checker,
+            v.state,
             v.start_date,
             v.planned_publication_date,
+            v.wfInstId,
             w.workday
         FROM
             project p,
@@ -1881,8 +2241,10 @@
         v.headman,
         v.principal AS principal,
         v.checker,
+        v.state,
         v.start_date,
         v.planned_publication_date,
+        v.wfInstId,
         w.workday
         FROM
         project p,
@@ -1919,8 +2281,10 @@
         v.headman,
         v.principal AS principal,
         v.checker,
+        v.state,
         v.start_date,
         v.planned_publication_date,
+        v.wfInstId,
         w.workday
         FROM
         project p,

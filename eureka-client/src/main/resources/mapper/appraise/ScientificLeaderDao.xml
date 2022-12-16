@@ -54,7 +54,7 @@
     </update>
     <update id="setToCheck">
         update scientific_term
-        set apply = 1, complete_date = now()
+        set `apply` = 1,`check` = 0, complete_date = now()
         where id = #{id}
     </update>
     <update id="setLeaderChecker">
@@ -99,6 +99,7 @@
         cast(plan_complete_date as char(10)) as plan_complete_date,
         cast(complete_date as char(19)) as complete_date,
         `check`,
+        back_reason,
         apply,
         leaderName,
         creatorName,
@@ -114,6 +115,7 @@
         t.plan_complete_date,
         t.complete_date,
         t.`check`,
+        t.back_reason,
         t.apply,
         u.`name` AS leaderName,
         u1.`name` AS creatorName,
@@ -140,6 +142,7 @@
         t.plan_complete_date,
         t.complete_date,
         t.`check`,
+        t.back_reason,
         t.apply,
         u.`name` AS leaderName,
         u1.`name` AS creatorName,

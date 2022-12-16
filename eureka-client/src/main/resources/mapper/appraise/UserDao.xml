@@ -1730,7 +1730,7 @@
         AND w.volume_id = h.volume_id
         AND h.submit = 2
         AND h.submit_date &gt;= #{map.startMonth}
-        AND w.submit_date &lt;= #{map.endMonth}
+        AND h.submit_date &lt;= #{map.endMonth}
         AND vu.designer = #{userId} UNION
         SELECT
         p.number AS pnum,
@@ -2057,7 +2057,7 @@
         AND w.volume_id = h.volume_id
         AND h.submit = 2
         AND h.submit_date &gt;= #{startMonth}
-        AND w.submit_date &lt;= #{endMonth}
+        AND h.submit_date &lt;= #{endMonth}
         AND vu.designer = #{id} UNION
         SELECT
         p.number AS pnum,

@@ -310,7 +310,7 @@
         <if test="item.type == 9">
                 update scientific_term
                 set `check` = #{check}, `workday` = #{item.workday}, checker = #{id},
-                    check_date = now()
+                    check_date = now(), back_reason = #{item.reason}
                 where id = #{item.id}
         </if>
         <if test="item.type == 10">
@@ -321,7 +321,7 @@
                  </if >
                 <if test="check ==0">
                     submit = 0,
-                </if> submit_time = now()
+                </if> submit_time = now(), back_reason = #{item.reason}
                 where id = #{i.id}
             </foreach>
         </if>
@@ -639,6 +639,7 @@
                     p.generalId = #{id}
                   AND p.id = t.scientific_id
                   AND t.`check` = 0
+                  and t.`apply` = 1
                 GROUP BY
                     t.id UNION ALL
                 SELECT
@@ -934,6 +935,7 @@
                     p.generalId = #{id}
                   AND p.id = t.scientific_id
                   AND t.`check` = 0
+                  and t.`apply` = 1
             ) AS count9,
             (
                 SELECT
@@ -2026,6 +2028,7 @@
             t.plan_complete_date,
             ifnull( t.workday, t.plan_workday ) AS workday,
             FALSE AS result,
+            "" as reason,
             9 AS `type`
         FROM
             `user` u,

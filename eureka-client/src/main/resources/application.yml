@@ -1,5 +1,5 @@
-#myIp : localhost
-myIp : 10.136.238.23
+myIp : 10.136.238.28
+#myIp : 10.136.238.23
 spring:
   application:
     name: eureka-client
@@ -82,7 +82,7 @@ security:
       check-token-access: http://localhost:9100/oauth/check_token
 
 server:
-  port: 9001
+  port: 9002
   servlet:
     encoding:
       enabled: true

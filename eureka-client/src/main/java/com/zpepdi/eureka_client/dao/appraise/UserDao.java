@@ -14,7 +14,6 @@ public interface UserDao {
 
     User queryById(Integer id);
 
-    List<Map<String,Object>> queryChildren(Integer id);
 
     List<Map<String,Object>> queryByUserIdSameDep(@Param("id") Integer id,@Param("name") String name);
 

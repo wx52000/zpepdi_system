@@ -2,26 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zpepdi.eureka_client.dao.appraise.SummaryProjectDao">
     <insert id="addBasic" keyColumn="id" keyProperty="map.id" useGeneratedKeys="true" >
-        INSERT INTO summary_project (
-                                     <if test="map.id != null and map.id != ''">
-                                         id,
-                                     </if>
-                                     `name`, `place`, `unit`, `scale`, `role`, `money`, `time`, `handler` )
-        VALUES
-            (
-            <if test="map.id != null and map.id != ''">
-                #{map.id},
-            </if>
-             #{map.name}, #{map.place}, #{map.unit}, #{map.scale}, #{map.role},
-             #{map.money}, now(), #{userId})
-        on duplicate key update
-        `name` = values(`name`),
-        `place` = values(`place`),
-        `unit` = values(`unit`),
-        `scale` = values(`scale`),
-        `role` = values(`role`),
-        `money` = values(`money`),
-        `time` = values(`time`)
+        INSERT INTO summary_project (`name`,  `time`, `handler` )
+        VALUES (#{map.name},  now(), #{userId})
     </insert>
     <insert id="addStaff">
         insert into summary_staff(summary_project_id, user_id, `username`, `name`, role)
@@ -32,6 +14,12 @@
     <insert id="addInformation">
         insert into summary_project_information(
         summary_project_id,
+        `contact`,
+        `unit`,
+        `place`,
+        `scale`,
+        `role`,
+        `money`,
         `stage`,
         `problem`,
         `probability`,
@@ -41,7 +29,8 @@
         `time`,
         `handler`)
         values
-        (#{map.id}, #{map.stage}, #{map.problem}, #{map.probability},
+        (#{map.id}, #{map.contact}, #{map.unit}, #{map.place}, #{map.scale}, #{map.role},
+         #{map.money}, #{map.stage}, #{map.problem}, #{map.probability},
          #{map.opponent}, #{map.next_stage}, #{map.working}, now(), #{userId})
     </insert>
     <delete id="delStaff">
@@ -54,12 +43,12 @@
         SELECT
             p.id,
             p.`name`,
-            p.unit,
-            p.place,
-            p.scale,
-            p.role,
-            p.money,
-            p.`handler`,
+            i.unit,
+            i.place,
+            i.scale,
+            i.role,
+            i.money,
+            i.`handler`,
             i.summary_project_id,
             i.id,
             i.stage,
@@ -69,7 +58,7 @@
             i.next_stage,
             i.working,
             i.time,
-            ( SELECT GROUP_CONCAT( `name` ) FROM summary_staff s WHERE s.summary_project_id = p.id AND role = 0 ) AS contact,
+            i. contact,
             ( SELECT GROUP_CONCAT( `name` ) FROM summary_staff s WHERE s.summary_project_id = p.id AND role = 1 ) AS tracker,
             p.handler = #{id} as permission
 
@@ -82,13 +71,14 @@
     <select id="queryByHandler" resultType="java.util.Map">
         SELECT
             p.id,
-            p.`name`,
-            p.unit,
-            p.place,
-            p.scale,
-            p.role,
-            p.money,
-            p.`handler`,
+            i.contact,
+            i.`name`,
+            i.unit,
+            i.place,
+            i.scale,
+            i.role,
+            i.money,
+            i.`handler`,
             i.summary_project_id,
             i.id,
             i.stage,
@@ -98,7 +88,6 @@
             i.next_stage,
             i.working,
             i.time,
-            ( SELECT GROUP_CONCAT( `name` ) FROM summary_staff s WHERE s.summary_project_id = p.id AND role = 0 ) AS contact,
             ( SELECT GROUP_CONCAT( `name` ) FROM summary_staff s WHERE s.summary_project_id = p.id AND role = 1 ) AS tracker,
             true as permission
         FROM
@@ -113,7 +102,7 @@
         SELECT
             p.id,
             p.`name`,
-            p.unit,
+            i.unit,
             i.id,
             i.stage,
             i.problem,
@@ -121,7 +110,7 @@
             i.`opponent`,
             i.next_stage,
             i.working,
-            i.time,
+            cast(i.time AS char(20)) as `time`,
             i.`handler`
         FROM
             summary_project p LEFT JOIN

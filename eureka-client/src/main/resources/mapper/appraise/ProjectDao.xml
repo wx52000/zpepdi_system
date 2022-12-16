@@ -390,7 +390,8 @@
         on duplicate key update
         manage = values(manage),
         volume = values(volume),
-        `check` = values(`check`)
+        `check` = values(`check`),
+        `handler` = values(`handler`)
     </update>
     <select id="getCheckerList" resultType="java.util.Map">
         select u.id, u.name, true as disabled
@@ -402,8 +403,11 @@
 
     <select id="getOtherProjectList" resultType="java.util.Map">
         SELECT
-            `stage`,
-            `tec`,
+            n.`stage`,
+            n.`tec`,
+            n.scope,
+            n.note,
+            p.create_time,
             p.general,
             u.username,
             u.`name`,
@@ -2881,14 +2885,33 @@
         where id = 1
     </select>
     <select id="queryTecById" resultMap="queryTecById">
-        select id, project_id, volume_tec as tec, `type`
-        from workday_tec
-        where project_id = #{id}
-        union
-        select null as id, project_id, tec, 1 as type
-        from volume
-        where project_id = #{id}
-        group by tec
+        SELECT
+            id,
+            project_id,
+            volume_tec AS tec,
+            `type`,
+            (SELECT EXISTS (
+                            SELECT id
+                            FROM workday_tec_distribute d
+                            WHERE d.project_id = project_id AND d.tec = volume_tec)) as isOperation
+        FROM
+            workday_tec
+        WHERE
+            project_id = #{id}
+        UNION
+        SELECT NULL AS
+                       id,
+               project_id,
+               tec,
+               1 AS type,
+               TRUE as isOperation
+        FROM
+            volume
+        WHERE
+            project_id = #{id}
+
+        GROUP BY
+            tec
     </select>
     <select id="queryBySelfCheck" resultType="java.util.Map">
         SELECT projectId,
