@@ -8,6 +8,7 @@
     <artifactId>zpepdi_system</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
+        <module>contract-charge</module>
     </modules>
     <packaging>pom</packaging>
 

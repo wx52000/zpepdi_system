@@ -1,20 +1,25 @@
 # 应用名称
+#myIp : 10.136.238.28
+myIp : localhost
+
 spring:
   application:
     name: eureka-server
 
 server:
   port: 9000
-
 # 指定主机地址
 eureka:
   server:
-    enable-self-preservation = false
+    enable-self-preservation: false
   instance:
-    hostname: localhost
+    prefer-ip-address: true
+    hostname: ${myIp}
   client:
     # 指定是否从注册中心获取服务(注册中心不需要开启)
     fetch-registry: false
     # 指定是否将服务注册到注册中心(注册中心不需要开启)
     register-with-eureka: false
+    service-url:
+      defaultZone: http://${myIp}:9000/eureka/
 

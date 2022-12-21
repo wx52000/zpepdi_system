@@ -1,3 +1,5 @@
+eurekaIp : 10.136.238.28
+#eurekaIp : localhost
 spring:
   application:
     name: oauth-server
@@ -32,7 +34,7 @@ eureka:
     fetch-registry: true
     service-url:
       # 配置注册中心地址
-      defaultZone: http://localhost:9000/eureka/
+      defaultZone: http://${eurekaIp}:9000/eureka/
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml

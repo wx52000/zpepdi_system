@@ -1,3 +1,5 @@
+#eurekaIp : 10.136.238.28
+eurekaIp : localhost
 spring:
   application:
     name: gateway-service
@@ -6,6 +8,13 @@ spring:
 
   cloud:
     gateway:
+      discovery:
+        locator:
+          #是否与服务发现组件进行结合，通过serviceId转发到具体实例
+          #是否开启基于服务发现的路由规则
+          enabled: true
+          ##表示将请求路径的服务名配置改成小写 ,因为服务注册的时候，向注册中心注册时将服务名转成大写的了
+          lowerCaseServiceId: true
       globalcors:
         cors-configurations:
           '[/**]':
@@ -14,18 +23,31 @@ spring:
             allowedMethods: '*'
             allowedOrigins: '*'
       httpclient: #http连接设置
+#        全局超时
+        connect-timeout: 1000
+        response-timeout: 5s
         pool:
           max-connections: 5000 #最大连接数
           #       max-life-time: 45000 #最大连接时间
           acquire-timeout: 15000 #返回时间
           max-idle-time: 10000 #最大空闲时间
 
+
       routes:
-        - id: gateway-server
+        - id: eureka-client
           uri: lb://eureka-client
           predicates:
-            - Path=/api/**
+            - Path=/client/**
           filters:
+        - id: contract-charge
+          uri: lb://contract-charge
+          predicates:
+            - Path=/contract/**
+#        单个超时
+#          metadata:
+#            response-timeout: 7000
+#            connect-timeout: 2000
+      default-filters:
             - StripPrefix=1
             - name: Hystrix
               args:
@@ -36,6 +58,7 @@ spring:
                   demo-control-down_control: 11000
                   demo-control-down_up: 11000
 
+
 hystrix:
   command:
     default:
@@ -45,21 +68,6 @@ hystrix:
           thread:
             timeoutInMilliseconds: 8000
 
-#security:
-#  oauth2:
-#    client:
-#      client-id: gateway-server
-#      client-secret: zpepdi7499
-#      user-authorization-uri: http://localhost:9100/oauth/authorize
-#      access-token-uri: http://localhost:9100/token/login
-#    resource:
-#      id: feign-server
-#      user-info-uri: http://localhost:9100/oauth/check_token
-#      jwt:
-#        key-uri: http://localhost:9100/oauth/token_key
-#        key-value: dev
-#    authorization:
-#      check-token-access: http://localhost:9100/oauth/check_token
 
 server:
   port: 9999
@@ -72,7 +80,7 @@ logging:
 
 eureka:
   instance:
-    hostname: localhost
+    hostname: gateway
   client:
     # 注册到Eureka的注册中心
     register-with-eureka: true
@@ -80,5 +88,5 @@ eureka:
     fetch-registry: true
     service-url:
       # 配置注册中心地址
-      defaultZone: http://localhost:9000/eureka/
+      defaultZone: http://${eurekaIp}:9000/eureka/
 

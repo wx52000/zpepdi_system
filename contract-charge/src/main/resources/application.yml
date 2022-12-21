@@ -1,14 +1,13 @@
-##开发
+#开发
 eurekaIp : localhost
 sqlIp : 10.136.238.23
 ##生产
 #sqlIp : 10.136.238.28
 #eurekaIp : 10.136.238.28
 
-
 spring:
   application:
-    name: eureka-client
+    name: contract-charge
   mvc:
     servlet:
       load-on-startup: 1
@@ -22,7 +21,6 @@ spring:
   redis:
     database: 0
     host: ${sqlIp}
-#    host: 10.136.238.23
     port: 7001
     password: 7499
 #     连接超时时间（毫秒）
@@ -46,12 +44,11 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
-      appraise:
+      fd:
         driver-class-name: com.mysql.cj.jdbc.Driver
-
 #                useSSL=false为连接linux服务器使用
-#        url: jdbc:mysql://10.136.238.23:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-        url: jdbc:mysql://${sqlIp}:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+#        url: jdbc:mysql://10.136.238.23:3306/contract_charge?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+        url: jdbc:mysql://${sqlIp}:3306/contract_charge?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
         username: root
         password: 7499
       zjepdi:
@@ -71,24 +68,9 @@ spring:
     auto: true
     proxy-target-class: true
 
-security:
-  oauth2:
-    client:
-      client-id: eureka-client
-      client-secret: zpepdi7499
-      user-authorization-uri: http://localhost:9100/oauth/authorize
-      access-token-uri: http://localhost:9100/token/login
-    resource:
-      id: eureka-client
-      user-info-uri: http://localhost:9100/oauth/check_token
-      jwt:
-        key-uri: http://localhost:9100/oauth/token_key
-        key-value: dev
-    authorization:
-      check-token-access: http://localhost:9100/oauth/check_token
 
 server:
-  port: 9002
+  port: 9200
   servlet:
     encoding:
       enabled: true
@@ -102,6 +84,18 @@ server:
     max-http-form-post-size: -1
 
 debug: true
+
+security:
+  oauth2:
+    client:
+      client-id: contract-charge
+      client-secret: zpepdi7499
+    resource:
+      id: contract-charge
+      user-info-uri: http://localhost:9100/oauth/check_token
+      jwt:
+        key-uri: http://localhost:9100/oauth/token_key
+        key-value: dev
 
 #mybatis:
 #  config-location: classpath:mybatis-config.xml

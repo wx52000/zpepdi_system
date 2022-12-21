@@ -107,6 +107,37 @@
         max(principal) as principal
         FROM
         (
+            SELECT
+                t.id,
+                t.`name`,
+                t.workday,
+                t.plan_workday,
+                t.plan_complete_date,
+                t.complete_date,
+                t.`check`,
+                t.back_reason,
+                t.apply,
+                u.`name` AS leaderName,
+                u1.`name` AS creatorName,
+                1 AS general,
+                0 AS principal
+            FROM
+                scientific_project p,
+                scientific_term t,
+                scientific_leader l,
+                `user` u,
+                `user` u1
+            WHERE
+                EXISTS (SELECT 1
+                        FROM `user` u, role_menus r
+                        WHERE u.id = 737
+                          AND u.pid = r.role_id
+                          AND r.menus_id = 10)
+              AND p.id = #{projectId}
+              AND p.id = t.scientific_id
+              AND t.scientific_leader_id = l.id
+              AND l.leader = u.id
+              AND t.creator = u1.id union
         SELECT
         t.id,
         t.`name`,

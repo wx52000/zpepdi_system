@@ -81,6 +81,35 @@
                     `user` u1
                 WHERE
                     p.id = #{id}
+                  AND EXISTS (SELECT 1
+                              FROM `user` u, role_menus r
+                              WHERE u.id = 737
+                                AND u.pid = r.role_id
+                                AND r.menus_id = 10)
+                  AND t.scientific_id = p.id
+                  AND w.scientific_task_id = t.id
+                  AND t.creator = u.id
+                  AND w.user_id = u1.id UNION
+                SELECT
+                    w.id,
+                    t.id AS taskId,
+                    t.number,
+                    t.`name`,
+                    u.`name` AS creator,
+                    u1.`name` AS userName,
+                    w.workday,
+                    cast(
+                            t.create_date AS CHAR ( 19 )) AS createDate,
+                    t.creator = #{userId} AS checkRole,
+                    submit
+                FROM
+                    scientific_project p,
+                    scientific_task t,
+                    scientific_task_workday w,
+                    `user` u,
+                    `user` u1
+                WHERE
+                    p.id = #{id}
                   AND p.generalId = #{userId}
                   AND t.scientific_id = p.id
                   AND w.scientific_task_id = t.id

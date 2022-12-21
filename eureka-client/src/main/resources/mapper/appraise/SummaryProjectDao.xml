@@ -71,8 +71,8 @@
     <select id="queryByHandler" resultType="java.util.Map">
         SELECT
             p.id,
+            p.`name`,
             i.contact,
-            i.`name`,
             i.unit,
             i.place,
             i.scale,

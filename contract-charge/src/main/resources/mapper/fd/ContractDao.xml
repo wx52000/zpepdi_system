@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zpepdi.system.dao.fd.ContractDao">
+  <resultMap id="ContractMap" type="zpepdi.system.entity.Contract">
+    <id column="id" jdbcType="CHAR" property="id" />
+    <result column="number" jdbcType="VARCHAR" property="number" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="first_party" jdbcType="VARCHAR" property="firstParty" />
+    <result column="business_manage" jdbcType="VARCHAR" property="businessManage" />
+    <result column="budget" jdbcType="DECIMAL" property="budget" />
+    <result column="money" jdbcType="DECIMAL" property="money" />
+    <result column="sign_date" jdbcType="DATE" property="signDate" />
+    <result column="settlement" jdbcType="DECIMAL" property="settlement" />
+    <result column="attribute" jdbcType="CHAR" property="attribute" />
+    <result column="property" jdbcType="VARCHAR" property="property" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="is_off_shore" jdbcType="INTEGER" property="isOffShore" />
+    <result column="state" jdbcType="CHAR" property="state" />
+    <result column="complete_state" jdbcType="CHAR" property="completeState" />
+    <result column="sponsor_dep" jdbcType="VARCHAR" property="sponsorDep" />
+    <result column="classes" jdbcType="VARCHAR" property="classes" />
+    <result column="kind" jdbcType="INTEGER" property="kind" />
+  </resultMap>
+  <select id="query" resultMap="ContractMap">
+    SELECT
+      id,
+      number,
+      `name`,
+      business_manage,
+      first_party,
+      budget,
+      money,
+      cast(sign_date as char(10)) as sign_date,
+      settlement,
+      attribute,
+      property,
+      type,
+      is_off_shore,
+      state,
+      sponsor_dep,
+      complete_state,
+      classes,
+      kind
+    FROM
+      contract
+    ORDER BY sign_date DESC
+  </select>
+  <select id="queryById" resultType="zpepdi.system.entity.Contract">
+    SELECT
+      id,
+      number,
+      `name`,
+      business_manage,
+      first_party,
+      budget,
+      money,
+      cast(sign_date as char(10)) as sign_date,
+      settlement,
+      attribute,
+      property,
+      type,
+      is_off_shore,
+      state,
+      sponsor_dep,
+      complete_state,
+      classes,
+      kind
+    FROM
+      contract
+    where id = #{id}
+    ORDER BY sign_date DESC
+  </select>
+</mapper>

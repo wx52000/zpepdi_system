@@ -1,0 +1,59 @@
+package zpepdi.system.config;
+
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import zpepdi.system.annotation.resolve.RoleIdMethodArgumentResolver;
+import zpepdi.system.annotation.resolve.UserIdMethodArgumentResolver;
+import zpepdi.system.interceptor.AuthInterceptor;
+
+import java.util.List;
+
+@Configuration
+public class WebMvcConfig extends WebMvcConfigurationSupport {
+
+    @Bean
+    public AuthInterceptor userIdInterceptor() {
+        return new AuthInterceptor();
+    }
+
+    @Bean
+    public UserIdMethodArgumentResolver userIdMethodArgumentResolver(){
+        return new UserIdMethodArgumentResolver();
+    }
+
+    @Bean
+    public RoleIdMethodArgumentResolver roleIdMethodArgumentResolver(){
+        return new RoleIdMethodArgumentResolver();
+    }
+
+
+    @Override
+    protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+        argumentResolvers.add(userIdMethodArgumentResolver());
+        argumentResolvers.add(roleIdMethodArgumentResolver());
+        super.addArgumentResolvers(argumentResolvers);
+    }
+
+
+    @Override
+    protected void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(userIdInterceptor())
+                .addPathPatterns("/**")
+                .excludePathPatterns("/login","/refresh","/down/down360","/myLogout",
+                        "/error","/test","/produceDataTransmit");
+        super.addInterceptors(registry);
+    }
+
+//    @Override
+//    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+//        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
+//        super.addResourceHandlers(registry);
+//    }
+
+
+
+}
