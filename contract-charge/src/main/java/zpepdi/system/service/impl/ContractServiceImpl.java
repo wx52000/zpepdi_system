@@ -2,6 +2,7 @@ package zpepdi.system.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
 import zpepdi.system.dao.fd.ContractDao;
 import zpepdi.system.result.Result;
 import zpepdi.system.service.ContractService;
@@ -17,8 +18,13 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Result queryById(String id) {
+    public Result queryById( String id) {
         return Result.ok(contractDao.queryById(id));
+    }
+
+    @Override
+    public Result contractReceive(String id) {
+        return Result.ok(contractDao.contractReceive(id));
     }
 
 

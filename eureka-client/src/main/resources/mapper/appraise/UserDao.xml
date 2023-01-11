@@ -4566,10 +4566,12 @@
                     COUNT( t.id ) AS `count`,
                     u.id AS userId
                 FROM
-                    workday_tec t,
+                    ( SELECT t.id, tp.user_id
+                      FROM workday_tec t, workday_tec_principal tp, project p
+                      WHERE t.id = tp.workday_tec_id AND p.id = t.project_id ) AS t,
                     `user` u
                 WHERE
-                    FIND_IN_SET( u.id, t.principal )
+                    t.user_id = u.id
                 GROUP BY
                     u.id
             ) AS p ON p.userId = u.id
@@ -4638,10 +4640,12 @@
                     COUNT( t.id ) AS `count`,
                     u.id AS userId
                 FROM
-                    workday_tec t,
+                    ( SELECT t.id, tp.user_id
+                      FROM workday_tec t, workday_tec_principal tp, project p
+                      WHERE t.id = tp.workday_tec_id AND p.id = t.project_id ) AS t,
                     `user` u
                 WHERE
-                    FIND_IN_SET( u.id, t.principal )
+                    t.user_id = u.id
                 GROUP BY
                     u.id
             ) AS p ON p.userId = u.id
@@ -4704,14 +4708,14 @@
         SELECT
             p.id,
             p.`number`,
-            p.projectName AS `name`,
+            p.`name` AS `name`,
             t.volume_tec AS tec,
-            a.workday,
-            ifnull(t.amount,0) + IFNULL( b.workday, 0 ) + IFNULL( a.workday, 0 ) AS workday,
+            ifnull( t.amount, 0 ) + IFNULL( b.workday, 0 ) + IFNULL( a.workday, 0 ) AS workday,
             IFNULL( v.workday, 0 ) + IFNULL( pt.workday, 0 ) AS used,
-            ifnull(t.amount,0) + IFNULL( b.workday, 0 ) + IFNULL( a.workday, 0 ) - IFNULL( v.workday, 0 ) - IFNULL( pt.workday, 0 ) AS have
+            ifnull( t.amount, 0 ) + IFNULL( b.workday, 0 ) + IFNULL( a.workday, 0 ) - IFNULL( v.workday, 0 ) - IFNULL( pt.workday, 0 ) AS have
         FROM
-            incomplete_project p,
+            project p,
+            workday_tec_principal tp,
             workday_tec t
                 LEFT JOIN ( SELECT tec, project_id, SUM( workday ) AS workday FROM project_workday_backup GROUP BY project_id, tec ) AS b ON t.project_id = b.project_id
                 AND b.tec = t.volume_tec
@@ -4763,9 +4767,8 @@
                 AND pt.tec = t.volume_tec
         WHERE
             p.id = t.project_id
-          AND FIND_IN_SET(
-                #{id},
-                t.principal)
+          AND t.id = tp.workday_tec_id
+          AND tp.user_id = #{id}
     </select>
     <select id="volumeDesigner" resultType="java.util.Map">
         SELECT

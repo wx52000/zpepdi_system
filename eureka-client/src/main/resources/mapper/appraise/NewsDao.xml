@@ -1960,7 +1960,6 @@
             p.id = n.project_id
           AND n.check_handler = #{id}
           AND n.`check` = 0
-          AND n.check_other = 1
     </select>
     <select id="queryByAdmin3" resultMap="queryChildren">
         SELECT

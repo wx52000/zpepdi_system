@@ -11,4 +11,6 @@ public interface ContractService {
 
     Result queryById(String id);
 
+    Result contractReceive(String id);
+
 }

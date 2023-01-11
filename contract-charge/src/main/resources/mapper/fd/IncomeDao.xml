@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.IncomeDao">
+    <update id="setIncome">
+        insert into income(`contract_id`, `income`, `single`, `month`, `quarter`, `year`,
+                           `handle_time`, `handler`, `type`)
+        values (#{map.contract_id}, #{map.income}, #{map.single},#{map.month},
+                #{map.quarter}, #{map.year}, now(), #{userId}, #{map.type} )
+        on duplicate key update
+        income = values(income),
+        handle_time = values(handle_time),
+        handler = values(handler)
+    </update>
+    <select id="queryByContractId" resultType="java.util.Map">
+        SELECT
+            id,
+            contract_id,
+            single,
+            `type`,
+            income,
+            `month`,
+            `quarter`,
+            `year`
+        FROM
+            income
+        WHERE `year` = #{year}
+          AND contract_id = #{contract_id}
+    </select>
+</mapper>

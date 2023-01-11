@@ -95,9 +95,11 @@ public class ScientificSystemServiceImpl implements ScientificSystemService {
     @Override
     public Result fdDataTransmit(){
         Path path = Paths.get(this.getPath());
-        String date = DateUtils.getDateMonth();
+//        String date = DateUtils.getDateMonth();
+        String date = "2022-12";
         File file = new File(path +"\\" + date +"工时.zip");
         if (!scientificSystemDao.queryIsCreate(DateUtils.getDateMonth()) || !file.exists()){
+//            createScientificProduce(DateUtils.getDateMonth(new Date().getTime() - 2592000));
             createScientificProduce(DateUtils.getDateMonth(new Date().getTime() - 2592000));
             creatDepartmentExcel();
         }
@@ -152,7 +154,6 @@ public class ScientificSystemServiceImpl implements ScientificSystemService {
                 }
                 list = scientificWorkdayTimeDao.queryDepartment(map);
             }else {
-
                 list = scientificSystemDao.queryProduce(date);
                 if (list.size() == 0){
                     createScientificProduce(date);

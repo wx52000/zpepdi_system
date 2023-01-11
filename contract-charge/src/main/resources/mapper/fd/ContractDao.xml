@@ -47,27 +47,95 @@
   </select>
   <select id="queryById" resultType="zpepdi.system.entity.Contract">
     SELECT
-      id,
-      number,
-      `name`,
-      business_manage,
-      first_party,
-      budget,
-      money,
-      cast(sign_date as char(10)) as sign_date,
-      settlement,
-      attribute,
-      property,
-      type,
-      is_off_shore,
-      state,
-      sponsor_dep,
-      complete_state,
-      classes,
-      kind
+      c.id,
+      c.number,
+      c.`name`,
+      c.business_manage,
+      c.first_party,
+      c.budget,
+      c.money,
+      cast(c.sign_date as char(10)) as sign_date,
+      c.settlement,
+      c.attribute,
+      c.property,
+      c.type,
+      c.is_off_shore,
+      c.state,
+      c.sponsor_dep,
+      c.complete_state,
+      c.classes,
+      c.kind,
+      s.consultation,
+      s.survey,
+      s.design,
+      s.management,
+      s.equipment,
+      s.construction,
+      s.other,
+      s.cost
     FROM
-      contract
+      contract c
+    left join contract_split s on c.id = s.contract_id
     where id = #{id}
     ORDER BY sign_date DESC
+  </select>
+  <select id="contractReceive" resultType="java.util.Map">
+    SELECT
+      happen_date,
+      money,
+      manage,
+      note,
+      receive_date
+    FROM
+      contract_receivable
+    WHERE
+        REPLACE ( number, "-", "" ) = REPLACE (#{id},"-","")
+  </select>
+  <select id="queryPlan" resultType="java.util.Map">
+    SELECT
+    c.`name`,
+    c.number,
+    c.money,
+    c.business_manage,
+    y.year_budget,
+    isum.chargeSum,
+    isum.addSum,
+    iyear.addYear,
+    iyear.chargeYear
+    FROM
+    contract c
+    LEFT JOIN invoice_budget_year y ON c.id = y.contract_id
+    AND y.`year` = #{year},
+    (
+    SELECT
+    SUM( i.charge ) AS chargeSum,
+    SUM( i.added_value ) AS addSum,
+    ii.contract_id
+    FROM
+    invoice_information ii,
+    invoice i
+    WHERE
+    ii.id = i.invoice_information_id
+    GROUP BY
+    ii.contract_id
+    ) AS isum,
+    (
+    SELECT
+    SUM( i.charge ) AS chargeYear,
+    SUM( i.added_value ) AS addYear,
+    ii.contract_id
+    FROM
+    invoice_information ii,
+    invoice i
+    WHERE
+    ii.id = i.invoice_information_id
+    AND i.out_date &gt;= concat(#{year},"-01-01")
+    AND i.out_date &lt; concat(#{year}+1, "-01-01")
+    GROUP BY
+    ii.contract_id
+    ) AS iyear
+    WHERE
+    isum.contract_id = c.id
+    AND iyear.contract_id = c.id
   </select>
 </mapper>

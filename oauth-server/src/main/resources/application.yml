@@ -1,5 +1,5 @@
-eurekaIp : 10.136.238.28
-#eurekaIp : localhost
+#eurekaIp : 10.136.238.28
+eurekaIp : localhost
 spring:
   application:
     name: oauth-server

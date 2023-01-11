@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.InvoiceBudgetDao">
+    <resultMap id="queryByContractId" type="map">
+        <result column="year" jdbcType="INTEGER" property="year"/>
+        <result column="contract_id" jdbcType="CHAR" property="contract_id"/>
+        <result column="year_budget" jdbcType="DECIMAL" property="year_budget"/>
+        <result column="quarter1_budget" jdbcType="DECIMAL" property="quarter1"/>
+        <result column="quarter2_budget" jdbcType="DECIMAL" property="quarter2"/>
+        <result column="quarter3_budget" jdbcType="DECIMAL" property="quarter3"/>
+        <result column="quarter4_budget" jdbcType="DECIMAL" property="quarter4"/>
+        <collection property="monthList" javaType="ARRAYLIST"
+                    column="year=year, contract_id= contract_id"
+                    select="queryMonthByContractId"/>
+    </resultMap>
+    <update id="setBudgetMonth">
+        insert into invoice_budget_month(contract_id, `budget`, `month`, quarter,
+                                         `year`, `time`, handler,single, `remark`, `type`, expend)
+        values (#{map.contract_id}, #{map.budget}, #{map.month},
+                #{map.quarter}, #{map.year}, now(), #{userId}, #{map.single}, #{map.remark}, #{map.type}, #{map.expend})
+        on duplicate key update
+        `budget` = values(`budget`),
+        `time` = values(`time`),
+        `handler` = values(`handler`),
+        `remark` = values(`remark`)
+    </update>
+    <update id="setBudgetYear">
+        insert into invoice_budget_year(contract_id, `year_budget`, quarter1_budget,quarter2_budget,
+                                quarter3_budget, quarter4_budget, `year`, `time`, handler)
+        values (#{map.contract_id}, #{map.year_budget}, #{map.quarter1}, #{map.quarter2},
+                #{map.quarter3}, #{map.quarter4}, #{map.year}, now(), #{userId})
+        on duplicate key update
+        `year_budget` = values(`year_budget`),
+        `quarter1_budget` = values(`quarter1_budget`),
+        `quarter2_budget` = values(`quarter2_budget`),
+        `quarter3_budget` = values(`quarter3_budget`),
+        `quarter4_budget` = values(`quarter4_budget`),
+        `time` = values(`time`),
+        `handler` = values(`handler`)
+    </update>
+    <select id="queryMonthByContractId" resultType="java.util.Map">
+        select `budget`, `month`, quarter, `year`, single, remark, `type`, expend
+        from invoice_budget_month
+        where contract_id= #{contract_id}
+        and `year` = #{year}
+        order by `month`
+    </select>
+    <select id="queryByContractId" resultMap="queryByContractId">
+        select ifnull(`year_budget`,0) as year_budget,
+               ifnull(quarter1_budget,0) as quarter1_budget,
+               ifnull(quarter2_budget,0) as quarter2_budget,
+               ifnull(quarter3_budget,0) as quarter3_budget,
+               ifnull(quarter4_budget,0) as quarter4_budget, `year`, contract_id
+        from invoice_budget_year
+        where contract_id= #{contract_id}
+          and `year` = #{year}
+    </select>
+</mapper>
