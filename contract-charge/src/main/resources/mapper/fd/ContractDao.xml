@@ -21,6 +21,29 @@
     <result column="classes" jdbcType="VARCHAR" property="classes" />
     <result column="kind" jdbcType="INTEGER" property="kind" />
   </resultMap>
+  <insert id="addChildren">
+    update contract
+    set parent_id = #{parent}, add_sub = #{addSub}
+    where id = #{id}
+  </insert>
+  <update id="setChildren">
+    update contract
+    set add_sub = #{addSub}
+    where id = #{id}
+  </update>
+  <update id="setConfirm">
+    <foreach collection="list" item="item" separator=";">
+    update contract
+    set kind = #{item.kind}, income_expend = #{item.income_expend}, is_new = 0,
+        handler = #{userId}, handle_time = now()
+    where id = #{item.id}
+    </foreach>
+  </update>
+  <delete id="delChildren">
+    update contract
+    set parent_id = 0
+    where id = #{id}
+  </delete>
   <select id="query" resultMap="ContractMap">
     SELECT
       id,
@@ -43,9 +66,11 @@
       kind
     FROM
       contract
+    where parent_id = 0
+    and  income_expend = #{income}
     ORDER BY sign_date DESC
   </select>
-  <select id="queryById" resultType="zpepdi.system.entity.Contract">
+  <select id="queryById" resultType="java.util.Map">
     SELECT
       c.id,
       c.number,
@@ -81,13 +106,17 @@
   </select>
   <select id="contractReceive" resultType="java.util.Map">
     SELECT
-      happen_date,
-      money,
-      manage,
-      note,
-      receive_date
+      r.id,
+      r.happen_date,
+      r.money,
+      r.manage,
+      r.note,
+      receive_date,
+      i.income,
+      cast(i.date as CHAR(10)) as `date`
     FROM
-      contract_receivable
+      contract_receivable r left join
+          income i on r.id = i.receivable_id
     WHERE
         REPLACE ( number, "-", "" ) = REPLACE (#{id},"-","")
   </select>
@@ -137,5 +166,50 @@
     WHERE
     isum.contract_id = c.id
     AND iyear.contract_id = c.id
+  </select>
+  <select id="queryChildren" resultType="java.util.Map">
+    select  id, number, name, money, add_sub
+    from contract
+    where parent_id = #{id}
+  </select>
+  <select id="queryBlur" resultType="java.util.Map">
+    select
+    id, number, name, money
+    from contract
+    where number like concat("%",#{search},"%")
+    union
+    select
+    id, number, name, money
+    from contract
+    where number like concat("%",#{search},"%")
+  </select>
+  <select id="queryConfirm" resultType="java.util.Map">
+      SELECT
+      c.id,
+	c.`name`,
+	c.number,
+	c.kind,
+	c.income_expend
+    FROM
+      appraise.`user` u,
+      contract c
+    WHERE
+      u.id = #{userId}
+      AND u.`name` = c.business_manage
+      AND c.income_expend = 2
+    UNION
+    SELECT
+      c.id,
+      c.`name`,
+      c.number,
+      c.kind,
+      c.income_expend
+    FROM
+      appraise.`user` u,
+      contract c
+    WHERE
+      u.id = #{userId}
+      AND u.`name` = c.business_manage
+      AND c.is_new = 1
   </select>
 </mapper>

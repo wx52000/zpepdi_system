@@ -39,11 +39,31 @@
         `handler` = values(`handler`)
     </update>
     <select id="queryMonthByContractId" resultType="java.util.Map">
-        select `budget`, `month`, quarter, `year`, single, remark, `type`, expend
-        from invoice_budget_month
-        where contract_id= #{contract_id}
-        and `year` = #{year}
-        order by `month`
+        SELECT
+            b.`budget`,
+            b.`month`,
+            b.`quarter`,
+            b.`year`,
+            b.single,
+            b.remark,
+            b.`type`,
+            b.expend,
+            i.budget as income_budget
+        FROM
+            invoice_budget_month b
+                LEFT JOIN income_budget_month i ON i.contract_id = b.contract_id
+                AND b.`year` = i.`year`
+                AND b.`month` = i.`month`
+                AND b.type = i.type
+                AND b.single = i.single
+
+        WHERE
+            b.contract_id = #{contract_id}
+
+          AND b.`year` = #{year}
+
+        ORDER BY
+            `month`
     </select>
     <select id="queryByContractId" resultMap="queryByContractId">
         select ifnull(`year_budget`,0) as year_budget,

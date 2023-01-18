@@ -987,6 +987,7 @@
         FROM
         (
         SELECT
+        m.id as mid,
         m.big_name AS tec,
         m.did,
         0 AS type,
@@ -1141,7 +1142,7 @@
         s.num AS num,
         ROUND( num6 / 6, 0 ) AS `avg`
         FROM
-        ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
+        ( SELECT DISTINCT m.id, m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
         LEFT JOIN (
         SELECT
         COUNT(*) AS num,
@@ -1263,6 +1264,7 @@
         GROUP BY
         tec UNION
         SELECT
+        m.id as mid,
         m.big_name AS tec,
         m.did,
         1 AS type,
@@ -1417,7 +1419,7 @@
         s.num AS num,
         ROUND( num6 / 6, 0 ) AS `avg`
         FROM
-        ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
+        ( SELECT DISTINCT m.id, m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
         LEFT JOIN (
         SELECT
         COUNT(*) AS num,
@@ -1541,8 +1543,7 @@
         tec,
         `type`
         ORDER BY
-        did,
-        tec
+        mid desc
     </select>
     <select id="manageTecProgress" resultType="java.util.Map">
         SELECT

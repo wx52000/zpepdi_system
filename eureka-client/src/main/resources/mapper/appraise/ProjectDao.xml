@@ -537,28 +537,29 @@
         call queryProjectRole(#{userId,mode=IN}, #{projectId,mode = IN})
     </select>
     <select id="queryByAdmin" resultType="java.util.Map">
-        SELECT id,
-               `number`,
-               projectName,
-               director,
-               general,
-               generalId,
-               workday,
-               `limit`,
-               workdayState,
-               distributeState,
+        SELECT tab.id,
+               tab.`number`,
+               tab.projectName,
+               tab.director,
+               tab.general,
+               tab.generalId,
+               tab.workday,
+               tab.`limit`,
+               tab.workdayState,
+               tab.distributeState,
                CASE
-                   frozen
+                   tab.frozen
                    WHEN 1 THEN
                        "已冻结"
                    ELSE state
                    END        AS `state`,
-               projectPhaseID,
-               spider,
-               type,
-               error,
-               used,
-               workday - used AS have
+               tab.projectPhaseID,
+               tab.spider,
+               tab.type,
+               tab.error,
+               tab.used,
+               tab.workday - tab.used AS have,
+               ut.`time`
         FROM (
                  SELECT DISTINCT p.id,
                                  p.`number`,
@@ -642,10 +643,12 @@
                  ) AS m ON m.id = p.id
                  GROUP BY p.id
                  ORDER BY p.id DESC
-             ) AS tab
+             ) AS tab LEFT JOIN user_defined_top ut on ut.top_id = tab.id
+            AND user_id = #{userId} AND menus_id = 10
         WHERE tab.workday &lt;&gt;
               tab.used
            OR tab.workday = 0
+        ORDER BY ut.time desc
     </select>
     <select id="queryCompleteByAdmin" resultType="java.util.Map">
         SELECT id,
@@ -3496,6 +3499,18 @@
     </select>
     <select id="projectProgress" resultType="java.util.Map">
         SELECT
+        tab.id,
+        tab.`number`,
+        tab.`name`,
+        tab.nowMonthZero,
+        tab.nowMonthUp,
+        tab.allZero,
+        tab.completeZero,
+        tab.comRatio,
+        tab.incompleteZero,
+        ut.`time`
+        from
+        (SELECT
         p.id,
         p.number,
         p.`name`,
@@ -3599,6 +3614,9 @@
         GROUP BY
         p.id
         ) AS c ON p.id = c.id
+        ) tab LEFT JOIN user_defined_top ut on ut.top_id = tab.id
+        AND user_id = #{userId} AND menus_id = 18
+        order by ut.time desc
     </select>
     <select id="projectProgressById" resultType="java.util.Map">
         SELECT p.id,
@@ -3618,21 +3636,16 @@
                  SELECT DISTINCT p.id,
                                  p.number,
                                  p.`name`,
-                                 p.tec
+                                 p.tec,
+                                 p.mid
                  FROM (
                           SELECT p.id,
                                  p.number,
                                  p.`name`,
-                                 CASE
-
-                                     WHEN v.tec LIKE "%电气%" THEN
-                                         '电气'
-                                     WHEN v.tec LIKE "%长输管道%" THEN
-                                         '长输管道'
-                                     ELSE v.tec
-                                     END AS tec
+                                 IFNULL(m.big_name,v.tec) as tec,
+                                 m.id  as mid
                           FROM project p,
-                               volume v
+                               volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                           WHERE p.id = v.project_id
                             AND p.id = #{id}
                             AND EXISTS(
@@ -3653,16 +3666,10 @@
                           SELECT p.id,
                                  p.number,
                                  p.`name`,
-                                 CASE
-
-                                     WHEN v.tec LIKE "%电气%" THEN
-                                         '电气'
-                                     WHEN v.tec LIKE "%长输管道%" THEN
-                                         '长输管道'
-                                     ELSE v.tec
-                                     END AS tec
+                                 IFNULL(m.big_name,v.tec) as tec,
+                                 m.id  as mid
                           FROM project p,
-                               volume v,
+                               volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name,
                                workday_tec t,
                                workday_tec_principal tp
                           WHERE p.id = v.project_id
@@ -3680,15 +3687,9 @@
                    tec
             FROM (
                      SELECT IFNULL(COUNT(v.id), 0) AS num,
-                            CASE
-
-                                WHEN v.tec LIKE "%电气%" THEN
-                                    '电气'
-                                WHEN v.tec LIKE "%长输管道%" THEN
-                                    '长输管道'
-                                ELSE v.tec
-                                END                AS tec
-                     FROM volume v
+                            IFNULL(m.big_name,v.tec) as tec,
+                            m.id  as mid
+                     FROM volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                      WHERE v.project_id = #{id}
 
                        AND DATE_FORMAT(v.actual_publication_date, '%Y-%m') = #{date}
@@ -3704,15 +3705,9 @@
                    tec
             FROM (
                      SELECT IFNULL(COUNT(v.id), 0) AS num,
-                            CASE
-
-                                WHEN v.tec LIKE "%电气%" THEN
-                                    '电气'
-                                WHEN v.tec LIKE "%长输管道%" THEN
-                                    '长输管道'
-                                ELSE v.tec
-                                END                AS tec
-                     FROM volume v
+                            IFNULL(m.big_name,v.tec) as tec,
+                            m.id  as mid
+                     FROM volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                      WHERE v.project_id = #{id}
 
                        AND DATE_FORMAT(v.actual_publication_date, '%Y-%m') = #{date}
@@ -3729,15 +3724,9 @@
                         tec
                  FROM (
                           SELECT IFNULL(COUNT(v.id), 0) AS num,
-                                 CASE
-
-                                     WHEN v.tec LIKE "%电气%" THEN
-                                         '电气'
-                                     WHEN v.tec LIKE "%长输管道%" THEN
-                                         '长输管道'
-                                     ELSE v.tec
-                                     END                AS tec
-                          FROM volume v
+                                 IFNULL(m.big_name,v.tec) as tec,
+                                 m.id  as mid
+                          FROM volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                           WHERE v.project_id = #{id}
 
                             AND DATE_FORMAT(v.planned_publication_date, '%Y-%m') = #{date}
@@ -3754,15 +3743,9 @@
                         tec
                  FROM (
                           SELECT IFNULL(COUNT(v.id), 0) AS num,
-                                 CASE
-
-                                     WHEN v.tec LIKE "%电气%" THEN
-                                         '电气'
-                                     WHEN v.tec LIKE "%长输管道%" THEN
-                                         '长输管道'
-                                     ELSE v.tec
-                                     END                AS tec
-                          FROM volume v
+                                 IFNULL(m.big_name,v.tec) as tec,
+                                 m.id  as mid
+                          FROM volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                           WHERE v.project_id = #{id}
 
                             AND DATE_FORMAT(v.planned_publication_date, '%Y-%m') = #{date}
@@ -3778,15 +3761,9 @@
                    tec
             FROM (
                      SELECT IFNULL(COUNT(v.id), 0) AS num,
-                            CASE
-
-                                WHEN v.tec LIKE "%电气%" THEN
-                                    '电气'
-                                WHEN v.tec LIKE "%长输管道%" THEN
-                                    '长输管道'
-                                ELSE v.tec
-                                END                AS tec
-                     FROM volume v
+                            IFNULL(m.big_name,v.tec) as tec,
+                            m.id  as mid
+                     FROM volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                      WHERE v.project_id = #{id}
 
                        AND v.number NOT LIKE "%+%"
@@ -3800,15 +3777,9 @@
                    tec
             FROM (
                      SELECT IFNULL(COUNT(v.id), 0) AS num,
-                            CASE
-
-                                WHEN v.tec LIKE "%电气%" THEN
-                                    '电气'
-                                WHEN v.tec LIKE "%长输管道%" THEN
-                                    '长输管道'
-                                ELSE v.tec
-                                END                AS tec
-                     FROM volume v
+                            IFNULL(m.big_name,v.tec) as tec,
+                            m.id  as mid
+                     FROM volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                      WHERE v.project_id = #{id}
 
                        AND v.number NOT LIKE "%+%"
@@ -3824,14 +3795,8 @@
                    tec
             FROM (
                      SELECT COUNT(*) AS num,
-                            CASE
-
-                                WHEN v.tec LIKE "%电气%" THEN
-                                    '电气'
-                                WHEN v.tec LIKE "%长输管道%" THEN
-                                    '长输管道'
-                                ELSE v.tec
-                                END  AS tec
+                            IFNULL(m.big_name,v.tec) as tec,
+                            m.id  as mid
                      FROM (
                               SELECT id,
                                      tec
@@ -3848,15 +3813,14 @@
 
                                 AND v.number NOT LIKE "%+%"
                                 AND v.actual_publication_date = ''
-                          ) AS v
+                          ) AS v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                      GROUP BY v.tec
                  ) AS c
             GROUP BY tec
         ) AS inc ON inc.tec = p.tec
         WHERE p.id = #{id}
-
         GROUP BY p.tec
-        ORDER BY tec DESC
+        ORDER BY p.mid desc,tec
     </select>
     <select id="progressVolume" resultType="java.util.Map">
         SELECT

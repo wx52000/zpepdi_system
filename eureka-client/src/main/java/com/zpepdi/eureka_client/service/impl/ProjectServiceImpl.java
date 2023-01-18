@@ -542,8 +542,8 @@ public class ProjectServiceImpl implements ProjectService {
 //    }
 
     @Override
-    public List<Map> queryByAdmin(User user) {
-        return projectDao.queryByAdmin();
+    public List<Map> queryByAdmin(Integer userId) {
+        return projectDao.queryByAdmin(userId);
     }
 
     @Override
@@ -1027,6 +1027,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result projectProgress(Integer userId, Map<String,Object> map) {
+        map.put("userId",userId);
         return Result.ok(projectDao.projectProgress(map));
     }
 

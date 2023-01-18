@@ -83,7 +83,7 @@ public interface ProjectDao {
     void setWorkdayBackupLog(@Param("userId") Integer userId,
                              @Param("list") List<Map<String, Object>> list, @Param("date") String date);
     //管理员查询
-    List<Map> queryByAdmin();
+    List<Map> queryByAdmin(Integer userId);
 
     List<Map> queryCompleteByAdmin();
 //作为设总查询

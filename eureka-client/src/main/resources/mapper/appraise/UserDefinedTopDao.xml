@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.UserDefinedTopDao">
+    <update id="setUserDefinedTop">
+        insert into user_defined_top(user_id, menus_id, top_id, `time`)
+        values <foreach collection="map.list" item="item" separator=",">
+            (#{userId}, #{map.menus_id}, #{item}, now())
+                </foreach>
+        on duplicate key update
+        `time` = values(`time`)
+    </update>
+    <delete id="resetUserDefinedTop">
+        delete
+        from user_defined_top
+        where user_id = #{userId}
+        and menus_id = #{map.menus_id}
+        and top_id in <foreach collection="map.list" item="item" separator="," open="(" close=")">
+        #{item}
+    </foreach>
+    </delete>
+</mapper>

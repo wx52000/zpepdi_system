@@ -58,7 +58,7 @@
         ORDER BY
             b.`month`
     </select>
-    <select id="queryByContractId" resultMap="queryByContractId">
+    <select id="queryByContractId" resultType="map">
         select ifnull(`year_budget`,0) as year_budget,
                ifnull(quarter1_budget,0) as quarter1_budget,
                ifnull(quarter2_budget,0) as quarter2_budget,

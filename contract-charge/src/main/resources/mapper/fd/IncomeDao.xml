@@ -2,12 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="zpepdi.system.dao.fd.IncomeDao">
     <update id="setIncome">
-        insert into income(`contract_id`, `income`, `single`, `month`, `quarter`, `year`,
-                           `handle_time`, `handler`, `type`)
-        values (#{map.contract_id}, #{map.income}, #{map.single},#{map.month},
-                #{map.quarter}, #{map.year}, now(), #{userId}, #{map.type} )
+        insert into income(`receivable_id`,`contract_id`, `income`, `date`,
+                           `handle_time`, `handler`)
+        values (#{map.receivable_id}, #{map.contract_id}, #{map.income}, #{map.date},
+                 now(), #{userId} )
         on duplicate key update
         income = values(income),
+        `date` = values(`date`),
         handle_time = values(handle_time),
         handler = values(handler)
     </update>
@@ -15,15 +16,10 @@
         SELECT
             id,
             contract_id,
-            single,
-            `type`,
-            income,
-            `month`,
-            `quarter`,
-            `year`
+            income,`date`
         FROM
             income
-        WHERE `year` = #{year}
-          AND contract_id = #{contract_id}
+        WHERE
+           contract_id = #{contract_id}
     </select>
 </mapper>

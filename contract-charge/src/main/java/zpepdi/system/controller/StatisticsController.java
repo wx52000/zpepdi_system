@@ -18,5 +18,15 @@ public class StatisticsController {
         return statisticsService.queryPlan(year);
     }
 
+    @RequestMapping("queryZCBMonth")
+    public Result queryZCBMonth(@RequestHeader("month")String month){
+        return statisticsService.queryZCBMonth(month);
+    }
+
+    @RequestMapping("queryZCBYear")
+    public Result queryZCBYear(@RequestHeader("year")Integer year){
+        return statisticsService.queryZCBYear(year);
+    }
+
 
 }

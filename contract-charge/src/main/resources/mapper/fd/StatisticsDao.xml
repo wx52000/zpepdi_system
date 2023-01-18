@@ -6,10 +6,8 @@
             c.`name`,
             c.number,
             c.state,
-            c.invoice_state,
-            c.income_state,
             c.first_party,
-            c.money,
+            ifnull(c.money,0) + ifnull(cc.money,0) as money,
             c.business_manage,
             n.`index` as nodeIndex,
             n.money as nodeMoney,
@@ -87,6 +85,17 @@
             inv.invoice12
         FROM
             contract c
+                left join
+                (SELECT
+                     parent_id,
+                     sum(
+                             IF
+                                 ( add_sub = 0, money, - money )) as money
+                 FROM
+                     contract
+                 WHERE
+                     parent_id &lt;&gt; 0
+                 GROUP BY parent_id) as cc on c.id = cc.parent_id
                 left join (
                 SELECT
                     contract_id,
@@ -263,44 +272,44 @@
                     contract_id,
                     MAX(
                             IF
-                                ( `month` = 1, income, 0 )) AS income1,
+                                ( DATE_FORMAT(`date`,'%m') = 1, income, 0 )) AS income1,
                     MAX(
                             IF
-                                ( `month` = 2, income, 0 )) AS income2,
+                                ( DATE_FORMAT(`date`,'%m') = 2, income, 0 )) AS income2,
                     MAX(
                             IF
-                                ( `month` = 3, income, 0 )) AS income3,
+                                ( DATE_FORMAT(`date`,'%m') = 3, income, 0 )) AS income3,
                     MAX(
                             IF
-                                ( `month` = 4, income, 0 )) AS income4,
+                                ( DATE_FORMAT(`date`,'%m') = 4, income, 0 )) AS income4,
                     MAX(
                             IF
-                                ( `month` = 5, income, 0 )) AS income5,
+                                ( DATE_FORMAT(`date`,'%m') = 5, income, 0 )) AS income5,
                     MAX(
                             IF
-                                ( `month` = 6, income, 0 )) AS income6,
+                                ( DATE_FORMAT(`date`,'%m') = 6, income, 0 )) AS income6,
                     MAX(
                             IF
-                                ( `month` = 7, income, 0 )) AS income7,
+                                ( DATE_FORMAT(`date`,'%m') = 7, income, 0 )) AS income7,
                     MAX(
                             IF
-                                ( `month` = 8, income, 0 )) AS income8,
+                                ( DATE_FORMAT(`date`,'%m') = 8, income, 0 )) AS income8,
                     MAX(
                             IF
-                                ( `month` = 9, income, 0 )) AS income9,
+                                ( DATE_FORMAT(`date`,'%m') = 9, income, 0 )) AS income9,
                     MAX(
                             IF
-                                ( `month` = 10, income, 0 )) AS income10,
+                                ( DATE_FORMAT(`date`,'%m') = 10, income, 0 )) AS income10,
                     MAX(
                             IF
-                                ( `month` = 11, income, 0 )) AS income11,
+                                ( DATE_FORMAT(`date`,'%m') = 11, income, 0 )) AS income11,
                     MAX(
                             IF
-                                ( `month` = 12, income, 0 )) AS income12
+                                ( DATE_FORMAT(`date`,'%m') = 12, income, 0 )) AS income12
                 FROM
                     income
                 WHERE
-                    `year` = #{year} and type = 0
+                    DATE_FORMAT(`date`,'%Y')
                 GROUP BY
                     contract_id
             ) AS inc ON c.id = inc.contract_id
@@ -353,5 +362,372 @@
                     ii.contract_id
             ) AS inv ON c.id = inv.contract_id
             where kind = 0
+    </select>
+    <select id="queryZCBMonth" resultType="java.util.Map">
+        SELECT
+        p.id,
+        p.number,
+        p.`name`,
+        p.cid,
+        p.classify,
+        max(IF
+        ( p.type = 0, s.sumInvoice, 0 )) AS sumInvoice0,
+        max(IF
+        ( p.type = 0, s.sumPay, 0 )) AS sumPay0,
+        max(IF
+        ( p.type = 1, s.sumInvoice, 0 )) AS sumInvoice1,
+        max(IF
+        ( p.type = 1, s.sumPay, 0 )) AS sumPay1,
+        max(IF
+        ( p.type = 0, n.nowInvoice, 0 )) AS nowInvoice0,
+        max(IF
+        ( p.type = 0, n.nowPay, 0 )) AS nowPay0,
+        max(IF
+        ( p.type = 1, n.nowInvoice, 0 )) AS nowInvoice1,
+        max(IF
+        ( p.type = 1, n.nowPay, 0 )) AS nowPay1,
+        max(IF
+        ( p.type = 0, l.lastInvoice, 0 )) AS lastInvoice0,
+        max(IF
+        ( p.type = 0, l.lastPay, 0 )) AS lastPay0,
+        max(IF
+        ( p.type = 1, l.lastInvoice, 0 )) AS lastInvoice1,
+        max(IF
+        ( p.type = 1, l.lastPay, 0 )) AS lastPay1,
+        max(IF
+        ( p.type = 0, b.invoice, 0 )) AS bInvoice0,
+        max(IF
+        ( p.type = 0, b.income, 0 )) AS bIncome0,
+        max(IF
+        ( p.type = 1, b.invoice, 0 )) AS bInvoice1,
+        max(IF
+        ( p.type = 1, b.income, 0 )) AS bIncome1
+        FROM
+        (
+        SELECT
+        p.id,
+        p.number,
+        p.`name`,
+        c.id AS cid,
+        c.classify,
+        0 AS type
+        FROM
+        market_project p,
+        classify c UNION
+        SELECT
+        p.id,
+        p.number,
+        p.`name`,
+        c.id AS cid,
+        c.classify,
+        1 AS type
+        FROM
+        market_project p,
+        classify c
+        ) AS p
+        LEFT JOIN (
+        SELECT
+        project_id,
+        SUM( ja_invoice_money ) AS sumInvoice,
+        SUM( ja_actual_payment ) AS sumPay,
+        1 AS cid,
+        type
+        FROM
+        general_project_ledger
+        WHERE
+        ja_invoice_date &lt;= #{date}
+        GROUP BY
+        project_id,
+        type UNION
+        SELECT
+        project_id,
+        SUM( sb_invoice_money ) AS sumInvoice,
+        SUM( sb_sum ) AS sumPay,
+        2 AS cid,
+        type
+        FROM
+        general_project_ledger
+        WHERE
+        sb_invoice_date &lt;= #{date}
+
+        GROUP BY
+        project_id,
+        type UNION
+        SELECT
+        project_id,
+        SUM( js_invoice_money ) AS sumInvoice,
+        SUM( js_sum ) AS sumPay,
+        3 AS cid,
+        type
+        FROM
+        general_project_ledger
+        WHERE
+        js_invoice_date &lt;= #{date}
+        GROUP BY
+        project_id,
+        type
+        ) AS s ON p.id = s.project_id
+        AND p.cid = s.cid
+        AND p.type = s.type
+        LEFT JOIN (
+        SELECT
+        project_id,
+        ja_invoice_money AS nowInvoice,
+        ja_actual_payment AS nowPay,
+        1 AS cid,
+        type
+        FROM
+        general_project_ledger
+        WHERE
+        ja_invoice_date &gt;= #{date}
+        AND ja_invoice_date &lt; #{endDate} UNION
+        SELECT
+        project_id,
+        sb_invoice_money AS nowInvoice,
+        sb_sum AS nowPay,
+        2 AS cid,
+        type
+        FROM
+        general_project_ledger
+        WHERE
+        sb_invoice_date &gt;= #{date}
+
+        AND sb_invoice_date &lt; #{endDate} UNION
+        SELECT
+        project_id,
+        js_invoice_money AS nowInvoice,
+        js_sum AS nowPay,
+        3 AS cid,
+        type
+        FROM
+        general_project_ledger
+        WHERE
+        js_invoice_date &gt;= #{date}
+
+        AND js_invoice_date &lt; #{endDate}
+
+        ) AS n ON p.id = n.project_id
+        AND p.cid = n.cid
+        AND p.type = n.type
+        LEFT JOIN (
+        SELECT
+        project_id,
+        ja_invoice_money AS lastInvoice,
+        ja_actual_payment AS lastPay,
+        1 AS cid,
+        type
+        FROM
+        general_project_ledger
+        WHERE
+        ja_invoice_date &lt; #{date}
+        AND ja_invoice_date &gt;= #{lastDate} UNION
+        SELECT
+        project_id,
+        sb_invoice_money AS lastInvoice,
+        sb_sum AS lastPay,
+        2 AS cid,
+        type
+        FROM
+        general_project_ledger
+        WHERE
+        ja_invoice_date &lt; #{date}
+        AND ja_invoice_date &gt;= #{lastDate} UNION
+        SELECT
+        project_id,
+        js_invoice_money AS lastInvoice,
+        js_sum AS lastPay,
+        3 AS cid,
+        type
+        FROM
+        general_project_ledger
+        WHERE
+        ja_invoice_date &lt; #{date}
+        AND ja_invoice_date &gt;= #{lastDate}
+
+        ) AS l ON p.id = l.project_id
+        AND p.cid = l.cid
+        AND p.type = l.type
+        LEFT JOIN (
+        SELECT
+        project_id,
+        single,
+        type,
+        invoice,
+        income,
+        remark
+        FROM
+        project_budget_month
+        WHERE
+        `year` = #{year}
+
+        AND `month` = #{month} ) AS b ON p.id = b.project_id
+
+        AND p.cid = b.single
+        AND p.type = b.type
+        group by p.id,p.cid
+    </select>
+    <select id="queryZCBYear" resultType="java.util.Map">
+        SELECT
+            t.id,
+            t.number,
+            t.`name`,
+            quarter1_budget,
+            quarter2_budget,
+            quarter3_budget,
+            quarter4_budget,
+            lastIncome,
+            MAX(
+                    IF
+                        ( `month` = 1, income, 0 )) AS income1,
+            MAX(
+                    IF
+                        ( `month` = 2, income, 0 )) AS income2,
+            MAX(
+                    IF
+                        ( `month` = 3, income, 0 )) AS income3,
+            MAX(
+                    IF
+                        ( `month` = 4, income, 0 )) AS income4,
+            MAX(
+                    IF
+                        ( `month` = 5, income, 0 )) AS income5,
+            MAX(
+                    IF
+                        ( `month` = 6, income, 0 )) AS income6,
+            MAX(
+                    IF
+                        ( `month` = 7, income, 0 )) AS income7,
+            MAX(
+                    IF
+                        ( `month` = 8, income, 0 )) AS income8,
+            MAX(
+                    IF
+                        ( `month` = 9, income, 0 )) AS income9,
+            MAX(
+                    IF
+                        ( `month` = 10, income, 0 )) AS income10,
+            MAX(
+                    IF
+                        ( `month` = 11, income, 0 )) AS income11,
+            MAX(
+                    IF
+                        ( `month` = 12, income, 0 )) AS income12,
+            MAX(
+                    IF
+                        ( `month` = 1, budget, 0 )) AS budget1,
+            MAX(
+                    IF
+                        ( `month` = 2, budget, 0 )) AS budget2,
+            MAX(
+                    IF
+                        ( `month` = 3, budget, 0 )) AS budget3,
+            MAX(
+                    IF
+                        ( `month` = 4, budget, 0 )) AS budget4,
+            MAX(
+                    IF
+                        ( `month` = 5, budget, 0 )) AS budget5,
+            MAX(
+                    IF
+                        ( `month` = 6, budget, 0 )) AS budget6,
+            MAX(
+                    IF
+                        ( `month` = 7, budget, 0 )) AS budget7,
+            MAX(
+                    IF
+                        ( `month` = 8, budget, 0 )) AS budget8,
+            MAX(
+                    IF
+                        ( `month` = 9, budget, 0 )) AS budget9,
+            MAX(
+                    IF
+                        ( `month` = 10, budget, 0 )) AS budget10,
+            MAX(
+                    IF
+                        ( `month` = 11, budget, 0 )) AS budget11,
+            MAX(
+                    IF
+                        ( `month` = 12, budget, 0 )) AS budget12
+        FROM
+            (
+                SELECT
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    p.`month`,
+                    IFNULL( lastJa.income, 0 ) + IFNULL( lastSb.income, 0 ) + IFNULL( lastJs.income, 0 ) AS lastIncome,
+                    IFNULL( ja.income, 0 ) + IFNULL( sb.income, 0 )+ IFNULL( js.income, 0 ) AS income,
+                    pby.quarter1_budget,
+                    pby.quarter2_budget,
+                    pby.quarter3_budget,
+                    pby.quarter4_budget,
+                    pbm.income AS budget
+                FROM
+                    ( SELECT p.id, p.number, p.`name`, m.`month` FROM market_project p, `month` m ) p
+                        LEFT JOIN ( SELECT project_id, SUM( ja_actual_payment ) AS income
+                                    FROM general_project_ledger
+                                    WHERE ja_invoice_date &lt; #{start} AND type = 0 GROUP BY project_id ) AS lastJa ON lastJa.project_id = p.id
+                        LEFT JOIN ( SELECT project_id, SUM( sb_sum ) AS income
+                                    FROM general_project_ledger
+                                    WHERE sb_invoice_date &lt; #{start} AND type = 0 GROUP BY project_id ) lastSb ON lastSb.project_id = p.id
+                        LEFT JOIN ( SELECT project_id, SUM( js_sum ) AS income
+                                    FROM general_project_ledger
+                                    WHERE js_invoice_date &lt; #{start} AND type = 0 GROUP BY project_id ) lastJs ON lastJs.project_id = p.id
+                        LEFT JOIN (
+                        SELECT
+                            project_id,
+                            Month(ja_invoice_date)	AS `month`,
+                            SUM( ja_actual_payment ) AS income
+                        FROM
+                            general_project_ledger
+                        WHERE
+                            ja_invoice_date &gt;= #{start}
+                          AND ja_invoice_date &lt;= #{end}
+                          AND type = 0
+                        GROUP BY
+                            project_id,
+                            ja_month
+                    ) AS ja ON ja.project_id = p.id
+                        AND p.`month` = ja.`month`
+                        LEFT JOIN (
+                        SELECT
+                            project_id,
+                            Month(sb_invoice_date) AS `month`,
+                            SUM( sb_sum ) AS income
+                        FROM
+                            general_project_ledger
+                        WHERE
+                            sb_invoice_date &gt;= #{start}
+                          AND sb_invoice_date &lt;= #{end}
+                          AND type = 0
+                        GROUP BY
+                            project_id,
+                            sb_month
+                    ) sb ON sb.project_id = p.id
+                        AND p.`month` = sb.`month`
+                        LEFT JOIN (
+                        SELECT
+                            project_id,
+                            Month(js_invoice_date)	AS `month`,
+                            SUM( js_sum ) AS income
+                        FROM
+                            general_project_ledger
+                        WHERE
+                            js_invoice_date &gt;= #{start}
+                          AND js_invoice_date &lt;= #{end}
+                          AND type = 0
+                        GROUP BY
+                            project_id,
+                            js_month
+                    ) js ON js.project_id = p.id
+                        AND p.`month` = js.`month`
+                        LEFT JOIN project_budget_year pby ON pby.project_id = p.id
+                        AND pby.`year` = #{year}
+                        LEFT JOIN project_budget_month pbm ON pbm.project_id = p.id
+                        AND pbm.`year` = #{year}
+                        AND p.`month` = pbm.`month`
+            ) AS t
+        GROUP BY
+            t.id
     </select>
 </mapper>

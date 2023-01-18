@@ -154,8 +154,8 @@ public class ProjectController {
 //    }
 
     @RequestMapping("queryByAdmin")
-    public Result queryByAdmin(@RequestBody User user){
-        return Result.ok(projectService.queryByAdmin(user));
+    public Result queryByAdmin(@UserId Integer userId){
+        return Result.ok(projectService.queryByAdmin(userId));
     }
 
 

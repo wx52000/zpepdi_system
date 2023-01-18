@@ -60,7 +60,7 @@ public interface ProjectService {
 
 //    Result setWorkdayBackup(Integer userId, List<Map<String,Object>> list, String date);
     //管理员查询
-    List<Map> queryByAdmin(User user);
+    List<Map> queryByAdmin(Integer userId);
 
     List<Map> queryCompleteByAdmin(User user);
     //作为设总查询
