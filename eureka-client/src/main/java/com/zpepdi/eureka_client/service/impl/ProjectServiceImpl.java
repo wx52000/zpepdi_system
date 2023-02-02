@@ -991,6 +991,27 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public Integer confirmDay() {
+        Object object = redisTemplate.opsForValue().get("confirmDay");
+        if (object == null){
+            System.out.println("数据库查询");
+            object = projectDao.confirmDay();
+            redisTemplate.opsForValue().set("confirmDay",object);
+        } else {
+            System.out.println("redis查询");
+        }
+        return Integer.valueOf(object.toString());
+    }
+
+    @Override
+    @Transactional
+    public Result setConfirmDay(Integer day) {
+        projectDao.setConfirmDay(day);
+        redisTemplate.opsForValue().set("confirmDay",day);
+        return Result.ok();
+    }
+
+    @Override
     public Result declareLog(Integer userId,Map<String,Object> map) {
         return Result.ok(projectDao.declareLog(userId,map));
     }

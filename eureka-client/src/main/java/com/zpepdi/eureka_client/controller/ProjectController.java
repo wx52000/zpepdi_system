@@ -279,6 +279,16 @@ public class ProjectController {
         return projectService.setDeclareDay(day);
     }
 
+    @RequestMapping("confirmDay")
+    public Result confirmDay(){
+        return Result.ok(projectService.confirmDay());
+    }
+
+    @RequestMapping("setConfirmDay")
+    public Result setConfirmDay(@RequestHeader("day") Integer day){
+        return projectService.setConfirmDay(day);
+    }
+
     @RequestMapping("declareLog")
     public Result declareLog(@UserId Integer userId, @RequestBody Map<String,Object> map){
         return projectService.declareLog(userId,map);

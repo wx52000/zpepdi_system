@@ -140,6 +140,10 @@ public interface ProjectDao {
 
     void setDeclareDay(Integer day);
 
+    Integer confirmDay();
+
+    void setConfirmDay(Integer day);
+
     List<Map<String,Object>> declareLog(@Param("userId") Integer userId,@Param("map") Map<String,Object> map );
 
     List<Map<String,Object>> declareLogList(@Param("id") Integer id,

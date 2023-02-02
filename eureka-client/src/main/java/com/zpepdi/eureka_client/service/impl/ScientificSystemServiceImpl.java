@@ -95,8 +95,8 @@ public class ScientificSystemServiceImpl implements ScientificSystemService {
     @Override
     public Result fdDataTransmit(){
         Path path = Paths.get(this.getPath());
-//        String date = DateUtils.getDateMonth();
-        String date = "2022-12";
+        String date = DateUtils.getDateMonth();
+//        String date = "2023-01";
         File file = new File(path +"\\" + date +"工时.zip");
         if (!scientificSystemDao.queryIsCreate(DateUtils.getDateMonth()) || !file.exists()){
 //            createScientificProduce(DateUtils.getDateMonth(new Date().getTime() - 2592000));

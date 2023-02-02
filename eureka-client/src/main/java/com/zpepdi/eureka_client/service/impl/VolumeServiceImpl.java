@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.excel.PlanDateListener;
 import com.zpepdi.eureka_client.tools.DateUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -289,6 +290,37 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
+    public Result tecVolumeRecordByDate(Map<String, Object> map) {
+        return Result.ok(volumeDao.tecVolumeRecordByDate(map));
+    }
+
+    @Override
+    public Result tecProgressByProjectId(Integer userId,Map<String, Object> map) {
+        map.put("userId",userId);
+        return Result.ok(volumeDao.tecProgressByProjectId(map));
+    }
+
+    @Override
+    public Result tecVolumeCompleteByDateByProjectId(Map<String, Object> map) {
+        return Result.ok(volumeDao.tecVolumeCompleteByDateByProjectId(map));
+    }
+
+    @Override
+    public Result tecVolumeInCompleteByDateByProjectId(Map<String, Object> map) {
+        return Result.ok(volumeDao.tecVolumeInCompleteByDateByProjectId(map));
+    }
+
+    @Override
+    public Result tecVolumePlanCompleteByDateByProjectId(Map<String, Object> map) {
+        return Result.ok(volumeDao.tecVolumePlanCompleteByDateByProjectId(map));
+    }
+
+    @Override
+    public Result tecVolumeRecordByDateByProjectId(Map<String, Object> map) {
+        return Result.ok(volumeDao.tecVolumeRecordByDateByProjectId(map));
+    }
+
+    @Override
     public Result setPlanDate(MultipartFile file) {
         try {
             InputStream inputStream = file.getInputStream();
@@ -332,5 +364,35 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public Result queryRecently10Day(Integer id) {
         return Result.ok(volumeDao.queryRecently10Day(id));
+    }
+
+    @Override
+    public Result setPlanConfirm(Integer userId, Map<String,Object> map) {
+        volumeDao.setPlanConfirm(userId,map);
+        return Result.ok();
+    }
+
+    @Override
+    public Result updatePlanedPublicDate() {
+        Map<String,Object> map = new HashMap<>();
+        Calendar calendar = Calendar.getInstance();
+        //获取当前月最后一天
+        calendar.add(Calendar.MONTH,1);
+        calendar.set(Calendar.DAY_OF_MONTH,0);
+//        calendar.add(Calendar.DAY_OF_MONTH,-1);
+        map.put("year",calendar.get(Calendar.YEAR));
+        map.put("month",calendar.get(Calendar.MONTH)+1);
+        String start = DateUtils.dateToString(calendar.getTime(),"yyyy-MM-01");
+        String end = DateUtils.dateToString(calendar.getTime());
+        //获取下月最后一天
+        calendar.add(Calendar.MONTH,2);
+        calendar.set(Calendar.DAY_OF_MONTH,0);
+        String date = DateUtils.dateToString(calendar.getTime());
+        map.put("start",start);
+        map.put("end",end);
+        map.put("date",date);
+        volumeDao.updatePlanedPublicDate(map);
+        volumeDao.setPlanRecord(map);
+        return Result.ok();
     }
 }

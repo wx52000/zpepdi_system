@@ -62,6 +62,17 @@ public interface VolumeService {
 
     Result tecVolumePlanCompleteByDate(Map<String,Object> map);
 
+    Result tecVolumeRecordByDate(Map<String,Object> map);
+
+    Result tecProgressByProjectId(Integer userId, Map<String,Object> map);
+
+    Result tecVolumeCompleteByDateByProjectId(Map<String,Object> map);
+
+    Result tecVolumeInCompleteByDateByProjectId(Map<String,Object> map);
+
+    Result tecVolumePlanCompleteByDateByProjectId(Map<String,Object> map);
+
+    Result tecVolumeRecordByDateByProjectId(Map<String,Object> map);
 
     Result setPlanDate(MultipartFile file);
 
@@ -76,4 +87,10 @@ public interface VolumeService {
     Result setSinglePlanDate(Map<String,Object> map);
 
     Result queryRecently10Day(Integer userId);
+
+    Result setPlanConfirm(Integer userId, Map<String,Object> map);
+
+    Result updatePlanedPublicDate();
+
+
 }

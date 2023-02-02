@@ -497,6 +497,11 @@
         set `day` = #{day}
         where id = 1
     </update>
+    <update id="setConfirmDay">
+        update confirm_day
+        set `day` = #{day}
+        where id = 1
+    </update>
     <update id="setShow">
         insert into project_show(project_id, user_id, `show`, `auth`)
         values (#{map.id}, #{id}, #{map.show}, 0) on duplicate key
@@ -1314,7 +1319,8 @@
                submit,
                submit_date,
                IF
-                   (p.volume_tec IS NOT NULL, TRUE, FALSE) AS principalRole
+                   (p.volume_tec IS NOT NULL, TRUE, FALSE) AS principalRole,
+               plan_confirm
         FROM (
                  SELECT project_id,
                         id,
@@ -1354,7 +1360,8 @@
                         1       AS spider,
                         `check`,
                         submit,
-                        submit_date
+                        submit_date,
+                        plan_confirm
                  FROM (
                           SELECT DISTINCT v.project_id,
                                           v.id                                                   AS id,
@@ -1404,7 +1411,8 @@
                                           w.type,
                                           w.`check`,
                                           w.submit,
-                                          w.submit_date
+                                          w.submit_date,
+                                          v.plan_confirm
                           FROM volume v
                                    LEFT JOIN volume_workday w ON v.id = w.volume_id
                                    LEFT JOIN volume_workday_high h ON v.id = h.volume_id
@@ -1461,7 +1469,8 @@
                                           w.type,
                                           w.`check`,
                                           w.submit,
-                                          w.submit_date
+                                          w.submit_date,
+                                          v.plan_confirm
                           FROM volume v
                                    LEFT JOIN volume_workday w ON v.id = w.volume_id
                                    LEFT JOIN volume_workday_high h ON v.id = h.volume_id
@@ -1523,7 +1532,8 @@
                         0                                                                                AS spider,
                         1                                                                                AS `check`,
                         t.submit,
-                        t.submit_date
+                        t.submit_date,
+                        7 as plan_confirm
                  FROM `user` u,
                       project_task t
                           LEFT JOIN task_advance w ON t.id = w.task_id
@@ -1585,7 +1595,8 @@
                         0                                                                                AS spider,
                         1                                                                                AS `check`,
                         t.submit,
-                        t.submit_date
+                        t.submit_date,
+                        7 as plan_confirm
                  FROM `user` u,
                       project_task t
                           LEFT JOIN task_advance w ON t.id = w.task_id
@@ -1630,7 +1641,8 @@
                         0                                                      AS spider,
                         1                                                      AS `check`,
                         1                                                      AS submit,
-                        t.`date`                                               as submit_date
+                        t.`date`                                               as submit_date,
+                        7 as plan_confirm
                  FROM `user` u,
                       project p,
                       project_workday_manage t
@@ -1682,7 +1694,8 @@
                `check`,
                submit,
                submit_date,
-               principalRole
+               principalRole,
+               plan_confirm
         FROM (
                  SELECT project_id,
                         id,
@@ -1723,7 +1736,8 @@
                         `check`,
                         submit,
                         submit_date,
-                        principalRole
+                        principalRole,
+                        plan_confirm
                  FROM (
                           SELECT DISTINCT v.project_id,
                                           v.id                                                   AS id,
@@ -1774,7 +1788,8 @@
                                           w.`check`,
                                           w.submit,
                                           w.submit_date,
-                                          TRUE                                                   AS principalRole
+                                          TRUE                                                   AS principalRole,
+                                          v.plan_confirm
                           FROM volume v
                                    LEFT JOIN volume_workday w ON v.id = w.volume_id
                                    LEFT JOIN volume_workday_high h ON v.id = h.volume_id
@@ -1837,7 +1852,8 @@
                                           w.`check`,
                                           w.submit,
                                           w.submit_date,
-                                          FALSE                                                  AS principalRole
+                                          FALSE                                                  AS principalRole,
+                                          v.plan_confirm
                           FROM volume v
                                    LEFT JOIN volume_user vu ON vu.volume_id = v.id
                                    LEFT JOIN volume_workday w ON v.id = w.volume_id
@@ -1905,7 +1921,8 @@
                         1                                                                                AS `check`,
                         t.submit,
                         t.submit_date,
-                        TRUE                                                                             AS principalRole
+                        TRUE                                                                             AS principalRole,
+                        7 as plan_confirm
                  FROM `user` u,
                       project_task t
                           LEFT JOIN task_advance w ON t.id = w.task_id
@@ -1973,7 +1990,8 @@
                         1                                                                                AS `check`,
                         t.submit,
                         t.submit_date,
-                        FALSE                                                                            AS principalRole
+                        FALSE                                                                            AS principalRole,
+                        7 as plan_confirm
                  FROM `user` u,
                       project_task t
                           LEFT JOIN task_advance w ON t.id = w.task_id
@@ -2887,6 +2905,11 @@
         from declare_day
         where id = 1
     </select>
+    <select id="confirmDay" resultType="java.lang.Integer">
+        select `day`
+        from confirm_day
+        where id = 1
+    </select>
     <select id="queryTecById" resultMap="queryTecById">
         SELECT
             id,
@@ -3631,19 +3654,22 @@
                IFNULL(inc.incomplete, 0)             AS incompleteZero,
                IFNULL(plan0.num, 0)                  as plan0,
                IFNULL(plan1.num, 0)                  as plan1,
-               p.tec
+               p.tec,
+               p.principalRole
         FROM (
                  SELECT DISTINCT p.id,
                                  p.number,
                                  p.`name`,
                                  p.tec,
-                                 p.mid
+                                 p.mid,
+                                 max(principalRole) as principalRole
                  FROM (
                           SELECT p.id,
                                  p.number,
                                  p.`name`,
                                  IFNULL(m.big_name,v.tec) as tec,
-                                 m.id  as mid
+                                 m.id  as mid,
+                                 0 as principalRole
                           FROM project p,
                                volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                           WHERE p.id = v.project_id
@@ -3667,7 +3693,8 @@
                                  p.number,
                                  p.`name`,
                                  IFNULL(m.big_name,v.tec) as tec,
-                                 m.id  as mid
+                                 m.id  as mid,
+                                 1 as principalRole
                           FROM project p,
                                volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name,
                                workday_tec t,
@@ -3836,6 +3863,7 @@
         v.planned_publication_date,
         v.actual_publication_date,
         v.wfInstId,
+        v.plan_confirm,
         w.workday
         FROM
         `volume` v left join volume_workday w on v.id = w.volume_id
@@ -3871,6 +3899,7 @@
                v.planned_publication_date,
                v.actual_publication_date,
                v.wfInstId,
+               v.plan_confirm,
                w.workday
         FROM `volume` v
                  LEFT JOIN volume_workday w ON v.id = w.volume_id
@@ -3891,6 +3920,7 @@
                v.planned_publication_date,
                v.actual_publication_date,
                v.wfInstId,
+               v.plan_confirm,
                w.workday
         FROM `volume` v
                  LEFT JOIN volume_workday w ON v.id = w.volume_id
@@ -3913,6 +3943,7 @@
         v.planned_publication_date,
         v.actual_publication_date,
         v.wfInstId,
+        v.plan_confirm,
         w.workday
         FROM
         `volume` v left join volume_workday w on v.id = w.volume_id

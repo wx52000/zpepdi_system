@@ -238,7 +238,7 @@
         FROM
             [dbo].[SpecialtyOfProjectEntity]
         WHERE
-            ProjectPhaseCode = '33-FC3033E19S'
+            ProjectPhaseCode = #{number}
           AND ParentDeptName LIKE '发电%'
     </select>
 </mapper>

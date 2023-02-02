@@ -27,15 +27,21 @@
             `wfInstId`,
             `actual_principal`,
             `tips`,
-            `alive`
+            `alive`,
+            plan_confirm
         )
         VALUES <foreach collection="list" item="item" separator=",">
         (#{id}, #{item.RollCode}, #{item.RollName}, #{item.RollID}, #{item.SpecialtyName},
          #{item.DelongDeptName},#{item.state}, #{item.MasterDesignerName}, #{item.MasterEngineerName},
-         #{item.RollOwnerName}, #{item.checker}, #{item.headman}, #{item.PlanStartDate},
-         #{item.FactStartDate}, #{item.PlanToPublishDate}, #{item.ToPublishDate},
-         #{item.PlanDesignedDate}, #{item.FactDesignedDate}, #{item.MutualVerifyDate},
-         #{item.FactOutOfCollegeDate}, 85,#{item.wfInst}, #{item.principal},0, 1)
+         #{item.RollOwnerName}, #{item.checker}, #{item.headman},
+         DATE_FORMAT(#{item.PlanStartDate},'%Y-%m-%d'),
+         DATE_FORMAT(#{item.FactStartDate},'%Y-%m-%d'),
+         DATE_FORMAT(#{item.PlanToPublishDate},'%Y-%m-%d'),
+         DATE_FORMAT(#{item.ToPublishDate},'%Y-%m-%d'),
+         DATE_FORMAT(#{item.PlanDesignedDate},'%Y-%m-%d'),
+         DATE_FORMAT(#{item.FactDesignedDate},'%Y-%m-%d'),
+         DATE_FORMAT(#{item.MutualVerifyDate},'%Y-%m-%d'),
+         DATE_FORMAT(#{item.FactOutOfCollegeDate},'%Y-%m-%d'), 85,#{item.wfInst}, #{item.principal},0, 1,0)
              </foreach>
          on duplicate key update
         `name` = values(`name`),

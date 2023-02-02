@@ -131,6 +131,36 @@ public class VolumeController {
         return volumeService.tecVolumeInCompleteByDate(map);
     }
 
+    @RequestMapping("tecVolumeRecordByDate")
+    public Result tecVolumeRecordByDate(@RequestBody Map<String,Object> map){
+        return volumeService.tecVolumeRecordByDate(map);
+    }
+
+    @RequestMapping("tecProgressByProjectId")
+    public Result tecProgressByProjectId(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return volumeService.tecProgressByProjectId(userId, map);
+    }
+
+    @RequestMapping("tecVolumeCompleteByDateByProjectId")
+    public Result tecVolumeCompleteByDateByProjectId(@RequestBody Map<String,Object> map){
+        return volumeService.tecVolumeCompleteByDateByProjectId(map);
+    }
+
+    @RequestMapping("tecVolumePlanCompleteByDateByProjectId")
+    public Result tecVolumePlanCompleteByDateByProjectId(@RequestBody Map<String,Object> map){
+        return volumeService.tecVolumePlanCompleteByDateByProjectId(map);
+    }
+
+    @RequestMapping("tecVolumeInCompleteByDateByProjectId")
+    public Result tecVolumeInCompleteByDateByProjectId(@RequestBody Map<String,Object> map){
+        return volumeService.tecVolumeInCompleteByDateByProjectId(map);
+    }
+
+    @RequestMapping("tecVolumeRecordByDateByProjectId")
+    public Result tecVolumeRecordByDateByProjectId(@RequestBody Map<String,Object> map){
+        return volumeService.tecVolumeRecordByDateByProjectId(map);
+    }
+
 
     @RequestMapping("setPlanDate")
     public Result setPlanDate(@RequestParam MultipartFile file){
@@ -162,6 +192,11 @@ public class VolumeController {
     @RequestMapping("queryCheckerList")
     public Result queryCheckerList(@RequestHeader("processInstanceId") String processInstanceId){
         return dataTransmissionService.queryCheckerList(processInstanceId);
+    }
+
+    @RequestMapping("setPlanConfirm")
+    public Result setPlanConfirm(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return volumeService.setPlanConfirm(userId,map);
     }
 
 }

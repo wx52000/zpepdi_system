@@ -30,14 +30,12 @@ import java.util.concurrent.Executors;
 public class ScheduledConfig implements SchedulingConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledConfig.class);
-
-    private GradeScoreService gradeScoreService;
-    private GradeTecService gradeTecService;
-    private UserScoreService userScoreService;
-    private TecScoreService tecScoreService;
+    
     private VolumeService volumeService;
     @Autowired
     private DataTransmissionService service;
+    @Autowired
+    private ProjectService projectService;
 
 
     //此处为每月自动更新时间
@@ -57,18 +55,24 @@ public class ScheduledConfig implements SchedulingConfigurer {
 //    public void createScientificProduce(){
 //        scientificSystemService.createScientificProduce(DateUtils.getDateMonth());
 //    }
-
-
+//
+//
 //    @Scheduled(cron = "0 0 0/2 * * ?")
-//    @Async("taskExecutor")
+//
 ////    @PostConstruct
 //    public void dataTransmission(){
 //        service.dataTransmissionService();
 //    }
 //
 //    @Scheduled(cron = "0 0 0 * * ?")
+//    @Async("taskExecutor")
 //    public void queryIncomeInformation(){
 //        service.queryIncomeInformation();
+//        Calendar calendar = Calendar.getInstance();
+//        int day = calendar.get(Calendar.DAY_OF_MONTH);
+//        if (projectService.confirmDay().equals(day)) {
+//            volumeService.updatePlanedPublicDate();
+//        }
 //    }
 
 

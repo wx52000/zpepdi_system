@@ -107,6 +107,10 @@ public interface ProjectService {
 
     Result setDeclareDay(Integer day);
 
+    Object confirmDay();
+
+    Result setConfirmDay(Integer day);
+
     Result declareLog(Integer userId, Map<String,Object> map);
 
     Result notSubmitByManage(Integer id);

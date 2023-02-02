@@ -65,12 +65,23 @@ public interface VolumeDao {
 
     List<Map<String,Object>> manageTecProgress(Map<String, Object> map);
 
-
     List<Map<String,Object>> tecVolumeCompleteByDate(Map<String, Object> map);
 
     List<Map<String,Object>> tecVolumePlanCompleteByDate(Map<String,Object> map);
 
     List<Map<String,Object>> tecVolumeInCompleteByDate(Map<String, Object> map);
+
+    List<Map<String,Object>> tecVolumeRecordByDate(Map<String,Object> map);
+
+    List<Map<String,Object>> tecProgressByProjectId(Map<String, Object> map);
+
+    List<Map<String,Object>> tecVolumeCompleteByDateByProjectId(Map<String, Object> map);
+
+    List<Map<String,Object>> tecVolumePlanCompleteByDateByProjectId(Map<String,Object> map);
+
+    List<Map<String,Object>> tecVolumeInCompleteByDateByProjectId(Map<String, Object> map);
+
+    List<Map<String,Object>> tecVolumeRecordByDateByProjectId(Map<String,Object> map);
 
     void setPlanDate(List<Map<String,Object>> list);
 
@@ -83,4 +94,10 @@ public interface VolumeDao {
     void setSinglePlanDate(Map<String,Object> map);
 
     List<Map<String,Object>> queryRecently10Day(Integer userId);
+
+    void setPlanConfirm(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
+
+    void updatePlanedPublicDate(Map<String,Object> map);
+
+    void setPlanRecord(Map<String,Object> map);
 }
