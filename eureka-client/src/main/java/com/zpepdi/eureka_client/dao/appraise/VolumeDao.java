@@ -100,4 +100,6 @@ public interface VolumeDao {
     void updatePlanedPublicDate(Map<String,Object> map);
 
     void setPlanRecord(Map<String,Object> map);
+
+    void resetPlanDate(Map<String,Object> map);
 }

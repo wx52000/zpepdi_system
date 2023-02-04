@@ -395,4 +395,23 @@ public class VolumeServiceImpl implements VolumeService {
         volumeDao.setPlanRecord(map);
         return Result.ok();
     }
+
+    @Override
+    public Result resetPlanDate() {
+        Map<String,Object> map = new HashMap<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH,1);
+        calendar.set(Calendar.DAY_OF_MONTH,0);
+//        获取本月最后一天
+        String date = DateUtils.dateToString(calendar.getTime());
+        calendar.set(Calendar.DAY_OF_MONTH,0);
+//        获取上月最后一天和第一天
+        String start = DateUtils.dateToString(calendar.getTime(),"yyyy-MM-01");
+        String end = DateUtils.dateToString(calendar.getTime());
+        map.put("start",start);
+        map.put("end",end);
+        map.put("date",date);
+        volumeDao.resetPlanDate(map);
+        return Result.ok();
+    }
 }

@@ -92,5 +92,6 @@ public interface VolumeService {
 
     Result updatePlanedPublicDate();
 
+    Result resetPlanDate();
 
 }

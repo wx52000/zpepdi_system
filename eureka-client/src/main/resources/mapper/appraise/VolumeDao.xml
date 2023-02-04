@@ -344,6 +344,13 @@
           and planned_publication_date &lt;= #{end}
           and plan_confirm = 1
     </update>
+    <update id="resetPlanDate">
+        update volume
+        set planned_publication_date = #{date}
+        where planned_publication_date &gt;= #{start}
+        and planned_publication_date &lt;= #{end}
+        and `state` in ('尚未确定','尚未开展','正在设计','正在校审')
+    </update>
     <delete id="del">
         DELETE volume, volume_workday, volume_workday_high
         FROM
@@ -2467,7 +2474,7 @@
         v.state,
         v.start_date,
         v.actual_publication_date,
-        v.wfInstId
+        v.wfInstId,
         w.workday
         FROM
         project p,
@@ -2991,7 +2998,7 @@
             GROUP BY
                 m.big_name,
                 `month`
-        ) as record on record.tec = m.big_name and record.`month` = m.`month`
+        ) as record on record.tec = m.tec and record.`month` = m.`month`
         LEFT JOIN (
         SELECT
         COUNT(*) AS incomplete,
@@ -3272,6 +3279,21 @@
         LEFT JOIN (
             SELECT
                 COUNT(*) AS num,
+                sum( w.workday ) AS workday,
+                v.tec AS tec
+            FROM
+                volume v
+                    LEFT JOIN volume_workday w ON w.volume_id = v.id
+            WHERE
+                v.project_id = #{id}
+              AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+              AND v.number LIKE "%+%"
+            GROUP BY
+                v.tec
+        ) AS s ON s.tec = m.tec
+        LEFT JOIN (
+            SELECT
+                COUNT(*) AS num,
                 SUM( w.workday ) AS workday,
                 m.big_name AS tec,
                 m.did,
@@ -3296,7 +3318,7 @@
               AND RIGHT ( p.number, 1 ) = "s"
             GROUP BY
                 m.big_name,
-                DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+                DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.tec = plan.tec
             AND plan.`month` = m.`month`
         left join (
             SELECT
@@ -3316,7 +3338,7 @@
             GROUP BY
                 m.big_name,
                 `month`
-        ) as record on record.tec = m.big_name and record.`month` = m.`month`
+        ) as record on record.tec = m.tec and record.`month` = m.`month`
         LEFT JOIN (
         SELECT
         COUNT(*) AS incomplete,
