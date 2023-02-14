@@ -1,0 +1,46 @@
+#myIp : localhost
+spring:
+  application:
+    name: qj_airhammer
+  mvc:
+    servlet:
+      load-on-startup: 1
+  servlet:
+    multipart:
+      enabled : true
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+
+
+  aop:
+    auto: true
+    proxy-target-class: true
+
+server:
+  port: 9009
+  servlet:
+    encoding:
+      enabled: true
+      force: true
+      charset: UTF-8
+    session:
+      timeout: 3000m
+
+  tomcat:
+    uri-encoding: UTF-8
+    max-http-form-post-size: -1
+
+
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    # 注册到Eureka的注册中心
+    register-with-eureka: true
+    # 获取注册实例列表
+    fetch-registry: true
+    service-url:
+      # 配置注册中心地址
+      defaultZone: http://localhost:9000/eureka/
