@@ -330,15 +330,17 @@
         where id = #{map.id}
     </update>
     <update id="updatePlanedPublicDate">
-        update volume
-        set planned_publication_date = #{date}, entry_plan_time = now()
-        where planned_publication_date &gt;= #{start}
-        and planned_publication_date &lt;= #{end}
-        and plan_confirm = 0
+    UPDATE volume v, major_contrast_technology m
+    SET v.planned_publication_date = #{date}, v.entry_plan_time = now()
+    WHERE
+        v.planned_publication_date &gt;= #{start}
+    AND v.planned_publication_date &lt;= #{end}
+    AND v.plan_confirm = 0
+    AND m.small_name = v.tec
     </update>
     <update id="setPlanRecord">
         insert into volume_plan_record(project_id, volume_id, tec, `number`, planned_publication_date, `year`, `month`)
-        select v.project_id, v.id, v.tec, v.number, v.planned_publication_date, #{year}, #{month}
+        select project_id, id, tec, number, planned_publication_date, #{year}, #{month}
         from volume
         where planned_publication_date &gt;= #{start}
           and planned_publication_date &lt;= #{end}
@@ -2616,7 +2618,7 @@
         v.checker,
         v.state,
         v.start_date,
-        vp.planned_publication_date,
+        Cast(vp.planned_publication_date as char(10)) as planned_publication_date,
         v.wfInstId,
         w.workday
         FROM
