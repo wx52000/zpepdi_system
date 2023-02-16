@@ -1,0 +1,38 @@
+
+1,新增表sw_architecture_b
+CREATE TABLE `sw_architecture_b`  (
+  `ID` int NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `architecture_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `architecture_type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `maxb` double NULL DEFAULT NULL,
+  `minb` double NULL DEFAULT NULL,
+  PRIMARY KEY (`ID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+2,新增表sw_variation_k
+CREATE TABLE `sw_variation_k`  (
+  `ID` int NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `TYPE` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '住宅类别',
+  `TYPE_CN` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '住宅类别编号',
+  `quota` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '热水用水定额[L人（床）·d]',
+  `pmax` int NULL DEFAULT NULL COMMENT '最大使用人（床）数 ',
+  `pmin` int NULL DEFAULT NULL COMMENT '最小使用人（床）数 ',
+  `kmax` double NULL DEFAULT NULL COMMENT '最大k',
+  `kmin` double NULL DEFAULT NULL COMMENT '最小k',
+  PRIMARY KEY (`ID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+3,新增表user_unit_config
+CREATE TABLE `user_unit_config`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `userconfig` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+SET FOREIGN_KEY_CHECKS = 1;
