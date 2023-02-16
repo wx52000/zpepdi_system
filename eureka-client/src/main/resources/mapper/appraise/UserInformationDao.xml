@@ -99,6 +99,7 @@
             u.id = i.user_id
           AND u.did = d.id
           AND u.tid = t.id
+          and u.alive = 1
         ORDER BY
             d.id,
             u.username,

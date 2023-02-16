@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="eureka-client" />
         <module name="test" />
+        <module name="qj_airhammer" />
         <module name="contract-charge" />
         <module name="api-gateway" />
         <module name="feign-service" />

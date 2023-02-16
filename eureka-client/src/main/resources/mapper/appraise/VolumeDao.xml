@@ -1708,7 +1708,7 @@
         tec,
         `type`
         ORDER BY
-        mid desc
+        mid desc, `type`
     </select>
     <select id="manageTecProgress" resultType="java.util.Map">
         SELECT
@@ -2989,14 +2989,12 @@
                 m.did,
                 `month`
             FROM
-                project p,
                 major_contrast_technology m,
                 volume_plan_record vp
             WHERE
-                p.id = vp.project_id
-              AND vp.tec = m.small_name
-              AND RIGHT ( p.number, 1 ) = "s"
-              AND vp.number NOT LIKE "%+%"
+               vp.tec = m.small_name
+            And vp.project_id = #{id}
+            AND vp.number NOT LIKE "%+%"
             GROUP BY
                 m.big_name,
                 `month`
@@ -3301,7 +3299,6 @@
                 m.did,
                 DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
             FROM
-                project p,
                 major_contrast_technology m,
                 (SELECT
                      v.id,
@@ -3315,9 +3312,8 @@
                 ) as v
                     LEFT JOIN volume_workday w ON w.volume_id = v.id
             WHERE
-                p.id = v.project_id
-              AND v.tec = m.small_name
-              AND RIGHT ( p.number, 1 ) = "s"
+               v.tec = m.small_name
+              AND v.project_id = #{id}
             GROUP BY
                 m.big_name,
                 DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.tec = plan.tec
@@ -3329,13 +3325,11 @@
                 m.did,
                 `month`
             FROM
-                project p,
                 major_contrast_technology m,
                 volume_plan_record vp
             WHERE
-                p.id = vp.project_id
-              AND vp.tec = m.small_name
-              AND RIGHT ( p.number, 1 ) = "s"
+                vp.tec = m.small_name
+              And vp.project_id = #{id}
               AND vp.number LIKE "%+%"
             GROUP BY
                 m.big_name,
@@ -3391,7 +3385,7 @@
         IFNULL(m.big_name,tab.tec),
         `type`
         ORDER BY
-        m.id desc
+        m.id desc,tab.tec,`type`
     </select>
     <select id="tecVolumeCompleteByDateByProjectId" resultType="java.util.Map">
         SELECT
@@ -3551,8 +3545,8 @@
         v.principal AS principal,
         v.checker,
         v.state,
-        v.start_date,
-        vp.planned_publication_date,
+        cast(v.start_date as char(10)) as start_date,
+        cast(vp.planned_publication_date as char(10)) as planned_publication_date,
         v.wfInstId,
         w.workday
         FROM
@@ -3561,7 +3555,7 @@
         `volume` v
         LEFT JOIN volume_workday w ON v.id = w.volume_id
         WHERE
-        RIGHT vp.project_id = #{id}
+         vp.project_id = #{id}
         AND m.small_name = v.tec
         AND m.big_name = #{tec}
         <if test = "type == 0" >

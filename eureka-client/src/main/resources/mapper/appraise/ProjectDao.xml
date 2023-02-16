@@ -3651,6 +3651,7 @@
                IFNULL(n1.num, 0)                     AS upNowComplete,
                IFNULL(a.num, 0)                      AS allZero,
                IFNULL(c.num, 0)                      AS completeZero,
+               IFNULL(upc.num, 0)                      AS completeUp,
                IFNULL(inc.incomplete, 0)             AS incompleteZero,
                IFNULL(plan0.num, 0)                  as plan0,
                IFNULL(plan1.num, 0)                  as plan1,
@@ -3817,6 +3818,25 @@
                  ) AS n
             GROUP BY tec
         ) AS c ON p.tec = c.tec
+        LEFT JOIN (
+            SELECT SUM(
+                           IFNULL(num, 0)) AS num,
+                   tec
+            FROM (
+                     SELECT IFNULL(COUNT(v.id), 0) AS num,
+                            IFNULL(m.big_name,v.tec) as tec,
+                            m.id  as mid
+                     FROM volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
+                     WHERE v.project_id = #{id}
+
+                       AND v.number LIKE "%+%"
+                       AND actual_publication_date != ''
+			AND actual_publication_date IS NOT NULL
+                     GROUP BY
+                         v.tec
+                 ) AS n
+            GROUP BY tec
+        ) AS upc ON p.tec = upc.tec
                  LEFT JOIN (
             SELECT SUM(num) AS incomplete,
                    tec
