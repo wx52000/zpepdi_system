@@ -1,10 +1,11 @@
-myIp : 10.136.238.23
+#myIp : 10.136.238.23
+myIp : 10.136.238.28
 #myIp : 127.0.0.1
 server:
   port: 9111
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${myIp}:3306/appraise?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${myIp}:3306/page_definition?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: 7499
