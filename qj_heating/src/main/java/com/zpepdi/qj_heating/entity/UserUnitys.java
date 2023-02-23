@@ -1,7 +1,7 @@
 package com.zpepdi.qj_heating.entity;
 
 
-public class UserUnit {
+public class UserUnitys {
 
     private Integer id;
 
@@ -9,7 +9,7 @@ public class UserUnit {
 
     private String name;
 
-    private String userconfig;
+    private String userys;
 
     public Integer getId() {
         return id;
@@ -35,11 +35,11 @@ public class UserUnit {
         this.name = name;
     }
 
-    public String getUserconfig() {
-        return userconfig;
+    public String getUserys() {
+        return userys;
     }
 
-    public void setUserconfig(String userconfig) {
-        this.userconfig = userconfig;
+    public void setUserys(String userys) {
+        this.userys = userys;
     }
 }
