@@ -237,6 +237,7 @@
             where project_id = #{map.projectId}
               and tec=#{map.tec}
             and plan_month = #{map.planMonth}
+            limit 1
         </selectKey>
         INSERT INTO check_plan ( project_id, tec, plan_month, workday_month, `handler`,
                                 handle_time,`check` )
