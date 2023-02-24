@@ -93,6 +93,10 @@ public interface VolumeDao {
 
     void setSinglePlanDate(Map<String,Object> map);
 
+
+    void setSingleRemark(Map<String,Object> map);
+
+
     List<Map<String,Object>> queryRecently10Day(Integer userId);
 
     void setPlanConfirm(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);

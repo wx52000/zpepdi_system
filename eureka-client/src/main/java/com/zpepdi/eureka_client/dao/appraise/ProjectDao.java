@@ -166,4 +166,11 @@ public interface ProjectDao {
 
     List<Map<String,Object>> progressIncompleteVolume(Map<String,Object> map);
 
+
+    List<Map<String,Object>> drawlineInfo(Map<String,Object> map);
+
+
+    List<Map<String,Object>> drawtotal(Map<String,Object> map);
+    List<Map<String,Object>> getdateInfo(Map<String,Object> map);
+
 }

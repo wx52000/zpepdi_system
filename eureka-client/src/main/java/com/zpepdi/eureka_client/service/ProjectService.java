@@ -131,4 +131,11 @@ public interface ProjectService {
 
     Result progressIncompleteVolume(Map<String,Object> map);
 
+
+    Result drawlineInfo(Integer userId,Map<String,Object> map);
+
+    Result drawtotal(Map<String,Object> map);
+
+    Result getdateInfo(Map<String,Object> map);
+
 }

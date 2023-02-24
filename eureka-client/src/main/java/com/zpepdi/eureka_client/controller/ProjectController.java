@@ -344,4 +344,19 @@ public class ProjectController {
     }
 
 
+    @RequestMapping("drawlineinfo")
+    public Result drawlineInfo(@UserId Integer userId,@RequestBody Map<String, Object> map) {
+        return projectService.drawlineInfo(userId,map);
+    }
+
+    @RequestMapping("drawtotal")
+    public Result drawtotal(@RequestBody Map<String, Object> map) {
+        return projectService.drawtotal(map);
+    }
+
+    @RequestMapping("getdateinfo")
+    public Result getdateinfo(@RequestBody Map<String, Object> map) {return projectService.getdateInfo(map);
+    }
+
+
 }

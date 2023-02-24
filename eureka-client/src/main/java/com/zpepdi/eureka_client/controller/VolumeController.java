@@ -184,6 +184,10 @@ public class VolumeController {
         return volumeService.setSinglePlanDate(map);
     }
 
+    @RequestMapping("setSingleRemark")
+    public Result setSingleRemark(@RequestBody Map<String,Object> map){
+        return volumeService.setSingleRemark(map);
+    }
     @RequestMapping("queryRecently10Day")
     public Result queryRecently10Day(@UserId Integer id){
         return volumeService.queryRecently10Day(id);

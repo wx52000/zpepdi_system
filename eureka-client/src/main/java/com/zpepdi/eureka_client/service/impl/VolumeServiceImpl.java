@@ -361,6 +361,13 @@ public class VolumeServiceImpl implements VolumeService {
         return Result.ok();
     }
 
+
+    @Override
+    public Result setSingleRemark(Map<String, Object> map) {
+        volumeDao.setSingleRemark(map);
+        return Result.ok();
+    }
+
     @Override
     public Result queryRecently10Day(Integer id) {
         return Result.ok(volumeDao.queryRecently10Day(id));

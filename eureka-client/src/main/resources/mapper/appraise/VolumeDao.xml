@@ -351,6 +351,13 @@
             entry_plan_time = now()
         where id = #{id}
     </update>
+
+    <update id="setSingleRemark">
+        update volume
+        set remark = #{remark}
+        where id = #{id}
+    </update>
+
     <update id="setPlanConfirm">
         update volume
         set plan_confirm = #{map.confirm}, confirm_user = #{userId}, confirm_time = now()

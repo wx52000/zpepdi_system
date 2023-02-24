@@ -3952,7 +3952,8 @@
         v.actual_publication_date,
         v.wfInstId,
         v.plan_confirm,
-        w.workday
+        w.workday,
+        v.remark
         FROM
         `volume` v left join volume_workday w on v.id = w.volume_id
         WHERE
@@ -4081,5 +4082,314 @@
           and grade = #{grade}
     </select>
 
+
+    <select id="drawlineInfo" resultType="java.util.Map">
+        SELECT
+        IFNULL( n0.num, 0 ) + IFNULL( n1.num, 0 ) AS allNowComplete,
+        IFNULL( n0.num, 0 ) AS zeroNowComplete,
+        IFNULL( n1.num, 0 ) AS upNowComplete,
+        IFNULL( plan0.num, 0 ) AS plan0,
+        IFNULL( plan1.num, 0 ) AS plan1,
+        alldate as date
+        FROM
+        JSON_TABLE (
+        #{datestring},
+        '$[*]' COLUMNS ( `alldate` VARCHAR ( 40 ) PATH '$' )) AS jt
+        LEFT JOIN (
+        SELECT
+        SUM(
+        IFNULL( num, 0 )) AS num,
+        tec,
+        date
+        FROM
+        (
+        SELECT
+        IFNULL( COUNT( v.id ), 0 ) AS num,
+        tec,
+        DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+        FROM
+        volume v
+        LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
+        WHERE
+        v.project_id = #{id}
+        AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name = #{tec} UNION SELECT #{tec} AS tec )
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )>= #{startMonth}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )&lt;= #{endMonth}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        DATE_FORMAT( v.actual_publication_date, '%Y-%m' ),
+        tec
+        ) AS n
+        GROUP BY
+        tec,
+        date
+        ) AS n0 ON n0.date = jt.alldate
+        LEFT JOIN (
+        SELECT
+        SUM(
+        IFNULL( num, 0 )) AS num,
+        tec,
+        date
+        FROM
+        (
+        SELECT
+        IFNULL( COUNT( v.id ), 0 ) AS num,
+        tec,
+        DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+        FROM
+        volume v
+        WHERE
+        v.project_id = #{id}
+        AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name = #{tec} UNION SELECT #{tec} AS tec )
+        <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )>= #{startMonth}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )&lt;= #{endMonth}
+        </if>
+        AND v.number LIKE "%+%"
+        GROUP BY
+        v.tec,
+        date
+        ) AS n
+        GROUP BY
+        tec,
+        date
+        ) AS n1 ON n1.date = jt.alldate
+        LEFT JOIN (
+        SELECT
+        SUM(
+        IFNULL( num, 0 )) AS num,
+        tec,
+        date
+        FROM
+        (
+        SELECT
+        IFNULL( COUNT( v.id ), 0 ) AS num,
+
+        tec,
+        DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) AS date
+        FROM
+        volume v
+        WHERE
+        v.project_id = #{id}
+        AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name = #{tec} UNION SELECT #{tec} AS tec )
+        <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+        AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) >= #{startMonth}
+        AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) &lt;= #{endMonth}
+        </if>
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        v.tec,
+        date
+        ) AS n
+        GROUP BY
+        tec,
+        date
+        ) AS plan0 ON plan0.date = jt.alldate
+        LEFT JOIN (
+        SELECT
+        SUM(
+        IFNULL( num, 0 )) AS num,
+        tec,
+        date
+        FROM
+        (
+        SELECT
+        IFNULL( COUNT( v.id ), 0 ) AS num,
+        IFNULL( m.big_name, v.tec ) AS tec,
+        m.id AS mid,
+        DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) AS date
+        FROM
+        volume v
+        LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
+        WHERE
+        v.project_id = #{id}
+        AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name = #{tec} UNION SELECT #{tec} AS tec )
+        <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+        AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) >= #{startMonth}
+        AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) &lt;= #{endMonth}
+        </if>
+        AND v.number LIKE "%+%"
+        GROUP BY
+        v.tec,
+        date
+        ) AS n
+        GROUP BY
+        tec,
+        date
+        ) AS plan1 ON plan1.date = jt.alldate
+    </select>
+    <select id="drawtotal" resultType="java.util.Map">
+        select
+        sum( allNowComplete ) as allNowComplete,
+        sum( zeroNowComplete ) as zeroNowComplete,
+        sum( upNowComplete ) as upNowComplete,
+        sum( plan0 ) as plan0,
+        sum( plan1 ) AS plan1,
+        date
+        from
+        (<foreach collection="tec" item="item" index="index"
+                 separator="union all">
+            SELECT
+            IFNULL( n0.num, 0 ) + IFNULL( n1.num, 0 ) AS allNowComplete,
+            IFNULL( n0.num, 0 ) AS zeroNowComplete,
+            IFNULL( n1.num, 0 ) AS upNowComplete,
+            IFNULL( plan0.num, 0 ) AS plan0,
+            IFNULL( plan1.num, 0 ) AS plan1,
+            alldate as date
+            FROM
+            JSON_TABLE (
+            #{datestring},
+            '$[*]' COLUMNS ( `alldate` VARCHAR ( 40 ) PATH '$' )) AS jt
+            LEFT JOIN (
+            SELECT
+            SUM(
+            IFNULL( num, 0 )) AS num,
+            tec,
+            date
+            FROM
+            (
+            SELECT
+            IFNULL( COUNT( v.id ), 0 ) AS num,
+            tec,
+            DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+            FROM
+            volume v
+            LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
+            WHERE
+            v.project_id = #{id}
+
+            AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name =
+            #{item}
+            UNION SELECT
+            #{item}
+            AS tec
+            )
+            AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )>= #{startMonth}
+            AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )&lt;= #{endMonth}
+            AND v.number NOT LIKE "%+%"
+            GROUP BY
+            DATE_FORMAT( v.actual_publication_date, '%Y-%m' ),
+            tec
+            ) AS n
+            GROUP BY
+            tec,
+            date
+            ) AS n0 ON n0.date = jt.alldate
+            LEFT JOIN (
+            SELECT
+            SUM(
+            IFNULL( num, 0 )) AS num,
+            tec,
+            date
+            FROM
+            (
+            SELECT
+            IFNULL( COUNT( v.id ), 0 ) AS num,
+            tec,
+            DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+            FROM
+            volume v
+            WHERE
+            v.project_id = #{id}
+            AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name =
+            #{item}
+            UNION SELECT
+            #{item}
+                as tec)
+            <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+                AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )>= #{startMonth}
+                AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) &lt;= #{endMonth}
+            </if>
+            AND v.number LIKE "%+%"
+            GROUP BY
+            v.tec,
+            date
+            ) AS n
+            GROUP BY
+            tec,
+            date
+            ) AS n1 ON n1.date = jt.alldate
+            LEFT JOIN (
+            SELECT
+            SUM(
+            IFNULL( num, 0 )) AS num,
+            tec,
+            date
+            FROM
+            (
+            SELECT
+            IFNULL( COUNT( v.id ), 0 ) AS num,
+            tec,
+            DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) AS date
+            FROM
+            volume v
+            WHERE
+            v.project_id = #{id}
+            AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name =
+            #{item}
+            UNION SELECT
+            #{item}
+            AS tec  )
+            <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+                AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) >= #{startMonth}
+                AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' )  &lt;= #{endMonth}
+            </if>
+            AND v.number NOT LIKE "%+%"
+            GROUP BY
+            v.tec,
+            date
+            ) AS n
+            GROUP BY
+            tec,
+            date
+            ) AS plan0 ON plan0.date = jt.alldate
+            LEFT JOIN (
+            SELECT
+            SUM(
+            IFNULL( num, 0 )) AS num,
+            tec,
+            date
+            FROM
+            (
+            SELECT
+            IFNULL( COUNT( v.id ), 0 ) AS num,
+            IFNULL( m.big_name, v.tec ) AS tec,
+            m.id AS mid,
+            DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) AS date
+            FROM
+            volume v
+            LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
+            WHERE
+            v.project_id = #{id}
+            AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name =
+            #{item}
+            UNION SELECT
+           #{item}
+            AS tec)
+            <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+                AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) >= #{startMonth}
+                AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) &lt;= #{endMonth}
+            </if>
+            AND v.number LIKE "%+%"
+            GROUP BY
+            v.tec,
+            date
+            ) AS n
+            GROUP BY
+            tec,
+            date
+            ) AS plan1 ON plan1.date = jt.alldate
+        </foreach>)
+as t group by date
+    </select>
+
+    <select id="getdateInfo" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+        FROM
+            volume v
+        where project_id=#{id}
+        order by date
+    </select>
 
 </mapper>
