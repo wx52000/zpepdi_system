@@ -86,6 +86,8 @@ public interface VolumeService {
 
     Result setSinglePlanDate(Map<String,Object> map);
 
+    Result setSingleRemark(Map<String,Object> map);
+
     Result queryRecently10Day(Integer userId);
 
     Result setPlanConfirm(Integer userId, Map<String,Object> map);
