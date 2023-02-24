@@ -10,6 +10,8 @@ public interface ZJEPDIDataTransmissionDao {
 
     List<Map<String,Object>> queryFromZJEPDI(String number);
 
+    Map<String,Object> queryProjectFromZJEPDI(String number);
+
     List<Map<String,Object>> queryIncomeInformation();
 
     List<Map<String,Object>> queryCheckerList(String processInstanceId);

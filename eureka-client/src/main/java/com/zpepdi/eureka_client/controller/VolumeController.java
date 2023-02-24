@@ -199,4 +199,16 @@ public class VolumeController {
         return volumeService.setPlanConfirm(userId,map);
     }
 
+    @RequestMapping("queryConfirmTec")
+    public Result queryConfirmTec(@UserId Integer userId, @RequestHeader("id")Integer id){
+        return volumeService.queryConfirmTec(userId,id);
+    }
+
+    @RequestMapping("sentConfirm")
+    public Result sentConfirm(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return volumeService.sentConfirm(userId,map);
+    }
+
+
+
 }

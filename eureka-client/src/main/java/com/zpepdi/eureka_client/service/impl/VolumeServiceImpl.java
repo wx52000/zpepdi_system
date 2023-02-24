@@ -414,4 +414,29 @@ public class VolumeServiceImpl implements VolumeService {
         volumeDao.resetPlanDate(map);
         return Result.ok();
     }
+
+    @Override
+    public Result queryConfirmTec(Integer userId, Integer id) {
+        return Result.ok(volumeDao.queryConfirmTec(userId,id));
+    }
+
+    @Override
+    public Result sentConfirm(Integer userId, Map<String, Object> map) {
+        Calendar calendar = Calendar.getInstance();
+        map.put("planMonth",DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
+        calendar.add(Calendar.MONTH,-1);
+        map.put("workdayMonth",DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
+        volumeDao.sendConfirm(userId,map);
+        if (map.get("list") != null && !map.get("list").toString().equals("[]")) {
+            volumeDao.sendConfirmVolume(map);
+        }
+        return Result.ok();
+    }
+
+    @Override
+    @Transactional
+    public Result timingConfirmWorkday(String date) {
+        volumeDao.timingConfirmWorkday(date);
+        return Result.ok();
+    }
 }

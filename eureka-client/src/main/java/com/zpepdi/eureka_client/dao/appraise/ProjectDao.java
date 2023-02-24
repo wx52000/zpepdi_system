@@ -39,6 +39,7 @@ public interface ProjectDao {
 
     void renewError(Integer id);
 
+    void resetProjectField(Map<String,Object> map);
     void updState(Integer id);
 
     void spider(Project project);
@@ -47,7 +48,7 @@ public interface ProjectDao {
 
     void sameNameInsert( Map<String,Object> map);
 
-    Map queryById(@Param("userId") Integer userId,@Param("id") Integer id);
+    Map<String,Object> queryById(@Param("userId") Integer userId,@Param("id") Integer id);
 
     List<Map<String,Object>> queryChildren(Integer id);
 

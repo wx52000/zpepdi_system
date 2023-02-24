@@ -283,6 +283,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public Result resetProjectField(Map<String, Object> map) {
+        if (map.get("type").toString().equals("1")){
+            map.put("field","control");
+        }else if (map.get("type").toString().equals("2")){
+            map.put("field","close");
+        }
+        projectDao.resetProjectField(map);
+        return Result.ok();
+    }
+
+    @Override
     public void addNumber(Project project) {
         projectDao.addNumber(project);
     }

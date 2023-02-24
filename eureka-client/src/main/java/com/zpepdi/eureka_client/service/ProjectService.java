@@ -25,6 +25,8 @@ public interface ProjectService {
 
     Result renewProject(Integer id, Map<String,Object> map);
 
+    Result resetProjectField(Map<String,Object> map);
+
     void addNumber(Project project);
 
     void renewError(Integer id);

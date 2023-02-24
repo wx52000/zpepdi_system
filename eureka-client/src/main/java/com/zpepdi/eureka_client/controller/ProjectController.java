@@ -70,6 +70,12 @@ public class ProjectController {
         return Result.ok();
     }
 
+    @RequestMapping("resetProjectField")
+    public Result resetProjectField(@RequestBody Map<String,Object> map){
+        projectService.resetProjectField(map);
+        return Result.ok();
+    }
+
     @RequestMapping("addNumber")
     public Result addNumber(@RequestBody Project project){
       projectService.addNumber(project);

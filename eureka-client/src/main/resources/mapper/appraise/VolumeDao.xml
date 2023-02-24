@@ -209,11 +209,11 @@
         `date` = values(`date`)
     </insert>
     <insert id="setWorkday" parameterType="hashmap">
-        insert into volume_workday(volume_id, `state`, workday,
+        insert into volume_workday(volume_id,`volume_number`, `state`, workday,
                                    designer_workday, checker_workday,
                                    principal_workday,headman_workday,
                                    `type`, `date`, `time`, handler)
-        values (#{map.taskId}, #{map.state}, #{map.workday},
+        values (#{map.taskId},#{map.number}, #{map.state}, #{map.workday},
                 #{map.designer},#{map.checker}, #{map.principal},#{map.headman},
                 #{map.typeId}, #{map.date}, now(), #{id})
         ON DUPLICATE KEY UPDATE
@@ -229,6 +229,33 @@
     <insert id="setWorkdayLog" parameterType="hashmap">
         insert volume_workday_log(user_id, volume_id, `date`, workday, this_grant, `type`, `old`)
         values (#{userId}, #{map.taskId}, now(), #{map.workday}, #{map.thisGrant}, #{map.type}, #{map.old})
+    </insert>
+    <insert id="sendConfirm">
+        <selectKey resultType="java.lang.Integer" keyProperty="map.id" order="AFTER">
+            SELECT id
+            from check_plan
+            where project_id = #{map.projectId}
+              and tec=#{map.tec}
+            and plan_month = #{map.planMonth}
+        </selectKey>
+        INSERT INTO check_plan ( project_id, tec, plan_month, workday_month, `handler`,
+                                handle_time,`check` )
+        VALUES
+            (#{map.projectId}, #{map.tec}, #{map.planMonth}, #{map.workdayMonth}, #{userId},
+             now(),0)
+        on duplicate key update
+        `handler` = values(`handler`),
+        `handle_time` = values(`handle_time`),
+        `check` = values(`check`)
+    </insert>
+    <insert id="sendConfirmVolume">
+        INSERT ignore INTO check_plan_volume (check_plan_id,volume_id,`number`,`name`,`state`,
+                                       designer,checker,principal,plan_publication )
+        VALUES
+            <foreach collection="list" item="item" separator=",">
+             (#{id}, #{item.id}, #{item.number}, #{item.name}, #{item.state},
+            #{item.designer}, #{item.checker},#{item.principal},#{item.plan_publication})
+            </foreach>
     </insert>
     <update id="setWorkdayHigh" parameterType="hashmap">
         insert into volume_ratio(volume_id, principal, designer, checker, headman, `check`, `time`, handler )
@@ -352,6 +379,39 @@
         where planned_publication_date &gt;= #{start}
         and planned_publication_date &lt;= #{end}
         and `state` in ('尚未确定','尚未开展','正在设计','正在校审')
+    </update>
+    <update id="timingConfirmWorkday">
+        UPDATE volume_workday w,
+            volume v,
+            check_plan p
+        SET w.submit = 2
+        WHERE
+            w.volume_id = v.id
+          AND v.project_id = p.project_id
+          AND v.tec = p.tec
+          AND p.plan_month = #{date}
+          AND w.submit_date = p.workday_month
+          AND w.submit = 5;
+        UPDATE volume_workday_high w,
+            volume v,
+            check_plan p
+        SET w.submit = 2
+        WHERE
+            w.volume_id = v.id
+          AND v.project_id = p.project_id
+          AND v.tec = p.tec
+          AND p.plan_month = #{date}
+          AND w.submit_date = p.workday_month
+          AND w.submit = 5;
+        UPDATE project_task t,
+            check_plan p
+        SET t.submit = 2
+        WHERE
+            p.project_id = t.project_id
+          AND t.tec = p.tec
+          AND p.plan_month = #{date}
+          AND t.submit_date = p.workday_month
+          AND t.submit = 5;
     </update>
     <delete id="del">
         DELETE volume, volume_workday, volume_workday_high
@@ -3725,7 +3785,51 @@
           AND v.tec = tr.tec
           AND v.project_id = tr.project_id
     </select>
-
+    <resultMap id="queryConfirmNotCheck" type="map">
+        <result column="id" property="id" ></result>
+        <result column="tec" property="tec" ></result>
+        <collection property="list" javaType="ARRAYLIST"
+                    select="queryConfirmNotCheck" column="id = id, tec = tec">
+        </collection>
+    </resultMap>
+    <select id="queryConfirmTec" resultMap="queryConfirmNotCheck">
+        SELECT
+            t.project_id as id, t.volume_tec as tec
+        FROM
+            workday_tec t,
+            workday_tec_principal tp
+        WHERE t.id = tp.workday_tec_id
+          and t.project_id = #{id}
+          AND tp.user_id = #{userId}
+    </select>
+    <select id="queryConfirmNotCheck" resultType="java.util.Map">
+        SELECT
+            v.id, v.number, v.name, v.state, v.designer, v.checker,
+            v.principal, v.planned_publication_date as plan_publication
+        FROM
+            volume v
+        WHERE
+            project_id = #{id}
+          and tec = #{tec}
+          AND plan_confirm = 1
+          AND `state` IN (
+                          '尚未确定',
+                          '尚未开展',
+                          '正在设计',
+                          '正在校审')
+    </select>
+    <select id="queryConfirmState" resultType="java.lang.Boolean">
+        select not exists(
+                       select 1
+                       from project p,
+                            check_plan c
+                       where p.id = #{id}
+                         and p.id = c.project_id
+                         and p.control = 1
+                         and c.tec = #{tec}
+                         and c.workday_month = #{submit_date}
+                   )
+    </select>
 
 
 </mapper>

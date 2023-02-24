@@ -69,6 +69,9 @@ public interface NewsDao {
 
   void setProjectBackup(@Param("id") Integer id, @Param("num") Integer num);
 
+  void checkPlan(@Param("userId")Integer userId,@Param("map") Map<String,Object> map,
+                 @Param("check") Integer check);
+
   void checkLog0(@Param("map") Map<String,Object> map,
              @Param("check") Integer check, @Param("id")Integer id);
 
@@ -99,6 +102,7 @@ public interface NewsDao {
   void checkLog7(@Param("map") Map<String,Object> map,
           @Param("check") Integer check, @Param("id")Integer id);
 
+
   List<Map<String,Object>> queryLog(@Param("id")Integer id);
 
   List<Map<String,Object>> queryLogList(@Param("id") Integer id, @Param("type") Integer type);
@@ -114,6 +118,10 @@ public interface NewsDao {
                                           @Param("projectId") Integer projectId,
                                           @Param("submitDate") String submitDate,
                                           @Param("creator") Integer creator);
+
+  List<Map<String,Object>> planGeneral(Integer userId);
+
+  List<Map<String,Object>> planVolumeGeneral(Integer id);
 
   //查询个人审核的实现的记录
   List<Map<String,Object>> adminQueryApply(Integer userId);

@@ -117,12 +117,14 @@
     </select>
     <select id="queryByPrincipal" resultType="java.util.Map">
         SELECT
-            volume_tec
+            t.volume_tec
         FROM
-            workday_tec
+            workday_tec t,
+            workday_tec_principal p
         WHERE
-            FIND_IN_SET( #{userId}, principal)
-        and project_id = #{id}
+            t.id = p.workday_tec_id
+        and p.user_id = #{userId}
+        and t.project_id = #{id}
     </select>
 
 

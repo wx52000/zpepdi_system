@@ -157,13 +157,13 @@
     </insert>
     <update id="setAlive">
         UPDATE volume v,
-            incomplete_project p
+            project p
         SET v.alive = 0
         WHERE
             p.id = v.project_id
-          and p.spider = 0
-          and v.state not in ('待送出版','正在出版',"
-                            "'待送业主','已完成','院交出')
+          and p.close = 0
+          and v.state not in ('待送出版','正在出版',
+            '待送业主','已完成','院交出')
     </update>
     <update id="reSetUser">
         INSERT INTO volume_user (project_id, volume_id, designer, checker, principal, headman )
@@ -194,6 +194,14 @@
         update income_information
         set `state` = 0
     </update>
+    <update id="setProject">
+        update project
+        set projectPhaseID = #{map.OrganizationId},
+            design_size = #{map.DesignSize},
+            start_time = #{map.TaskDate},
+            `general` = #{map.ProjectManagerAName}
+        where id = #{id}
+    </update>
     <delete id="delNotAlive">
         delete
         from volume
@@ -206,12 +214,11 @@
     </delete>
     <select id="queryProjectNumber" resultType="java.util.Map">
         SELECT
-            id, `number`
+            id, `number`,projectPhaseID as phaseID
         FROM
-            incomplete_project
+            project
         WHERE
-            spider = 0
-          AND `number` IS NOT NULL
+           `number` IS NOT NULL
           AND `number` != ""
     </select>
 </mapper>

@@ -94,4 +94,10 @@ public interface VolumeService {
 
     Result resetPlanDate();
 
+    Result queryConfirmTec(Integer userId,Integer id);
+
+    Result sentConfirm(Integer userId,Map<String,Object> map);
+
+    Result timingConfirmWorkday(String date);
+
 }

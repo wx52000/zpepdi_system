@@ -7,7 +7,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.entity.User;
+import com.zpepdi.eureka_client.service.ProjectService;
+import com.zpepdi.eureka_client.service.VolumeService;
 import com.zpepdi.eureka_client.tools.DateUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.zpepdi.eureka_client.result.Result;
@@ -20,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class NewsServiceImpl implements NewsService {
+
   private NewsDao newsDao;
   @Autowired
   private UserDao userDao;
@@ -27,6 +31,10 @@ public class NewsServiceImpl implements NewsService {
   ProjectWorkdayDao projectWorkdayDao;
   @Autowired
   private ProjectDao projectDao;
+  @Autowired
+  private ProjectService projectService;
+  @Autowired
+  private VolumeDao volumeDao;
   @Autowired
   private DepartmentDao departmentDao;
   @Autowired
@@ -76,6 +84,9 @@ public class NewsServiceImpl implements NewsService {
       case 10:
         mapList = newsDao.scientificHeadman(id);
         break;
+      case 11:
+        mapList = newsDao.planGeneral(id);
+        break;
       default:
         break;
     }
@@ -108,8 +119,6 @@ public class NewsServiceImpl implements NewsService {
 
     callables.add(() -> newsDao.resultByGeneral1(id));
 
-//    callables.add(() -> newsDao.resultByPrincipal(id));
-
     callables.add(() -> newsDao.resultByPrincipal1(id));
 
     callables.add(() -> newsDao.resultByPrincipal2(id));
@@ -137,6 +146,10 @@ public class NewsServiceImpl implements NewsService {
   @Transactional
   public Result check(Integer id, List<Map<String, Object>> list, Integer check) {
     boolean limit = false;
+    int count = 0;
+    int confirmDay = (int) projectService.confirmDay();
+    Calendar calendar = Calendar.getInstance();
+    int day = calendar.get(Calendar.DAY_OF_MONTH);
     if (check == 1) {
       AtomicBoolean except = new AtomicBoolean(false);
       for (int i = 0; i < list.size(); i++) {
@@ -146,8 +159,13 @@ public class NewsServiceImpl implements NewsService {
           if (!DateUtils.getDateMonth(
                   new Date().getTime() - (3600L *24* projectDao.declareDay()*1000))
                   .equals(list.get(i).get("submit_date").toString())){
-            list.get(i).put("submit_date", DateUtils.getDateMonth());
+            map.put("submit_date", DateUtils.getDateMonth());
           }
+            if (volumeDao.queryConfirmState(map)) {
+              map.put("submit", 5);
+            } else {
+              map.put("submit", 2);
+            }
         }
         if (type.equals("7")){
           if (map.get("typeNote").toString().equals("0")){
@@ -181,13 +199,25 @@ public class NewsServiceImpl implements NewsService {
                 newsDao.setProjectBackup(Integer.parseInt(map.get("projectId").toString()), workday);
               }
         }
+        if (type.equals("11")){
+          count++;
+          if (day > confirmDay){
+            map.put("workday_month",DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
+            Calendar calendar1 = Calendar.getInstance();
+            calendar1.add(Calendar.MONTH,1);
+            map.put("plan_month", DateUtils.dateToString(calendar1.getTime(),"yyyy-MM"));
+          }
+          newsDao.checkPlan(id,map,check);
+        }
       }
       if (except.get()){
         return Result.build(587,"存在项目工时未赋值");
       }
     }
     if (list.size() >0 ) {
-      newsDao.check(list, check, id);
+      if (list.size() != count) {
+        newsDao.check(list, check, id);
+      }
       new Thread(() ->{
         list.forEach(item ->{
           String type = item.get("type").toString();
@@ -201,6 +231,9 @@ public class NewsServiceImpl implements NewsService {
             newsDao.checkLog4List(item,check,id);
           }else if (type.equals("7")){
             newsDao.checkLog7(item,check,id);
+          }
+          else if (type.equals("11")){
+
           }else{
             newsDao.checkLog0(item,check,id);
             newsDao.checkLog5List(item,check,id);
