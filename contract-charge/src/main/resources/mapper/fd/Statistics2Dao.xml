@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.Statistics2Dao">
+    <select id="queryPlan2" resultType="java.util.Map">
+        SELECT
+            c.`name`,
+            c.number,
+            ifnull(c.money,0) + ifnull(cc.money,0) as money,
+            total.money - tYear.money AS lYear,
+            tYear.money AS tYear,
+            incomeb.incomeb1,
+            incomeb.incomeb2,
+            incomeb.incomeb3,
+            incomeb.incomeb4,
+            incomeb.incomeb5,
+            incomeb.incomeb6,
+            incomeb.incomeb7,
+            incomeb.incomeb8,
+            incomeb.incomeb9,
+            incomeb.incomeb10,
+            incomeb.incomeb11,
+            incomeb.incomeb12,
+            c.business_manage
+        FROM
+            contract c
+                left join
+                (SELECT
+                     parent_id,
+                     sum(
+                             IF
+                                 ( add_sub = 0, money, - money )) as money
+                 FROM
+                     contract
+                 WHERE
+                     parent_id &lt;&gt; 0
+                 GROUP BY parent_id) as cc on c.id = cc.parent_id
+                left join (
+                SELECT
+                    contract_id,
+                    GROUP_CONCAT(
+                            CONCAT( '节点', `index` )) AS `index`,
+                    SUM( money ) AS money,
+                    GROUP_CONCAT( details ) AS details,
+                    GROUP_CONCAT( DISTINCT DATE_FORMAT(date,'%Y-%m') ) AS `date`
+                FROM
+                    `contract_node`
+                WHERE
+                    state = 1
+                GROUP BY
+                    contract_id
+            ) as n on  c.id = n.contract_id
+                LEFT JOIN (
+                SELECT
+                    SUM( i.charge + added_value ) AS money,
+                    ii.contract_id
+                FROM
+                    invoice i,
+                    invoice_information ii
+                WHERE
+                    i.invoice_information_id = ii.id
+                GROUP BY
+                    ii.contract_id
+            ) AS total ON c.id = total.contract_id
+                LEFT JOIN (
+                SELECT
+                    SUM( i.charge + added_value ) AS money,
+                    ii.contract_id
+                FROM
+                    invoice i,
+                    invoice_information ii
+                WHERE
+                    i.invoice_information_id = ii.id
+                  AND i.out_date &gt;= concat(#{year},#{start},"-01")
+                  AND i.out_date &lt; concat(#{year2},#{end}, "-01")
+                GROUP BY
+                    ii.contract_id
+            ) AS tYear ON c.id = tYear.contract_id
+                LEFT JOIN invoice_budget_year iby ON c.id = iby.contract_id
+                AND iby.`year` = 3
+                LEFT JOIN (
+                SELECT
+                    contract_id,
+                    MAX(
+                            IF
+                                ( `month` = 1, budget, 0 )) AS invoiceb1,
+                    MAX(
+                            IF
+                                ( `month` = 2, budget, 0 )) AS invoiceb2,
+                    MAX(
+                            IF
+                                ( `month` = 3, budget, 0 )) AS invoiceb3,
+                    MAX(
+                            IF
+                                ( `month` = 4, budget, 0 )) AS invoiceb4,
+                    MAX(
+                            IF
+                                ( `month` = 5, budget, 0 )) AS invoiceb5,
+                    MAX(
+                            IF
+                                ( `month` = 6, budget, 0 )) AS invoiceb6,
+                    MAX(
+                            IF
+                                ( `month` = 7, budget, 0 )) AS invoiceb7,
+                    MAX(
+                            IF
+                                ( `month` = 8, budget, 0 )) AS invoiceb8,
+                    MAX(
+                            IF
+                                ( `month` = 9, budget, 0 )) AS invoiceb9,
+                    MAX(
+                            IF
+                                ( `month` = 10, budget, 0 )) AS invoiceb10,
+                    MAX(
+                            IF
+                                ( `month` = 11, budget, 0 )) AS invoiceb11,
+                    MAX(
+                            IF
+                                ( `month` = 12, budget, 0 )) AS invoiceb12,
+                    MAX(
+                            IF
+                                ( `month` = 1, remark, null )) AS remark1,
+                    MAX(
+                            IF
+                                ( `month` = 2, remark, null )) AS remark2,
+                    MAX(
+                            IF
+                                ( `month` = 3, remark, null )) AS remark3,
+                    MAX(
+                            IF
+                                ( `month` = 4, remark, null )) AS remark4,
+                    MAX(
+                            IF
+                                ( `month` = 5, remark, null )) AS remark5,
+                    MAX(
+                            IF
+                                ( `month` = 6, remark, null )) AS remark6,
+                    MAX(
+                            IF
+                                ( `month` = 7, remark, null )) AS remark7,
+                    MAX(
+                            IF
+                                ( `month` = 8, remark, null )) AS remark8,
+                    MAX(
+                            IF
+                                ( `month` = 9, remark, null )) AS remark9,
+                    MAX(
+                            IF
+                                ( `month` = 10, remark, null )) AS remark10,
+                    MAX(
+                            IF
+                                ( `month` = 11, remark, null )) AS remark11,
+                    MAX(
+                            IF
+                                ( `month` = 12, remark, null )) AS remark12
+                FROM
+                    invoice_budget_month
+                WHERE
+                    `year` = #{year} and type = 0
+                GROUP BY
+                    contract_id
+            ) AS invoiceb ON c.id = invoiceb.contract_id
+                LEFT JOIN (
+                SELECT
+                    contract_id,
+                    MAX(
+                            IF
+                                ( `month` = 1, budget, 0 )) AS incomeb1,
+                    MAX(
+                            IF
+                                ( `month` = 2, budget, 0 )) AS incomeb2,
+                    MAX(
+                            IF
+                                ( `month` = 3, budget, 0 )) AS incomeb3,
+                    MAX(
+                            IF
+                                ( `month` = 4, budget, 0 )) AS incomeb4,
+                    MAX(
+                            IF
+                                ( `month` = 5, budget, 0 )) AS incomeb5,
+                    MAX(
+                            IF
+                                ( `month` = 6, budget, 0 )) AS incomeb6,
+                    MAX(
+                            IF
+                                ( `month` = 7, budget, 0 )) AS incomeb7,
+                    MAX(
+                            IF
+                                ( `month` = 8, budget, 0 )) AS incomeb8,
+                    MAX(
+                            IF
+                                ( `month` = 9, budget, 0 )) AS incomeb9,
+                    MAX(
+                            IF
+                                ( `month` = 10, budget, 0 )) AS incomeb10,
+                    MAX(
+                            IF
+                                ( `month` = 11, budget, 0 )) AS incomeb11,
+                    MAX(
+                            IF
+                                ( `month` = 12, budget, 0 )) AS incomeb12
+                FROM
+                    income_budget_month
+                WHERE
+                    `year` = #{year} and type = 0
+                GROUP BY
+                    contract_id
+            ) AS incomeb ON c.id = incomeb.contract_id
+                LEFT JOIN (
+                SELECT
+                    contract_id,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 1, income, 0 )) AS income1,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 2, income, 0 )) AS income2,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 3, income, 0 )) AS income3,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 4, income, 0 )) AS income4,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 5, income, 0 )) AS income5,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 6, income, 0 )) AS income6,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 7, income, 0 )) AS income7,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 8, income, 0 )) AS income8,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 9, income, 0 )) AS income9,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 10, income, 0 )) AS income10,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 11, income, 0 )) AS income11,
+                    MAX(
+                            IF
+                                ( DATE_FORMAT(`date`,'%m') = 12, income, 0 )) AS income12
+                FROM
+                    income
+                WHERE
+                    DATE_FORMAT(`date`,'%Y')
+                GROUP BY
+                    contract_id
+            ) AS inc ON c.id = inc.contract_id
+                LEFT JOIN (
+                SELECT
+                    contract_id,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 1, charge + added_value, 0 )) AS invoice1,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 2, charge + added_value, 0 )) AS invoice2,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 3, charge + added_value, 0 )) AS invoice3,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 4, charge + added_value, 0 )) AS invoice4,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 5, charge + added_value, 0 )) AS invoice5,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 6, charge + added_value, 0 )) AS invoice6,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 7, charge + added_value, 0 )) AS invoice7,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 8, charge + added_value, 0 )) AS invoice8,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 9, charge + added_value, 0 )) AS invoice9,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 10, charge + added_value, 0 )) AS invoice10,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 11, charge + added_value, 0 )) AS invoice11,
+                    SUM(
+                            IF
+                                ( MONTH ( i.out_date ) = 12, charge + added_value, 0 )) AS invoice12
+                FROM
+                    invoice i,
+                    invoice_information ii
+                WHERE
+                    YEAR ( i.out_date ) = #{year}
+                  AND i.invoice_information_id = ii.id
+                GROUP BY
+                    ii.contract_id
+            ) AS inv ON c.id = inv.contract_id
+            where kind = 0 and tYear.money > 0
+    </select>
+
+</mapper>
