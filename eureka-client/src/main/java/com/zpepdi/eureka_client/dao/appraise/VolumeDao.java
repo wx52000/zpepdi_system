@@ -93,6 +93,10 @@ public interface VolumeDao {
 
     void setSinglePlanDate(Map<String,Object> map);
 
+
+    void setSingleRemark(Map<String,Object> map);
+
+
     List<Map<String,Object>> queryRecently10Day(Integer userId);
 
     void setPlanConfirm(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
@@ -102,4 +106,16 @@ public interface VolumeDao {
     void setPlanRecord(Map<String,Object> map);
 
     void resetPlanDate(Map<String,Object> map);
+
+    List<Map<String,Object>> queryConfirmTec(@Param("userId") Integer userId,@Param("id") Integer id);
+
+    List<Map<String,Object>> queryConfirmNotCheck(Map<String,Object> map);
+
+    boolean queryConfirmState(Map<String,Object> map);
+
+    void timingConfirmWorkday(String date);
+
+    void sendConfirm(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
+
+    void sendConfirmVolume(Map<String,Object> map);
 }

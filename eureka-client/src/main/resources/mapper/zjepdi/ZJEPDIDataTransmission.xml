@@ -55,6 +55,14 @@
         s.RollStateID = r.rollStateID
         and r.ProjectPhaseCode = #{number}
     </select>
+    <select id="queryProjectFromZJEPDI" resultType="java.util.Map">
+        SELECT TOP 1
+            OrganizationId, DesignSize, TaskDate, ProjectManagerAName
+        FROM
+            ProjectPhaseEntity
+        WHERE
+            ProjectPhaseCode = #{number}
+    </select>
     <select id="queryIncomeInformation" resultType="java.util.Map">
         SELECT
         tab.MarketProjectCode,
@@ -241,4 +249,5 @@
             ProjectPhaseCode = #{number}
           AND ParentDeptName LIKE '发电%'
     </select>
+
 </mapper>

@@ -1,29 +1,25 @@
 package com.zpepdi.eureka_client.service.impl;
 
 
-import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.dao.zjepdi.ZJEPDIDataTransmissionDao;
-import com.zpepdi.eureka_client.excel.PlanDateListener;
 import com.zpepdi.eureka_client.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.zpepdi.eureka_client.entity.*;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.ProjectService;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -279,6 +275,17 @@ public class ProjectServiceImpl implements ProjectService {
         }
         projectDao.upd(map);
         projectWorkDayDao.setProWorkday(map);
+        return Result.ok();
+    }
+
+    @Override
+    public Result resetProjectField(Map<String, Object> map) {
+        if (map.get("type").toString().equals("1")){
+            map.put("field","control");
+        }else if (map.get("type").toString().equals("2")){
+            map.put("field","close");
+        }
+        projectDao.resetProjectField(map);
         return Result.ok();
     }
 
@@ -1073,5 +1080,75 @@ public class ProjectServiceImpl implements ProjectService {
         return Result.ok(projectDao.progressIncompleteVolume(map));
     }
 
+    @Override
+    public Result drawlineInfo(Integer userId, Map<String, Object> map) {
+        map.put("userId", userId);
+        List<String> list = null;
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
 
+
+            Date d1 = new SimpleDateFormat("yyyy-MM").parse(map.get("startMonth").toString());//定义起始日期
+
+            Date d2 = new SimpleDateFormat("yyyy-MM").parse(map.get("endMonth").toString());//定义结束日期  可以去当前月也可以手动写日期。
+
+            Calendar dd = Calendar.getInstance();//定义日期实例
+
+            dd.setTime(d1);//设置日期起始时间
+
+            list = new ArrayList<>();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            while (d2.after(dd.getTime())) {//判断是否到结束日期
+                String str = sdf.format(dd.getTime());
+                System.out.println(str);//输出日期结果
+                list.add(str);
+                dd.add(Calendar.MONTH, 1);//进行当前日期月份加1
+            }
+            String d3 = sdf.format(d2);
+            list.add(d3);
+        } catch (Exception e) {
+        }
+        map.put("datestring",JSONObject.toJSONString(list));
+        return Result.ok(projectDao.drawlineInfo(map));
+    }
+
+
+    @Override
+    public Result drawtotal(Map<String, Object> map) {
+        List<String> list = null;
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
+
+
+            Date d1 = new SimpleDateFormat("yyyy-MM").parse(map.get("startMonth").toString());//定义起始日期
+
+            Date d2 = new SimpleDateFormat("yyyy-MM").parse(map.get("endMonth").toString());//定义结束日期  可以去当前月也可以手动写日期。
+
+            Calendar dd = Calendar.getInstance();//定义日期实例
+
+            dd.setTime(d1);//设置日期起始时间
+
+            list = new ArrayList<>();
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            while (d2.after(dd.getTime())) {//判断是否到结束日期
+                String str = sdf.format(dd.getTime());
+                System.out.println(str);//输出日期结果
+                list.add(str);
+                dd.add(Calendar.MONTH, 1);//进行当前日期月份加1
+            }
+            String d3 = sdf.format(d2);
+            list.add(d3);
+        } catch (Exception e) {
+        }
+        map.put("datestring",JSONObject.toJSONString(list));
+        return Result.ok(projectDao.drawtotal(map));
+    }
+
+    @Override
+    public Result getdateInfo(Map<String, Object> map) {
+
+        return Result.ok(projectDao.getdateInfo(map));
+    }
 }

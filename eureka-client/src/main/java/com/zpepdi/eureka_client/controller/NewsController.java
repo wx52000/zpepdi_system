@@ -2,6 +2,7 @@ package com.zpepdi.eureka_client.controller;
 
 
 import com.zpepdi.eureka_client.annotation.UserId;
+import com.zpepdi.eureka_client.service.ProjectService;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,7 @@ import java.util.Map;
 @RequestMapping("news")
 public class NewsController {
   private NewsService newsService;
+
 
     @Autowired
     public void setNewsService(NewsService newsService){
@@ -68,12 +70,6 @@ public class NewsController {
     public Result withdrawOverAll(@UserId Integer id, @RequestBody Map<String,Object> map){
       return newsService.withdrawOverAll(map);
     }
-
-
-
-
-
-
 
 
 }

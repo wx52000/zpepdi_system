@@ -354,6 +354,13 @@
         set `error` = 0
         where id = #{id}
     </update>
+    <update id="resetProjectField">
+        <foreach collection="list" item="item" separator=";">
+            update project
+            set ${field} = #{value}
+            where id = #{item}
+        </foreach>
+    </update>
     <update id="updState">
         update project
         set state = 1
@@ -545,6 +552,8 @@
         SELECT tab.id,
                tab.`number`,
                tab.projectName,
+               tab.design_size,
+               tab.start_time,
                tab.director,
                tab.general,
                tab.generalId,
@@ -562,6 +571,7 @@
                tab.spider,
                tab.type,
                tab.error,
+               tab.control,
                tab.used,
                tab.workday - tab.used AS have,
                ut.`time`
@@ -570,6 +580,8 @@
                                  p.`number`,
                                  p.`name`                                                           AS projectName,
                                  p.director,
+                                 p.design_size,
+                                 p.start_time,
                                  p.general,
                                  p.generalId,
                                  ifnull(w.num, 0) + IFNULL(a.workday, 0)                            AS workday,
@@ -584,6 +596,7 @@
                                  p.frozen,
                                  p.type,
                                  p.error,
+                                 p.control,
                                  IFNULL(vw.workday, 0) + IFNULL(t.designer, 0) + IFNULL(t.principal, 0) +
                                  IFNULL(t.checker, 0) + IFNULL(t.headman, 0) + IFNULL(m.workday, 0) AS used
                  FROM (
@@ -591,6 +604,8 @@
                                  p.`number`,
                                  p.`name`,
                                  p.director,
+                                 p.design_size,
+                                 cast(p.start_time as char(10)) as start_time,
                                  `general`,
                                  generalId,
                                  p.`state`,
@@ -598,7 +613,8 @@
                                  p.spider,
                                  p.frozen,
                                  p.type,
-                                 p.error
+                                 p.error,
+                                 p.control
                           FROM project p
                                    LEFT JOIN project_note n ON p.id = n.project_id
                           WHERE IFNULL(n.`check`, 1) = 1
@@ -874,6 +890,35 @@
                p.`number`,
                count(v.id)                                AS `count`,
                p.general,
+               p.control,
+               (select exists(
+                   select
+                       1
+                   from (
+                               SELECT
+                                   volume_tec
+                               FROM
+                                  project p,
+                                   workday_tec wt
+                               WHERE
+                                   p.generalId = #{userId}
+                               and p.id = #{id}
+                               and p.id = wt.project_id
+                   union
+                               SELECT
+                                   volume_tec
+                               FROM
+                                   workday_tec wt,
+                                   workday_tec_principal tp
+                               WHERE
+                                   tp.user_id = #{userId}
+                                 AND tp.workday_tec_id = wt.id
+                                 AND wt.project_id = #{id})
+                   as t
+                   where t.volume_tec NOT IN
+                         ( SELECT tec FROM check_plan c WHERE project_id = #{id}
+                                                                                                                    AND plan_month = DATE_FORMAT( NOW(), "%Y-%m" ) )
+                   )) as planConfirm,
                IF
                    (p.generalId = #{userId}, TRUE, FALSE) AS generalRole,
                IF
@@ -1398,6 +1443,8 @@
                                                           "已发放"
                                                       WHEN 3 THEN
                                                           "申报被拒"
+                                                      WHEN 5 THEN
+                                                          "已通过未发放"
                                                       ELSE "未填报"
                                                       END
                                               END                                                AS workday_state,
@@ -1442,7 +1489,7 @@
                                           v.complete_time,
                                           v.wfInstId,
                                           CASE
-                                              w.CHECK
+                                              w.check
                                               WHEN 0 THEN
                                                   "未审核"
                                               ELSE
@@ -1456,6 +1503,8 @@
                                                           "已发放"
                                                       WHEN 3 THEN
                                                           "申报被拒"
+                                                      WHEN 5 THEN
+                                                          "已通过未发放"
                                                       ELSE "未填报"
                                                       END
                                               END                                                AS workday_state,
@@ -1513,6 +1562,8 @@
                                 "已发放"
                             WHEN 3 THEN
                                 "申报被拒"
+                            WHEN 5 THEN
+                                "已通过未发放"
                             ELSE "未填报"
                             END                                                                          AS workday_state,
                         t.designer_workday + t.checker_workday + t.principal_workday + t.headman_workday AS workday,
@@ -1576,6 +1627,8 @@
                                 "已发放"
                             WHEN 3 THEN
                                 "申报被拒"
+                            WHEN 5 THEN
+                                "已通过未发放"
                             ELSE "未填报"
                             END                                                                          AS workday_state,
                         t.designer_workday + t.checker_workday + t.principal_workday + t.headman_workday AS workday,
@@ -1774,6 +1827,8 @@
                                                           "已发放"
                                                       WHEN 3 THEN
                                                           "申报被拒"
+                                                      WHEN 5 THEN
+                                                          "已通过未发放"
                                                       ELSE "未填报"
                                                       END
                                               END                                                AS workday_state,
@@ -1838,6 +1893,8 @@
                                                           "已发放"
                                                       WHEN 3 THEN
                                                           "申报被拒"
+                                                      WHEN 5 THEN
+                                                          "已通过未发放"
                                                       ELSE "未填报"
                                                       END
                                               END                                                AS workday_state,
@@ -1901,6 +1958,8 @@
                                 "已发放"
                             WHEN 3 THEN
                                 "申报被拒"
+                            WHEN 5 THEN
+                                "已通过未发放"
                             ELSE "未填报"
                             END                                                                          AS workday_state,
                         t.designer_workday + t.checker_workday + t.principal_workday + t.headman_workday AS workday,
@@ -1970,6 +2029,8 @@
                                 "已发放"
                             WHEN 3 THEN
                                 "申报被拒"
+                            WHEN 5 THEN
+                                "已通过未发放"
                             ELSE "未填报"
                             END                                                                          AS workday_state,
                         t.designer_workday + t.checker_workday + t.principal_workday + t.headman_workday AS workday,
@@ -3525,6 +3586,9 @@
         tab.id,
         tab.`number`,
         tab.`name`,
+        tab.design_size,
+        tab.control,
+        tab.start_time,
         tab.nowMonthZero,
         tab.nowMonthUp,
         tab.allZero,
@@ -3537,6 +3601,9 @@
         p.id,
         p.number,
         p.`name`,
+        p.design_size,
+        p.control,
+        p.start_time,
         IFNULL( n0.num, 0 ) AS nowMonthZero,
         IFNULL( n1.num, 0 ) AS nowMonthUp,
         IFNULL( a.num, 0 ) AS allZero,
@@ -3545,37 +3612,20 @@
         IFNULL( a.num, 0 ) - IFNULL( c.num, 0 ) AS incompleteZero
         FROM
         (
-        SELECT
-        p.id,
-        p.number,
-        p.`name`
-        FROM
-        project p,
-        volume v
-        WHERE
-        p.id = v.project_id
-        <if test="type == 0">
-            AND v.actual_publication_date is NULL
-        </if>
-        AND RIGHT ( p.number, 1 ) IN ( "Z", "S" )
-        GROUP BY
-        p.id
-        <if test="type == 0">
-            UNION
             SELECT
-            p.id,
-            p.number,
-            p.`name`
+                p.id,
+                p.number,
+                p.`name`,
+                p.design_size,
+                p.control,
+                cast(p.start_time as char(10)) as start_time
             FROM
-            project p,
-            volume v
+                project p
             WHERE
-            p.id = v.project_id
-            AND v.actual_publication_date = ''
-            AND RIGHT ( p.number, 1 ) IN ( "Z", "S" )
+
+                RIGHT ( p.number, 1 ) IN ( "Z", "S" )
             GROUP BY
-            p.id
-        </if>
+                p.id
         ) AS p
         LEFT JOIN (
         SELECT
@@ -3639,7 +3689,7 @@
         ) AS c ON p.id = c.id
         ) tab LEFT JOIN user_defined_top ut on ut.top_id = tab.id
         AND user_id = #{userId} AND menus_id = 18
-        order by ut.time desc
+        order by ut.time desc,tab.start_time desc
     </select>
     <select id="projectProgressById" resultType="java.util.Map">
         SELECT p.id,
@@ -3651,27 +3701,41 @@
                IFNULL(n1.num, 0)                     AS upNowComplete,
                IFNULL(a.num, 0)                      AS allZero,
                IFNULL(c.num, 0)                      AS completeZero,
+               IFNULL(upc.num, 0)                      AS completeUp,
                IFNULL(inc.incomplete, 0)             AS incompleteZero,
                IFNULL(plan0.num, 0)                  as plan0,
                IFNULL(plan1.num, 0)                  as plan1,
+               p.control,
                p.tec,
+               p.`check`,
                p.principalRole
         FROM (
                  SELECT DISTINCT p.id,
                                  p.number,
                                  p.`name`,
+                                 p.control,
                                  p.tec,
+                                 case
+                                 p.`check`
+                                    when 0 then '未审核'
+                                    when 1 then '已审核'
+                                    else '未申报' end as `check`,
                                  p.mid,
                                  max(principalRole) as principalRole
                  FROM (
                           SELECT p.id,
                                  p.number,
                                  p.`name`,
+                                 p.control,
                                  IFNULL(m.big_name,v.tec) as tec,
+                                 c.`check`,
                                  m.id  as mid,
                                  0 as principalRole
                           FROM project p,
-                               volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
+                               volume v
+                                   left join check_plan c on v.tec = c.tec
+                                   and v.project_id = c.project_id and c.plan_month = #{date}
+                                   LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                           WHERE p.id = v.project_id
                             AND p.id = #{id}
                             AND EXISTS(
@@ -3692,11 +3756,16 @@
                           SELECT p.id,
                                  p.number,
                                  p.`name`,
+                                 p.control,
                                  IFNULL(m.big_name,v.tec) as tec,
+                                 c.`check`,
                                  m.id  as mid,
                                  1 as principalRole
                           FROM project p,
-                               volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name,
+                               volume v
+                                   left join check_plan c on v.tec = c.tec
+                                                                 and v.project_id = c.project_id
+                                   LEFT JOIN major_contrast_technology m on v.tec = m.small_name,
                                workday_tec t,
                                workday_tec_principal tp
                           WHERE p.id = v.project_id
@@ -3817,6 +3886,25 @@
                  ) AS n
             GROUP BY tec
         ) AS c ON p.tec = c.tec
+        LEFT JOIN (
+            SELECT SUM(
+                           IFNULL(num, 0)) AS num,
+                   tec
+            FROM (
+                     SELECT IFNULL(COUNT(v.id), 0) AS num,
+                            IFNULL(m.big_name,v.tec) as tec,
+                            m.id  as mid
+                     FROM volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
+                     WHERE v.project_id = #{id}
+
+                       AND v.number LIKE "%+%"
+                       AND actual_publication_date != ''
+			AND actual_publication_date IS NOT NULL
+                     GROUP BY
+                         v.tec
+                 ) AS n
+            GROUP BY tec
+        ) AS upc ON p.tec = upc.tec
                  LEFT JOIN (
             SELECT SUM(num) AS incomplete,
                    tec
@@ -3864,7 +3952,8 @@
         v.actual_publication_date,
         v.wfInstId,
         v.plan_confirm,
-        w.workday
+        w.workday,
+        v.remark
         FROM
         `volume` v left join volume_workday w on v.id = w.volume_id
         WHERE
@@ -3993,5 +4082,314 @@
           and grade = #{grade}
     </select>
 
+
+    <select id="drawlineInfo" resultType="java.util.Map">
+        SELECT
+        IFNULL( n0.num, 0 ) + IFNULL( n1.num, 0 ) AS allNowComplete,
+        IFNULL( n0.num, 0 ) AS zeroNowComplete,
+        IFNULL( n1.num, 0 ) AS upNowComplete,
+        IFNULL( plan0.num, 0 ) AS plan0,
+        IFNULL( plan1.num, 0 ) AS plan1,
+        alldate as date
+        FROM
+        JSON_TABLE (
+        #{datestring},
+        '$[*]' COLUMNS ( `alldate` VARCHAR ( 40 ) PATH '$' )) AS jt
+        LEFT JOIN (
+        SELECT
+        SUM(
+        IFNULL( num, 0 )) AS num,
+        tec,
+        date
+        FROM
+        (
+        SELECT
+        IFNULL( COUNT( v.id ), 0 ) AS num,
+        tec,
+        DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+        FROM
+        volume v
+        LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
+        WHERE
+        v.project_id = #{id}
+        AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name = #{tec} UNION SELECT #{tec} AS tec )
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )>= #{startMonth}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )&lt;= #{endMonth}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        DATE_FORMAT( v.actual_publication_date, '%Y-%m' ),
+        tec
+        ) AS n
+        GROUP BY
+        tec,
+        date
+        ) AS n0 ON n0.date = jt.alldate
+        LEFT JOIN (
+        SELECT
+        SUM(
+        IFNULL( num, 0 )) AS num,
+        tec,
+        date
+        FROM
+        (
+        SELECT
+        IFNULL( COUNT( v.id ), 0 ) AS num,
+        tec,
+        DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+        FROM
+        volume v
+        WHERE
+        v.project_id = #{id}
+        AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name = #{tec} UNION SELECT #{tec} AS tec )
+        <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )>= #{startMonth}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )&lt;= #{endMonth}
+        </if>
+        AND v.number LIKE "%+%"
+        GROUP BY
+        v.tec,
+        date
+        ) AS n
+        GROUP BY
+        tec,
+        date
+        ) AS n1 ON n1.date = jt.alldate
+        LEFT JOIN (
+        SELECT
+        SUM(
+        IFNULL( num, 0 )) AS num,
+        tec,
+        date
+        FROM
+        (
+        SELECT
+        IFNULL( COUNT( v.id ), 0 ) AS num,
+
+        tec,
+        DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) AS date
+        FROM
+        volume v
+        WHERE
+        v.project_id = #{id}
+        AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name = #{tec} UNION SELECT #{tec} AS tec )
+        <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+        AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) >= #{startMonth}
+        AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) &lt;= #{endMonth}
+        </if>
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        v.tec,
+        date
+        ) AS n
+        GROUP BY
+        tec,
+        date
+        ) AS plan0 ON plan0.date = jt.alldate
+        LEFT JOIN (
+        SELECT
+        SUM(
+        IFNULL( num, 0 )) AS num,
+        tec,
+        date
+        FROM
+        (
+        SELECT
+        IFNULL( COUNT( v.id ), 0 ) AS num,
+        IFNULL( m.big_name, v.tec ) AS tec,
+        m.id AS mid,
+        DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) AS date
+        FROM
+        volume v
+        LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
+        WHERE
+        v.project_id = #{id}
+        AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name = #{tec} UNION SELECT #{tec} AS tec )
+        <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+        AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) >= #{startMonth}
+        AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) &lt;= #{endMonth}
+        </if>
+        AND v.number LIKE "%+%"
+        GROUP BY
+        v.tec,
+        date
+        ) AS n
+        GROUP BY
+        tec,
+        date
+        ) AS plan1 ON plan1.date = jt.alldate
+    </select>
+    <select id="drawtotal" resultType="java.util.Map">
+        select
+        sum( allNowComplete ) as allNowComplete,
+        sum( zeroNowComplete ) as zeroNowComplete,
+        sum( upNowComplete ) as upNowComplete,
+        sum( plan0 ) as plan0,
+        sum( plan1 ) AS plan1,
+        date
+        from
+        (<foreach collection="tec" item="item" index="index"
+                 separator="union all">
+            SELECT
+            IFNULL( n0.num, 0 ) + IFNULL( n1.num, 0 ) AS allNowComplete,
+            IFNULL( n0.num, 0 ) AS zeroNowComplete,
+            IFNULL( n1.num, 0 ) AS upNowComplete,
+            IFNULL( plan0.num, 0 ) AS plan0,
+            IFNULL( plan1.num, 0 ) AS plan1,
+            alldate as date
+            FROM
+            JSON_TABLE (
+            #{datestring},
+            '$[*]' COLUMNS ( `alldate` VARCHAR ( 40 ) PATH '$' )) AS jt
+            LEFT JOIN (
+            SELECT
+            SUM(
+            IFNULL( num, 0 )) AS num,
+            tec,
+            date
+            FROM
+            (
+            SELECT
+            IFNULL( COUNT( v.id ), 0 ) AS num,
+            tec,
+            DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+            FROM
+            volume v
+            LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
+            WHERE
+            v.project_id = #{id}
+
+            AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name =
+            #{item}
+            UNION SELECT
+            #{item}
+            AS tec
+            )
+            AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )>= #{startMonth}
+            AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )&lt;= #{endMonth}
+            AND v.number NOT LIKE "%+%"
+            GROUP BY
+            DATE_FORMAT( v.actual_publication_date, '%Y-%m' ),
+            tec
+            ) AS n
+            GROUP BY
+            tec,
+            date
+            ) AS n0 ON n0.date = jt.alldate
+            LEFT JOIN (
+            SELECT
+            SUM(
+            IFNULL( num, 0 )) AS num,
+            tec,
+            date
+            FROM
+            (
+            SELECT
+            IFNULL( COUNT( v.id ), 0 ) AS num,
+            tec,
+            DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+            FROM
+            volume v
+            WHERE
+            v.project_id = #{id}
+            AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name =
+            #{item}
+            UNION SELECT
+            #{item}
+                as tec)
+            <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+                AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )>= #{startMonth}
+                AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) &lt;= #{endMonth}
+            </if>
+            AND v.number LIKE "%+%"
+            GROUP BY
+            v.tec,
+            date
+            ) AS n
+            GROUP BY
+            tec,
+            date
+            ) AS n1 ON n1.date = jt.alldate
+            LEFT JOIN (
+            SELECT
+            SUM(
+            IFNULL( num, 0 )) AS num,
+            tec,
+            date
+            FROM
+            (
+            SELECT
+            IFNULL( COUNT( v.id ), 0 ) AS num,
+            tec,
+            DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) AS date
+            FROM
+            volume v
+            WHERE
+            v.project_id = #{id}
+            AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name =
+            #{item}
+            UNION SELECT
+            #{item}
+            AS tec  )
+            <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+                AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) >= #{startMonth}
+                AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' )  &lt;= #{endMonth}
+            </if>
+            AND v.number NOT LIKE "%+%"
+            GROUP BY
+            v.tec,
+            date
+            ) AS n
+            GROUP BY
+            tec,
+            date
+            ) AS plan0 ON plan0.date = jt.alldate
+            LEFT JOIN (
+            SELECT
+            SUM(
+            IFNULL( num, 0 )) AS num,
+            tec,
+            date
+            FROM
+            (
+            SELECT
+            IFNULL( COUNT( v.id ), 0 ) AS num,
+            IFNULL( m.big_name, v.tec ) AS tec,
+            m.id AS mid,
+            DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) AS date
+            FROM
+            volume v
+            LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
+            WHERE
+            v.project_id = #{id}
+            AND v.tec IN ( SELECT small_name FROM major_contrast_technology m WHERE big_name =
+            #{item}
+            UNION SELECT
+           #{item}
+            AS tec)
+            <if test="startMonth != null and startMonth != ''and endMonth != null and endMonth != ''">
+                AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) >= #{startMonth}
+                AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) &lt;= #{endMonth}
+            </if>
+            AND v.number LIKE "%+%"
+            GROUP BY
+            v.tec,
+            date
+            ) AS n
+            GROUP BY
+            tec,
+            date
+            ) AS plan1 ON plan1.date = jt.alldate
+        </foreach>)
+as t group by date
+    </select>
+
+    <select id="getdateInfo" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+        FROM
+            volume v
+        where project_id=#{id}
+        order by date
+    </select>
 
 </mapper>

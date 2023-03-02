@@ -43,4 +43,5 @@ eureka:
     fetch-registry: true
     service-url:
       # 配置注册中心地址
-      defaultZone: http://localhost:9000/eureka/
+      defaultZone: http://10.136.238.28:9000/eureka/
+#        defaultZone: http://localhost:9000/eureka/

@@ -70,6 +70,12 @@ public class ProjectController {
         return Result.ok();
     }
 
+    @RequestMapping("resetProjectField")
+    public Result resetProjectField(@RequestBody Map<String,Object> map){
+        projectService.resetProjectField(map);
+        return Result.ok();
+    }
+
     @RequestMapping("addNumber")
     public Result addNumber(@RequestBody Project project){
       projectService.addNumber(project);
@@ -335,6 +341,21 @@ public class ProjectController {
     @RequestMapping("progressIncompleteVolume")
     public Result progressIncompleteVolume(@RequestBody Map<String, Object> map) {
         return projectService.progressIncompleteVolume(map);
+    }
+
+
+    @RequestMapping("drawlineinfo")
+    public Result drawlineInfo(@UserId Integer userId,@RequestBody Map<String, Object> map) {
+        return projectService.drawlineInfo(userId,map);
+    }
+
+    @RequestMapping("drawtotal")
+    public Result drawtotal(@RequestBody Map<String, Object> map) {
+        return projectService.drawtotal(map);
+    }
+
+    @RequestMapping("getdateinfo")
+    public Result getdateinfo(@RequestBody Map<String, Object> map) {return projectService.getdateInfo(map);
     }
 
 

@@ -25,6 +25,8 @@ public interface ProjectService {
 
     Result renewProject(Integer id, Map<String,Object> map);
 
+    Result resetProjectField(Map<String,Object> map);
+
     void addNumber(Project project);
 
     void renewError(Integer id);
@@ -128,5 +130,12 @@ public interface ProjectService {
     Result planVolume(Map<String,Object> map);
 
     Result progressIncompleteVolume(Map<String,Object> map);
+
+
+    Result drawlineInfo(Integer userId,Map<String,Object> map);
+
+    Result drawtotal(Map<String,Object> map);
+
+    Result getdateInfo(Map<String,Object> map);
 
 }

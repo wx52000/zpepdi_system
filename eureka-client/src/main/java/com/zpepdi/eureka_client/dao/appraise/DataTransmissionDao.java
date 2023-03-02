@@ -11,6 +11,9 @@ public interface DataTransmissionDao {
 
     List<Map<String,Object>> queryProjectNumber();
 
+    void setProject(@Param("id")Integer id,
+                    @Param("map") Map<String,Object> map);
+
     void setAlive();
 
     void delNotAlive();

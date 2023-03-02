@@ -3,6 +3,7 @@ package com.zpepdi.eureka_client.config;
 import com.zpepdi.eureka_client.service.*;
 import com.zpepdi.eureka_client.tools.DateUtils;
 import org.checkerframework.checker.initialization.qual.Initialized;
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LoggerFactoryBinder;
@@ -51,35 +52,36 @@ public class ScheduledConfig implements SchedulingConfigurer {
     public ScientificSystemService scientificSystemService;
 
 
-//    @Scheduled(cron = "0 0 3 23 * ?")
-//    public void createScientificProduce(){
-//        scientificSystemService.createScientificProduce(DateUtils.getDateMonth());
-//    }
-//
-//    @Scheduled(cron = "0 0 5 1 * ?")
-//    public void resetPlanDate(){
-//        volumeService.resetPlanDate();
-//    }
-//
-//
-//    @Scheduled(cron = "0 0 0/2 * * ?")
-//    @Async("taskExecutor")
-////    @PostConstruct
-//    public void dataTransmission(){
-//        service.dataTransmissionService();
-//    }
-//
-//    @Scheduled(cron = "0 0 0 * * ?")
-//    @Async("taskExecutor")
-//    public void queryIncomeInformation(){
-//        service.queryIncomeInformation();
-//        Calendar calendar = Calendar.getInstance();
-//        int day = calendar.get(Calendar.DAY_OF_MONTH);
-//        if (projectService.confirmDay().equals(day)) {
-//            volumeService.updatePlanedPublicDate();
-//        }
-//    }
+    @Scheduled(cron = "0 0 3 23 * ?")
+    public void createScientificProduce(){
+        scientificSystemService.createScientificProduce(DateUtils.getDateMonth());
+    }
 
+    @Scheduled(cron = "0 0 5 1 * ?")
+    public void resetPlanDate(){
+        volumeService.resetPlanDate();
+    }
+
+
+    @Scheduled(cron = "0 0 0/2 * * ?")
+    @Async("taskExecutor")
+//    @PostConstruct
+    public void dataTransmission(){
+        service.dataTransmissionService();
+    }
+//
+    @Scheduled(cron = "0 59 23 * * ?")
+    @Async("taskExecutor")
+    public void queryIncomeInformation(){
+        service.queryIncomeInformation();
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        if (projectService.confirmDay().equals(day)) {
+            volumeService.updatePlanedPublicDate();
+            volumeService.timingConfirmWorkday(DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
+        }
+    }
+//
 
 
 //  @Scheduled(cron = "0 0 0 * * ?")

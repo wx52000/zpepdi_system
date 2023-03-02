@@ -249,7 +249,7 @@
                 <if test="i.task == 1 and i.advance == 1">
                     task_advance
                 </if>
-                set submit = #{check} + 1, submit_time = now(), submit_date = #{item.submit_date}, `submit_handler` = #{id}
+                set submit = #{item.submit}, submit_time = now(), submit_date = #{item.submit_date}, `submit_handler` = #{id}
                 where
                 id = #{i.id}
             </foreach>
@@ -395,6 +395,12 @@
             WHERE
             id = #{id};
         </if>
+    </update>
+    <update id="checkPlan">
+        update check_plan
+        set plan_month = #{map.plan_month}, workday_month = #{map.workday_month},
+            `check` = #{check}, checker = #{userId}, check_time = now()
+        where id = #{map.id}
     </update>
     <select id="count" resultType="java.lang.Integer">
         SELECT
@@ -654,6 +660,13 @@
                 GROUP BY
                     t.scientific_id,
                     t.creator
+                UNION ALL
+                select c.id
+                from check_plan c,
+                     project p
+                where c.project_id = p.id
+                and p.generalId = #{id}
+                and c.check = 0
             ) AS tab
     </select>
     <select id="queryCountByType" resultType="java.util.Map">
@@ -955,7 +968,18 @@
                             t.scientific_id,
                             t.creator
                     ) tab
-            ) AS count10
+            ) AS count10,
+            (
+                SELECT
+                    count( c.id )
+                FROM
+                    check_plan c,
+                    project p
+                WHERE
+                    c.project_id = p.id
+                  AND p.generalId = #{id}
+                  AND c.`check` = 0
+                ) as count11
     </select>
     <select id="queryByAdmin" resultMap="queryByAdminList">
       select 0 as type, p.id as id,
@@ -2704,6 +2728,38 @@
             declare_day
         WHERE
             id = 1
+    </select>
+    <resultMap id="planGeneral" type="map">
+        <result column="id" property="id"></result>
+        <result column="number" property="number"></result>
+        <result column="name" property="name"></result>
+        <result column="tec" property="tec"></result>
+        <result column="plan_month" property="plan_month"></result>
+        <result column="workday_month" property="workday_month"></result>
+        <result column="handler" property="handler"></result>
+        <result column="result" property="result"></result>
+        <result column="type" property="type"></result>
+        <collection property="list" column="id = id"
+        javaType="ARRAYLIST" select="planVolumeGeneral"></collection>
+    </resultMap>
+    <select id="planGeneral" resultMap="planGeneral">
+        SELECT
+            c.id, p.number, p.`name`, c.tec, c.plan_month, c.workday_month,
+            u.`name` as `handler`,
+            FALSE AS result,
+            11 as `type`
+        FROM check_plan c,
+             project p,
+             `user` u
+        WHERE c.project_id = p.id
+          AND p.generalId = #{userId}
+          AND u.id = c.`handler`
+    </select>
+    <select id="planVolumeGeneral" resultType="java.util.Map">
+        SELECT
+            volume_id,`number`,`name`,state,designer,checker,principal,plan_publication
+        FROM check_plan_volume
+        WHERE check_plan_id = #{id}
     </select>
 
 </mapper>

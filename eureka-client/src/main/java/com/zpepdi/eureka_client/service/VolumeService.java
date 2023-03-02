@@ -86,6 +86,8 @@ public interface VolumeService {
 
     Result setSinglePlanDate(Map<String,Object> map);
 
+    Result setSingleRemark(Map<String,Object> map);
+
     Result queryRecently10Day(Integer userId);
 
     Result setPlanConfirm(Integer userId, Map<String,Object> map);
@@ -93,5 +95,11 @@ public interface VolumeService {
     Result updatePlanedPublicDate();
 
     Result resetPlanDate();
+
+    Result queryConfirmTec(Integer userId,Integer id);
+
+    Result sentConfirm(Integer userId,Map<String,Object> map);
+
+    Result timingConfirmWorkday(String date);
 
 }

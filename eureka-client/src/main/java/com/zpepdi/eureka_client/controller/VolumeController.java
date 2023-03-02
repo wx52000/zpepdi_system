@@ -184,6 +184,10 @@ public class VolumeController {
         return volumeService.setSinglePlanDate(map);
     }
 
+    @RequestMapping("setSingleRemark")
+    public Result setSingleRemark(@RequestBody Map<String,Object> map){
+        return volumeService.setSingleRemark(map);
+    }
     @RequestMapping("queryRecently10Day")
     public Result queryRecently10Day(@UserId Integer id){
         return volumeService.queryRecently10Day(id);
@@ -198,5 +202,17 @@ public class VolumeController {
     public Result setPlanConfirm(@UserId Integer userId, @RequestBody Map<String,Object> map){
         return volumeService.setPlanConfirm(userId,map);
     }
+
+    @RequestMapping("queryConfirmTec")
+    public Result queryConfirmTec(@UserId Integer userId, @RequestHeader("id")Integer id){
+        return volumeService.queryConfirmTec(userId,id);
+    }
+
+    @RequestMapping("sentConfirm")
+    public Result sentConfirm(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return volumeService.sentConfirm(userId,map);
+    }
+
+
 
 }

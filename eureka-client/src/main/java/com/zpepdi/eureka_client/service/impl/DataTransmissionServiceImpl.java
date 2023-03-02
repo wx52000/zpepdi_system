@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +31,16 @@ public class DataTransmissionServiceImpl implements DataTransmissionService {
             List<Map<String,Object>> projectList = dataTransmissionDao.queryProjectNumber();
             if (projectList != null && projectList.size() > 0){
                 projectList.forEach(item ->{
+                    String number = item.get("number").toString();
+                    if (item.get("phaseID") == null ||
+                            item.get("phaseID").toString().equals("")){
+                        Map<String,Object> map = transmissionDao.queryProjectFromZJEPDI(number);
+                        if (map != null && !map.isEmpty()){
+                            dataTransmissionDao.setProject((Integer) item.get("id"),map);
+                        }
+                    }
                     List<Map<String,Object>> list =
-                            transmissionDao.queryFromZJEPDI(item.get("number").toString());
+                            transmissionDao.queryFromZJEPDI(number);
                     if (list != null && list.size()>0) {
                         dataTransmissionDao.insertData(item.get("id").toString(), list);
                     }
