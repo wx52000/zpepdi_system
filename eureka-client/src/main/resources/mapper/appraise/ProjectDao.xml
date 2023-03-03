@@ -671,6 +671,102 @@
            OR tab.workday = 0
         ORDER BY ut.time desc
     </select>
+    <select id="queryByManage" resultType="java.util.Map">
+        SELECT
+            tab.id,
+            tab.`number`,
+            tab.`name`,
+            tab.design_size,
+            tab.control,
+            tab.start_time,
+            tab.allZero,
+            tab.allUp,
+            tab.completeZero,
+            tab.completeUp,
+            tab.underway,
+            ut.`time`
+        FROM
+            (
+                SELECT
+                    p.id,
+                    p.number,
+                    p.`name`,
+                    p.design_size,
+                    p.control,
+                    cast(p.start_time as char(10)) as start_time,
+                    IFNULL( a0.num, 0 ) AS allZero,
+                    IFNULL( a1.num, 0 ) AS allUp,
+                    IFNULL( c0.num, 0 ) AS completeZero,
+                    IFNULL( c1.num, 0 ) AS completeUp,
+                    IFNULL( u.num, 0 ) AS underway
+                FROM
+                    project p
+                        LEFT JOIN (
+                        SELECT
+                            v.project_id AS id,
+                            COUNT( v.id ) AS num
+                        FROM
+                            volume v
+                        WHERE
+                            v.number NOT LIKE "%+%"
+                        GROUP BY
+                            v.project_id
+                    ) AS a0 ON p.id = a0.id
+                        LEFT JOIN (
+                        SELECT
+                            v.project_id AS id,
+                            COUNT( v.id ) AS num
+                        FROM
+                            volume v
+                        WHERE
+                            v.number LIKE "%+%"
+                        GROUP BY
+                            project_id
+                    ) AS a1 ON p.id = a1.id
+                        LEFT JOIN (
+                        SELECT
+                            v.project_id AS id,
+                            COUNT( v.id ) AS num
+                        FROM
+                            volume v
+                        WHERE
+                            v.number NOT LIKE "%+%"
+                          AND v.actual_publication_date != ''
+			AND v.actual_publication_date IS NOT NULL
+                        GROUP BY
+                            v.project_id
+                    ) c0 ON p.id = c0.id
+                        LEFT JOIN (
+                        SELECT
+                            v.project_id AS id,
+                            COUNT( v.id ) AS num
+                        FROM
+                            volume v
+                        WHERE
+                            v.number LIKE "%+%"
+                          AND v.actual_publication_date != ''
+			AND v.actual_publication_date IS NOT NULL
+                        GROUP BY
+                            v.project_id
+                    ) AS c1 ON p.id = c1.id
+                        LEFT JOIN (
+                        SELECT
+                            v.project_id AS id,
+                            COUNT( v.id ) AS num
+                        FROM
+                            volume v
+                        WHERE
+                            v.state IN ( '正在设计', '正在校审' )
+                        GROUP BY
+                            v.project_id
+                    ) AS u ON p.id = u.id
+            ) tab
+                LEFT JOIN user_defined_top ut ON ut.top_id = tab.id
+                AND user_id = #{userId} AND menus_id = 28
+        ORDER BY
+            ut.time DESC,
+            tab.start_time DESC
+    </select>
     <select id="queryCompleteByAdmin" resultType="java.util.Map">
         SELECT id,
                `number`,
@@ -1335,7 +1431,7 @@
                number,
                `name`,
                dep,
-               tec,
+               tab.tec,
                state,
                principal,
                designer,
@@ -1711,6 +1807,17 @@
               AND wtp.user_id = #{id}
               AND wt.id = wtp.workday_tec_id
         ) AS p ON tab.tec = p.volume_tec
+        <if test="map.role == 3">
+            ,(select t.name as tec from technology t, user u where u.id = #{id}
+                                               and u.did = t.did
+                union
+                SELECT DISTINCT wt.volume_tec as tec            FROM workday_tec wt,
+            workday_tec_principal wtp
+            WHERE wt.project_id = #{map.id}
+            AND wtp.user_id = #{id}
+            AND wt.id = wtp.workday_tec_id) as t
+        where t.tec = tab.tec
+        </if>
         GROUP BY id
     </select>
     <select id="queryPartTaskByUser" resultType="java.util.Map">
@@ -2086,6 +2193,7 @@
                     p.`show`,
                     p.type,
                     p.frozen,
+                    p.control,
                     0 AS `mode`
                 FROM
                     (
@@ -2099,6 +2207,7 @@
                             p.principal,
                             p.`show`,
                             p.frozen,
+                            p.control,
                             p.type,
                             IFNULL( s.`show`, 1 ) AS `sShow`
                         FROM
@@ -2113,7 +2222,8 @@
                                     max( tab.principal ) AS principal,
                                     p.generalId = #{id} `show`,
                                     p.type,
-                                    p.frozen
+                                    p.frozen,
+                                    p.control
                                 FROM
                                     (
                                         SELECT
@@ -2254,6 +2364,7 @@
                     IFNULL( s.`show`, 1 ) = 1 AS `show`,
                     sci.type,
                     sci.frozen,
+                    sci.control,
                     sci.`mold`
                 FROM
                     (
@@ -2267,6 +2378,7 @@
                             1 AS principal,
                             0 AS type,
                             0 AS frozen,
+                            0 as control,
                             1 AS `mold`
                         FROM
                             scientific_project p,
@@ -2284,6 +2396,7 @@
                             1 AS principal,
                             0 AS type,
                             0 AS frozen,
+                            0 as control,
                             1 AS `mold`
                         FROM
                             scientific_project p,
@@ -3703,8 +3816,8 @@
                IFNULL(c.num, 0)                      AS completeZero,
                IFNULL(upc.num, 0)                      AS completeUp,
                IFNULL(inc.incomplete, 0)             AS incompleteZero,
-               IFNULL(plan0.num, 0)                  as plan0,
-               IFNULL(plan1.num, 0)                  as plan1,
+               ifnull(cplan0.num,IFNULL(plan0.num, 0))                  as plan0,
+               ifnull(cplan1.num,IFNULL(plan1.num, 0))                  as plan1,
                p.control,
                p.tec,
                p.`check`,
@@ -3753,6 +3866,37 @@
                               )
                           GROUP BY v.tec
                           UNION
+                          SELECT
+                              p.id,
+                              p.number,
+                              p.`name`,
+                              p.control,
+                              IFNULL( m.big_name, v.tec ) AS tec,
+                              c.`check`,
+                              m.id AS mid,
+                              0 AS principalRole
+                          FROM
+                              project p,
+                              technology t,
+                              `user` u ,
+                              role_menus r,
+                              volume v
+                                  LEFT JOIN check_plan c ON v.tec = c.tec
+                                  AND v.project_id = c.project_id
+                                  AND c.plan_month = #{date}
+                                  LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
+                          WHERE
+                              p.id = v.project_id
+                            AND p.id = #{id}
+                            AND
+                              u.id = #{userId}
+                            AND u.pid = r.role_id
+                            AND r.menus_id = 28
+                            AND u.did = t.did
+                            AND v.tec = t.`name`
+                          GROUP BY
+                              v.tec
+                        union
                           SELECT p.id,
                                  p.number,
                                  p.`name`,
@@ -3832,6 +3976,33 @@
                       ) AS n
                  GROUP BY tec
              ) AS plan0 ON p.tec = plan0.tec
+            left join(
+            SELECT
+                SUM(
+                        IFNULL( num, 0 )) AS num,
+                tec
+            FROM
+                (
+                    SELECT
+                        IFNULL( COUNT( v.id ), 0 ) AS num,
+                        IFNULL( m.big_name, c.tec ) AS tec,
+                        m.id AS mid
+                    FROM
+                        check_plan c
+                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name ,
+                        check_plan_volume v
+
+                    WHERE
+                        c.project_id = #{id}
+                      AND c.plan_month = #{date}
+                      AND v.number NOT LIKE "%+%"
+                      AND v.check_plan_id = c.id
+                    GROUP BY
+                        c.id
+                ) AS n
+            GROUP BY
+                tec
+        ) as cplan0 on p.tec = cplan0.tec
                  LEFT JOIN
              (
                  SELECT SUM(
@@ -3851,6 +4022,33 @@
                       ) AS n
                  GROUP BY tec
              ) AS plan1 ON p.tec = plan1.tec
+            left join(
+            SELECT
+                SUM(
+                        IFNULL( num, 0 )) AS num,
+                tec
+            FROM
+                (
+                    SELECT
+                        IFNULL( COUNT( v.id ), 0 ) AS num,
+                        IFNULL( m.big_name, c.tec ) AS tec,
+                        m.id AS mid
+                    FROM
+                        check_plan c
+                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name ,
+                        check_plan_volume v
+
+                    WHERE
+                        c.project_id = #{id}
+                      AND c.plan_month = #{date}
+                      AND v.number LIKE "%+%"
+                      AND v.check_plan_id = c.id
+                    GROUP BY
+                        c.id
+                ) AS n
+            GROUP BY
+                tec
+        ) as cplan1 on p.tec = cplan1.tec
                  LEFT JOIN (
             SELECT SUM(
                            IFNULL(num, 0)) AS num,
@@ -4026,19 +4224,39 @@
         v.state,
         v.designer,
         v.headman,
-        v.principal AS principal,
+        v.actual_principal AS principal,
         v.checker,
         v.start_date,
         v.planned_publication_date,
         v.actual_publication_date,
         v.wfInstId,
         v.plan_confirm,
-        w.workday
+        w.workday,
+        v.remark
         FROM
-        `volume` v left join volume_workday w on v.id = w.volume_id
+        `volume` v
+        LEFT JOIN volume_workday w ON v.id = w.volume_id
         WHERE
         v.project_id = #{id}
-        AND DATE_FORMAT( planned_publication_date, '%Y-%m' ) = #{date}
+        AND
+        IF
+        (EXISTS ( SELECT 1 FROM `check_plan` c WHERE
+                                                  c.project_id = #{id}
+                                                AND plan_month = #{date}
+                                    <if test="tec != '' and tec != '合计'">
+                                        AND c.tec like CONCAT("%",#{tec},"%")
+                                    </if> ),
+        EXISTS (
+        SELECT
+        1
+        FROM
+        check_plan_volume pv
+        WHERE
+         pv.project_id = #{id}
+        AND pv.check_month = #{date}
+        AND v.id = pv.volume_id
+        ),
+        DATE_FORMAT( planned_publication_date, '%Y-%m' ) = #{date})
         <if test="type == 1">
             AND v.number not LIKE "%+%"
         </if>
@@ -4050,29 +4268,41 @@
         </if>
     </select>
     <select id="queryUser" resultType="java.util.Map">
-        SELECT u.id,
-               u.`name`,
-               u.username,
-               p.frozen,
-               max(
-                       IF
-                           (r.id IS NULL, FALSE, TRUE))            AS admin,
-               max(
-                       IF
-                           (p.generalId = #{userId}, TRUE, FALSE)) AS general,
-               max(
-                       IF
-                           (wtp.id IS NULL, FALSE, TRUE))          AS principal
-        FROM `user` u
-                 LEFT JOIN role_menus r ON u.pid = r.role_id
-            AND r.menus_id = 10,
-             project p
-                 LEFT JOIN workday_tec wt ON p.id = wt.project_id
-                 LEFT JOIN workday_tec_principal wtp ON wt.id = wtp.workday_tec_id
-                 AND wtp.user_id = #{userId}
-        WHERE u.id = #{userId}
+        SELECT
+            u.id,
+            u.`name`,
+            u.username,
+            p.frozen,(
+                SELECT EXISTS (
+                               SELECT 1
+                               FROM
+                                   role_menus r WHERE u.pid = r.role_id
+                                                  AND r.menus_id = 10
+                           )) AS admin,
+            (
+                SELECT EXISTS (
+                               SELECT 1
+                               FROM
+                                   role_menus r WHERE u.pid = r.role_id
+                                                  AND r.menus_id = 28
+                           )) AS manage,
+            max(
+                    IF
+                        ( p.generalId = #{userId}, TRUE, FALSE )) AS general,
+            max(
+                    IF
+                        ( wtp.id IS NULL, FALSE, TRUE )) AS principal
+        FROM
+            `user` u,
+            project p
+                LEFT JOIN workday_tec wt ON p.id = wt.project_id
+                LEFT JOIN workday_tec_principal wtp ON wt.id = wtp.workday_tec_id
+                AND wtp.user_id = #{userId}
+        WHERE
+            u.id = #{userId}
           AND p.id = #{id}
-        GROUP BY u.id
+        GROUP BY
+            u.id
     </select>
     <select id="valWorkdayRate" resultType="java.lang.Integer">
         select ratio

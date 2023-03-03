@@ -188,10 +188,6 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
     if (limitMap == null){
       return Result.build(498,"该项目工时未分配");
     }
-    if (Double.parseDouble(map.get("num").toString())
-            > Double.parseDouble(limitMap.get("limit").toString())){
-      return Result.build(499,"额外申请工时超出可申请上限");
-    }
     proWorkdayDao.setNewProWorkday(id,map);
     proWorkdayDao.setNewProWorkdayDistribut(id,map);
     if (map.get("tecWorkday") != null) {

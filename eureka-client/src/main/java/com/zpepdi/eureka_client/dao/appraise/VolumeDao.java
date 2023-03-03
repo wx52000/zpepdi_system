@@ -91,7 +91,7 @@ public interface VolumeDao {
 
     List<Map<String,Object>> queryPlannedPublicDate(String search);
 
-    void setSinglePlanDate(Map<String,Object> map);
+    void setSinglePlanDate(@Param("userId")Integer userId,@Param("map") Map<String,Object> map);
 
 
     void setSingleRemark(Map<String,Object> map);

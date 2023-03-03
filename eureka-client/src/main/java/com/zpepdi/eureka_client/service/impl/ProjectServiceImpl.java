@@ -554,6 +554,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public List<Map> queryByManage(Integer userId) {
+        return projectDao.queryByManage(userId);
+    }
+
+    @Override
     public List<Map> queryCompleteByAdmin(User user) {
         return projectDao.queryCompleteByAdmin();
     }
@@ -872,9 +877,10 @@ public class ProjectServiceImpl implements ProjectService {
   public Result queryTaskByUser(Integer userId, Map<String,String> map) {
         int role = projectDao.queryProjectRole(userId, Integer.valueOf(map.get("id")));
         List<Map<String,Object>> list = new ArrayList<>();
-        if (role ==1 || role  == 2){
+        if (role ==1 || role  == 2 || role == 3){
+            map.put("role", String.valueOf(role));
             list = projectDao.queryAllTaskByUser(userId,map);
-        }else if (role == 3){
+        }else if (role == 4){
             list = projectDao.queryPartTaskByUser(userId,map);
         }else {
             Result.build(726,"暂无权限");

@@ -84,7 +84,7 @@ public interface VolumeService {
 
     Result queryPlannedPublicDate(String search);
 
-    Result setSinglePlanDate(Map<String,Object> map);
+    Result setSinglePlanDate(Integer userId,Map<String,Object> map);
 
     Result setSingleRemark(Map<String,Object> map);
 

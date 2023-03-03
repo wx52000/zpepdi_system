@@ -164,6 +164,10 @@ public class ProjectController {
         return Result.ok(projectService.queryByAdmin(userId));
     }
 
+    @RequestMapping("queryByManage")
+    public Result queryByManage(@UserId Integer userId){
+        return Result.ok(projectService.queryByManage(userId));
+    }
 
     @RequestMapping("queryCompleteByAdmin")
     public Result queryCompleteByAdmin(@RequestBody User user){

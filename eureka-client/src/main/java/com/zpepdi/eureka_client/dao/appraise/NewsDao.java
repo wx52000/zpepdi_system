@@ -72,6 +72,10 @@ public interface NewsDao {
   void checkPlan(@Param("userId")Integer userId,@Param("map") Map<String,Object> map,
                  @Param("check") Integer check);
 
+  void checkPlanAdjust(Map<String,Object> map);
+
+  void checkPlanAdjustReturn(Map<String,Object> map);
+
   void checkLog0(@Param("map") Map<String,Object> map,
              @Param("check") Integer check, @Param("id")Integer id);
 
@@ -123,6 +127,9 @@ public interface NewsDao {
 
   List<Map<String,Object>> planVolumeGeneral(Integer id);
 
+  List<Map<String,Object>> planAdjustGeneral(Integer id);
+
+  List<Map<String,Object>> planAdjustVolumeGeneral(Map<String,Object> map);
   //查询个人审核的实现的记录
   List<Map<String,Object>> adminQueryApply(Integer userId);
 

@@ -2721,7 +2721,35 @@
         ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday
         FROM
         `user` u
-        LEFT JOIN workday_tec t ON t.project_id = #{map.id}
+         JOIN (
+            SELECT wt.volume_tec
+            FROM workday_tec wt
+            WHERE EXISTS (
+                    SELECT 1
+                    FROM `user` u,
+                         role_menus m
+                    WHERE u.id = #{userId}
+                      AND u.pid = m.role_id
+                      AND m.menus_id = 10
+                    UNION
+                    SELECT 1
+                    FROM project p
+                    WHERE p.generalId = #{userId}
+                    and p.id = #{map.id})
+              AND wt.project_id = #{map.id}
+            UNION
+            SELECT wt.volume_tec
+            FROM workday_tec wt,
+                 `user` u,
+                 role_menus m,
+                 technology t
+            WHERE u.id = #{userId}
+              AND u.pid = m.role_id
+              AND m.menus_id = 28
+              AND t.did = u.did
+              AND wt.volume_tec = t.`name`
+              AND wt.project_id = #{map.id}
+        )  t
         LEFT JOIN (
         SELECT
         vu.designer,

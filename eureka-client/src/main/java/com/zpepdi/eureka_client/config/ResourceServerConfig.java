@@ -77,6 +77,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers("/myLogout").permitAll()
                 .antMatchers("/test").permitAll()
                 .antMatchers("/produceDataTransmit").permitAll()
+                .antMatchers("/druid").permitAll()
                 .antMatchers("/error").permitAll()
                 .and()
                 .authorizeRequests()

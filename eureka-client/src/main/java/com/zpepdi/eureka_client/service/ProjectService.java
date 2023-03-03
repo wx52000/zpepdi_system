@@ -64,6 +64,8 @@ public interface ProjectService {
     //管理员查询
     List<Map> queryByAdmin(Integer userId);
 
+    List<Map> queryByManage(Integer userId);
+
     List<Map> queryCompleteByAdmin(User user);
     //作为设总查询
     List<Map> queryByGeneral(User user);

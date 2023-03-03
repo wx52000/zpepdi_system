@@ -402,6 +402,20 @@
             `check` = #{check}, checker = #{userId}, check_time = now()
         where id = #{map.id}
     </update>
+    <update id="checkPlanAdjust">
+        <foreach collection="list" item="item" separator=";">
+        update volume
+        set plan_publication_check = 1
+        where id = #{item.id}
+        </foreach>
+    </update>
+    <update id="checkPlanAdjustReturn">
+        <foreach collection="list" item="item" separator=";">
+        update volume v, volume_plan_log l
+        set v.plan_publication_check = 2, v.planned_publication_date = l.plan_publiction_date
+        where v.id = #{item.id} and v.id = l.volume_id
+        </foreach>
+    </update>
     <select id="count" resultType="java.lang.Integer">
         SELECT
             COUNT(*)
@@ -667,6 +681,14 @@
                 where c.project_id = p.id
                 and p.generalId = #{id}
                 and c.check = 0
+                union All
+                SELECT v.id
+                FROM volume v,
+                     project p
+                WHERE plan_publication_check = 0
+                and v.project_id = p.id
+                and p.generalId = #{id}
+                GROUP BY project_id, tec
             ) AS tab
     </select>
     <select id="queryCountByType" resultType="java.util.Map">
@@ -979,7 +1001,22 @@
                     c.project_id = p.id
                   AND p.generalId = #{id}
                   AND c.`check` = 0
-                ) as count11
+                ) as count11,
+            (SELECT COUNT(*)
+             FROM(
+                     SELECT
+                         p.id, v.tec
+                     FROM
+                         volume v,
+                         project p
+                     WHERE
+                         plan_publication_check = 0
+                       AND v.project_id = p.id
+                       AND p.generalId = #{id}
+                     GROUP BY
+                         project_id,
+                         tec
+                 ) as t) as count12
     </select>
     <select id="queryByAdmin" resultMap="queryByAdminList">
       select 0 as type, p.id as id,
@@ -2754,12 +2791,48 @@
         WHERE c.project_id = p.id
           AND p.generalId = #{userId}
           AND u.id = c.`handler`
+          and c.check = 0
     </select>
     <select id="planVolumeGeneral" resultType="java.util.Map">
         SELECT
             volume_id,`number`,`name`,state,designer,checker,principal,plan_publication
         FROM check_plan_volume
         WHERE check_plan_id = #{id}
+    </select>
+    <resultMap id="planAdjustGeneral" type="map">
+    <result column="id" property="id"></result>
+    <result column="number" property="number"></result>
+    <result column="name" property="name"></result>
+    <result column="tec" property="tec"></result>
+    <result column="result" property="result"></result>
+    <result column="type" property="type"></result>
+    <collection property="list" column="id = id,tec,tec"
+                javaType="ARRAYLIST" select="planAdjustVolumeGeneral"></collection>
+    </resultMap>
+    <select id="planAdjustGeneral" resultMap="planAdjustGeneral">
+        SELECT
+            p.id, v.tec, p.name, p.number,
+            FALSE AS result,
+            12 as `type`
+        FROM
+            volume v,
+            project p
+        WHERE
+            plan_publication_check = 0
+          AND v.project_id = p.id
+          AND p.generalId = #{id}
+        GROUP BY
+            project_id,
+            tec
+    </select>
+    <select id="planAdjustVolumeGeneral" resultType="java.util.Map">
+        select
+        id,`number`,`name`,state,designer,checker,principal,planned_publication_date
+        from
+        volume
+        where project_id = #{id}
+        and tec = #{tec}
+        and plan_publication_check = 0
     </select>
 
 </mapper>
