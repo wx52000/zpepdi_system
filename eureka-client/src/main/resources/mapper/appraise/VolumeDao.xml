@@ -1375,21 +1375,22 @@
         left join (
             SELECT
                 COUNT(*) AS num,
-                m.big_name AS tec,
-                m.did,
-                `month`
+                m.big_name as tec,
+                RIGHT ( c.plan_month, 2 ) AS `month`
             FROM
                 project p,
                 major_contrast_technology m,
-                volume_plan_record vp
+                check_plan c,
+                check_plan_volume vp
             WHERE
-                p.id = vp.project_id
-              AND vp.tec = m.small_name
-              AND RIGHT ( p.number, 1 ) = "s"
+                RIGHT ( p.number, 1 ) = "s"
+              AND p.id = c.project_id
               AND vp.number NOT LIKE "%+%"
+              AND c.id = vp.check_plan_id
+              AND c.tec = m.small_name
+              AND c.plan_month LIKE CONCAT(#{year},"%")
             GROUP BY
-                m.big_name,
-                `month`
+                m.big_name, c.plan_month
             ) as record on record.tec = m.big_name and record.`month` = m.`month`
         LEFT JOIN (
         SELECT
@@ -1712,21 +1713,22 @@
         left join (
             SELECT
                 COUNT(*) AS num,
-                m.big_name AS tec,
-                m.did,
-                `month`
+                m.big_name as tec,
+                RIGHT ( c.plan_month, 2 ) AS `month`
             FROM
                 project p,
                 major_contrast_technology m,
-                volume_plan_record vp
+                check_plan c,
+                check_plan_volume vp
             WHERE
-                p.id = vp.project_id
-              AND vp.tec = m.small_name
-              AND RIGHT ( p.number, 1 ) = "s"
+                RIGHT ( p.number, 1 ) = "s"
+              AND p.id = c.project_id
               AND vp.number LIKE "%+%"
+              AND c.id = vp.check_plan_id
+              AND c.tec = m.small_name
+              AND c.plan_month LIKE CONCAT(#{year},"%")
             GROUP BY
-                m.big_name,
-                `month`
+                m.big_name, c.plan_month
         ) as record on record.tec = m.big_name and record.`month` = m.`month`
         LEFT JOIN (
         SELECT
@@ -2128,21 +2130,22 @@
                         left join (
                         SELECT
                             COUNT(*) AS num,
-                            m.big_name AS tec,
-                            m.did,
-                            `month`
+                            m.big_name as tec,
+                            RIGHT ( c.plan_month, 2 ) AS `month`
                         FROM
                             project p,
                             major_contrast_technology m,
-                            volume_plan_record vp
+                            check_plan c,
+                            check_plan_volume vp
                         WHERE
-                            p.id = vp.project_id
-                          AND vp.tec = m.small_name
-                          AND RIGHT ( p.number, 1 ) = "s"
+                            RIGHT ( p.number, 1 ) = "s"
+                          AND p.id = c.project_id
                           AND vp.number NOT LIKE "%+%"
+                          AND c.id = vp.check_plan_id
+                          AND c.tec = m.small_name
+                          AND c.plan_month LIKE CONCAT(#{year},"%")
                         GROUP BY
-                            m.big_name,
-                            `month`
+                            m.big_name, c.plan_month
                     ) as record on record.tec = m.big_name and record.`month` = m.`month`
                         LEFT JOIN (
                         SELECT
@@ -2465,21 +2468,22 @@
                         left join (
                         SELECT
                             COUNT(*) AS num,
-                            m.big_name AS tec,
-                            m.did,
-                            `month`
+                            m.big_name as tec,
+                            RIGHT ( c.plan_month, 2 ) AS `month`
                         FROM
                             project p,
                             major_contrast_technology m,
-                            volume_plan_record vp
+                            check_plan c,
+                            check_plan_volume vp
                         WHERE
-                            p.id = vp.project_id
-                          AND vp.tec = m.small_name
-                          AND RIGHT ( p.number, 1 ) = "s"
+                            RIGHT ( p.number, 1 ) = "s"
+                          AND p.id = c.project_id
                           AND vp.number LIKE "%+%"
+                          AND c.id = vp.check_plan_id
+                          AND c.tec = m.small_name
+                          AND c.plan_month LIKE CONCAT(#{year},"%")
                         GROUP BY
-                            m.big_name,
-                            `month`
+                            m.big_name, c.plan_month
                     ) as record on record.tec = m.big_name and record.`month` = m.`month`
                         LEFT JOIN (
                         SELECT
@@ -2697,29 +2701,31 @@
         v.principal AS principal,
         v.checker,
         v.state,
-        v.start_date,
-        Cast(vp.planned_publication_date as char(10)) as planned_publication_date,
+        cast(v.start_date as char(10)) as start_date,
+        cast(pv.plan_publication as char(10)) as planned_publication_date,
         v.wfInstId,
         w.workday
         FROM
         project p,
         major_contrast_technology m,
-        volume_plan_record vp,
+        check_plan cp,
+        check_plan_volume pv,
         `volume` v
         LEFT JOIN volume_workday w ON v.id = w.volume_id
         WHERE
-        RIGHT ( p.number, 1 ) = "s"
-        AND p.id = vp.project_id
-        AND m.small_name = v.tec
+        p.id = cp.project_id
+        and RIGHT ( p.number, 1 ) = "s"
+        and m.small_name = v.tec
         AND m.big_name = #{tec}
+        AND pv.volume_id = v.id
+        AND pv.check_plan_id = cp.id
+        and cp.plan_month = #{date}
         <if test = "type == 0" >
             AND v.number NOT LIKE "%+%"
         </if>
         <if test = "type == 1" >
             AND v.number LIKE "%+%"
         </if>
-        AND DATE_FORMAT( vp.planned_publication_date, '%Y-%m' ) = #{date}
-        and vp.volume_id = v.id
     </select>
     <select id="tecProgressByProjectId" resultType="java.util.Map">
         SELECT

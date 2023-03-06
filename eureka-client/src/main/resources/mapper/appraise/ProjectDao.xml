@@ -2322,7 +2322,7 @@
                                   AND h.submit_date = #{date} UNION
                                 SELECT
                                     t.id,
-                                    t.designer_workday + t.checker_workday + t.checker_workday + t.principal_workday AS workday,
+                                    t.designer_workday + t.checker_workday + t.headman_workday + t.principal_workday AS workday,
                                     t.project_id,
                                     t.tec
                                 FROM
