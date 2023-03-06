@@ -172,4 +172,9 @@ public interface ProjectDao {
     List<Map<String,Object>> drawtotal(Map<String,Object> map);
     List<Map<String,Object>> getdateInfo(Map<String,Object> map);
 
+
+    List<Map<String,Object>> downInfo(Map<String,Object> map);
+
+    List<Map<String,Object>> tecInfo(Map<String,Object> map);
+
 }

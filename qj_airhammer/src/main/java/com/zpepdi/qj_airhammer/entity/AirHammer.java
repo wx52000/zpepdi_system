@@ -1,7 +1,6 @@
 package com.zpepdi.qj_airhammer.entity;
 
 import java.math.BigDecimal;
-import java.util.Formatter;
 
 public class AirHammer {
 

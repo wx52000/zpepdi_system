@@ -1,15 +1,24 @@
 package com.zpepdi.qj_airhammer.service.impl;
 
 import com.zpepdi.qj_airhammer.capacity.Water;
+import com.zpepdi.qj_airhammer.dao.WaterDao;
 import com.zpepdi.qj_airhammer.result.Result;
-import com.zpepdi.qj_airhammer.service.AirHammerService;
 import com.zpepdi.qj_airhammer.service.PtService;
+import org.apache.commons.lang.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 @Service
 public class PtServiceImpl implements PtService {
+
+    @Autowired
+    private WaterDao waterDao;
+
+
     @Override
     public Result pt(Map<String, Object> map){
         Water water=new Water();
@@ -350,7 +359,7 @@ public class PtServiceImpl implements PtService {
 
     @Override
     public Result jl(Map<String, Object> map){
-Water water=new Water();
+        Water water=new Water();
         String Mpa1=map.get("Mpa1").toString();
         String Mpa3=map.get("Mpa3").toString();
         String T1=map.get("T1").toString();
@@ -477,7 +486,6 @@ Water water=new Water();
         map1.put("T2",temp2);
         return Result.ok(map1);
     }
-
     @Override
     public Result ds(Map<String, Object> map){
         Water water=new Water();
@@ -579,7 +587,6 @@ Water water=new Water();
         }
         double x2=water.x_ps(mpa2,s);
         String m_type2=water.m_type_Ps(mpa2,s);
-
         Map<String,Object> map1=new HashMap<>();
         map1.put("Mpa2",mpa2);
         map1.put("S",s);
@@ -589,8 +596,25 @@ Water water=new Water();
         map1.put("meduim2",m_type2);
         map1.put("T2",temp2);
         return Result.ok(map1);
-
-
-
     }
+
+    @Override
+    public Result save(Integer userId,Map<String, Object> map){
+        String kind=map.get("kind").toString();
+        Object bySelect=waterDao.doSelect(userId,kind);
+        System.out.println(bySelect);
+        if(StringUtils.isEmpty(bySelect)){
+            waterDao.doInsert(userId,map);
+        }
+        else{
+            waterDao.doUpdate(userId,map);
+        }
+        return null;
+    }
+
+    @Override
+    public Result show(Integer userId,Map<String, Object> map){
+        return Result.ok(waterDao.show(userId,map));
+    }
+
 }

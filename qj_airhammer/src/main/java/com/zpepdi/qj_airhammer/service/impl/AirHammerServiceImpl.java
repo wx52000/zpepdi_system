@@ -1,23 +1,14 @@
 package com.zpepdi.qj_airhammer.service.impl;
 
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.read.listener.ReadListener;
-import com.alibaba.excel.write.metadata.style.WriteCellStyle;
-import com.alibaba.excel.write.metadata.style.WriteFont;
-import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import com.zpepdi.qj_airhammer.Listener.ExcelListener;
 import com.zpepdi.qj_airhammer.entity.AirHammer;
 import com.zpepdi.qj_airhammer.entity.Excel;
-import com.zpepdi.qj_airhammer.result.Result;
 import com.zpepdi.qj_airhammer.service.AirHammerService;
-import jxl.CellView;
-import jxl.Workbook;
 import jxl.write.*;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,9 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.math.BigDecimal.ROUND_HALF_UP;
 
@@ -36,7 +25,7 @@ public class AirHammerServiceImpl implements AirHammerService {
 
 
     @Override
-    public HttpServletResponse compute(HttpServletResponse response,AirHammer airHammer, MultipartFile file) throws IOException, WriteException {
+    public HttpServletResponse compute(HttpServletResponse response, AirHammer airHammer, MultipartFile file) throws IOException, WriteException {
         BigDecimal num1 = new BigDecimal("1.05");
         BigDecimal num2 = new BigDecimal("1000");
         BigDecimal num3 = new BigDecimal("3600");
@@ -60,8 +49,6 @@ public class AirHammerServiceImpl implements AirHammerService {
                     list.get(i).setF(String.valueOf(big3));
                     list.get(i).setFz(a);
                     list.get(i).setTf(String.valueOf(b));
-
-
         }
         String fileName =  "气锤计算" + System.currentTimeMillis() + ".xls";
         HSSFWorkbook workbook =  new HSSFWorkbook();

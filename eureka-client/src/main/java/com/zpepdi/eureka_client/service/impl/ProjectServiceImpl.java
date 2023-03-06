@@ -7,6 +7,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.dao.zjepdi.ZJEPDIDataTransmissionDao;
 import com.zpepdi.eureka_client.tools.*;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -14,14 +16,20 @@ import org.springframework.transaction.annotation.Transactional;
 import com.zpepdi.eureka_client.entity.*;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.ProjectService;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static org.apache.poi.hssf.record.cf.BorderFormatting.BORDER_THIN;
 
 @Service("ProjectService")
 @Transactional
@@ -1108,16 +1116,10 @@ public class ProjectServiceImpl implements ProjectService {
         List<String> list = null;
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
-
-
             Date d1 = new SimpleDateFormat("yyyy-MM").parse(map.get("startMonth").toString());//定义起始日期
-
             Date d2 = new SimpleDateFormat("yyyy-MM").parse(map.get("endMonth").toString());//定义结束日期  可以去当前月也可以手动写日期。
-
             Calendar dd = Calendar.getInstance();//定义日期实例
-
             dd.setTime(d1);//设置日期起始时间
-
             list = new ArrayList<>();
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
@@ -1137,7 +1139,161 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result getdateInfo(Map<String, Object> map) {
-
         return Result.ok(projectDao.getdateInfo(map));
+    }
+
+    @Override
+    public HttpServletResponse downinfo(HttpServletResponse response, Integer userId,Map<String, Object> map) {
+        List<Map<String, Object>> datemap = new ArrayList<>();
+        List<String> list = new ArrayList<>();
+        datemap = projectDao.getdateInfo(map);
+        for (int i = 0; i < datemap.size(); i++) {
+            list.add(datemap.get(i).get("date").toString());
+        }
+        List<String> list1 = null;
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
+            Date d1 = new SimpleDateFormat("yyyy-MM").parse(list.get(0));//定义起始日期
+            Date d2 = new SimpleDateFormat("yyyy-MM").parse(list.get(list.size() - 1));//定义结束日期  可以去当前月也可以手动写日期。
+            Calendar dd = Calendar.getInstance();//定义日期实例
+            dd.setTime(d1);//设置日期起始时间
+            list1 = new ArrayList<>();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            while (d2.after(dd.getTime())) {//判断是否到结束日期
+                String str = sdf.format(dd.getTime());
+                System.out.println(str);//输出日期结果
+                list1.add(str);
+                dd.add(Calendar.MONTH, 1);//进行当前日期月份加1
+            }
+            String d3 = sdf.format(d2);
+            list1.add(d3);
+        } catch (Exception e) {
+        }
+        System.out.println(list1);
+        map.put("startMonth", list.get(0));
+        map.put("endMonth", list.get(list.size() - 1));
+        map.put("date", list1);
+        map.put("datestring", JSONObject.toJSONString(list1));
+        map.put("userId", userId);
+        List<Map<String, Object>> info = new ArrayList<>();
+        List<String> tec = new ArrayList<>();
+        try {
+            info=projectDao.downInfo(map);
+            //使用poi下载文件
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            String fileName="详细信息";
+            //创建sheet
+            HSSFSheet sheet1 = workbook.createSheet("详细信息");
+            //创建row信息
+            HSSFRow row = sheet1.createRow(0);
+            //创建单元格头标
+            ArrayList<String> title = new ArrayList<>();
+            title.add("专业");
+            title.add("类型");
+
+            for(int i=0;i<list1.size();i++){
+               title.add(list1.get(i));
+            }
+            HSSFCell cell;
+            for(int i = 0 ;i<title.size();i++){
+                cell = row.createCell(i);
+                cell.setCellValue(title.get(i));
+            }
+            int max=0;
+            max=title.size();
+            //创建列
+            if (info != null && info.size() != 0) {
+                for (int i=0;i<info.size();i++) {
+                    row = sheet1.createRow(i + 1);
+                    for(int j = 0;j<title.size();j++){
+                        cell = row.createCell(j);
+                        //防止下标越界
+                        cell.setCellValue(info.get(i).get(title.get(j)).toString());
+                    }
+                }
+            }
+            //分专业创建sheet
+            for(int i=0;i<info.size();i++){
+                tec.add(info.get(i).get("专业").toString());
+            }
+            LinkedHashSet<String> hashSet = new LinkedHashSet<>(tec);
+            ArrayList<String> listWithoutDuplicates = new ArrayList<>(hashSet);
+            System.out.println(listWithoutDuplicates);
+            List<Map<String, Object>> tecinfo = new ArrayList<>();
+            Map<String, Object> tecmap = new HashMap<>();
+            for(int i=0;i<listWithoutDuplicates.size();i++){
+                HSSFSheet sheet = workbook.createSheet(listWithoutDuplicates.get(i));
+                tecmap=new HashMap<>();
+                tecmap.put("tec",listWithoutDuplicates.get(i));
+                tecmap.put("startMonth", list.get(0));
+                tecmap.put("endMonth", list.get(list.size() - 1));
+                tecmap.put("id", map.get("id"));
+                tecinfo=projectDao.tecInfo(tecmap);
+                HSSFRow row1 = sheet.createRow(0);
+                //创建单元格头标
+                row1.createCell(0).setCellValue("编号");
+                row1.createCell(1).setCellValue("卷册名");
+                row1.createCell(2).setCellValue("工时");
+                row1.createCell(3).setCellValue("状态");
+                row1.createCell(4).setCellValue("开始时间");
+                row1.createCell(5).setCellValue("实际出版时间");
+                row1.createCell(6).setCellValue("最新计划时间");
+                row1.createCell(7).setCellValue("主设");
+                row1.createCell(8).setCellValue("设计");
+                row1.createCell(9).setCellValue("校核");
+                row1.createCell(10).setCellValue("组长");
+                if (tecinfo != null && tecinfo.size() != 0) {
+                    for (int k=0;k<tecinfo.size();k++) {
+                        int lastRowNum = sheet.getLastRowNum();
+                        HSSFRow lastRow = sheet.createRow(lastRowNum + 1);
+                        lastRow.createCell(0).setCellValue(tecinfo.get(k).get("number").toString());
+                        lastRow.createCell(1).setCellValue(tecinfo.get(k).get("name").toString());
+                        lastRow.createCell(2).setCellValue(tecinfo.get(k).get("workday").toString());
+                        lastRow.createCell(3).setCellValue(tecinfo.get(k).get("state").toString());
+                        lastRow.createCell(4).setCellValue(tecinfo.get(k).get("start_date").toString());
+                        lastRow.createCell(5).setCellValue(tecinfo.get(k).get("actual_publication_date").toString());
+                        lastRow.createCell(6).setCellValue(tecinfo.get(k).get("planned_publication_date").toString());
+                        lastRow.createCell(7).setCellValue(tecinfo.get(k).get("principal").toString());
+                        lastRow.createCell(8).setCellValue(tecinfo.get(k).get("designer").toString());
+                        lastRow.createCell(9).setCellValue(tecinfo.get(k).get("checker").toString());
+                        lastRow.createCell(10).setCellValue(tecinfo.get(k).get("headman").toString());
+                    }
+                }
+            }
+            //列宽自适应
+            for (int columnNum = 0; columnNum <= max; columnNum++) {
+                int columnWidth = sheet1.getColumnWidth(columnNum) / 256;
+                for (int rowNum = 0; rowNum < sheet1.getLastRowNum(); rowNum++) {
+                    HSSFRow currentRow;
+                    if (sheet1.getRow(rowNum) == null) {
+                        currentRow = sheet1.createRow(rowNum);
+                    } else {
+                        currentRow = sheet1.getRow(rowNum);
+                    }
+                    if (currentRow.getCell(columnNum) != null) {
+                        HSSFCell currentCell = currentRow.getCell(columnNum);
+                        if (currentCell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
+                            int length = currentCell.getStringCellValue().getBytes().length;
+                            if (columnWidth < length) {
+                                columnWidth = length;
+                            }
+                        }
+                    }
+                }
+                sheet1.setColumnWidth(columnNum, columnWidth * 256);
+            }
+            response.setContentType("application/vnd.ms-excel;charset:utf-8");
+            OutputStream os = response.getOutputStream();
+            //这里进行设置了一个文件名，其实也可以不要设置了，
+            //在前端进行下载的时候需要重新给定一个文件名进行下载
+            response.setHeader("Content-disposition","attachment;filename=="+ URLEncoder.encode(fileName,"UTF-8"));
+            workbook.write(os);
+            os.flush();
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return response;
     }
 }
