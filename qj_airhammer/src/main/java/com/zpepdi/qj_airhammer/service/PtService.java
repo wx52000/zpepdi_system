@@ -16,4 +16,9 @@ public interface PtService {
     Result jl(Map<String, Object> map);
 
     Result ds(Map<String, Object> map);
+
+    Result save(Integer userId,Map<String, Object> map);
+
+    Result show(Integer userId,Map<String, Object> map);
+
 }

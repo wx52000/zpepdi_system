@@ -362,5 +362,11 @@ public class ProjectController {
     public Result getdateinfo(@RequestBody Map<String, Object> map) {return projectService.getdateInfo(map);
     }
 
+    //下载项目信息
+    @RequestMapping("downinfo")
+    public HttpServletResponse downinfo(HttpServletResponse response,@UserId Integer userId, @RequestBody Map<String, Object> map){
+        return projectService.downinfo(response,userId,map);
+    }
+
 
 }

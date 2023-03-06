@@ -4618,8 +4618,253 @@ as t group by date
             DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
         FROM
             volume v
-        where project_id=#{id}
+        where project_id=#{id} and v.actual_publication_date is not null
         order by date
     </select>
 
+    <select id="downInfo" resultType="java.util.Map">
+        SELECT
+        IFNULL( m.big_name, tab.tec ) AS "专业",
+        case when type=0 then "零版"
+        when type=1 then "升版" else type end as "类型",
+        <foreach collection="date" item="item" index="index"
+                 separator=",">
+           `${item}`
+        </foreach>
+        FROM(
+        SELECT
+        m.tec AS tec,
+        0 AS type,
+        <foreach collection="date" item="item" index="index"
+                 separator=",">
+            MAX( IF ( m.ym = #{item}, tab.num, 0 )) AS  #{item}
+        </foreach>
+        FROM
+        (
+        SELECT DISTINCT
+        v.tec,
+        jt.ym
+        FROM
+        volume v,
+        JSON_TABLE (
+        #{datestring},
+        '$[*]' COLUMNS ( `ym` VARCHAR ( 40 ) PATH '$' )) AS jt
+        WHERE
+        v.project_id = #{id}
+        AND EXISTS (
+        SELECT
+        1
+        FROM
+        role_menus r,
+        `user` u
+        WHERE
+        u.id = #{userId}
+        AND u.pid = r.role_id
+        AND r.menus_id = 10 UNION
+        SELECT
+        1
+        FROM
+        project p1
+        WHERE
+        p1.generalId = #{userId}
+        AND p1.id = #{id}
+        ) UNION
+        SELECT DISTINCT
+        wt.volume_tec AS tec,
+        jt.ym
+        FROM
+        JSON_TABLE (
+        #{datestring},
+        '$[*]' COLUMNS ( `ym` VARCHAR ( 40 ) PATH '$' )) AS jt,
+        workday_tec wt,
+        workday_tec_principal wtp
+        WHERE
+        wtp.user_id = #{userId}
+        AND wtp.workday_tec_id = wt.id
+        AND wt.project_id = #{id}
+        ) AS m
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        SUM( w.workday ) AS workday,
+        v.tec,
+        DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS ym
+        FROM
+        volume v
+        LEFT JOIN volume_workday w ON v.id = w.volume_id
+        WHERE
+        v.project_id = #{id}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) >= #{startMonth}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )  &lt;= #{endMonth}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        v.tec,
+        ym
+        ) AS tab ON tab.tec = m.tec
+        AND tab.ym = m.ym
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        sum( w.workday ) AS workday,
+        v.tec AS tec
+        FROM
+        volume v
+        LEFT JOIN volume_workday w ON w.volume_id = v.id
+        WHERE
+        v.project_id = #{id}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) >= #{startMonth}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )  &lt;= #{endMonth}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        v.tec
+        ) AS s ON s.tec = m.tec
+        LEFT JOIN (
+        SELECT
+        COUNT( v.id ) AS num6,
+        v.tec AS tec
+        FROM
+        volume v
+        WHERE
+        v.project_id = #{id}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        v.tec
+        ) AS a ON a.tec = m.tec
+        GROUP BY
+        tec UNION
+        SELECT
+        m.tec AS tec,
+
+        1 AS type,
+        <foreach collection="date" item="item" index="index"
+                 separator=",">
+            MAX( IF ( m.ym = #{item}, tab.num, 0 )) AS  #{item}
+        </foreach>
+        FROM
+        (
+        SELECT DISTINCT
+        v.tec,
+        `ym`
+        FROM
+        volume v,
+        JSON_TABLE (#{datestring},'$[*]' COLUMNS ( `ym` VARCHAR ( 40 ) PATH '$' )) AS jt
+        WHERE
+        v.project_id = #{id}
+        AND EXISTS (
+        SELECT
+        1
+        FROM
+        role_menus r,
+        `user` u
+        WHERE
+        u.id = #{userId}
+        AND u.pid = r.role_id
+        AND r.menus_id = 10 UNION
+        SELECT
+        1
+        FROM
+        project p1
+        WHERE
+        p1.generalId = #{userId}
+        AND p1.id = #{id}
+        ) UNION
+        SELECT DISTINCT
+        wt.volume_tec AS tec,
+        ym
+        FROM
+        JSON_TABLE (
+        #{datestring},'$[*]' COLUMNS ( `ym` VARCHAR ( 40 ) PATH '$' )) AS jt,
+        workday_tec wt,
+        workday_tec_principal wtp
+        WHERE
+        wtp.user_id = #{userId}
+        AND wtp.workday_tec_id = wt.id
+        AND wt.project_id = #{id}
+        ) AS m
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        SUM( w.workday ) AS workday,
+        v.tec,
+        DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS ym
+        FROM
+        volume v
+        LEFT JOIN volume_workday w ON v.id = w.volume_id
+        WHERE
+        v.project_id = #{id}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) >= #{startMonth}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )  &lt;= #{endMonth}
+        AND v.number LIKE "%+%"
+        GROUP BY
+        v.tec,
+        ym
+        ) AS tab ON tab.tec = m.tec
+        AND tab.ym = m.ym
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        sum( w.workday ) AS workday,
+        v.tec AS tec
+        FROM
+        volume v
+        LEFT JOIN volume_workday w ON w.volume_id = v.id
+        WHERE
+        v.project_id = #{id}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) >= #{startMonth}
+        AND DATE_FORMAT( v.actual_publication_date, '%Y-%m' )  &lt;= #{endMonth}
+        AND v.number LIKE "%+%"
+        GROUP BY
+        v.tec
+        ) AS s ON s.tec = m.tec
+        LEFT JOIN (
+        SELECT
+        COUNT( v.id ) AS num6,
+        v.tec AS tec
+        FROM
+        volume v
+        WHERE
+        v.project_id = #{id}
+        AND v.number NOT LIKE "%+%"
+        GROUP BY
+        v.tec
+        ) AS a ON a.tec = m.tec
+        GROUP BY
+        tec	) AS tab
+        LEFT JOIN major_contrast_technology m ON tab.tec = m.small_name
+        GROUP BY
+        IFNULL( m.big_name, tab.tec ),
+        `type`
+        ORDER BY
+        m.id DESC
+    </select>
+    <select id="tecInfo" resultType="java.util.Map">
+        SELECT
+            v.number,
+            v.`name`,
+            v.designer,
+            IFNULL( v.headman,"") as headman,
+            IFNULL( v.actual_principal ,"")AS principal,
+            v.checker,
+            v.state,
+            v.start_date,
+            v.actual_publication_date,
+            IFNULL( v.planned_publication_date,"") AS planned_publication_date,
+            IFNULL( w.workday ,"") AS workday
+        FROM
+        `volume` v
+        LEFT JOIN  major_contrast_technology m on v.tec = m.small_name
+        left join volume_workday w on v.id = w.volume_id
+        WHERE
+        v.project_id = #{id}
+        and v.tec IN (
+        SELECT small_name
+        FROM
+        major_contrast_technology
+        WHERE
+        big_name = #{tec}
+        UNION
+        SELECT #{tec})
+        AND DATE_FORMAT( actual_publication_date, '%Y-%m' ) >= #{startMonth}
+        AND DATE_FORMAT( actual_publication_date, '%Y-%m' )  &lt;= #{endMonth}
+    </select>
 </mapper>

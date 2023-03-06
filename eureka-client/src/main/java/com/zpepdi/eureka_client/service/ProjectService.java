@@ -7,6 +7,7 @@ import com.zpepdi.eureka_client.result.Result;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
@@ -139,5 +140,7 @@ public interface ProjectService {
     Result drawtotal(Map<String,Object> map);
 
     Result getdateInfo(Map<String,Object> map);
+
+    HttpServletResponse downinfo(HttpServletResponse response,Integer userId, Map<String, Object> map);
 
 }
