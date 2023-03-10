@@ -400,7 +400,17 @@
         update check_plan
         set plan_month = #{map.plan_month}, workday_month = #{map.workday_month},
             `check` = #{check}, checker = #{userId}, check_time = now()
-        where id = #{map.id}
+        where id = #{map.id};
+        update check_plan_volume
+        set check_month = #{map.plan_month}
+        where check_plan_id = #{map.id};
+        UPDATE volume v, check_plan_volume pv
+        SET v.planned_publication_date = #{map.end}
+        WHERE pv.volume_id = v.id
+        and check_plan_id = #{map.id};
+        AND( v.planned_publication_date is NULL
+        OR v.planned_publication_date &lt; #{map.start}
+        OR v.planned_publication_date &gt; #{map.end});
     </update>
     <update id="checkPlanAdjust">
         <foreach collection="list" item="item" separator=";">
@@ -626,10 +636,7 @@
                   AND p.id = c.project_id
                   AND c.tec = v.tec
                   AND v.project_id = p.id
-                  AND (
-                        EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-                        OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-                    )
+                  AND EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal)
                 GROUP BY
                     p.id,
                     c.tec,
@@ -927,10 +934,7 @@
                           AND p.id = c.project_id
                           AND c.tec = v.tec
                           AND v.project_id = p.id
-                          AND (
-                                EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-                                OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-                            )
+                          AND EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
                         GROUP BY
                             p.id,
                             c.tec,
@@ -1340,8 +1344,7 @@
           and w.project_id = p.id
           and w.volume_tec = v.tec
           AND v.project_id = p.id
-          AND (EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 2 )
-            OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 2 ) )
+          AND EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 2 )
         GROUP BY
             p.id,
             v.tec,

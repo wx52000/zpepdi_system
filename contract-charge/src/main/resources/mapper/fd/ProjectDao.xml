@@ -19,6 +19,20 @@
                     select="queryContractByProjectId"
                     column="id = id"></collection>
     </resultMap>
+    <insert id="insertSingle">
+        INSERT INTO `contract_charge`.`market_project`(`id`, `number`, `name`, `first_party`,
+               `task_resource`, `type`, `level`, `is_off_shore`, `state`, `province`,
+            `build_place`, `build_type`, `dep`, entry_user)
+        values (
+              #{map.id},#{map.number}, #{map.name}, #{map.first_party},
+              #{map.task_resource},#{map.type}, #{map.level}, #{map.is_off_shore},
+              #{map.state}, #{map.province}, #{map.build_place},#{map.build_type}, #{map.dep}, #{userId}
+              )
+    </insert>
+    <insert id="addRelateContract">
+        insert ignore into contract_relate_project(contract_id, project_id,entry_user, entry_time)
+        values (#{map.contract_id}, #{map.project_id}, #{userId}, now())
+    </insert>
     <update id="setLedger" keyColumn="id" keyProperty="map.id" useGeneratedKeys="true">
         INSERT INTO general_project_ledger (
             <if test="map.id != null and map.id != ''">
@@ -73,7 +87,6 @@
             js_invoice_date,
             js_prepay,
             js_progress,
-            js_goods,
             js_acceptance,
             js_performance,
             js_quality_guarantee,
@@ -137,7 +150,6 @@
             #{map.js_invoice_date},
             #{map.js_prepay},
             #{map.js_progress},
-            #{map.js_goods},
             #{map.js_acceptance},
             #{map.js_performance},
             #{map.js_quality_guarantee},
@@ -196,7 +208,6 @@
          js_invoice_date = values(js_invoice_date),
          js_prepay = values(js_prepay),
          js_progress = values(js_progress),
-         js_goods = values(js_goods),
          js_acceptance = values(js_acceptance),
          js_performance = values(js_performance),
          js_quality_guarantee = values(js_quality_guarantee),
@@ -207,6 +218,21 @@
          `handler` = values(handler),
          handle_time = values(handle_time)
     </update>
+    <update id="setContractZCBSplit">
+        insert into contract_zcb_split(id, ja_contract_money,
+                                       sb_contract_money, js_contract_money)
+        values (#{id}, #{ja_contract_money}, #{sb_contract_money}, #{js_contract_money})
+        on duplicate key update
+            ja_contract_money = values(ja_contract_money),
+            sb_contract_money = values(sb_contract_money),
+            js_contract_money = values(js_contract_money)
+    </update>
+    <delete id="delRelateContract">
+        delete
+        from contract_relate_project
+        where contract_id = #{contract_id}
+        and project_id = #{project_id}
+    </delete>
     <select id="query" resultType="java.util.Map">
         SELECT
             id,
@@ -246,15 +272,22 @@
     </select>
     <select id="queryContractByProjectId" resultType="java.util.Map">
         SELECT
-            c.id, c.number, c.`name`, c.money
+            c.id, c.number, c.`name`, c.money,
+            s.ja_contract_money,
+            s.sb_contract_money,
+            s.js_contract_money
         FROM contract_relate_project cp,
-             contract c
+             contract c left join
+             contract_zcb_split s on c.id = s.id
         WHERE  cp.project_id = #{id}
           AND c.id = cp.contract_id
     </select>
     <select id="queryLedger" resultType="java.util.Map">
         select
             g.id,
+            s.ja_contract_money,
+            s.sb_contract_money,
+            s.js_contract_money,
             g.project_id,
             g.phase,
             g.contract_id,
@@ -307,7 +340,6 @@
             cast(g.js_invoice_date as CHAR(10))as js_invoice_date ,
             g.js_prepay,
             g.js_progress,
-            g.js_goods,
             g.js_acceptance,
             g.js_performance,
             g.js_quality_guarantee,
@@ -318,7 +350,8 @@
             g.`handler`,
             g.handle_time
         from general_project_ledger g,
-             contract c
+             contract c left join
+             contract_zcb_split s on c.id = s.id
         where g.project_id = #{id}
             and g.contract_id = c.id
     </select>

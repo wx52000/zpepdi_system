@@ -26,7 +26,19 @@
     set parent_id = #{parent}, add_sub = #{addSub}
     where id = #{id}
   </insert>
-  <update id="setChildren">
+    <insert id="insertSingle">
+        insert IGNORE  INTO contract(`number`, `name`, first_party, business_manage, budget, money, settlement, attribute,
+        property, `type`, is_off_shore, `state`, complete_state, sponsor_dep, classes, id, entry_user)
+        values
+        (#{map.ContractCode},#{map.ContractName},#{map.FirstName},#{map.SponsorUserName},
+        #{map.ContractValueOfEstimate},#{map.ContractValue},#{map.NetSettlement},
+        #{map.ContractAttribute},#{map.ContractProperty},
+        #{map.ContractTypeName},#{map.IsOffShore},
+        #{map.ContractState},#{map.CompleteState},
+        #{map.SponsorDeptName},#{map.ProjectClassesSecondName},
+        #{map.ContractID}, #{userId})
+    </insert>
+    <update id="setChildren">
     update contract
     set add_sub = #{addSub}
     where id = #{id}

@@ -116,6 +116,11 @@ public class VolumeController {
         return volumeService.manageTecProgress(userId,map);
     }
 
+    @RequestMapping("tecVolumeConfirmNotCheck")
+    public Result tecVolumeConfirmNotCheck(@RequestBody Map<String,Object> map){
+        return volumeService.tecVolumeConfirmNotCheck(map);
+    }
+
     @RequestMapping("tecVolumeCompleteByDate")
     public Result tecVolumeCompleteByDate(@RequestBody Map<String,Object> map){
         return volumeService.tecVolumeCompleteByDate(map);

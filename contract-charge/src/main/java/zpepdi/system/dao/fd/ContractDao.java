@@ -10,6 +10,7 @@ import java.util.Map;
 @Repository
 public interface ContractDao {
 
+    void insertSingle(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
     List<Contract> query(Integer income);
 
     List<Map<String,Object>> queryChildren(String id);

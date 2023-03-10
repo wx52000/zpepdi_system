@@ -1104,7 +1104,8 @@
         IFNULL( incomplete, 0 ) AS incomplete,
         IFNULL( num, 0 ) AS num,
         IFNULL( `avg`, 0 ) AS `avg`,
-        IFNULL( ROUND( lastNum / avg, 1 ), 0 ) AS rate
+        IFNULL( ROUND( lastNum / avg, 1 ), 0 ) AS rate,
+        confirm_notCheck
         FROM
         (
         SELECT
@@ -1297,7 +1298,8 @@
         ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
         inc.incomplete,
         s.num AS num,
-        ROUND( num6 / 6, 0 ) AS `avg`
+        ROUND( num6 / 6, 0 ) AS `avg`,
+        cnc.num as confirm_notCheck
         FROM
         ( SELECT DISTINCT m.id, m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
         LEFT JOIN (
@@ -1381,9 +1383,11 @@
                 project p,
                 major_contrast_technology m,
                 check_plan c,
+                volume v,
                 check_plan_volume vp
             WHERE
                 RIGHT ( p.number, 1 ) = "s"
+              and v.id = vp.volume_id
               AND p.id = c.project_id
               AND vp.number NOT LIKE "%+%"
               AND c.id = vp.check_plan_id
@@ -1445,8 +1449,29 @@
         GROUP BY
         m.big_name
         ) AS a ON a.tec = m.big_name
+        left join (
+            SELECT
+                COUNT(*) as num,
+                m.big_name AS tec
+            FROM
+                volume v,
+                major_contrast_technology m
+            WHERE
+                v.plan_confirm =1
+              AND v.tec = m.small_name
+              AND v.number NOT LIKE "%+%"
+              AND v.state IN ("尚未确定","尚未开展","正在设计","正在校核")
+              AND NOT EXISTS (
+                    SELECT 1
+                    FROM check_plan_volume pv
+                    WHERE check_month = #{date}
+                      AND v.id = pv.volume_id)
+            GROUP BY
+                m.big_name
+        ) as cnc on cnc.tec = m.big_name
         GROUP BY
-        tec UNION
+        tec
+        UNION
         SELECT
         m.id as mid,
         m.big_name AS tec,
@@ -1637,7 +1662,8 @@
         ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
         inc.incomplete,
         s.num AS num,
-        ROUND( num6 / 6, 0 ) AS `avg`
+        ROUND( num6 / 6, 0 ) AS `avg`,
+        cnc.num as confirm_notCheck
         FROM
         ( SELECT DISTINCT m.id, m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
         LEFT JOIN (
@@ -1718,10 +1744,12 @@
             FROM
                 project p,
                 major_contrast_technology m,
+                volume v,
                 check_plan c,
                 check_plan_volume vp
             WHERE
                 RIGHT ( p.number, 1 ) = "s"
+              and v.id = vp.volume_id
               AND p.id = c.project_id
               AND vp.number LIKE "%+%"
               AND c.id = vp.check_plan_id
@@ -1783,6 +1811,26 @@
         GROUP BY
         m.big_name
         ) AS a ON a.tec = m.big_name
+        left join (
+            SELECT
+                COUNT(*) as num,
+                m.big_name AS tec
+            FROM
+                volume v,
+                major_contrast_technology m
+            WHERE
+                v.plan_confirm =1
+              AND v.tec = m.small_name
+              AND v.number LIKE "%+%"
+              AND v.state IN ("尚未确定","尚未开展","正在设计","正在校核")
+              AND NOT EXISTS (
+                    SELECT 1
+                    FROM check_plan_volume pv
+                    WHERE check_month = #{date}
+                      AND v.id = pv.volume_id)
+            GROUP BY
+                m.big_name
+        ) as cnc on cnc.tec = m.big_name
         GROUP BY
         tec
         ) AS tab
@@ -1859,7 +1907,8 @@
             IFNULL( incomplete, 0 ) AS incomplete,
             IFNULL( num, 0 ) AS num,
             IFNULL( `avg`, 0 ) AS `avg`,
-            IFNULL( ROUND( lastNum / avg, 1 ), 0 ) AS rate
+            IFNULL( ROUND( lastNum / avg, 1 ), 0 ) AS rate,
+            confirm_notCheck
         FROM
             (
                 SELECT
@@ -2051,7 +2100,8 @@
                                 ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
                     inc.incomplete,
                     s.num AS num,
-                    ROUND( num6 / 6, 0 ) AS `avg`
+                    ROUND( num6 / 6, 0 ) AS `avg`,
+                    cnc.num as confirm_notCheck
                 FROM
                     ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
                                                                                         `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
@@ -2136,9 +2186,11 @@
                             project p,
                             major_contrast_technology m,
                             check_plan c,
+                            volume v,
                             check_plan_volume vp
                         WHERE
                             RIGHT ( p.number, 1 ) = "s"
+                          and v.id = vp.volume_id
                           AND p.id = c.project_id
                           AND vp.number NOT LIKE "%+%"
                           AND c.id = vp.check_plan_id
@@ -2200,6 +2252,26 @@
                         GROUP BY
                             m.big_name
                     ) AS a ON a.tec = m.big_name
+                        left join (
+                        SELECT
+                            COUNT(*) as num,
+                            m.big_name AS tec
+                        FROM
+                            volume v,
+                            major_contrast_technology m
+                        WHERE
+                            v.plan_confirm =1
+                          AND v.tec = m.small_name
+                          AND v.number NOT LIKE "%+%"
+                          AND v.state IN ("尚未确定","尚未开展","正在设计","正在校核")
+                          AND NOT EXISTS (
+                                SELECT 1
+                                FROM check_plan_volume pv
+                                WHERE check_month = #{date}
+                                  AND v.id = pv.volume_id)
+                        GROUP BY
+                            m.big_name
+                    ) as cnc on cnc.tec = m.big_name
                 GROUP BY
                     tec UNION
                 SELECT
@@ -2391,7 +2463,8 @@
                                 ( tab.`month` = DATE_FORMAT( NOW() - INTERVAL 1 MONTH, "%m" ), tab.num, 0 )) AS lastNum,
                     inc.incomplete,
                     s.num AS num,
-                    ROUND( num6 / 6, 0 ) AS `avg`
+                    ROUND( num6 / 6, 0 ) AS `avg`,
+                    cnc.num as confirm_notCheck
                 FROM
                     ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
                                                                                         `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
@@ -2473,10 +2546,12 @@
                         FROM
                             project p,
                             major_contrast_technology m,
+                            volume v,
                             check_plan c,
                             check_plan_volume vp
                         WHERE
                             RIGHT ( p.number, 1 ) = "s"
+                          and v.id = vp.volume_id
                           AND p.id = c.project_id
                           AND vp.number LIKE "%+%"
                           AND c.id = vp.check_plan_id
@@ -2538,6 +2613,26 @@
                         GROUP BY
                             m.big_name
                     ) AS a ON a.tec = m.big_name
+                        left join (
+                        SELECT
+                            COUNT(*) as num,
+                            m.big_name AS tec
+                        FROM
+                            volume v,
+                            major_contrast_technology m
+                        WHERE
+                            v.plan_confirm =1
+                          AND v.tec = m.small_name
+                          AND v.number NOT LIKE "%+%"
+                          AND v.state IN ("尚未确定","尚未开展","正在设计","正在校核")
+                          AND NOT EXISTS (
+                                SELECT 1
+                                FROM check_plan_volume pv
+                                WHERE check_month = #{date}
+                                  AND v.id = pv.volume_id)
+                        GROUP BY
+                            m.big_name
+                    ) as cnc on cnc.tec = m.big_name
                 GROUP BY
                     tec
             ) AS tab
@@ -2547,7 +2642,7 @@
         ORDER BY
             tec
     </select>
-     <select id="tecVolumeCompleteByDate" resultType="java.util.Map">
+    <select id="tecVolumeConfirmNotCheck" resultType="java.util.Map">
         SELECT
         p.number as pNumber,
         p.name as pName,
@@ -2564,8 +2659,52 @@
         w.workday
         FROM
         project p,
+        volume v left join volume_workday w on v.id = w.volume_id,
+        major_contrast_technology m
+        WHERE
+        v.plan_confirm =1
+        and p.id = v.project_id
+        and m.big_name = #{tec}
+        AND v.tec = m.small_name
+        AND v.state IN ("尚未确定","尚未开展","正在设计","正在校核")
+        AND NOT EXISTS (
+        SELECT 1
+        FROM check_plan_volume pv
+        WHERE check_month = #{date}
+        AND v.id = pv.volume_id)
+        <if test="type == 0">
+            and v.number not LIKE "%+%"
+        </if>
+        <if test="type == 1">
+            and v.number LIKE "%+%"
+        </if>
+    </select>
+     <select id="tecVolumeCompleteByDate" resultType="java.util.Map">
+        SELECT
+        p.number as pNumber,
+        p.name as pName,
+        v.number,
+        v.`name`,
+        v.designer,
+        v.headman,
+        v.actual_principal AS principal,
+        v.checker,
+        v.state,
+        v.start_date,
+        v.actual_publication_date,
+        v.wfInstId,
+        w.workday,
+         exists( select  1
+             from  check_plan_volume pv
+             where  pv.volume_id = v.id) as check_state,
+        v.plan_confirm,
+        u.name as confirm_user,
+        cast(v.confirm_time as char(10)) as confirm_time
+        FROM
+        project p,
         major_contrast_technology m,
         `volume` v left join volume_workday w on v.id = w.volume_id
+        left join `user` u on u.id = v.confirm_user
         WHERE
         RIGHT ( p.number
         , 1 ) = "s"
@@ -2599,11 +2738,18 @@
             v.start_date,
             v.planned_publication_date,
             v.wfInstId,
-            w.workday
+            w.workday,
+            exists( select  1
+            from  check_plan_volume pv
+            where  pv.volume_id = v.id) as check_state,
+            v.plan_confirm,
+            u.name as confirm_user,
+            cast(v.confirm_time as char(10)) as confirm_time
         FROM
             project p,
             major_contrast_technology m,
             `volume` v left join volume_workday w on v.id = w.volume_id
+        left join `user` u on u.id = v.confirm_user
         WHERE
             RIGHT ( p.number
             , 1 ) = "s"
@@ -2631,11 +2777,18 @@
         v.start_date,
         v.planned_publication_date,
         v.wfInstId,
-        w.workday
+        w.workday,
+        exists( select  1
+        from  check_plan_volume pv
+        where  pv.volume_id = v.id) as check_state,
+        v.plan_confirm,
+        u.name as confirm_user,
+        cast(v.confirm_time as char(10)) as confirm_time
         FROM
         project p,
         major_contrast_technology m,
         `volume` v left join volume_workday w on v.id = w.volume_id
+        left join `user` u on u.id = v.confirm_user
         WHERE
         RIGHT ( p.number
         , 1 ) = "s"
@@ -2671,12 +2824,19 @@
         v.start_date,
         v.planned_publication_date,
         v.wfInstId,
-        w.workday
+        w.workday,
+        exists( select  1
+        from  check_plan_volume pv
+        where  pv.volume_id = v.id) as check_state,
+        v.plan_confirm,
+        u.name as confirm_user,
+        cast(v.confirm_time as char(10)) as confirm_time
         FROM
         project p,
         major_contrast_technology m,
         `volume` v
         LEFT JOIN volume_workday w ON v.id = w.volume_id
+        left join `user` u on u.id = v.confirm_user
         WHERE
         RIGHT ( p.number, 1 ) = "s"
         AND p.id = v.project_id
@@ -2702,9 +2862,15 @@
         v.checker,
         v.state,
         cast(v.start_date as char(10)) as start_date,
-        cast(pv.plan_publication as char(10)) as planned_publication_date,
+        cast(v.planned_publication_date as char(10)) as planned_publication_date,
         v.wfInstId,
-        w.workday
+        w.workday,
+        exists( select  1
+        from  check_plan_volume pv
+        where  pv.volume_id = v.id) as check_state,
+        v.plan_confirm,
+        u.name as confirm_user,
+        cast(v.confirm_time as char(10)) as confirm_time
         FROM
         project p,
         major_contrast_technology m,
@@ -2712,6 +2878,7 @@
         check_plan_volume pv,
         `volume` v
         LEFT JOIN volume_workday w ON v.id = w.volume_id
+        left join `user` u on u.id = v.confirm_user
         WHERE
         p.id = cp.project_id
         and RIGHT ( p.number, 1 ) = "s"
@@ -3095,11 +3262,13 @@
                 RIGHT(c.plan_month,2) as `month`
             FROM
                 check_plan c,
-                check_plan_volume v
+                volume v,
+                check_plan_volume vp
             WHERE
-                c.id = v.check_plan_id
+                c.id = vp.check_plan_id
+              and v.id = vp.volume_id
               AND c.project_id = #{id}
-              AND v.number not LIKE "%+%"
+              AND vp.number not LIKE "%+%"
             GROUP BY c.id
         ) as record on record.tec = m.tec and record.`month` = m.`month`
         LEFT JOIN (
@@ -3428,12 +3597,14 @@
                 RIGHT(c.plan_month,2) as `month`
             FROM
                 check_plan c,
-                check_plan_volume v
+                volume v,
+                check_plan_volume vp
             WHERE
-                c.id = v.check_plan_id
+                c.id = vp.check_plan_id
+              and v.id = vp.volume_id
               AND c.project_id = #{id}
 
-              AND v.number LIKE "%+%"
+              AND vp.number LIKE "%+%"
 
             GROUP BY c.id
         ) as record on record.tec = m.tec and record.`month` = m.`month`
@@ -3648,7 +3819,7 @@
         v.checker,
         v.state,
         cast(v.start_date as char(10)) as start_date,
-        cast(pv.plan_publication as char(10)) as planned_publication_date,
+        cast(v.planned_publication_date as char(10)) as planned_publication_date,
         v.wfInstId,
         w.workday
         FROM
@@ -3879,6 +4050,7 @@
         WHERE
             id = #{id}
     </select>
+
 
 
 </mapper>

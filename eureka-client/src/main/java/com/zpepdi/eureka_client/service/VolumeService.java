@@ -56,6 +56,8 @@ public interface VolumeService {
 
     Result manageTecProgress(Integer userId,Map<String,Object> map);
 
+    Result tecVolumeConfirmNotCheck(Map<String,Object> map);
+
     Result tecVolumeCompleteByDate(Map<String,Object> map);
 
     Result tecVolumeInCompleteByDate(Map<String,Object> map);

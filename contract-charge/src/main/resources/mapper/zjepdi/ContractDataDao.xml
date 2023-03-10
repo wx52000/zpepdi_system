@@ -1,4 +1,36 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="zpepdi.system.dao.zjepdi.ContractDataDao">
+    <select id="queryList" resultType="java.util.Map">
+        SELECT
+            MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
+            MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
+            MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
+            MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
+            MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
+        FROM MM_ContractEntity
+        WHERE BussinessSegment = '发电业务'
+    </select>
+    <select id="queryListBySearch" resultType="java.util.Map">
+        SELECT
+            MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
+            MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
+            MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
+            MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
+            MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
+        FROM MM_ContractEntity
+        WHERE MM_ContractEntity.ContractCode like '%'+#{search} +'%'
+        union
+        SELECT
+            MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
+            MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
+            MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
+            MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
+            MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
+        FROM MM_ContractEntity
+        WHERE MM_ContractEntity.ContractName like '%'+#{search} +'%'
+    </select>
 </mapper>

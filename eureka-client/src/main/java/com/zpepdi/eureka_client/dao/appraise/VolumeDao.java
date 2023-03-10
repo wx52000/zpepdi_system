@@ -65,6 +65,7 @@ public interface VolumeDao {
 
     List<Map<String,Object>> manageTecProgress(Map<String, Object> map);
 
+    List<Map<String,Object>> tecVolumeConfirmNotCheck(Map<String, Object> map);
     List<Map<String,Object>> tecVolumeCompleteByDate(Map<String, Object> map);
 
     List<Map<String,Object>> tecVolumePlanCompleteByDate(Map<String,Object> map);

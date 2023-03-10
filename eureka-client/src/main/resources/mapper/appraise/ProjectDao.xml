@@ -4151,9 +4151,12 @@
         v.wfInstId,
         v.plan_confirm,
         w.workday,
-        v.remark
+        v.remark,
+        u.name as confirm_user,
+        cast(v.confirm_time as char(10))confirm_time
         FROM
         `volume` v left join volume_workday w on v.id = w.volume_id
+                                              left join `user` u on u.id = v.confirm_user
         WHERE
         v.project_id = #{id}
         <if test="type == 1">
@@ -4187,9 +4190,17 @@
                v.actual_publication_date,
                v.wfInstId,
                v.plan_confirm,
-               w.workday
+               w.workday,
+               v.remark,
+               EXISTS (SELECT
+                           1
+                       FROM check_plan_volume
+                       WHERE volume_id  = v.id) as check_state,
+               u.name as confirm_user,
+               cast(v.confirm_time as char(10))confirm_time
         FROM `volume` v
                  LEFT JOIN volume_workday w ON v.id = w.volume_id
+                 left join `user` u on u.id = v.confirm_user
         WHERE v.project_id = #{id}
           AND v.actual_publication_date IS NULL
           AND v.number not LIKE "%+%"
@@ -4208,9 +4219,17 @@
                v.actual_publication_date,
                v.wfInstId,
                v.plan_confirm,
-               w.workday
+               w.workday,
+                v.remark,
+               EXISTS (SELECT
+                           1
+                       FROM check_plan_volume
+                       WHERE volume_id  = v.id) as check_state,
+                u.name as confirm_user,
+               cast(v.confirm_time as char(10))confirm_time
         FROM `volume` v
                  LEFT JOIN volume_workday w ON v.id = w.volume_id
+                 left join `user` u on u.id = v.confirm_user
         WHERE v.project_id = #{id}
           AND v.actual_publication_date = ''
           AND v.number not LIKE "%+%"
@@ -4232,10 +4251,17 @@
         v.wfInstId,
         v.plan_confirm,
         w.workday,
-        v.remark
+        v.remark,
+        EXISTS (SELECT
+        1
+        FROM check_plan_volume
+        WHERE volume_id  = v.id) as check_state,
+        u.name as confirm_user,
+        cast(v.confirm_time as char(10))confirm_time
         FROM
         `volume` v
         LEFT JOIN volume_workday w ON v.id = w.volume_id
+        left join `user` u on u.id = v.confirm_user
         WHERE
         v.project_id = #{id}
         AND

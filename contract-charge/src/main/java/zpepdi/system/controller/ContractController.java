@@ -18,6 +18,10 @@ public class ContractController {
     @Autowired
     private ContractService contractService;
 
+    @RequestMapping("insertSingle")
+    public Result insertSingle(@UserId Integer id, @RequestBody Map<String,Object> map){
+        return contractService.insertSingle(id, map);
+    }
     @RequestMapping("query")
     public Result query(@RequestHeader("income") Integer income){
         return contractService.query(income);

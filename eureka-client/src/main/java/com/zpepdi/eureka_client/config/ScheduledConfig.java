@@ -65,7 +65,7 @@ public class ScheduledConfig implements SchedulingConfigurer {
 ////
 //    @Scheduled(cron = "0 0 0/2 * * ?")
 //    @Async("taskExecutor")
-//    @PostConstruct
+////    @PostConstruct
 //    public void dataTransmission(){
 //        service.dataTransmissionService();
 //    }

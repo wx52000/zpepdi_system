@@ -157,6 +157,7 @@ public class NewsServiceImpl implements NewsService {
       for (int i = 0; i < list.size(); i++) {
         Map<String,Object> map = list.get(i);
         String type =  map.get("type").toString();
+        map.put("submit", 3);
         if (check == 1) {
           if (type.equals("5")) {
             if (!DateUtils.getDateMonth(
@@ -209,7 +210,23 @@ public class NewsServiceImpl implements NewsService {
             map.put("workday_month",DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
             Calendar calendar1 = Calendar.getInstance();
             calendar1.add(Calendar.MONTH,1);
-            map.put("plan_month", DateUtils.dateToString(calendar1.getTime(),"yyyy-MM"));
+            String plan_month = DateUtils.dateToString(calendar1.getTime(),"yyyy-MM");
+            map.put("plan_month", plan_month);
+            String start = plan_month + "-01";
+            calendar1.add(Calendar.MONTH,1);
+            calendar1.set(Calendar.DAY_OF_MONTH,0);
+            String end = DateUtils.dateToString(calendar1.getTime(),"yyyy-MM-dd");
+            map.put("start",start);
+            map.put("end",end);
+          }else {
+            Calendar calendar1 = Calendar.getInstance();
+            String plan_month = DateUtils.dateToString(calendar1.getTime(),"yyyy-MM");
+            String start = plan_month + "-01";
+            map.put("start",start);
+            calendar1.add(Calendar.MONTH,1);
+            calendar1.set(Calendar.DAY_OF_MONTH,0);
+            String end = DateUtils.dateToString(calendar1.getTime(),"yyyy-MM-dd");
+            map.put("end",end);
           }
           newsDao.checkPlan(id,map,check);
         }

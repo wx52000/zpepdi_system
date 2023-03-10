@@ -17,6 +17,22 @@ public class ProjectController {
     @Autowired
     private ProjectService projectService;
 
+
+    @RequestMapping("addRelateContract")
+    public Result addRelateContract(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return projectService.addRelateContract(userId, map);
+    }
+
+    @RequestMapping("delRelateContract")
+    public Result delRelateContract(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return projectService.delRelateContract(map);
+    }
+
+    @RequestMapping("insertSingle")
+    public Result insertSingle(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return projectService.insertSingle(userId, map);
+    }
+
     @RequestMapping("query")
     public Result query(){
         return projectService.query();
@@ -27,6 +43,10 @@ public class ProjectController {
         return projectService.queryById(id);
     }
 
+    @RequestMapping("setContractZCBSplit")
+    public Result setContractZCBSplit(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return projectService.setContractZCBSplit(map);
+    }
     @RequestMapping("setLedger")
     public Result setLedger(@UserId Integer userId, @RequestBody Map<String,Object> map){
         return projectService.setLedger(userId,map);
@@ -36,4 +56,11 @@ public class ProjectController {
     public Result queryLedger(@UserId Integer userId, @RequestHeader String id){
         return projectService.queryLedger(id);
     }
+
+
+    @RequestMapping("querySearch")
+    public Result querySearch(@RequestHeader String search){
+        return projectService.querySearch(search);
+    }
+
 }

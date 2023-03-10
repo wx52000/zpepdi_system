@@ -268,13 +268,21 @@ public class VolumeServiceImpl implements VolumeService {
 
     @Override
     public Result tecProgress(Map<String, Object> map) {
+        map.put("date",DateUtils.getDateMonth());
         return Result.ok(volumeDao.tecProgress(map));
     }
 
     @Override
     public Result manageTecProgress(Integer userId, Map<String, Object> map) {
         map.put("userId",userId);
+        map.put("date",DateUtils.getDateMonth());
         return Result.ok(volumeDao.manageTecProgress(map));
+    }
+
+    @Override
+    public Result tecVolumeConfirmNotCheck(Map<String, Object> map) {
+        map.put("date",DateUtils.getDateMonth());
+        return Result.ok(volumeDao.tecVolumeConfirmNotCheck(map));
     }
 
     @Override
