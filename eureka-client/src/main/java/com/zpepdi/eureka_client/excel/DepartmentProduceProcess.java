@@ -121,20 +121,19 @@ public class DepartmentProduceProcess {
         }
         int n = 5;
         DecimalFormat df = new DecimalFormat("#.##");
-        for (AtomicInteger i = new AtomicInteger(); i.get() < list.size(); i.getAndIncrement()) {
-            Map<String,Object> map = list.get(i.get());
+        for (int i = 0; i < list.size(); i++) {
+            Map<String,Object> map = list.get(i);
             List<String>  strings = new ArrayList<>();
-            strings.add(String.valueOf(i.get() +1));
+            strings.add(String.valueOf(i +1));
             strings.add(map.get("number").toString());
             strings.add(map.get("name").toString());
             strings.add(map.get("stage").toString());
             AtomicReference<Double> sum = new AtomicReference<>((double) 0);
-            tecList.forEach(item ->{
-                i.getAndIncrement();
+            for (String item : tecList){
                 String value = df.format(map.get(item));
                 strings.add(value);
-                sum.updateAndGet(v -> new Double(v + Double.parseDouble(value)));
-            });
+                sum.updateAndGet(v -> v + Double.parseDouble(value));
+            }
             strings.add(df.format(sum.get()));
             lists.add(strings);
         }

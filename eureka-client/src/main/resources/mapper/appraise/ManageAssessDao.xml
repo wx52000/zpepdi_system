@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.ManageAssessDao">
+    <insert id="setManageAssessUser">
+        INSERT IGNORE INTO manage_assess_user ( user_id, did, username, `name`, `type`,`time` )
+        SELECT
+        u.id,
+        u.did,
+        u.username,
+        u.`name`,
+        IF
+        ( u.username &lt; 5000, 0, 1 ),
+        now()
+        FROM
+        `user` u,
+        department_produce dp
+        where u.did = dp.did
+    </insert>
+    <update id="setUserAssess">
+        INSERT IGNORE INTO manage_assess
+            (user_id,did,workday, remark, submit_date, handler, handler_time)
+        values(#{map.id}, #{map.did}, #{map.workday}, #{map.remark}, #{map.submit_date},#{userId}, now())
+        on duplicate key update
+        workday = values(workday),
+        remark = values(remark),
+        handler = values(handler),
+        handler_time = values(handler_time)
+    </update>
+    <select id="queryAssessSum" resultType="java.util.Map">
+        SELECT
+            max(
+                    IF
+                        ( type = 0, count * 20, 0 )) AS formal,
+            max(
+                    IF
+                        ( type = 1, count * 15 ,0 )) AS `external`,
+	max(
+	IF
+	( type = 0, workday, 0 )) AS formalUsed,
+	max(
+	IF
+	( type = 1, workday, 0 )) AS externalUsed
+        FROM
+            (
+            SELECT
+            COUNT(*) AS `count`,
+            SUM( m.workday ) AS workday,
+            type
+            FROM
+            manage_assess_user mu
+            LEFT JOIN manage_assess m ON m.user_id = mu.user_id
+            AND m.submit_date = #{date},
+            `user` u,
+            role_button rb
+            WHERE
+            u.id = #{userId}
+            AND pid = rb.role_id
+            AND button_id = 14
+            AND u.did = mu.did
+            GROUP BY
+            mu.type UNION
+            SELECT
+            COUNT(*) AS `count`,
+            SUM( m.workday ) AS workday,
+            type
+            FROM
+            manage_assess_user mu
+            LEFT JOIN manage_assess m ON m.user_id = mu.user_id
+            AND m.submit_date = #{date}
+            WHERE
+            mu.role_user = #{userId}
+            GROUP BY
+            mu.type
+            ) t
+    </select>
+</mapper>

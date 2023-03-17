@@ -17,11 +17,12 @@ public interface ProjectWorkdayDao {
 
   List<Map> queryTecWorkdayAmount(Integer id);
 
-  Map queryProSumWorkday(Integer id);
+  Map queryProSumWorkday(@Param("userId") Integer userId , @Param("id") Integer id);
 
   List<Map<String,Object>> queryProjectTecWorkdayLog(Map<String,Object> map);
 
-  List<Map> queryTecSumWorkdayAmount(Integer id);
+  List<Map> queryTecSumWorkdayAmount(@Param("id") Integer id, @Param("role") Integer role,
+                                     @Param("userId") Integer userId);
 
   //同上
   List<Map> queryTecWorkday(Integer id);
@@ -91,7 +92,7 @@ public interface ProjectWorkdayDao {
 
   void setTecVolumeRatio(@Param("id")Integer id, @Param("map")Map<String,Object> map);
 
-  void setVolumeWorkday(@Param("map")Map<String,Object> list,@Param("id")Integer id,@Param("date")String date);
+  void setVolumeWorkday(@Param("map")Map<String,Object> map,@Param("id")Integer id,@Param("date")String date);
 
   List<Map<String,Object>> queryNewWorkday(Integer id);
 

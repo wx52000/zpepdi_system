@@ -2179,7 +2179,7 @@
     </select>
     <select id="homepageProject" resultType="java.util.Map">
         SELECT
-            *
+            tab.*, dt.time
         FROM(
                 SELECT
                     p.id,
@@ -2427,7 +2427,9 @@
                 WHERE
                     IFNULL( s.`show`, 1 ) = 1
             ) as tab
-        ORDER BY `show` DESC,principal DESC
+        left join user_defined_top dt on tab.id = dt.top_id and dt.user_id = #{id} and
+                                      dt.menus_id = 29
+        ORDER BY dt.time desc,  `show` DESC,principal DESC
     </select>
     <select id="personalProject" resultType="map">
         SELECT p.id,
@@ -3088,30 +3090,37 @@
         SELECT
             id,
             project_id,
-            volume_tec AS tec,
-            `type`,
-            (SELECT EXISTS (
-                            SELECT id
-                            FROM workday_tec_distribute d
-                            WHERE d.project_id = project_id AND d.tec = volume_tec)) as isOperation
-        FROM
-            workday_tec
-        WHERE
-            project_id = #{id}
-        UNION
-        SELECT NULL AS
-                       id,
-               project_id,
-               tec,
-               1 AS type,
-               TRUE as isOperation
-        FROM
-            volume
-        WHERE
-            project_id = #{id}
+            tec,
+            max(`type`) as type,
+            max(isOperation) as isOperation
+        FROM (
+                 SELECT
+                     id,
+                     project_id,
+                     volume_tec AS tec,
+                     `type`,
+                     (
+                         SELECT EXISTS
+                                    ( SELECT id FROM workday_tec_distribute d WHERE d.project_id = project_id AND d.tec = volume_tec )) AS isOperation
+                 FROM
+                     workday_tec
+                 WHERE
+                     project_id = #{id}
+                 UNION
+                 SELECT NULL AS id,
+                        project_id,
+                        tec,
+                        1 AS type,
+                        TRUE AS isOperation
+                 FROM
+                     volume
+                 WHERE
+                     project_id = #{id}
 
-        GROUP BY
-            tec
+                 GROUP BY
+                     tec
+             ) as t
+        GROUP BY tec
     </select>
     <select id="queryBySelfCheck" resultType="java.util.Map">
         SELECT projectId,
@@ -4641,11 +4650,11 @@ as t group by date
 
     <select id="getdateInfo" resultType="java.util.Map">
         SELECT
-            DATE_FORMAT( v.actual_publication_date, '%Y-%m' ) AS date
+            DATE_FORMAT(max(v.planned_publication_date), '%Y-%m' ) AS maxDate,
+            DATE_FORMAT(max(v.actual_publication_date), '%Y-%m' ) AS minDate
         FROM
             volume v
-        where project_id=#{id} and v.actual_publication_date is not null
-        order by date
+        where project_id=#{id}
     </select>
 
     <select id="downInfo" resultType="java.util.Map">
@@ -4674,7 +4683,7 @@ as t group by date
         volume v,
         JSON_TABLE (
         #{datestring},
-        '$[*]' COLUMNS ( `ym` VARCHAR ( 40 ) PATH '$' )) AS jt
+        '$[*]' COLUMNS ( `ym` VARCHAR ( 20 ) PATH '$' )) AS jt
         WHERE
         v.project_id = #{id}
         AND EXISTS (
@@ -4701,7 +4710,7 @@ as t group by date
         FROM
         JSON_TABLE (
         #{datestring},
-        '$[*]' COLUMNS ( `ym` VARCHAR ( 40 ) PATH '$' )) AS jt,
+        '$[*]' COLUMNS ( `ym` VARCHAR ( 20 ) PATH '$' )) AS jt,
         workday_tec wt,
         workday_tec_principal wtp
         WHERE
@@ -4890,7 +4899,6 @@ as t group by date
         big_name = #{tec}
         UNION
         SELECT #{tec})
-        AND DATE_FORMAT( actual_publication_date, '%Y-%m' ) >= #{startMonth}
-        AND DATE_FORMAT( actual_publication_date, '%Y-%m' )  &lt;= #{endMonth}
+        order by v.number
     </select>
 </mapper>

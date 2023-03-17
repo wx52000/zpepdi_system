@@ -1870,7 +1870,7 @@
         AND m.designer = #{userId}
         AND m.`handler` = u.id UNION
         SELECT
-        p.number AS pnumber,
+        p.number AS pnum,
         p.`name` AS pname,
         u.`name` AS `handler`,
         t.number,
@@ -1893,6 +1893,31 @@
         AND w.submit_date &gt;= #{map.startMonth}
         AND w.submit_date &lt;= #{map.endMonth}
         AND t.creator = u.id
+        union
+        SELECT
+        null AS pnum,
+        d.`name` AS pname,
+        u.`name` AS `handler`,
+        NULL AS number,
+        IF
+        ( m.remark = '', "部门工时",m.remark ) AS `name`,
+        t.`name` AS tec,
+        m.workday,
+        m.submit_date,
+        7 AS `type`,
+        0 AS role
+        FROM
+        manage_assess m,
+        `user` u,
+        department d,
+        technology t
+        WHERE
+        m.submit_date &lt;= #{map.endMonth} AND m.submit_date &gt;= #{map.startMonth}
+        AND m.`handler` = u.id
+        AND d.id = u.did
+        and m.user_id = #{userId}
+        AND u.tid = t.id
+        AND m.confirm = 1
         ) AS d
         WHERE
         d.workday != 0
@@ -2218,7 +2243,7 @@
         AND u.id = t.`handler`
         AND p.id = t.project_id UNION
         SELECT
-        p.number AS pnumber,
+        p.number AS pnum,
         p.`name` AS pname,
         u.`name` AS `handler`,
         t.number,
@@ -2241,6 +2266,30 @@
         AND w.submit_date &gt;= #{startMonth}
         AND w.submit_date &lt;= #{endMonth}
         AND t.creator = u.id
+        union
+        SELECT
+            null AS pnum,
+            d.`name` AS pname,
+            u.`name` AS `handler`,
+            NULL AS number,
+            IF
+                ( m.remark = '', "部门工时",m.remark ) AS `name`,
+            t.`name` AS tec,
+            m.workday,
+            m.submit_date,
+            7 AS `type`,
+            0 AS designer
+        FROM
+            manage_assess m,
+            `user` u,
+            department d,
+            technology t
+        WHERE
+            m.submit_date &lt;= #{endMonth} AND m.submit_date &gt;= #{startMonth}
+          AND m.`handler` = u.id
+          AND d.id = u.did
+          AND u.tid = t.id
+          and m.user_id = #{id}
         ) AS d
         WHERE
         d.workday != 0
@@ -2252,11 +2301,12 @@
         `name`,
         dep,
         tec,
-        volume_workday + advance_workday + task_workday + `manage` + ifnull( deduct, 0 ) + scientific AS workday,
+        dWorkday + volume_workday + advance_workday + task_workday + `manage` + ifnull( deduct, 0 ) + scientific AS workday,
         volume_workday,
         advance_workday,
         task_workday,
         manage,
+        dWorkday,
         scientific,
         ifnull( deduct, 0 ) AS deduct
         FROM
@@ -2277,6 +2327,7 @@
         ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday,
         ifnull( m.workday, 0 ) AS `manage`,
         IFNULL( sci.workday, 0 ) AS scientific,
+        ifnull(man.workday,0) as dWorkday,
         de.workday AS deduct
         FROM
         `user` u
@@ -2453,6 +2504,18 @@
         GROUP BY
         m.designer
         ) AS m ON m.designer = u.id
+        left join (
+            SELECT
+                m.user_id,
+                sum( m.workday ) as workday
+            FROM
+                manage_assess m
+            where
+                m.submit_date &gt;=  #{startMonth}
+              AND m.submit_date &lt;= #{endMonth}
+            GROUP BY
+                m.user_id
+        ) as man on man.user_id = u.id
         LEFT JOIN ( SELECT sum( workday ) AS workday, user_id AS userId FROM workday_deduct WHERE `date` &gt;= #{startMonth} AND `date` &lt;= #{endMonth} GROUP BY user_id ) AS de ON de.userId = u.id
         LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date &gt;= #{startMonth} AND submit_date &lt;= #{endMonth} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id
         WHERE
@@ -2469,12 +2532,17 @@
         SELECT
             id,
             `name`,
+            did,
             tec,
             username,
-            volume_workday + advance_workday + task_workday + `manage` + scientific + ifnull( deduct, 0 ) AS workday,
+            dRemark,
+            dRole,
+            dType,
+            dWorkday + volume_workday + advance_workday + task_workday + `manage` + scientific + ifnull( deduct, 0 ) AS workday,
             volume_workday,
             advance_workday,
             task_workday,
+            dWorkday,
             manage,
             scientific,
             ifnull( deduct, 0 ) AS deduct
@@ -2495,6 +2563,10 @@
         (
         ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday,
         ifnull( m.workday, 0 ) AS `manage`,
+        ifnull(man.workday,0) as dWorkday,
+        ifnull(man.remark,"") as dRemark,
+        man.role as dRole,
+        man.type as dType,
         IFNULL( sci.workday, 0 ) AS scientific,
         de.workday AS deduct
         FROM
@@ -2672,11 +2744,29 @@
         GROUP BY
         m.designer
         ) AS m ON m.designer = u.id
+        left join (
+        SELECT
+        mu.user_id,
+        mu.type,
+        sum( m.workday ) as workday,
+        m.`remark`,
+        IF
+        (
+        mu.`role_user` = #{id},
+        1,
+        EXISTS ( SELECT 1 FROM `user` u, role_button rb WHERE u.id = #{id} AND pid = rb.role_id AND button_id = 14 )) AS role
+        FROM
+        manage_assess_user mu
+        left join manage_assess m on         m.submit_date &gt;=  #{map.startMonth}
+            AND m.submit_date &lt;= #{map.endMonth}
+            AND m.user_id = mu.user_id
+        GROUP BY
+        mu.user_id
+        ) as man on man.user_id = u.id
         LEFT JOIN ( SELECT sum( workday ) AS workday, user_id AS userId FROM workday_deduct WHERE `date` &gt;= #{map.startMonth} AND `date` &lt;= #{map.endMonth} GROUP BY user_id ) AS de ON de.userId = u.id
         LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date &gt;= #{map.startMonth} AND submit_date &lt;= #{map.endMonth} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id, `user` u1
         WHERE
         u1.id = #{id}
-
         AND u.alive = 1
         AND u.did = u1.did
         GROUP BY
@@ -4874,11 +4964,12 @@
             dep,
             tec,
             username,
-            volume_workday + advance_workday + task_workday + `manage` + scientific AS workday,
+            dWorkday + volume_workday + advance_workday + task_workday + `manage` + scientific AS workday,
             volume_workday,
             advance_workday,
             task_workday,
             manage,
+            dWorkday,
             scientific
         FROM
         (
@@ -4898,6 +4989,7 @@
         ifnull( td.workday, 0 ) + ifnull( tc.checker_workday, 0 ) + ifnull( tp.principal_workday, 0 ) + ifnull( th.headman_workday, 0 )) AS task_workday,
         ifnull( m.workday, 0 ) AS `manage`,
         IFNULL( sci.workday, 0 ) AS scientific,
+        ifnull(man.workday,0) as dWorkday,
         de.workday AS deduct
         FROM
         `user` u
@@ -5074,6 +5166,19 @@
         GROUP BY
         m.designer
         ) AS m ON m.designer = u.id
+        left join (
+            SELECT
+                m.user_id,
+                sum( m.workday ) as workday
+            FROM
+                manage_assess m
+            where
+                    m.submit_date &gt;=  #{map.startMonth}
+                    AND m.submit_date &lt;= #{map.endMonth}
+                    AND m.confirm = 1
+            GROUP BY
+                m.user_id
+        ) as man on man.user_id = u.id
         LEFT JOIN ( SELECT sum( workday ) AS workday, user_id AS userId FROM workday_deduct WHERE `date` &gt;= #{map.startMonth} AND `date` &lt;= #{map.endMonth} GROUP BY user_id ) AS de ON de.userId = u.id
         LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date &gt;= #{map.startMonth} AND submit_date &lt;= #{map.endMonth} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id
         WHERE

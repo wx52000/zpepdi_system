@@ -60,8 +60,8 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
   }
 
   @Override
-  public Result queryProjectSumWorkday(Integer id) {
-    return Result.ok(proWorkdayDao.queryProSumWorkday(id));
+  public Result queryProjectSumWorkday(Integer usedId, Integer id) {
+    return Result.ok(proWorkdayDao.queryProSumWorkday(usedId, id));
   }
 
   @Override

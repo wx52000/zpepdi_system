@@ -1161,24 +1161,18 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public HttpServletResponse downinfo(HttpServletResponse response, Integer userId,Map<String, Object> map) {
-        List<Map<String, Object>> datemap = new ArrayList<>();
-        List<String> list = new ArrayList<>();
-        datemap = projectDao.getdateInfo(map);
-        for (int i = 0; i < datemap.size(); i++) {
-            list.add(datemap.get(i).get("date").toString());
-        }
+        Map<String,Object> datemap = projectDao.getdateInfo(map);
         List<String> list1 = null;
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
-            Date d1 = new SimpleDateFormat("yyyy-MM").parse(list.get(0));//定义起始日期
-            Date d2 = new SimpleDateFormat("yyyy-MM").parse(list.get(list.size() - 1));//定义结束日期  可以去当前月也可以手动写日期。
+            Date d1 = new SimpleDateFormat("yyyy-MM").parse(datemap.get("minDate").toString());//定义起始日期
+            Date d2 = new SimpleDateFormat("yyyy-MM").parse(datemap.get("maxDate").toString());//定义结束日期  可以去当前月也可以手动写日期。
             Calendar dd = Calendar.getInstance();//定义日期实例
             dd.setTime(d1);//设置日期起始时间
             list1 = new ArrayList<>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
             while (d2.after(dd.getTime())) {//判断是否到结束日期
                 String str = sdf.format(dd.getTime());
-                System.out.println(str);//输出日期结果
                 list1.add(str);
                 dd.add(Calendar.MONTH, 1);//进行当前日期月份加1
             }
@@ -1186,9 +1180,8 @@ public class ProjectServiceImpl implements ProjectService {
             list1.add(d3);
         } catch (Exception e) {
         }
-        System.out.println(list1);
-        map.put("startMonth", list.get(0));
-        map.put("endMonth", list.get(list.size() - 1));
+        map.put("startMonth", datemap.get("minDate").toString());
+        map.put("endMonth", datemap.get("maxDate").toString());
         map.put("date", list1);
         map.put("datestring", JSONObject.toJSONString(list1));
         map.put("userId", userId);
@@ -1219,13 +1212,15 @@ public class ProjectServiceImpl implements ProjectService {
             int max=0;
             max=title.size();
             //创建列
-            if (info != null && info.size() != 0) {
-                for (int i=0;i<info.size();i++) {
+            if (info != null && info.size() > 0) {
+                for (int i=0;i<info.size(); i++) {
                     row = sheet1.createRow(i + 1);
                     for(int j = 0;j<title.size();j++){
                         cell = row.createCell(j);
                         //防止下标越界
-                        cell.setCellValue(info.get(i).get(title.get(j)).toString());
+                        if (info.get(i).get(title.get(j)) != null) {
+                            cell.setCellValue(info.get(i).get(title.get(j)).toString());
+                        }
                     }
                 }
             }
@@ -1235,15 +1230,14 @@ public class ProjectServiceImpl implements ProjectService {
             }
             LinkedHashSet<String> hashSet = new LinkedHashSet<>(tec);
             ArrayList<String> listWithoutDuplicates = new ArrayList<>(hashSet);
-            System.out.println(listWithoutDuplicates);
             List<Map<String, Object>> tecinfo = new ArrayList<>();
             Map<String, Object> tecmap = new HashMap<>();
             for(int i=0;i<listWithoutDuplicates.size();i++){
                 HSSFSheet sheet = workbook.createSheet(listWithoutDuplicates.get(i));
                 tecmap=new HashMap<>();
                 tecmap.put("tec",listWithoutDuplicates.get(i));
-                tecmap.put("startMonth", list.get(0));
-                tecmap.put("endMonth", list.get(list.size() - 1));
+                tecmap.put("startMonth", datemap.get("minDate").toString());
+                tecmap.put("endMonth", datemap.get("maxDate").toString());
                 tecmap.put("id", map.get("id"));
                 tecinfo=projectDao.tecInfo(tecmap);
                 HSSFRow row1 = sheet.createRow(0);
@@ -1265,15 +1259,15 @@ public class ProjectServiceImpl implements ProjectService {
                         HSSFRow lastRow = sheet.createRow(lastRowNum + 1);
                         lastRow.createCell(0).setCellValue(tecinfo.get(k).get("number").toString());
                         lastRow.createCell(1).setCellValue(tecinfo.get(k).get("name").toString());
-                        lastRow.createCell(2).setCellValue(tecinfo.get(k).get("workday").toString());
+                        lastRow.createCell(2).setCellValue(tecinfo.get(k).get("workday")!= null ? tecinfo.get(k).get("workday").toString() : "");
                         lastRow.createCell(3).setCellValue(tecinfo.get(k).get("state").toString());
-                        lastRow.createCell(4).setCellValue(tecinfo.get(k).get("start_date").toString());
-                        lastRow.createCell(5).setCellValue(tecinfo.get(k).get("actual_publication_date").toString());
-                        lastRow.createCell(6).setCellValue(tecinfo.get(k).get("planned_publication_date").toString());
-                        lastRow.createCell(7).setCellValue(tecinfo.get(k).get("principal").toString());
-                        lastRow.createCell(8).setCellValue(tecinfo.get(k).get("designer").toString());
-                        lastRow.createCell(9).setCellValue(tecinfo.get(k).get("checker").toString());
-                        lastRow.createCell(10).setCellValue(tecinfo.get(k).get("headman").toString());
+                        lastRow.createCell(4).setCellValue(tecinfo.get(k).get("start_date") != null ? tecinfo.get(k).get("start_date").toString() : "");
+                        lastRow.createCell(5).setCellValue(tecinfo.get(k).get("actual_publication_date")!= null ? tecinfo.get(k).get("actual_publication_date").toString() : "");
+                        lastRow.createCell(6).setCellValue(tecinfo.get(k).get("planned_publication_date")!= null ? tecinfo.get(k).get("planned_publication_date").toString() : "");
+                        lastRow.createCell(7).setCellValue(tecinfo.get(k).get("principal")!= null ? tecinfo.get(k).get("principal").toString() : "");
+                        lastRow.createCell(8).setCellValue(tecinfo.get(k).get("designer")!= null ? tecinfo.get(k).get("designer").toString() : "");
+                        lastRow.createCell(9).setCellValue(tecinfo.get(k).get("checker")!= null ? tecinfo.get(k).get("checker").toString() : "");
+                        lastRow.createCell(10).setCellValue(tecinfo.get(k).get("headman")!= null ? tecinfo.get(k).get("headman").toString() : "");
                     }
                 }
             }

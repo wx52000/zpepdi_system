@@ -108,7 +108,7 @@ public interface ProjectService {
 
     Result setDeclare(Integer userId, List<Map<String,Object>> list,String date);
 
-    Object declareDay();
+    Integer declareDay();
 
     Result setDeclareDay(Integer day);
 

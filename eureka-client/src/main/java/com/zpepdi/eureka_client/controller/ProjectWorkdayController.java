@@ -42,8 +42,8 @@ public class ProjectWorkdayController {
   }
 
   @RequestMapping("queryProjectSumWorkday")
-  public Result queryProjectSumWorkday(@RequestHeader Integer id){
-    return proWorkdayService.queryProjectSumWorkday(id);
+  public Result queryProjectSumWorkday(@UserId Integer usedId, @RequestHeader Integer id){
+    return proWorkdayService.queryProjectSumWorkday(usedId, id);
   }
 
   @RequestMapping("queryProjectTecWorkdayLog")

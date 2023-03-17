@@ -75,7 +75,6 @@ public class ScientificSystemServiceImpl implements ScientificSystemService {
 
     @Override
     public List<Map<String,Object>> querySumWorkdayByDep(Integer id,String date) {
-
         return scientificSystemDao.querySumWorkdayByDep(id,date).get(1);
     }
 
@@ -98,21 +97,23 @@ public class ScientificSystemServiceImpl implements ScientificSystemService {
         String date = DateUtils.getDateMonth();
 //        String date = "2023-01";
         File file = new File(path +"\\" + date +"工时.zip");
-        if (!scientificSystemDao.queryIsCreate(DateUtils.getDateMonth()) || !file.exists()){
+        if (!scientificSystemDao.queryIsCreate(DateUtils.getDateMonth())){
 //            createScientificProduce(DateUtils.getDateMonth(new Date().getTime() - 2592000));
             createScientificProduce(DateUtils.getDateMonth(new Date().getTime() - 2592000));
+        }
+        if(!file.exists()) {
             creatDepartmentExcel();
         }
         try {
-                RestTemplate restTemplate = new RestTemplate();
-                HttpHeaders headers = new HttpHeaders();
-                String url = "http://10.136.238.48:8866/produceData/fdDataTransmit";
-                headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
-                JSONObject paramMap = new JSONObject();
-                paramMap.put("data",scientificSystemDao.queryProduce(DateUtils.getDateMonth()));
-                HttpEntity<JSONObject> httpEntity =
-                        new HttpEntity<JSONObject>(paramMap, headers);
-                restTemplate.postForEntity(url, httpEntity, String.class);
+//                RestTemplate restTemplate = new RestTemplate();
+//                HttpHeaders headers = new HttpHeaders();
+//                String url = "http://10.136.238.48:8866/produceData/fdDataTransmit";
+//                headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
+//                JSONObject paramMap = new JSONObject();
+//                paramMap.put("data",scientificSystemDao.queryProduce(DateUtils.getDateMonth()));
+//                HttpEntity<JSONObject> httpEntity =
+//                        new HttpEntity<JSONObject>(paramMap, headers);
+//                restTemplate.postForEntity(url, httpEntity, String.class);
             return Result.ok();
         }catch (Exception e){
             return Result.build(787, e.getMessage());

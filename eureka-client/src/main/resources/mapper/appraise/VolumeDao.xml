@@ -1109,7 +1109,7 @@
         FROM
         (
         SELECT
-        m.id as mid,
+        m.id AS mid,
         m.big_name AS tec,
         m.did,
         0 AS type,
@@ -1222,41 +1222,41 @@
         IF
         ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
         MAX(
-                IF
-                    ( m.`month` = 1, record.num, 0 )) AS `record1`,
+        IF
+        ( m.`month` = 1, record.num, 0 )) AS `record1`,
         MAX(
-                IF
-                    ( m.`month` = 2, record.num, 0 )) AS `record2`,
+        IF
+        ( m.`month` = 2, record.num, 0 )) AS `record2`,
         MAX(
-                IF
-                    ( m.`month` = 3, record.num, 0 )) AS `record3`,
+        IF
+        ( m.`month` = 3, record.num, 0 )) AS `record3`,
         MAX(
-                IF
-                    ( m.`month` = 4, record.num, 0 )) AS `record4`,
+        IF
+        ( m.`month` = 4, record.num, 0 )) AS `record4`,
         MAX(
-                IF
-                    ( m.`month` = 5, record.num, 0 )) AS `record5`,
+        IF
+        ( m.`month` = 5, record.num, 0 )) AS `record5`,
         MAX(
-                IF
-                    ( m.`month` = 6, record.num, 0 )) AS `record6`,
+        IF
+        ( m.`month` = 6, record.num, 0 )) AS `record6`,
         MAX(
-                IF
-                    ( m.`month` = 7, record.num, 0 )) AS `record7`,
+        IF
+        ( m.`month` = 7, record.num, 0 )) AS `record7`,
         MAX(
-                IF
-                    ( m.`month` = 8, record.num, 0 )) AS `record8`,
+        IF
+        ( m.`month` = 8, record.num, 0 )) AS `record8`,
         MAX(
-                IF
-                    ( m.`month` = 9, record.num, 0 )) AS `record9`,
+        IF
+        ( m.`month` = 9, record.num, 0 )) AS `record9`,
         MAX(
-                IF
-                    ( m.`month` = 10, record.num, 0 )) AS `record10`,
+        IF
+        ( m.`month` = 10, record.num, 0 )) AS `record10`,
         MAX(
-                IF
-                    ( m.`month` = 11, record.num, 0 )) AS `record11`,
+        IF
+        ( m.`month` = 11, record.num, 0 )) AS `record11`,
         MAX(
-                IF
-                    ( m.`month` = 12, record.num, 0 )) AS `record12`,
+        IF
+        ( m.`month` = 12, record.num, 0 )) AS `record12`,
         MAX(
         IF
         ( m.`month` = 1, plan.workday, 0 )) AS `planWorkday1`,
@@ -1299,11 +1299,30 @@
         inc.incomplete,
         s.num AS num,
         ROUND( num6 / 6, 0 ) AS `avg`,
-        cnc.num as confirm_notCheck
+        cnc.num AS confirm_notCheck
         FROM
-        ( SELECT DISTINCT m.id, m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
+        (
+        SELECT DISTINCT
+        m.id,
+        m.small_name,
+        m.big_name,
+        mon.`month`,
+        m.did
+        FROM
+        major_contrast_technology m,
+        `month` mon
+        ) AS m
         LEFT JOIN (
         SELECT
+        cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+        SUM( workday ) AS workday,
+        tec,
+        did,
+        `month`
+        FROM
+        (
+        SELECT
+        FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
         COUNT(*) AS num,
         SUM( w.workday ) AS workday,
         m.big_name AS tec,
@@ -1315,15 +1334,22 @@
         `month` mon
         LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
         LEFT JOIN volume_workday w ON v.id = w.volume_id
+        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+        AND v.tec = pvc.tec
         WHERE
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
-        AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+        AND v.actual_publication_date LIKE CONCAT( 2023, "%" )
         AND v.number NOT LIKE "%+%"
         GROUP BY
+        p.id,
         m.big_name,
         mon.`month`
+        ) AS t
+        GROUP BY
+        tec,
+        `month`
         ) AS tab ON tab.tec = m.big_name
         AND tab.`month` = m.`month`
         LEFT JOIN (
@@ -1340,13 +1366,22 @@
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
-        AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+        AND v.actual_publication_date LIKE CONCAT( 2023, "%" )
         AND v.number NOT LIKE "%+%"
         GROUP BY
         m.big_name
         ) AS s ON s.tec = m.big_name
         LEFT JOIN (
         SELECT
+        cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+        SUM( workday ) AS workday,
+        tec,
+        did,
+        `month`
+        FROM
+        (
+        SELECT
+        FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
         COUNT(*) AS num,
         SUM( w.workday ) AS workday,
         m.big_name AS tec,
@@ -1355,47 +1390,73 @@
         FROM
         project p,
         major_contrast_technology m,
-        (SELECT
-             v.id,
-             v.project_id,
-             v.tec,
-             v.planned_publication_date
-         FROM
-             volume v
-         WHERE v.planned_publication_date LIKE CONCAT(#{year},"%")
-           AND v.number NOT LIKE "%+%"
-        ) as v
+        (
+        SELECT
+        v.id,
+        v.project_id,
+        v.tec,
+        v.planned_publication_date
+        FROM
+        volume v
+        WHERE
+        v.planned_publication_date LIKE CONCAT( 2023, "%" )
+        AND v.number NOT LIKE "%+%"
+        ) AS v
         LEFT JOIN volume_workday w ON w.volume_id = v.id
+        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+        AND v.tec = pvc.tec
         WHERE
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
         GROUP BY
+        p.id,
         m.big_name,
-        DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+        `month`
+        ) AS t
+        GROUP BY
+        tec,
+        `month`
+        ) AS plan ON m.big_name = plan.tec
         AND plan.`month` = m.`month`
-        left join (
-            SELECT
-                COUNT(*) AS num,
-                m.big_name as tec,
-                RIGHT ( c.plan_month, 2 ) AS `month`
-            FROM
-                project p,
-                major_contrast_technology m,
-                check_plan c,
-                volume v,
-                check_plan_volume vp
-            WHERE
-                RIGHT ( p.number, 1 ) = "s"
-              and v.id = vp.volume_id
-              AND p.id = c.project_id
-              AND vp.number NOT LIKE "%+%"
-              AND c.id = vp.check_plan_id
-              AND c.tec = m.small_name
-              AND c.plan_month LIKE CONCAT(#{year},"%")
-            GROUP BY
-                m.big_name, c.plan_month
-            ) as record on record.tec = m.big_name and record.`month` = m.`month`
+        LEFT JOIN (
+        SELECT
+        cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+        tec,
+        `month`
+        FROM
+        (
+        SELECT
+        FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        RIGHT ( c.plan_month, 2 ) AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        check_plan c,
+        volume v
+        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+        AND v.tec = pvc.tec,
+        check_plan_volume vp
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND v.id = vp.volume_id
+        AND p.id = c.project_id
+        AND vp.number NOT LIKE "%+%"
+        AND c.id = vp.check_plan_id
+        AND c.tec = m.small_name
+        AND c.plan_month LIKE CONCAT( 2023, "%" )
+        GROUP BY
+        p.id,
+        m.big_name,
+        c.plan_month
+        ) AS t
+        GROUP BY
+        tec,
+        `month`
+        ) AS record ON record.tec = m.big_name
+        AND record.`month` = m.`month`
         LEFT JOIN (
         SELECT
         COUNT(*) AS incomplete,
@@ -1449,31 +1510,26 @@
         GROUP BY
         m.big_name
         ) AS a ON a.tec = m.big_name
-        left join (
-            SELECT
-                COUNT(*) as num,
-                m.big_name AS tec
-            FROM
-                volume v,
-                major_contrast_technology m
-            WHERE
-                v.plan_confirm =1
-              AND v.tec = m.small_name
-              AND v.number NOT LIKE "%+%"
-              AND v.state IN ("尚未确定","尚未开展","正在设计","正在校核")
-              AND NOT EXISTS (
-                    SELECT 1
-                    FROM check_plan_volume pv
-                    WHERE check_month = #{date}
-                      AND v.id = pv.volume_id)
-            GROUP BY
-                m.big_name
-        ) as cnc on cnc.tec = m.big_name
-        GROUP BY
-        tec
-        UNION
+        LEFT JOIN (
         SELECT
-        m.id as mid,
+        COUNT(*) AS num,
+        m.big_name AS tec
+        FROM
+        volume v,
+        major_contrast_technology m
+        WHERE
+        v.plan_confirm = 1
+        AND v.tec = m.small_name
+        AND v.number NOT LIKE "%+%"
+        AND v.state IN ( "尚未确定", "尚未开展", "正在设计", "正在校核" )
+        AND NOT EXISTS ( SELECT 1 FROM check_plan_volume pv WHERE check_month = #{date} AND v.id = pv.volume_id )
+        GROUP BY
+        m.big_name
+        ) AS cnc ON cnc.tec = m.big_name
+        GROUP BY
+        tec UNION
+        SELECT
+        m.id AS mid,
         m.big_name AS tec,
         m.did,
         1 AS type,
@@ -1586,41 +1642,41 @@
         IF
         ( m.`month` = 12, plan.num, 0 )) AS `plan12`,
         MAX(
-                IF
-                    ( m.`month` = 1, record.num, 0 )) AS `record1`,
+        IF
+        ( m.`month` = 1, record.num, 0 )) AS `record1`,
         MAX(
-                IF
-                    ( m.`month` = 2, record.num, 0 )) AS `record2`,
+        IF
+        ( m.`month` = 2, record.num, 0 )) AS `record2`,
         MAX(
-                IF
-                    ( m.`month` = 3, record.num, 0 )) AS `record3`,
+        IF
+        ( m.`month` = 3, record.num, 0 )) AS `record3`,
         MAX(
-                IF
-                    ( m.`month` = 4, record.num, 0 )) AS `record4`,
+        IF
+        ( m.`month` = 4, record.num, 0 )) AS `record4`,
         MAX(
-                IF
-                    ( m.`month` = 5, record.num, 0 )) AS `record5`,
+        IF
+        ( m.`month` = 5, record.num, 0 )) AS `record5`,
         MAX(
-                IF
-                    ( m.`month` = 6, record.num, 0 )) AS `record6`,
+        IF
+        ( m.`month` = 6, record.num, 0 )) AS `record6`,
         MAX(
-                IF
-                    ( m.`month` = 7, record.num, 0 )) AS `record7`,
+        IF
+        ( m.`month` = 7, record.num, 0 )) AS `record7`,
         MAX(
-                IF
-                    ( m.`month` = 8, record.num, 0 )) AS `record8`,
+        IF
+        ( m.`month` = 8, record.num, 0 )) AS `record8`,
         MAX(
-                IF
-                    ( m.`month` = 9, record.num, 0 )) AS `record9`,
+        IF
+        ( m.`month` = 9, record.num, 0 )) AS `record9`,
         MAX(
-                IF
-                    ( m.`month` = 10, record.num, 0 )) AS `record10`,
+        IF
+        ( m.`month` = 10, record.num, 0 )) AS `record10`,
         MAX(
-                IF
-                    ( m.`month` = 11, record.num, 0 )) AS `record11`,
+        IF
+        ( m.`month` = 11, record.num, 0 )) AS `record11`,
         MAX(
-                IF
-                    ( m.`month` = 12, record.num, 0 )) AS `record12`,
+        IF
+        ( m.`month` = 12, record.num, 0 )) AS `record12`,
         MAX(
         IF
         ( m.`month` = 1, plan.workday, 0 )) AS `planWorkday1`,
@@ -1663,11 +1719,30 @@
         inc.incomplete,
         s.num AS num,
         ROUND( num6 / 6, 0 ) AS `avg`,
-        cnc.num as confirm_notCheck
+        cnc.num AS confirm_notCheck
         FROM
-        ( SELECT DISTINCT m.id, m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon ) AS m
+        (
+        SELECT DISTINCT
+        m.id,
+        m.small_name,
+        m.big_name,
+        mon.`month`,
+        m.did
+        FROM
+        major_contrast_technology m,
+        `month` mon
+        ) AS m
         LEFT JOIN (
         SELECT
+        cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+        SUM( workday ) AS workday,
+        tec,
+        did,
+        `month`
+        FROM
+        (
+        SELECT
+        FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
         COUNT(*) AS num,
         SUM( w.workday ) AS workday,
         m.big_name AS tec,
@@ -1679,15 +1754,22 @@
         `month` mon
         LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
         LEFT JOIN volume_workday w ON v.id = w.volume_id
+        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+        AND v.tec = pvc.tec
         WHERE
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
-        AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+        AND v.actual_publication_date LIKE CONCAT( 2023, "%" )
         AND v.number LIKE "%+%"
         GROUP BY
+        p.id,
         m.big_name,
         mon.`month`
+        ) AS t
+        GROUP BY
+        tec,
+        `month`
         ) AS tab ON tab.tec = m.big_name
         AND tab.`month` = m.`month`
         LEFT JOIN (
@@ -1702,13 +1784,22 @@
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
-        AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+        AND v.actual_publication_date LIKE CONCAT( 2023, "%" )
         AND v.number LIKE "%+%"
         GROUP BY
         m.big_name
         ) AS s ON s.tec = m.big_name
         LEFT JOIN (
         SELECT
+        cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+        SUM( workday ) AS workday,
+        tec,
+        did,
+        `month`
+        FROM
+        (
+        SELECT
+        FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
         COUNT(*) AS num,
         SUM( w.workday ) AS workday,
         m.big_name AS tec,
@@ -1717,47 +1808,73 @@
         FROM
         project p,
         major_contrast_technology m,
-        (SELECT
-             v.id,
-             v.project_id,
-             v.tec,
-             v.planned_publication_date
-         FROM
-             volume v
-         WHERE v.planned_publication_date LIKE CONCAT(#{year},"%")
-           AND v.number LIKE "%+%"
-        ) as v
+        (
+        SELECT
+        v.id,
+        v.project_id,
+        v.tec,
+        v.planned_publication_date
+        FROM
+        volume v
+        WHERE
+        v.planned_publication_date LIKE CONCAT( 2023, "%" )
+        AND v.number LIKE "%+%"
+        ) AS v
         LEFT JOIN volume_workday w ON v.id = w.volume_id
+        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+        AND v.tec = pvc.tec
         WHERE
         p.id = v.project_id
         AND v.tec = m.small_name
         AND RIGHT ( p.number, 1 ) = "s"
         GROUP BY
+        p.id,
         m.big_name,
-        DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+        `month`
+        ) AS t
+        GROUP BY
+        tec,
+        `month`
+        ) AS plan ON m.big_name = plan.tec
         AND plan.`month` = m.`month`
-        left join (
-            SELECT
-                COUNT(*) AS num,
-                m.big_name as tec,
-                RIGHT ( c.plan_month, 2 ) AS `month`
-            FROM
-                project p,
-                major_contrast_technology m,
-                volume v,
-                check_plan c,
-                check_plan_volume vp
-            WHERE
-                RIGHT ( p.number, 1 ) = "s"
-              and v.id = vp.volume_id
-              AND p.id = c.project_id
-              AND vp.number LIKE "%+%"
-              AND c.id = vp.check_plan_id
-              AND c.tec = m.small_name
-              AND c.plan_month LIKE CONCAT(#{year},"%")
-            GROUP BY
-                m.big_name, c.plan_month
-        ) as record on record.tec = m.big_name and record.`month` = m.`month`
+        LEFT JOIN (
+        SELECT
+        cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+        tec,
+        `month`
+        FROM
+        (
+        SELECT
+        FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
+        COUNT(*) AS num,
+        m.big_name AS tec,
+        RIGHT ( c.plan_month, 2 ) AS `month`
+        FROM
+        project p,
+        major_contrast_technology m,
+        volume v
+        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+        AND v.tec = pvc.tec,
+        check_plan c,
+        check_plan_volume vp
+        WHERE
+        RIGHT ( p.number, 1 ) = "s"
+        AND v.id = vp.volume_id
+        AND p.id = c.project_id
+        AND vp.number LIKE "%+%"
+        AND c.id = vp.check_plan_id
+        AND c.tec = m.small_name
+        AND c.plan_month LIKE CONCAT( 2023, "%" )
+        GROUP BY
+        p.id,
+        m.big_name,
+        c.plan_month
+        ) AS t
+        GROUP BY
+        tec,
+        `month`
+        ) AS record ON record.tec = m.big_name
+        AND record.`month` = m.`month`
         LEFT JOIN (
         SELECT
         COUNT(*) AS incomplete,
@@ -1811,26 +1928,22 @@
         GROUP BY
         m.big_name
         ) AS a ON a.tec = m.big_name
-        left join (
-            SELECT
-                COUNT(*) as num,
-                m.big_name AS tec
-            FROM
-                volume v,
-                major_contrast_technology m
-            WHERE
-                v.plan_confirm =1
-              AND v.tec = m.small_name
-              AND v.number LIKE "%+%"
-              AND v.state IN ("尚未确定","尚未开展","正在设计","正在校核")
-              AND NOT EXISTS (
-                    SELECT 1
-                    FROM check_plan_volume pv
-                    WHERE check_month = #{date}
-                      AND v.id = pv.volume_id)
-            GROUP BY
-                m.big_name
-        ) as cnc on cnc.tec = m.big_name
+        LEFT JOIN (
+        SELECT
+        COUNT(*) AS num,
+        m.big_name AS tec
+        FROM
+        volume v,
+        major_contrast_technology m
+        WHERE
+        v.plan_confirm = 1
+        AND v.tec = m.small_name
+        AND v.number LIKE "%+%"
+        AND v.state IN ( "尚未确定", "尚未开展", "正在设计", "正在校核" )
+        AND NOT EXISTS ( SELECT 1 FROM check_plan_volume pv WHERE check_month = #{date} AND v.id = pv.volume_id )
+        GROUP BY
+        m.big_name
+        ) AS cnc ON cnc.tec = m.big_name
         GROUP BY
         tec
         ) AS tab
@@ -1838,7 +1951,8 @@
         tec,
         `type`
         ORDER BY
-        mid desc, `type`
+        mid DESC,
+        `type`
     </select>
     <select id="manageTecProgress" resultType="java.util.Map">
         SELECT
@@ -2101,32 +2215,48 @@
                     inc.incomplete,
                     s.num AS num,
                     ROUND( num6 / 6, 0 ) AS `avg`,
-                    cnc.num as confirm_notCheck
+                    cnc.num AS confirm_notCheck
                 FROM
                     ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
                                                                                         `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
                         LEFT JOIN (
                         SELECT
-                            COUNT(*) AS num,
-                            SUM( w.workday ) AS workday,
-                            m.big_name AS tec,
-                            m.did,
-                            mon.`month` AS `month`
+                            cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+                            SUM( workday ) AS workday,
+                            tec,
+                            did,
+                            `month`
                         FROM
-                            project p,
-                            major_contrast_technology m,
-                            `month` mon
-                                LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
-                                LEFT JOIN volume_workday w ON v.id = w.volume_id
-                        WHERE
-                            p.id = v.project_id
-                          AND v.tec = m.small_name
-                          AND RIGHT ( p.number, 1 ) = "s"
-                          AND v.actual_publication_date LIKE CONCAT(#{year},"%")
-                          AND v.number NOT LIKE "%+%"
+                            (
+                                SELECT
+                                    FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
+                                    COUNT(*) AS num,
+                                    SUM( w.workday ) AS workday,
+                                    m.big_name AS tec,
+                                    m.did,
+                                    mon.`month` AS `month`
+                                FROM
+                                    project p,
+                                    major_contrast_technology m,
+                                    `month` mon
+                                        LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+                                        LEFT JOIN volume_workday w ON v.id = w.volume_id
+                                        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+                                        AND v.tec = pvc.tec
+                                WHERE
+                                    p.id = v.project_id
+                                  AND v.tec = m.small_name
+                                  AND RIGHT ( p.number, 1 ) = "s"
+                                  AND v.actual_publication_date LIKE CONCAT( 2023, "%" )
+                                  AND v.number NOT LIKE "%+%"
+                                GROUP BY
+                                    p.id,
+                                    m.big_name,
+                                    mon.`month`
+                            ) AS t
                         GROUP BY
-                            m.big_name,
-                            mon.`month`
+                            tec,
+                            `month`
                     ) AS tab ON tab.tec = m.big_name
                         AND tab.`month` = m.`month`
                         LEFT JOIN (
@@ -2143,62 +2273,97 @@
                             p.id = v.project_id
                           AND v.tec = m.small_name
                           AND RIGHT ( p.number, 1 ) = "s"
-                          AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+                          AND v.actual_publication_date LIKE CONCAT( 2023, "%" )
                           AND v.number NOT LIKE "%+%"
                         GROUP BY
                             m.big_name
                     ) AS s ON s.tec = m.big_name
                         LEFT JOIN (
                         SELECT
-                            COUNT(*) AS num,
-                            SUM( w.workday ) AS workday,
-                            m.big_name AS tec,
-                            m.did,
-                            DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+                            cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+                            SUM( workday ) AS workday,
+                            tec,
+                            did,
+                            `month`
                         FROM
-                            project p,
-                            major_contrast_technology m,
-                            (SELECT
-                                 v.id,
-                                 v.project_id,
-                                 v.tec,
-                                 v.planned_publication_date
-                             FROM
-                                 volume v
-                             WHERE v.planned_publication_date LIKE CONCAT(#{year},"%")
-                               AND v.number NOT LIKE "%+%"
-                            ) as v
-                                LEFT JOIN volume_workday w ON w.volume_id = v.id
-                        WHERE
-                            p.id = v.project_id
-                          AND v.tec = m.small_name
-                          AND RIGHT ( p.number, 1 ) = "s"
+                            (
+                                SELECT
+                                    FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
+                                    COUNT(*) AS num,
+                                    SUM( w.workday ) AS workday,
+                                    m.big_name AS tec,
+                                    m.did,
+                                    DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+                                FROM
+                                    project p,
+                                    major_contrast_technology m,
+                                    (
+                                        SELECT
+                                            v.id,
+                                            v.project_id,
+                                            v.tec,
+                                            v.planned_publication_date
+                                        FROM
+                                            volume v
+                                        WHERE
+                                            v.planned_publication_date LIKE CONCAT( 2023, "%" )
+                                          AND v.number NOT LIKE "%+%"
+                                    ) AS v
+                                        LEFT JOIN volume_workday w ON w.volume_id = v.id
+                                        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+                                        AND v.tec = pvc.tec
+                                WHERE
+                                    p.id = v.project_id
+                                  AND v.tec = m.small_name
+                                  AND RIGHT ( p.number, 1 ) = "s"
+                                GROUP BY
+                                    p.id,
+                                    m.big_name,
+                                    `month`
+                            ) AS t
                         GROUP BY
-                            m.big_name,
-                            DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+                            tec,
+                            `month`
+                    ) AS plan ON m.big_name = plan.tec
                         AND plan.`month` = m.`month`
-                        left join (
+                        LEFT JOIN (
                         SELECT
-                            COUNT(*) AS num,
-                            m.big_name as tec,
-                            RIGHT ( c.plan_month, 2 ) AS `month`
+                            cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+                            tec,
+                            `month`
                         FROM
-                            project p,
-                            major_contrast_technology m,
-                            check_plan c,
-                            volume v,
-                            check_plan_volume vp
-                        WHERE
-                            RIGHT ( p.number, 1 ) = "s"
-                          and v.id = vp.volume_id
-                          AND p.id = c.project_id
-                          AND vp.number NOT LIKE "%+%"
-                          AND c.id = vp.check_plan_id
-                          AND c.tec = m.small_name
-                          AND c.plan_month LIKE CONCAT(#{year},"%")
+                            (
+                                SELECT
+                                    FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
+                                    COUNT(*) AS num,
+                                    m.big_name AS tec,
+                                    RIGHT ( c.plan_month, 2 ) AS `month`
+                                FROM
+                                    project p,
+                                    major_contrast_technology m,
+                                    check_plan c,
+                                    volume v
+                                    LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+                                    AND v.tec = pvc.tec,
+                                    check_plan_volume vp
+                                WHERE
+                                    RIGHT ( p.number, 1 ) = "s"
+                                  AND v.id = vp.volume_id
+                                  AND p.id = c.project_id
+                                  AND vp.number NOT LIKE "%+%"
+                                  AND c.id = vp.check_plan_id
+                                  AND c.tec = m.small_name
+                                  AND c.plan_month LIKE CONCAT( 2023, "%" )
+                                GROUP BY
+                                    p.id,
+                                    m.big_name,
+                                    c.plan_month
+                            ) AS t
                         GROUP BY
-                            m.big_name, c.plan_month
-                    ) as record on record.tec = m.big_name and record.`month` = m.`month`
+                            tec,
+                            `month`
+                    ) AS record ON record.tec = m.big_name
+                        AND record.`month` = m.`month`
                         LEFT JOIN (
                         SELECT
                             COUNT(*) AS incomplete,
@@ -2252,26 +2417,22 @@
                         GROUP BY
                             m.big_name
                     ) AS a ON a.tec = m.big_name
-                        left join (
+                        LEFT JOIN (
                         SELECT
-                            COUNT(*) as num,
+                            COUNT(*) AS num,
                             m.big_name AS tec
                         FROM
                             volume v,
                             major_contrast_technology m
                         WHERE
-                            v.plan_confirm =1
+                            v.plan_confirm = 1
                           AND v.tec = m.small_name
                           AND v.number NOT LIKE "%+%"
-                          AND v.state IN ("尚未确定","尚未开展","正在设计","正在校核")
-                          AND NOT EXISTS (
-                                SELECT 1
-                                FROM check_plan_volume pv
-                                WHERE check_month = #{date}
-                                  AND v.id = pv.volume_id)
+                          AND v.state IN ( "尚未确定", "尚未开展", "正在设计", "正在校核" )
+                          AND NOT EXISTS ( SELECT 1 FROM check_plan_volume pv WHERE check_month = #{date} AND v.id = pv.volume_id )
                         GROUP BY
                             m.big_name
-                    ) as cnc on cnc.tec = m.big_name
+                    ) AS cnc ON cnc.tec = m.big_name
                 GROUP BY
                     tec UNION
                 SELECT
@@ -2464,32 +2625,48 @@
                     inc.incomplete,
                     s.num AS num,
                     ROUND( num6 / 6, 0 ) AS `avg`,
-                    cnc.num as confirm_notCheck
+                    cnc.num AS confirm_notCheck
                 FROM
                     ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
                                                                                         `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
                         LEFT JOIN (
                         SELECT
-                            COUNT(*) AS num,
-                            SUM( w.workday ) AS workday,
-                            m.big_name AS tec,
-                            m.did,
-                            mon.`month` AS `month`
+                            cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+                            SUM( workday ) AS workday,
+                            tec,
+                            did,
+                            `month`
                         FROM
-                            project p,
-                            major_contrast_technology m,
-                            `month` mon
-                                LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
-                                LEFT JOIN volume_workday w ON v.id = w.volume_id
-                        WHERE
-                            p.id = v.project_id
-                          AND v.tec = m.small_name
-                          AND RIGHT ( p.number, 1 ) = "s"
-                          AND v.actual_publication_date LIKE CONCAT(#{year},"%")
-                          AND v.number LIKE "%+%"
+                            (
+                                SELECT
+                                    FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
+                                    COUNT(*) AS num,
+                                    SUM( w.workday ) AS workday,
+                                    m.big_name AS tec,
+                                    m.did,
+                                    mon.`month` AS `month`
+                                FROM
+                                    project p,
+                                    major_contrast_technology m,
+                                    `month` mon
+                                        LEFT JOIN volume v ON DATE_FORMAT( v.actual_publication_date, '%m' ) = mon.`month`
+                                        LEFT JOIN volume_workday w ON v.id = w.volume_id
+                                        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+                                        AND v.tec = pvc.tec
+                                WHERE
+                                    p.id = v.project_id
+                                  AND v.tec = m.small_name
+                                  AND RIGHT ( p.number, 1 ) = "s"
+                                  AND v.actual_publication_date LIKE CONCAT( 2023, "%" )
+                                  AND v.number LIKE "%+%"
+                                GROUP BY
+                                    p.id,
+                                    m.big_name,
+                                    mon.`month`
+                            ) AS t
                         GROUP BY
-                            m.big_name,
-                            mon.`month`
+                            tec,
+                            `month`
                     ) AS tab ON tab.tec = m.big_name
                         AND tab.`month` = m.`month`
                         LEFT JOIN (
@@ -2504,62 +2681,97 @@
                             p.id = v.project_id
                           AND v.tec = m.small_name
                           AND RIGHT ( p.number, 1 ) = "s"
-                          AND v.actual_publication_date LIKE CONCAT(#{year},"%")
+                          AND v.actual_publication_date LIKE CONCAT( 2023, "%" )
                           AND v.number LIKE "%+%"
                         GROUP BY
                             m.big_name
                     ) AS s ON s.tec = m.big_name
                         LEFT JOIN (
                         SELECT
-                            COUNT(*) AS num,
-                            SUM( w.workday ) AS workday,
-                            m.big_name AS tec,
-                            m.did,
-                            DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+                            cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+                            SUM( workday ) AS workday,
+                            tec,
+                            did,
+                            `month`
                         FROM
-                            project p,
-                            major_contrast_technology m,
-                            (SELECT
-                                 v.id,
-                                 v.project_id,
-                                 v.tec,
-                                 v.planned_publication_date
-                             FROM
-                                 volume v
-                             WHERE v.planned_publication_date LIKE CONCAT(#{year},"%")
-                               AND v.number LIKE "%+%"
-                            ) as v
-                                LEFT JOIN volume_workday w ON v.id = w.volume_id
-                        WHERE
-                            p.id = v.project_id
-                          AND v.tec = m.small_name
-                          AND RIGHT ( p.number, 1 ) = "s"
+                            (
+                                SELECT
+                                    FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
+                                    COUNT(*) AS num,
+                                    SUM( w.workday ) AS workday,
+                                    m.big_name AS tec,
+                                    m.did,
+                                    DATE_FORMAT( v.planned_publication_date, '%m' ) AS `month`
+                                FROM
+                                    project p,
+                                    major_contrast_technology m,
+                                    (
+                                        SELECT
+                                            v.id,
+                                            v.project_id,
+                                            v.tec,
+                                            v.planned_publication_date
+                                        FROM
+                                            volume v
+                                        WHERE
+                                            v.planned_publication_date LIKE CONCAT( 2023, "%" )
+                                          AND v.number LIKE "%+%"
+                                    ) AS v
+                                        LEFT JOIN volume_workday w ON v.id = w.volume_id
+                                        LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+                                        AND v.tec = pvc.tec
+                                WHERE
+                                    p.id = v.project_id
+                                  AND v.tec = m.small_name
+                                  AND RIGHT ( p.number, 1 ) = "s"
+                                GROUP BY
+                                    p.id,
+                                    m.big_name,
+                                    `month`
+                            ) AS t
                         GROUP BY
-                            m.big_name,
-                            DATE_FORMAT( v.planned_publication_date, '%m' )) AS plan ON m.big_name = plan.tec
+                            tec,
+                            `month`
+                    ) AS plan ON m.big_name = plan.tec
                         AND plan.`month` = m.`month`
-                        left join (
+                        LEFT JOIN (
                         SELECT
-                            COUNT(*) AS num,
-                            m.big_name as tec,
-                            RIGHT ( c.plan_month, 2 ) AS `month`
+                            cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
+                            tec,
+                            `month`
                         FROM
-                            project p,
-                            major_contrast_technology m,
-                            volume v,
-                            check_plan c,
-                            check_plan_volume vp
-                        WHERE
-                            RIGHT ( p.number, 1 ) = "s"
-                          and v.id = vp.volume_id
-                          AND p.id = c.project_id
-                          AND vp.number LIKE "%+%"
-                          AND c.id = vp.check_plan_id
-                          AND c.tec = m.small_name
-                          AND c.plan_month LIKE CONCAT(#{year},"%")
+                            (
+                                SELECT
+                                    FORMAT( COUNT(*)* IFNULL( pvc.coefficient, 1 ), 0 ) AS cnum,
+                                    COUNT(*) AS num,
+                                    m.big_name AS tec,
+                                    RIGHT ( c.plan_month, 2 ) AS `month`
+                                FROM
+                                    project p,
+                                    major_contrast_technology m,
+                                    volume v
+                                    LEFT JOIN project_volume_coeffcient pvc ON pvc.project_id = v.project_id
+                                    AND v.tec = pvc.tec,
+                                    check_plan c,
+                                    check_plan_volume vp
+                                WHERE
+                                    RIGHT ( p.number, 1 ) = "s"
+                                  AND v.id = vp.volume_id
+                                  AND p.id = c.project_id
+                                  AND vp.number LIKE "%+%"
+                                  AND c.id = vp.check_plan_id
+                                  AND c.tec = m.small_name
+                                  AND c.plan_month LIKE CONCAT( 2023, "%" )
+                                GROUP BY
+                                    p.id,
+                                    m.big_name,
+                                    c.plan_month
+                            ) AS t
                         GROUP BY
-                            m.big_name, c.plan_month
-                    ) as record on record.tec = m.big_name and record.`month` = m.`month`
+                            tec,
+                            `month`
+                    ) AS record ON record.tec = m.big_name
+                        AND record.`month` = m.`month`
                         LEFT JOIN (
                         SELECT
                             COUNT(*) AS incomplete,
@@ -2613,26 +2825,22 @@
                         GROUP BY
                             m.big_name
                     ) AS a ON a.tec = m.big_name
-                        left join (
+                        LEFT JOIN (
                         SELECT
-                            COUNT(*) as num,
+                            COUNT(*) AS num,
                             m.big_name AS tec
                         FROM
                             volume v,
                             major_contrast_technology m
                         WHERE
-                            v.plan_confirm =1
+                            v.plan_confirm = 1
                           AND v.tec = m.small_name
-                          AND v.number NOT LIKE "%+%"
-                          AND v.state IN ("尚未确定","尚未开展","正在设计","正在校核")
-                          AND NOT EXISTS (
-                                SELECT 1
-                                FROM check_plan_volume pv
-                                WHERE check_month = #{date}
-                                  AND v.id = pv.volume_id)
+                          AND v.number LIKE "%+%"
+                          AND v.state IN ( "尚未确定", "尚未开展", "正在设计", "正在校核" )
+                          AND NOT EXISTS ( SELECT 1 FROM check_plan_volume pv WHERE check_month = #{date} AND v.id = pv.volume_id )
                         GROUP BY
                             m.big_name
-                    ) as cnc on cnc.tec = m.big_name
+                    ) AS cnc ON cnc.tec = m.big_name
                 GROUP BY
                     tec
             ) AS tab
@@ -2640,7 +2848,7 @@
             tec,
             `type`
         ORDER BY
-            tec
+            `type`
     </select>
     <select id="tecVolumeConfirmNotCheck" resultType="java.util.Map">
         SELECT
@@ -4050,7 +4258,7 @@
         WHERE
             id = #{id}
     </select>
+    <select id="tecProgressAllDateByProjectId" resultType="java.util.Map">
 
-
-
+    </select>
 </mapper>
