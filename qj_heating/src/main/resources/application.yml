@@ -1,11 +1,29 @@
-#myIp : 10.136.238.23
-myIp : 10.136.238.28
+myIp : 10.136.238.23
+#myIp : 10.136.238.28
 #myIp : 127.0.0.1
 server:
   port: 9111
+
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${myIp}:3306/page_definition?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: 7499
+    dynamic:
+      #设置默认的数据源或者数据源组,默认值即为master
+      primary: master
+      #严格匹配数据源,默认false. true未匹配到指定数据源时抛异常,false使用默认数据源
+      strict: false
+      datasource:
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://${myIp}:3306/page_definition?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+          username: root
+          password: 7499
+        slave_1:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://${myIp}:3306/technical_chart?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+          username: root
+          password: 7499
+
+mybatis:
+#  config-location: classpath:mybatis-config.xml
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com/zpepdi/qj_heating/entity

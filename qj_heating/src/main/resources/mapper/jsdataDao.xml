@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zpepdi.qj_heating.dao.jsdataDao">
+    <select id="queryTableNames" resultType="java.util.Map">
+        select table_name from information_schema.tables where table_schema='technical_chart'
+    </select>
+
+    <select id="queryzhcn" resultType="java.util.Map">
+        select * from zh_cn
+    </select>
+    <select id="queryTabledata" resultType="java.util.Map">
+        select * from `${tablename}`
+    </select>
+    <select id="queryTablebz" resultType="java.util.Map">
+        show full columns from  `${tablename}`
+    </select>
+
+
+
+</mapper>
