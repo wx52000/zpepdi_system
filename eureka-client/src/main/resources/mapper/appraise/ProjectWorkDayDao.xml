@@ -29,7 +29,9 @@
     <result column="backup" property="backup" />
     <result column="check" property="check" />
     <result column="checkerId" property="checkerId" />
-    <collection property="list" javaType="ARRAYLIST" column="id = id"
+    <result column="role" property="role" />
+    <result column="userId" property="userId" />
+    <collection property="list" javaType="ARRAYLIST" column="id = id,role = role,userId = userId"
                 select="queryTecSumWorkdayAmount">
     </collection>
   </resultMap>
@@ -366,7 +368,16 @@
       IFNULL( d.`backup`, 0 ) + IFNULL( a.`backup`, 0 ) + IFNULL( tde.workday, 0 ) - IFNULL( de.workday, 0 ) AS `backup`,
       -(IFNULL( tde.workday, 0 ) - IFNULL( de.workday, 0 )) as deduct,
       d.`check`,
-      c.checker AS checkerId
+      c.checker AS checkerId,
+      if(p.generalId = #{userId},true, exists(
+              SELECT 1
+              FROM role_menus r,
+                   `user` u
+              WHERE u.id = #{userId}
+                AND u.pid = r.role_id
+                AND r.menus_id = 10
+        )) as role,
+        #{userId} as userId
     FROM
       project p
         LEFT JOIN project_workday w ON p.id = w.project_id
@@ -422,7 +433,6 @@
 
     WHERE
       p.id = #{id}
-
     GROUP BY
       w.project_id
   </select>
@@ -455,7 +465,22 @@
         FROM
           project_workday_distribute d
             LEFT JOIN workday_tec wt ON wt.project_id = d.project_id
-            AND d.`check` = 1
+            AND d.`check` = 1 and if(#{role},true, wt.volume_tec in (SELECT
+                                                                 wt.volume_tec AS tec
+                                                               FROM
+                                                                 technology t,
+                                                                 workday_tec wt,
+                                                                 `user` u,
+                                                                 role_menus r
+                                                               WHERE
+                                                                 wt.project_id = #{id}
+                                                                 AND u.id = #{userId}
+                                                                 AND u.pid = r.role_id
+                                                                 AND r.menus_id = 28
+                                                                 AND u.did = t.did
+                                                                 AND wt.volume_tec = t.`name`
+                                                               GROUP BY
+                                                                 wt.volume_tec))
             LEFT JOIN (
             SELECT
               SUM( amount ) AS amount,

@@ -116,6 +116,11 @@ public class VolumeController {
         return volumeService.manageTecProgress(userId,map);
     }
 
+    @RequestMapping("tecVolumeConfirmNotCheck")
+    public Result tecVolumeConfirmNotCheck(@RequestBody Map<String,Object> map){
+        return volumeService.tecVolumeConfirmNotCheck(map);
+    }
+
     @RequestMapping("tecVolumeCompleteByDate")
     public Result tecVolumeCompleteByDate(@RequestBody Map<String,Object> map){
         return volumeService.tecVolumeCompleteByDate(map);
@@ -180,8 +185,8 @@ public class VolumeController {
     }
 
     @RequestMapping("setSinglePlanDate")
-    public Result setSinglePlanDate(@RequestBody Map<String,Object> map){
-        return volumeService.setSinglePlanDate(map);
+    public Result setSinglePlanDate(@UserId Integer userId,@RequestBody Map<String,Object> map){
+        return volumeService.setSinglePlanDate(userId,map);
     }
 
     @RequestMapping("setSingleRemark")

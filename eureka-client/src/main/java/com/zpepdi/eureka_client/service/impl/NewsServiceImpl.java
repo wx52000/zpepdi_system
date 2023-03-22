@@ -87,6 +87,9 @@ public class NewsServiceImpl implements NewsService {
       case 11:
         mapList = newsDao.planGeneral(id);
         break;
+      case 12:
+        mapList = newsDao.planAdjustGeneral(id);
+        break;
       default:
         break;
     }
@@ -150,54 +153,56 @@ public class NewsServiceImpl implements NewsService {
     int confirmDay = (int) projectService.confirmDay();
     Calendar calendar = Calendar.getInstance();
     int day = calendar.get(Calendar.DAY_OF_MONTH);
-    if (check == 1) {
       AtomicBoolean except = new AtomicBoolean(false);
       for (int i = 0; i < list.size(); i++) {
         Map<String,Object> map = list.get(i);
         String type =  map.get("type").toString();
-        if (type.equals("5")) {
-          if (!DateUtils.getDateMonth(
-                  new Date().getTime() - (3600L *24* projectDao.declareDay()*1000))
-                  .equals(list.get(i).get("submit_date").toString())){
-            map.put("submit_date", DateUtils.getDateMonth());
-          }
+        map.put("submit", 3);
+        if (check == 1) {
+          if (type.equals("5")) {
+            if (!DateUtils.getDateMonth(
+                            new Date().getTime() - (3600L * 24 * projectDao.declareDay() * 1000))
+                    .equals(list.get(i).get("submit_date").toString())) {
+              map.put("submit_date", DateUtils.getDateMonth());
+            }
             if (volumeDao.queryConfirmState(map)) {
-              map.put("submit", 5);
-            } else {
               map.put("submit", 2);
-            }
-        }
-        if (type.equals("7")){
-          if (map.get("typeNote").toString().equals("0")){
-            Object object = map.get("workday");
-            if (object == null || object.equals("")) {
-              except.set(true);
-            }
-          }else if (map.get("typeNote").toString().equals("1")){
-            Map<String,Object> surplus = departmentDao.querySurplus(id, Integer.valueOf(map.get("did").toString()));
-            if (Double.parseDouble(surplus.get("surplus").toString()) <
-                    Double.parseDouble(map.get("workday").toString())){
-              return Result.build(587,"无产值项目申请工时数大于当前专业可用工时");
+            } else {
+              map.put("submit", 5);
             }
           }
-        }
-        if (type.equals("8")){
-              int workday;
-              JSONArray list1 = JSONArray.parseArray(JSONArray.toJSONString(map.get("list")));
-              workday = list1.stream()
-                      .mapToInt(item -> {
-                        Object o = JSONObject.parseObject(item.toString()).get("workday");
-                        if (o != null && o != "") {
-                          return Integer.parseInt(o.toString());
-                        }else {
-                          except.set(true);
-                          return 0;
-                        }
-                      }).sum();
-              if(!except.get()) {
-                newsDao.setProjectWorkday(Integer.valueOf(map.get("projectId").toString()), workday);
-                newsDao.setProjectBackup(Integer.parseInt(map.get("projectId").toString()), workday);
+          if (type.equals("7")) {
+            if (map.get("typeNote").toString().equals("0")) {
+              Object object = map.get("workday");
+              if (object == null || object.equals("")) {
+                except.set(true);
               }
+            } else if (map.get("typeNote").toString().equals("1")) {
+              Map<String, Object> surplus = departmentDao.querySurplus(id, Integer.valueOf(map.get("did").toString()));
+              if (Double.parseDouble(surplus.get("surplus").toString()) <
+                      Double.parseDouble(map.get("workday").toString())) {
+                return Result.build(587, "无产值项目申请工时数大于当前专业可用工时");
+              }
+            }
+          }
+          if (type.equals("8")) {
+            int workday;
+            JSONArray list1 = JSONArray.parseArray(JSONArray.toJSONString(map.get("list")));
+            workday = list1.stream()
+                    .mapToInt(item -> {
+                      Object o = JSONObject.parseObject(item.toString()).get("workday");
+                      if (o != null && o != "") {
+                        return Integer.parseInt(o.toString());
+                      } else {
+                        except.set(true);
+                        return 0;
+                      }
+                    }).sum();
+            if (!except.get()) {
+              newsDao.setProjectWorkday(Integer.valueOf(map.get("projectId").toString()), workday);
+              newsDao.setProjectBackup(Integer.parseInt(map.get("projectId").toString()), workday);
+            }
+          }
         }
         if (type.equals("11")){
           count++;
@@ -205,14 +210,37 @@ public class NewsServiceImpl implements NewsService {
             map.put("workday_month",DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
             Calendar calendar1 = Calendar.getInstance();
             calendar1.add(Calendar.MONTH,1);
-            map.put("plan_month", DateUtils.dateToString(calendar1.getTime(),"yyyy-MM"));
+            String plan_month = DateUtils.dateToString(calendar1.getTime(),"yyyy-MM");
+            map.put("plan_month", plan_month);
+            String start = plan_month + "-01";
+            calendar1.add(Calendar.MONTH,1);
+            calendar1.set(Calendar.DAY_OF_MONTH,0);
+            String end = DateUtils.dateToString(calendar1.getTime(),"yyyy-MM-dd");
+            map.put("start",start);
+            map.put("end",end);
+          }else {
+            Calendar calendar1 = Calendar.getInstance();
+            String plan_month = DateUtils.dateToString(calendar1.getTime(),"yyyy-MM");
+            String start = plan_month + "-01";
+            map.put("start",start);
+            calendar1.add(Calendar.MONTH,1);
+            calendar1.set(Calendar.DAY_OF_MONTH,0);
+            String end = DateUtils.dateToString(calendar1.getTime(),"yyyy-MM-dd");
+            map.put("end",end);
           }
           newsDao.checkPlan(id,map,check);
         }
-      }
-      if (except.get()){
-        return Result.build(587,"存在项目工时未赋值");
-      }
+        if (type.equals("12")){
+          count++;
+          if (check == 1) {
+            newsDao.checkPlanAdjust(map);
+          }else {
+            newsDao.checkPlanAdjustReturn(map);
+          }
+        }
+        if (except.get()){
+          return Result.build(587,"存在项目工时未赋值");
+        }
     }
     if (list.size() >0 ) {
       if (list.size() != count) {
@@ -232,7 +260,7 @@ public class NewsServiceImpl implements NewsService {
           }else if (type.equals("7")){
             newsDao.checkLog7(item,check,id);
           }
-          else if (type.equals("11")){
+          else if (type.equals("11") || type.equals("12")){
 
           }else{
             newsDao.checkLog0(item,check,id);

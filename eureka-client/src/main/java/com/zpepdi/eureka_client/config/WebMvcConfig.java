@@ -44,7 +44,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         registry.addInterceptor(userIdInterceptor())
                 .addPathPatterns("/**")
                 .excludePathPatterns("/login","/refresh","/down/down360","/myLogout",
-                        "/error","/test","/produceDataTransmit");
+                        "/error","/test","/produceDataTransmit"," /druid/*");
         super.addInterceptors(registry);
     }
 

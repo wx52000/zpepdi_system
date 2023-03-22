@@ -60,8 +60,8 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
   }
 
   @Override
-  public Result queryProjectSumWorkday(Integer id) {
-    return Result.ok(proWorkdayDao.queryProSumWorkday(id));
+  public Result queryProjectSumWorkday(Integer usedId, Integer id) {
+    return Result.ok(proWorkdayDao.queryProSumWorkday(usedId, id));
   }
 
   @Override
@@ -187,10 +187,6 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
     Map<String,Object> limitMap = proWorkdayDao.queryLimitAndAddSum(projectId);
     if (limitMap == null){
       return Result.build(498,"该项目工时未分配");
-    }
-    if (Double.parseDouble(map.get("num").toString())
-            > Double.parseDouble(limitMap.get("limit").toString())){
-      return Result.build(499,"额外申请工时超出可申请上限");
     }
     proWorkdayDao.setNewProWorkday(id,map);
     proWorkdayDao.setNewProWorkdayDistribut(id,map);

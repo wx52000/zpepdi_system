@@ -7,11 +7,17 @@ import java.util.Map;
 
 public interface ProjectDao {
 
+    void addRelateContract(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
+
+    void delRelateContract(Map<String,Object> map);
+    void insertSingle(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
     List<Map<String,Object>> query();
 
     Map<String,Object> queryById(String id);
 
     List<Map<String,Object>> queryContractByProjectId(String id);
+
+    void setContractZCBSplit(Map<String,Object> map);
 
     void setLedger(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 

@@ -27,10 +27,11 @@ public class DataTransmissionServiceImpl implements DataTransmissionService {
     @Async("taskExecutor")
     public void dataTransmissionService() {
         new Thread(() -> {
+            //佛reach 异步循环会导致卷册提前删除
             dataTransmissionDao.setAlive();
             List<Map<String,Object>> projectList = dataTransmissionDao.queryProjectNumber();
             if (projectList != null && projectList.size() > 0){
-                projectList.forEach(item ->{
+                for (Map<String,Object> item : projectList){
                     String number = item.get("number").toString();
                     if (item.get("phaseID") == null ||
                             item.get("phaseID").toString().equals("")){
@@ -44,7 +45,7 @@ public class DataTransmissionServiceImpl implements DataTransmissionService {
                     if (list != null && list.size()>0) {
                         dataTransmissionDao.insertData(item.get("id").toString(), list);
                     }
-                });
+                }
                 dataTransmissionDao.delNotAlive();
             }
             dataTransmissionDao.reSetUser();

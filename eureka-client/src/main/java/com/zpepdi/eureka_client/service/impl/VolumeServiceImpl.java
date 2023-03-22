@@ -1,11 +1,10 @@
 package com.zpepdi.eureka_client.service.impl;
 
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.fastjson.JSONArray;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.excel.PlanDateListener;
+import com.zpepdi.eureka_client.service.ProjectService;
 import com.zpepdi.eureka_client.tools.DateUtils;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,11 @@ public class VolumeServiceImpl implements VolumeService {
     @Autowired
     private ProjectDao projectDao;
     @Autowired
+    private ProjectWorkdayDao projectWorkdayDao;
+    @Autowired
     private ProjectTaskDao projectTaskDao;
+    @Autowired
+    private ProjectService projectService;
     @Autowired
     public void  setVolumeDao(VolumeDao volumeDao){
         this.volumeDao = volumeDao;
@@ -203,7 +206,6 @@ public class VolumeServiceImpl implements VolumeService {
 
     }
 
-
     @Override
     public Result setWorkdayHigh(Integer userId, Map<String, Object> map) {
             volumeDao.setWorkdayHigh(userId,map);
@@ -265,13 +267,21 @@ public class VolumeServiceImpl implements VolumeService {
 
     @Override
     public Result tecProgress(Map<String, Object> map) {
+        map.put("date",DateUtils.getDateMonth());
         return Result.ok(volumeDao.tecProgress(map));
     }
 
     @Override
     public Result manageTecProgress(Integer userId, Map<String, Object> map) {
         map.put("userId",userId);
+        map.put("date",DateUtils.getDateMonth());
         return Result.ok(volumeDao.manageTecProgress(map));
+    }
+
+    @Override
+    public Result tecVolumeConfirmNotCheck(Map<String, Object> map) {
+        map.put("date",DateUtils.getDateMonth());
+        return Result.ok(volumeDao.tecVolumeConfirmNotCheck(map));
     }
 
     @Override
@@ -356,8 +366,8 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
-    public Result setSinglePlanDate(Map<String, Object> map) {
-        volumeDao.setSinglePlanDate(map);
+    public Result setSinglePlanDate(Integer userId,Map<String, Object> map) {
+        volumeDao.setSinglePlanDate(userId,map);
         return Result.ok();
     }
 
@@ -430,9 +440,17 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public Result sentConfirm(Integer userId, Map<String, Object> map) {
         Calendar calendar = Calendar.getInstance();
-        map.put("planMonth",DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
-        calendar.add(Calendar.MONTH,-1);
-        map.put("workdayMonth",DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int confirmDay = (int) projectService.confirmDay();
+        if (day<=confirmDay) {
+            map.put("planMonth", DateUtils.dateToString(calendar.getTime(), "yyyy-MM"));
+            calendar.add(Calendar.MONTH, -1);
+            map.put("workdayMonth", DateUtils.dateToString(calendar.getTime(), "yyyy-MM"));
+        }else {
+            map.put("workdayMonth", DateUtils.dateToString(calendar.getTime(), "yyyy-MM"));
+            calendar.add(Calendar.MONTH, 1);
+            map.put("planMonth", DateUtils.dateToString(calendar.getTime(), "yyyy-MM"));
+        }
         volumeDao.sendConfirm(userId,map);
         if (map.get("list") != null && !map.get("list").toString().equals("[]")) {
             volumeDao.sendConfirmVolume(map);

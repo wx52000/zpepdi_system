@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.qj_airhammer.dao.WaterDao">
+    <insert id="save">
+        if EXISTS(SELECT * FROM water WHERE userid=#{userId} and kind=#{map.kind})
+        UPDATE water SET temp=#{map.temp},
+            tempunit=#{map.tempunit},
+                             mpa=#{map.mpa},
+                             mpaunit=#{map.mpaunit},
+                             bmpaunit=#{map.bmpaunit},
+                             btempunit=#{map.btempunit},
+                             h=#{map.h},
+                             s=#{map.s},
+                             temp1=#{map.temp1},
+                             temp1unit=#{map.temp1unit}
+        WHERE userid=#{userId} and kind=#{map.kind}
+        ELSE
+        INSERT INTO water(userid,kind,temp,tempunit,mpa,mpaunit,bmpaunit,btempunit,h,s,temp1,temp1unit)
+        values (#{userId}, #{map.kind}, #{map.temp}, #{map.tempunit}, #{map.mpa}, #{map.mpaunit}, #{map.bmpaunit}, #{map.btempunit}, #{map.h}, #{map.s}, #{map.temp1}, #{map.temp1unit})
+--         insert  into water(userid,kind,temp,tempunit,mpa,mpaunit,bmpaunit,btempunit,h,s,temp1,temp1unit)
+--         values (#{userId}, #{map.kind}, #{map.temp}, #{map.tempunit}, #{map.mpa}, #{map.mpaunit}, #{map.bmpaunit}, #{map.btempunit}, #{map.h}, #{map.s}, #{map.temp1}, #{map.temp1unit})
+--         ON DUPLICATE KEY UPDATE
+--             temp = VALUES(temp),
+--             tempunit = VALUES(tempunit),
+--             mpa = VALUES(mpa),
+--             mpaunit = VALUES(mpaunit),
+--             bmpaunit = VALUES(bmpaunit),
+--             btempunit = VALUES(btempunit),
+--             h = VALUES(h),
+--             s = VALUES(s),
+--             temp1 = VALUES(temp1),
+--             temp1unit = VALUES(temp1unit)
+
+    </insert>
+
+    <select id="show" resultType="java.util.Map">
+       select temp,tempunit,mpa,mpaunit,btempunit,bmpaunit,h,s,temp1,temp1unit from water
+       where kind=#{map.kind} and userId=#{userId}
+
+    </select>
+
+    <select id="doSelect" resultType="java.util.Map">
+        select * from water
+        where kind=#{kind} and userId=#{userId}
+
+    </select>
+
+
+    <insert id="doInsert">
+        INSERT INTO water(userid,kind,temp,tempunit,mpa,mpaunit,bmpaunit,btempunit,h,s,temp1,temp1unit)
+        values (#{userId}, #{map.kind}, #{map.temp}, #{map.tempunit}, #{map.mpa}, #{map.mpaunit}, #{map.bmpaunit}, #{map.btempunit}, #{map.h}, #{map.s}, #{map.temp1}, #{map.temp1unit})
+
+    </insert>
+    <insert id="doUpdate">
+        UPDATE water SET temp=#{map.temp},
+                         tempunit=#{map.tempunit},
+                         mpa=#{map.mpa},
+                         mpaunit=#{map.mpaunit},
+                         bmpaunit=#{map.bmpaunit},
+                         btempunit=#{map.btempunit},
+                         h=#{map.h},
+                         s=#{map.s},
+                         temp1=#{map.temp1},
+                         temp1unit=#{map.temp1unit}
+        WHERE userid=#{userId} and kind=#{map.kind}
+    </insert>
+
+</mapper>

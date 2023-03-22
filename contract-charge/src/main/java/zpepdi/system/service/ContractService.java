@@ -8,6 +8,7 @@ import java.util.Map;
 
 public interface ContractService {
 
+    Result insertSingle(Integer userId,Map<String,Object> map);
     Result query(Integer income);
 
     Result queryChildren(String id);

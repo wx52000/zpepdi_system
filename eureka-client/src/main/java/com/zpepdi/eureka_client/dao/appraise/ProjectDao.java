@@ -86,6 +86,8 @@ public interface ProjectDao {
     //管理员查询
     List<Map> queryByAdmin(Integer userId);
 
+    List<Map> queryByManage(Integer userId);
+
     List<Map> queryCompleteByAdmin();
 //作为设总查询
     List<Map> queryByGeneral(User user);
@@ -171,6 +173,11 @@ public interface ProjectDao {
 
 
     List<Map<String,Object>> drawtotal(Map<String,Object> map);
-    List<Map<String,Object>> getdateInfo(Map<String,Object> map);
+    Map<String,Object> getdateInfo(Map<String,Object> map);
+
+
+    List<Map<String,Object>> downInfo(Map<String,Object> map);
+
+    List<Map<String,Object>> tecInfo(Map<String,Object> map);
 
 }

@@ -370,6 +370,16 @@
         p.`name`,
         p.cid,
         p.classify,
+        CASE p.cid
+            WHEN 1 THEN
+                pm.ja_contract_money
+            WHEN 2 THEN
+                pm.sb_contract_money
+            WHEN 3 THEN
+                pm.ja_contract_money
+            ELSE
+                0
+            END as `money`,
         max(IF
         ( p.type = 0, s.sumInvoice, 0 )) AS sumInvoice0,
         max(IF
@@ -425,6 +435,22 @@
         market_project p,
         classify c
         ) AS p
+        left join (
+            SELECT
+                cp.project_id,
+                SUM(c.money),
+                SUM(s.ja_contract_money) as ja_contract_money,
+                SUM(s.sb_contract_money) sb_contract_money,
+                SUM(s.js_contract_money) js_contract_money
+            FROM
+
+                contract_relate_project cp,
+                contract c
+                    LEFT JOIN contract_zcb_split s ON c.id = s.id
+            WHERE
+                c.id = cp.contract_id
+            GROUP BY cp.project_id
+        ) as pm on pm.project_id = p.id
         LEFT JOIN (
         SELECT
         project_id,
@@ -449,7 +475,6 @@
         general_project_ledger
         WHERE
         sb_invoice_date &lt;= #{date}
-
         GROUP BY
         project_id,
         type UNION
@@ -561,7 +586,6 @@
         `year` = #{year}
 
         AND `month` = #{month} ) AS b ON p.id = b.project_id
-
         AND p.cid = b.single
         AND p.type = b.type
         group by p.id,p.cid
@@ -571,6 +595,7 @@
             t.id,
             t.number,
             t.`name`,
+            t.money,
             quarter1_budget,
             quarter2_budget,
             quarter3_budget,
@@ -655,6 +680,7 @@
                     p.number,
                     p.`name`,
                     p.`month`,
+                    pm.money,
                     IFNULL( lastJa.income, 0 ) + IFNULL( lastSb.income, 0 ) + IFNULL( lastJs.income, 0 ) AS lastIncome,
                     IFNULL( ja.income, 0 ) + IFNULL( sb.income, 0 )+ IFNULL( js.income, 0 ) AS income,
                     pby.quarter1_budget,
@@ -664,6 +690,16 @@
                     pbm.income AS budget
                 FROM
                     ( SELECT p.id, p.number, p.`name`, m.`month` FROM market_project p, `month` m ) p
+                        left join (SELECT
+                                       cp.project_id,
+                                       SUM(c.money) as money
+                                   FROM
+
+                                       contract_relate_project cp,
+                                       contract c
+                                   WHERE
+                                       c.id = cp.contract_id
+                                   GROUP BY cp.project_id) pm on p.id = pm.project_id
                         LEFT JOIN ( SELECT project_id, SUM( ja_actual_payment ) AS income
                                     FROM general_project_ledger
                                     WHERE ja_invoice_date &lt; #{start} AND type = 0 GROUP BY project_id ) AS lastJa ON lastJa.project_id = p.id

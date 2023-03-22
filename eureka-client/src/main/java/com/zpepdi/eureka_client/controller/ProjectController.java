@@ -164,6 +164,10 @@ public class ProjectController {
         return Result.ok(projectService.queryByAdmin(userId));
     }
 
+    @RequestMapping("queryByManage")
+    public Result queryByManage(@UserId Integer userId){
+        return Result.ok(projectService.queryByManage(userId));
+    }
 
     @RequestMapping("queryCompleteByAdmin")
     public Result queryCompleteByAdmin(@RequestBody User user){
@@ -356,6 +360,12 @@ public class ProjectController {
 
     @RequestMapping("getdateinfo")
     public Result getdateinfo(@RequestBody Map<String, Object> map) {return projectService.getdateInfo(map);
+    }
+
+    //下载项目信息
+    @RequestMapping("downinfo")
+    public HttpServletResponse downinfo(HttpServletResponse response,@UserId Integer userId, @RequestBody Map<String, Object> map){
+        return projectService.downinfo(response,userId,map);
     }
 
 

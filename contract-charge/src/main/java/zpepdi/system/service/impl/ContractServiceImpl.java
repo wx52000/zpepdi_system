@@ -9,11 +9,21 @@ import zpepdi.system.service.ContractService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class ContractServiceImpl implements ContractService {
     @Autowired
     private ContractDao contractDao;
+
+    @Override
+    public Result insertSingle(Integer userId, Map<String, Object> map) {
+        if (map.get("id") != null&& !map.get("id").toString().equals("")){
+            map.put("id", UUID.randomUUID());
+        }
+        contractDao.insertSingle(userId,map);
+        return Result.ok();
+    }
 
     @Override
     public Result query(Integer income) {

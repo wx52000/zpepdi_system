@@ -2,8 +2,6 @@ package com.zpepdi.qj_airhammer.entity;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 
-import java.math.BigDecimal;
-
 public class Excel{
     @ExcelProperty(value="管道号",index=0)
     private String number;

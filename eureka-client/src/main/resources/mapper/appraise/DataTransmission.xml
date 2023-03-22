@@ -45,6 +45,7 @@
              </foreach>
          on duplicate key update
         `name` = values(`name`),
+        `tec` = values(`tec`),
         `state` = values(`state`),
         `principal` = values(`principal`),
         `chief` = values(`chief`),
@@ -162,8 +163,7 @@
         WHERE
             p.id = v.project_id
           and p.close = 0
-          and v.state not in ('待送出版','正在出版',
-            '待送业主','已完成','院交出')
+          and v.state in ('尚未开展','尚未确定')
     </update>
     <update id="reSetUser">
         INSERT INTO volume_user (project_id, volume_id, designer, checker, principal, headman )

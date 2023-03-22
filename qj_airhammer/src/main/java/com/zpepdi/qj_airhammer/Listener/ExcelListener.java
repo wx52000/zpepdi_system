@@ -3,8 +3,6 @@ package com.zpepdi.qj_airhammer.Listener;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.zpepdi.qj_airhammer.entity.Excel;
-import com.zpepdi.qj_airhammer.service.impl.AirHammerServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;

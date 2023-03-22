@@ -400,7 +400,31 @@
         update check_plan
         set plan_month = #{map.plan_month}, workday_month = #{map.workday_month},
             `check` = #{check}, checker = #{userId}, check_time = now()
-        where id = #{map.id}
+        where id = #{map.id};
+        update check_plan_volume
+        set check_month = #{map.plan_month}
+        where check_plan_id = #{map.id};
+        UPDATE volume v, check_plan_volume pv
+        SET v.planned_publication_date = #{map.end}
+        WHERE pv.volume_id = v.id
+        and check_plan_id = #{map.id}
+        AND( v.planned_publication_date is NULL
+        OR v.planned_publication_date &lt; #{map.start}
+        OR v.planned_publication_date &gt; #{map.end});
+    </update>
+    <update id="checkPlanAdjust">
+        <foreach collection="list" item="item" separator=";">
+        update volume
+        set plan_publication_check = 1
+        where id = #{item.id}
+        </foreach>
+    </update>
+    <update id="checkPlanAdjustReturn">
+        <foreach collection="list" item="item" separator=";">
+        update volume v, volume_plan_log l
+        set v.plan_publication_check = 2, v.planned_publication_date = l.plan_publiction_date
+        where v.id = #{item.id} and v.id = l.volume_id
+        </foreach>
     </update>
     <select id="count" resultType="java.lang.Integer">
         SELECT
@@ -612,10 +636,7 @@
                   AND p.id = c.project_id
                   AND c.tec = v.tec
                   AND v.project_id = p.id
-                  AND (
-                        EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-                        OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-                    )
+                  AND EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal)
                 GROUP BY
                     p.id,
                     c.tec,
@@ -667,6 +688,14 @@
                 where c.project_id = p.id
                 and p.generalId = #{id}
                 and c.check = 0
+                union All
+                SELECT v.id
+                FROM volume v,
+                     project p
+                WHERE plan_publication_check = 0
+                and v.project_id = p.id
+                and p.generalId = #{id}
+                GROUP BY project_id, tec
             ) AS tab
     </select>
     <select id="queryCountByType" resultType="java.util.Map">
@@ -905,10 +934,7 @@
                           AND p.id = c.project_id
                           AND c.tec = v.tec
                           AND v.project_id = p.id
-                          AND (
-                                EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-                                OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
-                            )
+                          AND EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 0 AND `handler` = c.principal )
                         GROUP BY
                             p.id,
                             c.tec,
@@ -979,7 +1005,22 @@
                     c.project_id = p.id
                   AND p.generalId = #{id}
                   AND c.`check` = 0
-                ) as count11
+                ) as count11,
+            (SELECT COUNT(*)
+             FROM(
+                     SELECT
+                         p.id, v.tec
+                     FROM
+                         volume v,
+                         project p
+                     WHERE
+                         plan_publication_check = 0
+                       AND v.project_id = p.id
+                       AND p.generalId = #{id}
+                     GROUP BY
+                         project_id,
+                         tec
+                 ) as t) as count12
     </select>
     <select id="queryByAdmin" resultMap="queryByAdminList">
       select 0 as type, p.id as id,
@@ -1020,15 +1061,22 @@
                da.backup,
                da.tec,
                a.reason,
+               pw.num as initialWorkday,
+               (select sum(`num`)
+                from project_workday_add pwa
+                where  pwa.project_id = p.id
+                and a.`check` = 1) as extraWorkday,
                a.handler as handlerId,
                u.name as handler,
                false  as result
         from  project p,
+              project_workday pw,
             project_workday_add a
              left join project_workday_distribute_add da on a.id = da.add_id,
             project_checker c,
              `user` u
         where p.id = a.project_id
+          and p.id = pw.project_id
           and a.`check` = 0
           and c.project_id = p.id
           and c.checker = #{id}
@@ -1303,8 +1351,7 @@
           and w.project_id = p.id
           and w.volume_tec = v.tec
           AND v.project_id = p.id
-          AND (EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 2 )
-            OR EXISTS ( SELECT id FROM volume_ratio WHERE v.id = volume_id AND `check` = 2 ) )
+          AND EXISTS ( SELECT id FROM volume_workday WHERE v.id = volume_id AND `check` = 2 )
         GROUP BY
             p.id,
             v.tec,
@@ -1962,6 +2009,24 @@
             n.tec,
             n.other_tec AS otherTec,
             CONVERT(n.planned_date, CHAR(10)) AS plannedDate,
+            (
+                SELECT
+                    GROUP_CONCAT(CONCAT( pp.number, "$$", w.`num` + IFNULL(a.workday,0)))
+                FROM
+                    project pp,
+                    project_workday w
+                        LEFT JOIN ( SELECT project_id, SUM( `num` ) AS workday FROM project_workday_add a GROUP BY a.project_id ) AS a ON w.project_id = a.project_id
+                WHERE
+                    IF
+                        (
+                        RIGHT ( pp.number, 1 ) REGEXP '[0-9]',
+                                pp.number = SUBSTR( p.number, 1, LENGTH( p.number )- 1 ),
+                                SUBSTR( pp.number, 1, LENGTH( pp.number )- 1 ) = SUBSTR( p.number, 1, LENGTH( p.number )- 1 ))
+                  AND pp.number IS NOT NULL
+                  AND pp.number != ""
+                AND pp.number != p.number
+                AND pp.id = w.project_id
+                ) as relation,
             n.note,
             CASE
                 n.spider
@@ -2754,12 +2819,48 @@
         WHERE c.project_id = p.id
           AND p.generalId = #{userId}
           AND u.id = c.`handler`
+          and c.check = 0
     </select>
     <select id="planVolumeGeneral" resultType="java.util.Map">
         SELECT
             volume_id,`number`,`name`,state,designer,checker,principal,plan_publication
         FROM check_plan_volume
         WHERE check_plan_id = #{id}
+    </select>
+    <resultMap id="planAdjustGeneral" type="map">
+    <result column="id" property="id"></result>
+    <result column="number" property="number"></result>
+    <result column="name" property="name"></result>
+    <result column="tec" property="tec"></result>
+    <result column="result" property="result"></result>
+    <result column="type" property="type"></result>
+    <collection property="list" column="id = id,tec,tec"
+                javaType="ARRAYLIST" select="planAdjustVolumeGeneral"></collection>
+    </resultMap>
+    <select id="planAdjustGeneral" resultMap="planAdjustGeneral">
+        SELECT
+            p.id, v.tec, p.name, p.number,
+            FALSE AS result,
+            12 as `type`
+        FROM
+            volume v,
+            project p
+        WHERE
+            plan_publication_check = 0
+          AND v.project_id = p.id
+          AND p.generalId = #{id}
+        GROUP BY
+            project_id,
+            tec
+    </select>
+    <select id="planAdjustVolumeGeneral" resultType="java.util.Map">
+        select
+        id,`number`,`name`,state,designer,checker,principal,planned_publication_date
+        from
+        volume
+        where project_id = #{id}
+        and tec = #{tec}
+        and plan_publication_check = 0
     </select>
 
 </mapper>

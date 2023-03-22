@@ -65,6 +65,7 @@ public interface VolumeDao {
 
     List<Map<String,Object>> manageTecProgress(Map<String, Object> map);
 
+    List<Map<String,Object>> tecVolumeConfirmNotCheck(Map<String, Object> map);
     List<Map<String,Object>> tecVolumeCompleteByDate(Map<String, Object> map);
 
     List<Map<String,Object>> tecVolumePlanCompleteByDate(Map<String,Object> map);
@@ -74,6 +75,7 @@ public interface VolumeDao {
     List<Map<String,Object>> tecVolumeRecordByDate(Map<String,Object> map);
 
     List<Map<String,Object>> tecProgressByProjectId(Map<String, Object> map);
+
 
     List<Map<String,Object>> tecVolumeCompleteByDateByProjectId(Map<String, Object> map);
 
@@ -91,7 +93,7 @@ public interface VolumeDao {
 
     List<Map<String,Object>> queryPlannedPublicDate(String search);
 
-    void setSinglePlanDate(Map<String,Object> map);
+    void setSinglePlanDate(@Param("userId")Integer userId,@Param("map") Map<String,Object> map);
 
 
     void setSingleRemark(Map<String,Object> map);
