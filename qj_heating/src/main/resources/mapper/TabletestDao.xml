@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zpepdi.qj_heating.dao.TabletestDao">
+
+    <!--创建表的 SQL 语句-->
+    <update id="createTable" parameterType="com.zpepdi.qj_heating.entity.TableList">
+
+        CREATE TABLE IF NOT EXISTS `${tableList.tName}`
+        (
+            `id`       int(0)    NOT NULL AUTO_INCREMENT COMMENT '主键',
+            <foreach collection="tableList.btList" item="bt" separator="," close="," >
+                ${bt} varchar(255) NULL DEFAULT NULL
+            </foreach>
+            `Version` int(0) NULL DEFAULT NULL ,
+            PRIMARY KEY (`id`)
+            ) ENGINE = InnoDB
+            AUTO_INCREMENT = 1
+            CHARACTER SET = utf8mb4;
+    </update>
+
+    <!--创建表的 SQL 语句-->
+    <insert id="insertTable" parameterType="com.zpepdi.qj_heating.entity.TableList">
+
+        <foreach collection="tableList.bodyList" item="body" >
+
+
+            INSERT INTO `${tableList.tName}`
+            (
+            <foreach collection="tableList.btList" item="bt" separator="," close="," >
+                ${bt}
+            </foreach>
+            `Version` )
+            VALUES
+            (
+            <foreach collection="body" item="b" separator="," close="," >
+                '${b}'
+            </foreach>
+              1 );
+
+        </foreach>
+
+
+    </insert>
+
+</mapper>
