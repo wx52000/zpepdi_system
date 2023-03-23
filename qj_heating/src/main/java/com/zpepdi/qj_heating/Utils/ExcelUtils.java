@@ -32,7 +32,8 @@ public class ExcelUtils {
             throw new Exception("找不到文件");
         }
         List<List<Object>> list = new ArrayList<>();
-        XSSFWorkbook xwb = new XSSFWorkbook(new FileInputStream(file));
+        FileInputStream fis = new FileInputStream(file);
+        XSSFWorkbook xwb = new XSSFWorkbook(fis);
         // 读取第一张表格内容
         XSSFSheet sheet = xwb.getSheetAt(0);
         String sheetName = xwb.getSheetName(0);
@@ -104,6 +105,7 @@ public class ExcelUtils {
         //生成excel文件
         String filename = lujing+"\\应力计算结果.xlsx";
         createExcel(filename,lists,sheetName,sheetMap);
+        fis.close();
     }
 
     public static List<List<Object>> docInsertXlsx(Map<String,List<String>> docdata,Map<String,List<String>> docdata2,List<List<Object>> xlsxdata){

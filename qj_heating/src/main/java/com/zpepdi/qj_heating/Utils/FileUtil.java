@@ -8,6 +8,7 @@ import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.impl.xb.xmlschema.SpaceAttribute;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.slf4j.Logger;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,92 +64,74 @@ public class FileUtil {
         return map;
     }
 
-    /**
-     * 获取正文文件内容，doc方法
-     *
-     * @param path
-     * @return
-     */
-    public static Map<String, String> getContentDoc(String path) {
-        Map<String, String> map = new HashMap();
-        StringBuffer content = new StringBuffer("");
-        String result = "0";  // 0表示获取正常，1表示获取异常
-        InputStream is = null;
-        Logger logger = null;
-        try {
-            is = new FileInputStream(new File(path));
-            // 2003版本的word
-            WordExtractor extractor = new WordExtractor(is);  // 2003版本 仅doc格式文件可处理，docx文件不可处理
-            String[] paragraphText = extractor.getParagraphText();   // 获取段落，段落缩进无法获取，可以在前添加空格填充
-            if (paragraphText != null && paragraphText.length > 0) {
-                for (String paragraph : paragraphText) {
-                    if (!paragraph.startsWith("    ")) {
-                        content.append(paragraph.trim()).append("\r\n");
-                    } else {
-                        content.append(paragraph);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("doc解析正文异常:" + e);
-            result = "1"; // 出现异常
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    logger.error("" + e);
-                }
-            }
-            map.put("result", result);
-            map.put("content", content.toString());
-        }
-        return map;
-    }
 
     /**
-     * 获取正文文件内容，wps方法
+     * 将MultipartFile转换为File
      *
-     * @param path
-     * @return
+     *
+     * @param outFilePath 参数
+     * @param multiFile 参数
+     * @return 执行结果
      */
-    public static Map<String, String> getContentWps(String path) {
-        Map<String, String> map = new HashMap();
-        StringBuffer content = new StringBuffer("");
-        String result = "0";  // 0表示获取正常，1表示获取异常
-        InputStream is = null;
-        Logger logger = null;
-        try {
-            is = new FileInputStream(new File(path));
-            // wps版本word
-            HWPFDocument hwpf = new HWPFDocument(is);
-            WordExtractor wordExtractor = new WordExtractor(hwpf);
-            // 文档文本内容
-            String[] paragraphText1 = wordExtractor.getParagraphText();
-            if (paragraphText1 != null && paragraphText1.length > 0) {
-                for (String paragraph : paragraphText1) {
-                    if (!paragraph.startsWith("    ")) {
-                        content.append(paragraph.trim()).append("\r\n");
-                    } else {
-                        content.append(paragraph);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("wps解析正文异常:" + e);
-            result = "1"; // 出现异常
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    logger.error("" + e);
-                }
-            }
-            map.put("result", result);
-            map.put("content", content.toString());
+    public static File multipartFileToFile(String outFilePath, MultipartFile multiFile) {
+        // 获取文件名
+        if (null == multiFile) {
+            return null;
         }
-        return map;
+        String fileName = multiFile.getOriginalFilename();
+        if (null == fileName) {
+            return null;
+        }
+        try {
+            File toFile;
+            InputStream ins;
+            ins = multiFile.getInputStream();
+            //指定存储路径
+            toFile = new File(outFilePath.concat(File.separator).concat(multiFile.getOriginalFilename()));
+            inputStreamToFile(ins, toFile);
+            return toFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    private static void inputStreamToFile(InputStream ins, File file) {
+        try (OutputStream os = new FileOutputStream(file)) {
+            int bytesRead;
+            int bytes = 8192;
+            byte[] buffer = new byte[bytes];
+            while ((bytesRead = ins.read(buffer, 0, bytes)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            ins.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // MultipartFile转换为InputStream
+    public static InputStream multipartToInputStream(MultipartFile multipartFile) throws IOException {
+        InputStream inputStream = null;
+        File file = null;
+        try {
+            // 创建临时文件
+            file = File.createTempFile("temp", null);
+            // 把multipartFile写入临时文件
+            multipartFile.transferTo(file);
+            // 使用文件创建 inputStream 流
+            inputStream = new FileInputStream(file);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            // 最后记得删除文件
+            file.deleteOnExit();
+            // 关闭流
+            inputStream.close();
+        }
+        return inputStream;
     }
 
     /**
@@ -157,7 +140,7 @@ public class FileUtil {
      * @param newsumdata
      * @throws IOException
      */
-    public static void createFile(String lujing,Map<String,List<String>> newsumdata) throws IOException {
+    public static void createFile(String Directoryname,String lujing,Map<String,List<String>> newsumdata) throws IOException {
         //创建文本对象
         XWPFDocument docxDocument = new XWPFDocument();
         //创建第一段落
@@ -165,7 +148,7 @@ public class FileUtil {
         paragraphX.setAlignment(ParagraphAlignment.LEFT);//对齐方式
         //创建段落中的run
         XWPFRun run = paragraphX.createRun();
-        run.setText("fliepath:  "+lujing);
+        run.setText("Directoryname:  "+Directoryname);
         run.addCarriageReturn();//回车键
         run.addCarriageReturn();//回车键
         for(String key:newsumdata.keySet()){
@@ -193,7 +176,7 @@ public class FileUtil {
      * @param newsumdata
      * @throws IOException
      */
-    public static void createFile2(String lujing,Map<String,List<String>> newsumdata) throws IOException {
+    public static void createFile2(String Directoryname,String lujing,Map<String,List<String>> newsumdata) throws IOException {
         //创建文本对象
         XWPFDocument docxDocument = new XWPFDocument();
         //创建第一段落
@@ -201,7 +184,7 @@ public class FileUtil {
         paragraphX.setAlignment(ParagraphAlignment.LEFT);//对齐方式
         //创建段落中的run
         XWPFRun run = paragraphX.createRun();
-        run.setText("fliepath:  "+lujing);
+        run.setText("Directoryname:  "+Directoryname);
         run.addCarriageReturn();//回车键
         run.addCarriageReturn();//回车键
         for(String key:newsumdata.keySet()){
