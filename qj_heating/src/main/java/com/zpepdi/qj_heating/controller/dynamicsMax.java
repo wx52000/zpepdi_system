@@ -2,11 +2,18 @@ package com.zpepdi.qj_heating.controller;
 
 import com.zpepdi.qj_heating.Utils.ExcelUtils;
 import com.zpepdi.qj_heating.Utils.FileUtil;
+import com.zpepdi.qj_heating.Utils.FileZipUtil;
 import com.zpepdi.qj_heating.result.Result;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 @RestController
@@ -14,10 +21,73 @@ import java.util.*;
 @CrossOrigin(origins = "*")
 public class dynamicsMax {
 
-    @RequestMapping("dynamiclujing")
-    public Result dynamiclujing(@RequestBody Map<String,String> map ){
-        //得到文件夹路径
-        String lujing = map.get("lujing");
+    //定义临时文件路径
+    private static final String tempfile = "temp";
+    /**
+     * 删除临时文件
+     */
+    @RequestMapping("delete")
+    public void testDeleteFileDir5() throws IOException {
+        Path path = Paths.get(tempfile);
+        Files.walkFileTree(path,
+                new SimpleFileVisitor<Path>() {
+                    // 先去遍历删除文件
+                    public FileVisitResult visitFile(Path file,
+                                                     BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        System.out.printf("文件被删除 : %s%n", file);
+                        return FileVisitResult.CONTINUE;
+                    }
+                    // 再去遍历删除目录
+                    public FileVisitResult postVisitDirectory(Path dir,
+                                                              IOException exc) throws IOException {
+                        Files.delete(dir);
+                        System.out.printf("文件夹被删除: %s%n", dir);
+                        return FileVisitResult.CONTINUE;
+                    }
+                }
+        );
+
+    }
+
+
+
+
+    //得到文件并保存至临时目录
+    @PostMapping("dynamicFilelist")
+    public Result dynamicFilelist(@RequestBody MultipartFile[] file){
+        String Directoryname = null;
+        String filepath = tempfile+"\\";
+        for(MultipartFile f:file){
+            String[] split = f.getOriginalFilename().split("/");
+            Directoryname = split[0];
+            String name = split[split.length - 1];
+            String type = name.split("\\.")[1];
+            String start = name.split("\\.")[0].substring(0,2);
+            String end = name.split("\\.")[0].substring(name.split("\\.")[0].length()-2);
+            if(type.equals("xlsx")){
+                saveFileByDirectory(f);
+                continue;
+            }
+            if(start.equals("动态")&&end.equals("荷载")&&type.equals("docx")){
+                saveFileByDirectory(f);
+                continue;
+            }
+            if(start.equals("动态")&&end.equals("位移")&&type.equals("docx")){
+                saveFileByDirectory(f);
+                continue;
+            }
+        }
+        //根据文件路径进行处理
+        ;
+        return dynamiclujing(filepath,Directoryname);
+
+    }
+
+
+
+
+    public  Result dynamiclujing(String lujing,String Directoryname){
         //荷载文件数据
         Map<String,List<List<String>>> sumdata = new LinkedHashMap<>();
         Map<String,List<String>> newsumdata = new LinkedHashMap<>();
@@ -156,14 +226,17 @@ public class dynamicsMax {
         }
 
         try {
+            String newname = lujing+"newfile\\";
+            File file1 = new File(newname);
+            file1.mkdir();
             //生成荷载doc文件
-            FileUtil.createFile(lujing,newsumdata);
+            FileUtil.createFile(Directoryname,newname,newsumdata);
             //生成位移doc文件
-            FileUtil.createFile2(lujing,newsumdata2);
+            FileUtil.createFile2(Directoryname,newname,newsumdata2);
             //excel文件路径
-            File file = getAllFile3(lujing);
+            File file = getAllFile3(lujing).get(0);
             //读取并创建excel文件
-            ExcelUtils.readExcel(lujing,file,newsumdata,newsumdata2);
+            ExcelUtils.readExcel(newname,file,newsumdata,newsumdata2);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -171,7 +244,10 @@ public class dynamicsMax {
         return Result.ok("文件正常生成成功");
     }
 
-
+    @GetMapping("/download")
+    public void download(String filename, HttpServletResponse response) throws IOException {
+        FileZipUtil.exportZip(response,"temp\\newfile\\",filename,".zip");
+    }
 
 
     /**
@@ -202,7 +278,7 @@ public class dynamicsMax {
      * @param dirFilePath 文件夹路径
      * @return
      */
-    public File getAllFile3(String dirFilePath) {
+    public List<File> getAllFile3(String dirFilePath) {
         if (dirFilePath == null || dirFilePath.equals(""))
             return null;
         return getAllFile3(new File(dirFilePath));
@@ -290,13 +366,14 @@ public class dynamicsMax {
         return files;
     }
 
+
     /**
      * 获取指定文件夹下excel文件
      *
      * @param dirFile 文件夹
      * @return
      */
-    public File getAllFile3(File dirFile) {
+    public List<File> getAllFile3(File dirFile) {
         // 如果文件夹不存在或着不是文件夹，则返回 null
         if (Objects.isNull(dirFile) || !dirFile.exists() || dirFile.isFile())
             return null;
@@ -307,7 +384,7 @@ public class dynamicsMax {
 
         List<File> files = new ArrayList<>();
         for (File childFile : childrenFiles) {
-            // 如果是文件
+            // 如果是文件，直接添加到结果集合
             if (childFile.isFile()) {
                 String filename = childFile.getName();
                 String[] split = filename.split("\\.");
@@ -315,11 +392,37 @@ public class dynamicsMax {
                 String type = split[split.length-1];
                 if(type.equals("xlsx")){
                     files.add(childFile);
-                    return childFile;
                 }
             }
+            else {
+                // 如果是文件夹，则将其内部文件添加进结果集合
+                List<File> cFiles = getAllFile3(childFile);
+                if (Objects.isNull(cFiles) || cFiles.isEmpty()) continue;
+                files.addAll(cFiles);
+            }
         }
-        return null;
+        return files;
     }
+
+    /**
+     * 保存文件
+     * @param file
+     */
+    public static void saveFileByDirectory (MultipartFile file) {
+        try {
+            // 将文件保存在服务器目录中
+            // 得到上传文件后缀
+            String originalName = file.getOriginalFilename();
+//            String ext = "." + FilenameUtils.getExtension(originalName);
+            // 新生成的文件名称
+            String fileName = originalName;
+            // 复制文件
+            File targetFile = new File("temp\\", fileName);
+            FileUtils.writeByteArrayToFile(targetFile, file.getBytes());
+        } catch (IOException e) {
+            System.out.println("保存文件到服务器（本地）失败");
+        }
+    }
+
 
 }
