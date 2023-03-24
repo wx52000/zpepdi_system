@@ -37,9 +37,10 @@ public class ExcelUtils {
         // 读取第一张表格内容
         XSSFSheet sheet = xwb.getSheetAt(0);
         String sheetName = xwb.getSheetName(0);
+        String newsheetName = "(Dynamic)"+xwb.getSheetName(0);
         Map<String,XSSFSheet> sheetMap = new LinkedHashMap<>();
         int numberOfSheets = xwb.getNumberOfSheets();
-        for(int i=1;i<numberOfSheets;i++){
+        for(int i=0;i<numberOfSheets;i++){
             sheetMap.put(xwb.getSheetName(i),xwb.getSheetAt(i));
         }
         XSSFRow row = null;
@@ -51,7 +52,7 @@ public class ExcelUtils {
                 list.add(new ArrayList<>());
                 continue;
             }
-            List<Object> linked = new LinkedList<Object>();
+            List<Object> linked = new ArrayList<>();
             for (int j = 0; j <= row.getLastCellNum(); j++) {
                 Object value = null;
                 cell = row.getCell(j);
@@ -66,23 +67,7 @@ public class ExcelUtils {
                         value = cell.getStringCellValue();
                         break;
                     case NUMERIC:
-                        //日期数据返回LONG类型的时间戳
-                        if ("yyyy\"年\"m\"月\"d\"日\";@".equals(cell.getCellStyle().getDataFormatString())) {
-                            //System.out.println(cell.getNumericCellValue()+":日期格式："+cell.getCellStyle().getDataFormatString());
-//                            value = DateUtils.getMillis(HSSFDateUtil.getJavaDate(cell.getNumericCellValue())) / 1000;
-                        } else {
-                            if(Math.abs(cell.getNumericCellValue())>0.00001 && Math.abs(cell.getNumericCellValue())<1){
-                                cell.setCellType(NUMERIC);
-                                value = String.valueOf(cell.getNumericCellValue());
-                            }else {
-                                cell.setCellType(STRING);
-                                value = cell.getStringCellValue();
-                            }
-                            if(((String)value).indexOf(".") > -1){
-                                cell.setCellType(NUMERIC);
-                                value = String.valueOf(cell.getNumericCellValue());
-                            }
-                        }
+                        value = String.valueOf(cell.getNumericCellValue());
                         break;
                     case BOOLEAN:
                         //布尔类型
@@ -104,7 +89,7 @@ public class ExcelUtils {
         List<List<Object>> lists = docInsertXlsx(newlistdata,newlistdata2, list);
         //生成excel文件
         String filename = lujing+"\\应力计算结果.xlsx";
-        createExcel(filename,lists,sheetName,sheetMap);
+        createExcel(filename,lists,newsheetName,sheetMap);
         fis.close();
     }
 
@@ -336,9 +321,22 @@ public class ExcelUtils {
                     XSSFCell cell = row.createCell(j);
                     if(sheetMap.get(key).getRow(i).getCell(j)==null||sheetMap.get(key).getRow(i).getCell(j).equals("")){
                         cell.setCellValue("");
-                        break;
+                        continue;
                     }
-                    cell.setCellValue(sheetMap.get(key).getRow(i).getCell(j).toString());
+                    try {
+                        cell.setCellType(NUMERIC);
+                        cell.setCellValue(Integer.parseInt(sheetMap.get(key).getRow(i).getCell(j).toString()));
+                    }catch (NumberFormatException e){
+                        try {
+                            cell.setCellType(NUMERIC);
+                            cell.setCellValue(Double.parseDouble(sheetMap.get(key).getRow(i).getCell(j).toString()));
+                        }catch(Exception e2){
+                            // 定义单元格为字符串类型
+                            cell.setCellType(STRING);
+                            // 在单元格中输入一些内容
+                            cell.setCellValue(sheetMap.get(key).getRow(i).getCell(j).toString());
+                        }
+                    }
                     cell.setCellStyle(redStyle);
                 }
             }
@@ -370,8 +368,6 @@ public class ExcelUtils {
                             // 在单元格中输入一些内容
                             cell.setCellValue(dataRow.get(i).toString());
                         }
-
-
                     }
 
 

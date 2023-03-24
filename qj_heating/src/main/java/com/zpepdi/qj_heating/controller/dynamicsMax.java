@@ -27,26 +27,31 @@ public class dynamicsMax {
      * 删除临时文件
      */
     @RequestMapping("delete")
-    public void testDeleteFileDir5() throws IOException {
-        Path path = Paths.get(tempfile);
-        Files.walkFileTree(path,
-                new SimpleFileVisitor<Path>() {
-                    // 先去遍历删除文件
-                    public FileVisitResult visitFile(Path file,
-                                                     BasicFileAttributes attrs) throws IOException {
-                        Files.delete(file);
-                        System.out.printf("文件被删除 : %s%n", file);
-                        return FileVisitResult.CONTINUE;
+    public void testDeleteFileDir5() {
+        try {
+            Path path = Paths.get(tempfile);
+            Files.walkFileTree(path,
+                    new SimpleFileVisitor<Path>() {
+                        // 先去遍历删除文件
+                        public FileVisitResult visitFile(Path file,
+                                                         BasicFileAttributes attrs) throws IOException {
+                            Files.delete(file);
+                            System.out.printf("文件被删除 : %s%n", file);
+                            return FileVisitResult.CONTINUE;
+                        }
+                        // 再去遍历删除目录
+                        public FileVisitResult postVisitDirectory(Path dir,
+                                                                  IOException exc) throws IOException {
+                            Files.delete(dir);
+                            System.out.printf("文件夹被删除: %s%n", dir);
+                            return FileVisitResult.CONTINUE;
+                        }
                     }
-                    // 再去遍历删除目录
-                    public FileVisitResult postVisitDirectory(Path dir,
-                                                              IOException exc) throws IOException {
-                        Files.delete(dir);
-                        System.out.printf("文件夹被删除: %s%n", dir);
-                        return FileVisitResult.CONTINUE;
-                    }
-                }
-        );
+            );
+        }catch (Exception e){
+            System.out.println("删除临时文件错误");
+        }
+
 
     }
 
