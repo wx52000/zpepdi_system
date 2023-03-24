@@ -111,4 +111,9 @@ public class PositionServiceImpl implements PositionService {
     }
     return Result.ok();
   }
+
+  @Override
+  public Result queryDepRole(Integer userId, Integer id) {
+    return Result.ok(positionDao.queryDepRole(userId,id));
+  }
 }

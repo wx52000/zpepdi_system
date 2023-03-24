@@ -25,4 +25,6 @@ public interface PositionService {
   Result queryRole(Integer id);
 
   Result setRoleMenus(Map<String,Object> map);
+
+  Result queryDepRole(Integer userId, Integer id);
 }

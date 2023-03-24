@@ -128,12 +128,12 @@ public class PtServiceImpl implements PtService {
         System.out.println(x1);
         double h=water.h_pt(mpa,temp,x3);
         double s=water.s_pt(mpa,temp,x3);
-        double v=water.v_pt(mpa,temp,x3);
-        double den=water.den_pt(mpa,temp,x3);
-        double u=water.u_pt(mpa,temp,x3);
-        double cv=water.Cv_pt(mpa,temp,x3);
-        double cp=water.Cp_pt(mpa,temp,x3);
-        double w=water.w_pt(mpa,temp,x3);
+        double v=water.v_pt(mpa,temp);
+        double den=water.den_pt(mpa,temp);
+        double u=water.u_pt(mpa,temp);
+        double cv=water.Cv_pt(mpa,temp);
+        double cp=water.Cp_pt(mpa,temp);
+        double w=water.w_pt(mpa,temp);
         Map<String,Object> map1=new HashMap<>();
         map1.put("H",h);
         map1.put("X",x2);

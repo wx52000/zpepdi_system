@@ -2,6 +2,7 @@ package com.zpepdi.eureka_client.controller;
 
 
 import com.zpepdi.eureka_client.annotation.RoleId;
+import com.zpepdi.eureka_client.annotation.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -72,5 +73,10 @@ public class PositionController {
   @RequestMapping("setRoleMenus")
   public Result setRoleMenus(@RequestBody Map<String,Object> map){
     return positionService.setRoleMenus(map);
+  }
+
+  @RequestMapping("queryDepRole")
+  public Result queryDepRole(@UserId Integer userId){
+    return positionService.queryDepRole(userId,9);
   }
 }

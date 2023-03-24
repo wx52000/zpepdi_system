@@ -57,6 +57,11 @@ public class ProjectController {
         return projectService.queryLedger(id);
     }
 
+    @RequestMapping("querySearchLocal")
+    public Result querySearchLocal(@RequestHeader String search){
+        return projectService.querySearchLocal(search);
+    }
+
 
     @RequestMapping("querySearch")
     public Result querySearch(@RequestHeader String search){

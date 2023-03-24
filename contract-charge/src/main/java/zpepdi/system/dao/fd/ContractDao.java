@@ -11,9 +11,15 @@ import java.util.Map;
 public interface ContractDao {
 
     void insertSingle(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
-    List<Contract> query(Integer income);
+    List<Map<String,Object>> query(Integer income);
 
     List<Map<String,Object>> queryChildren(String id);
+
+    List<Map<String,Object>> queryRelativeProject(String id);
+
+    void setType(Map<String,Object> map);
+
+    void setEndTime(Map<String,Object> map);
 
     void addChildren(Map<String,Object> map);
 
@@ -23,6 +29,7 @@ public interface ContractDao {
     List<Map<String,Object>> queryBlur(String search);
 
     Map<String,Object> queryById(String id);
+
 
     List<Map<String,Object>> contractReceive(String id);
 

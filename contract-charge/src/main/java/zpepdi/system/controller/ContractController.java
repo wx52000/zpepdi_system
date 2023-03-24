@@ -22,6 +22,21 @@ public class ContractController {
     public Result insertSingle(@UserId Integer id, @RequestBody Map<String,Object> map){
         return contractService.insertSingle(id, map);
     }
+
+    @RequestMapping("addRelativeProject")
+    public Result addRelativeProject(@UserId Integer id, @RequestBody Map<String,Object> map){
+        return contractService.addRelativeProject(id, map);
+    }
+
+    @RequestMapping("setType")
+    public Result setType( @RequestBody Map<String,Object> map){
+        return contractService.setType(map);
+    }
+
+    @RequestMapping("setEndTime")
+    public Result setEndTime( @RequestBody Map<String,Object> map){
+        return contractService.setEndTime(map);
+    }
     @RequestMapping("query")
     public Result query(@RequestHeader("income") Integer income){
         return contractService.query(income);
@@ -30,6 +45,11 @@ public class ContractController {
     @RequestMapping("queryChildren")
     public Result queryChildren(@RequestHeader("id") String id){
         return contractService.queryChildren(id);
+    }
+
+    @RequestMapping("queryRelativeProject")
+    public Result queryRelativeProject(@RequestHeader("id") String id){
+        return contractService.queryRelativeProject(id);
     }
 
     @RequestMapping("addChildren")

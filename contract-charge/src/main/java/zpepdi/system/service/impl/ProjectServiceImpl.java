@@ -70,6 +70,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public Result querySearchLocal(String search) {
+        return Result.ok(projectDao.querySearch(search));
+    }
+
+    @Override
     public Result querySearch(String search) {
         return Result.ok(projectDataDao.queryListBySearch(search));
     }

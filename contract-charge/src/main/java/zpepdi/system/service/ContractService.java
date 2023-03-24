@@ -9,9 +9,17 @@ import java.util.Map;
 public interface ContractService {
 
     Result insertSingle(Integer userId,Map<String,Object> map);
+
+    Result addRelativeProject(Integer userId,Map<String,Object> map);
+
+    Result setType(Map<String,Object> map);
+
+    Result setEndTime(Map<String,Object> map);
     Result query(Integer income);
 
     Result queryChildren(String id);
+
+    Result queryRelativeProject(String id);
 
     Result addChildren(Map<String,Object> map);
     Result delChildren(String id);

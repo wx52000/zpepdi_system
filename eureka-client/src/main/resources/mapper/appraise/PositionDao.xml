@@ -172,6 +172,16 @@
                          AND u.pid = rm.role_id
                          AND rm.menus_id = #{menusId})
     </select>
+    <select id="queryDepRole" resultType="java.util.Map">
+        select `id`, `username`, `name`
+        from `user` u
+        where u.did = (
+            select did
+            from user uu
+            where uu.id = #{userId}
+            )
+        and pid = #{id}
+    </select>
 
 
 </mapper>

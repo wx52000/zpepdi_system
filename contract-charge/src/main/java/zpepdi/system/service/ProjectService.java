@@ -20,5 +20,7 @@ public interface ProjectService {
 
     Result queryLedger(String id);
 
+    Result querySearchLocal(String search);
+
     Result querySearch(String search);
 }

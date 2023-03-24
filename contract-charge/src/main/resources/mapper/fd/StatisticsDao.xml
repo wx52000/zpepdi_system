@@ -100,7 +100,7 @@
                 SELECT
                     contract_id,
                     GROUP_CONCAT(
-                            CONCAT( '节点', `index` )) AS `index`,
+                            CONCAT( '节点', `index`,':',details ) SEPARATOR ';') AS `index`,
                     SUM( money ) AS money,
                     GROUP_CONCAT( details ) AS details,
                     GROUP_CONCAT( DISTINCT DATE_FORMAT(date,'%Y-%m') ) AS `date`

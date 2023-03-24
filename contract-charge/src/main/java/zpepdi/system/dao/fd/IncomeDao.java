@@ -13,4 +13,6 @@ public interface IncomeDao {
                    @Param("map") Map<String,Object> map);
 
     List<Map<String,Object>> queryByContractId(Map<String,Object> map);
+
+    List<Map<String,Object>> query(Map<String,Object> map);
 }

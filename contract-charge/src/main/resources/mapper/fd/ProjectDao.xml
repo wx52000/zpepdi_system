@@ -227,6 +227,11 @@
             sb_contract_money = values(sb_contract_money),
             js_contract_money = values(js_contract_money)
     </update>
+    <update id="updateData">
+        update market_project
+        set level = #{level}, general = #{general}, `stage` = #{stage}
+        where id = #{project_id}
+    </update>
     <delete id="delRelateContract">
         delete
         from contract_relate_project
@@ -354,5 +359,14 @@
              contract_zcb_split s on c.id = s.id
         where g.project_id = #{id}
             and g.contract_id = c.id
+    </select>
+    <select id="querySearch" resultType="java.util.Map">
+        SELECT id, number, `name`
+        FROM market_project
+        WHERE number LIKE CONCAT("%",#{search},"%")
+        UNION
+        SELECT id, number, `name`
+        FROM market_project
+        WHERE `name` LIKE CONCAT("%",#{search},"%")
     </select>
 </mapper>

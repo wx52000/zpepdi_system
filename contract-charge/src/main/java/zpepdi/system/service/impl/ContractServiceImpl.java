@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestHeader;
 import zpepdi.system.dao.fd.ContractDao;
+import zpepdi.system.dao.fd.ProjectDao;
 import zpepdi.system.result.Result;
 import zpepdi.system.service.ContractService;
 
@@ -15,6 +16,8 @@ import java.util.UUID;
 public class ContractServiceImpl implements ContractService {
     @Autowired
     private ContractDao contractDao;
+    @Autowired
+    private ProjectDao projectDao;
 
     @Override
     public Result insertSingle(Integer userId, Map<String, Object> map) {
@@ -26,6 +29,25 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
+    public Result addRelativeProject(Integer userId, Map<String, Object> map) {
+        projectDao.addRelateContract(userId,map);
+        projectDao.updateData(map);
+        return Result.ok();
+    }
+
+    @Override
+    public Result setType(Map<String, Object> map) {
+        contractDao.setType(map);
+        return Result.ok();
+    }
+
+    @Override
+    public Result setEndTime(Map<String, Object> map) {
+        contractDao.setEndTime(map);
+        return Result.ok();
+    }
+
+    @Override
     public Result query(Integer income) {
         return Result.ok(contractDao.query(income));
     }
@@ -33,6 +55,11 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Result queryChildren(String id) {
         return Result.ok(contractDao.queryChildren(id));
+    }
+
+    @Override
+    public Result queryRelativeProject(String id) {
+        return Result.ok(contractDao.queryRelativeProject(id));
     }
 
     @Override

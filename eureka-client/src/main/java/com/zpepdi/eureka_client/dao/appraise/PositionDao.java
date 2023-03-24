@@ -43,4 +43,6 @@ public interface PositionDao {
   List<String> queryRole(Integer id);
 
   List<String> queryRoleButton(@Param("roleId")Integer roleId);
+
+  List<Map<String,Object>> queryDepRole(@Param("userId") Integer userId, @Param("id") Integer id);
 }

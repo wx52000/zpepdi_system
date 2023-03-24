@@ -22,4 +22,7 @@
         WHERE
            contract_id = #{contract_id}
     </select>
+    <select id="query" resultType="java.util.Map">
+
+    </select>
 </mapper>
