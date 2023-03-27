@@ -459,6 +459,12 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
+    public Result sentConfirmDelay(Integer userId, Map<String, Object> map) {
+        volumeDao.sentConfirmDelay(userId,map);
+        return Result.ok();
+    }
+
+    @Override
     @Transactional
     public Result timingConfirmWorkday(String date) {
         volumeDao.timingConfirmWorkday(date);

@@ -90,6 +90,9 @@ public class NewsServiceImpl implements NewsService {
       case 12:
         mapList = newsDao.planAdjustGeneral(id);
         break;
+      case 13:
+        mapList = newsDao.confirmDelay(id);
+        break;
       default:
         break;
     }
@@ -238,6 +241,10 @@ public class NewsServiceImpl implements NewsService {
             newsDao.checkPlanAdjustReturn(map);
           }
         }
+        if (type.equals("13")){
+          count++;
+          newsDao.checkConfirmDelay(map,check);
+        }
         if (except.get()){
           return Result.build(587,"存在项目工时未赋值");
         }
@@ -260,7 +267,7 @@ public class NewsServiceImpl implements NewsService {
           }else if (type.equals("7")){
             newsDao.checkLog7(item,check,id);
           }
-          else if (type.equals("11") || type.equals("12")){
+          else if (Integer.valueOf(type) > 11){
 
           }else{
             newsDao.checkLog0(item,check,id);

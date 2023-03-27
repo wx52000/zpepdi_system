@@ -218,6 +218,11 @@ public class VolumeController {
         return volumeService.sentConfirm(userId,map);
     }
 
+    @RequestMapping("sentConfirmDelay")
+    public Result sentConfirmDelay(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return volumeService.sentConfirmDelay(userId,map);
+    }
+
 
 
 }

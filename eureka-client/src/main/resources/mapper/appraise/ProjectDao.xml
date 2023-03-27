@@ -4006,6 +4006,7 @@
                       AND c.plan_month = #{date}
                       AND v.number NOT LIKE "%+%"
                       AND v.check_plan_id = c.id
+                      and v.delay = -1
                     GROUP BY
                         c.id
                 ) AS n
@@ -4052,6 +4053,7 @@
                       AND c.plan_month = #{date}
                       AND v.number LIKE "%+%"
                       AND v.check_plan_id = c.id
+                      and v.delay = -1
                     GROUP BY
                         c.id
                 ) AS n
@@ -4290,6 +4292,7 @@
          pv.project_id = #{id}
         AND pv.check_month = #{date}
         AND v.id = pv.volume_id
+        and pv.delay in (-1, 2)
         ),
         DATE_FORMAT( planned_publication_date, '%Y-%m' ) = #{date})
         <if test="type == 1">
