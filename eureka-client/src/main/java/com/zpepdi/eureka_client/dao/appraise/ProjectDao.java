@@ -139,10 +139,6 @@ public interface ProjectDao {
 
     void resetDeclare(Map<String,Object> map);
 
-    Integer declareDay();
-
-    void setDeclareDay(Integer day);
-
     Integer confirmDay();
 
     void setConfirmDay(Integer day);

@@ -42,6 +42,9 @@ public class NewsServiceImpl implements NewsService {
     this.newsDao = newsDao;
   }
 
+  @Autowired
+  private DeclareDayDao declareDayDao;
+
   @Override
   public Result newsCount(Integer id) {
     return Result.ok(newsDao.count(id));
@@ -164,7 +167,7 @@ public class NewsServiceImpl implements NewsService {
         if (check == 1) {
           if (type.equals("5")) {
             if (!DateUtils.getDateMonth(
-                            new Date().getTime() - (3600L * 24 * projectDao.declareDay() * 1000))
+                            new Date().getTime() - (3600L * 24 * declareDayDao.declareDay() * 1000))
                     .equals(list.get(i).get("submit_date").toString())) {
               map.put("submit_date", DateUtils.getDateMonth());
             }

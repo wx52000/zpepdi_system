@@ -499,11 +499,6 @@
             id = #{item.id}
         </foreach>
     </update>
-    <update id="setDeclareDay">
-        update declare_day
-        set `day` = #{day}
-        where id = 1
-    </update>
     <update id="setConfirmDay">
         update confirm_day
         set `day` = #{day}
@@ -3076,11 +3071,6 @@
           and a.submit_date = #{map.date}
           and a.task_id = t.id
     </select>
-    <select id="declareDay" resultType="java.lang.Integer">
-        select `day`
-        from declare_day
-        where id = 1
-    </select>
     <select id="confirmDay" resultType="java.lang.Integer">
         select `day`
         from confirm_day
@@ -4163,6 +4153,13 @@
         v.plan_confirm,
         w.workday,
         v.remark,
+        EXISTS (SELECT
+        1
+        FROM check_plan_volume
+        WHERE volume_id  = v.id) as check_state,
+        (select IFNULL(max( check_month ) = #{nowMonth},FALSE)
+            FROM check_plan_volume
+            where volume_id = v.id) as check_month,
         u.name as confirm_user,
         cast(v.confirm_time as char(10))confirm_time
         FROM
@@ -4207,6 +4204,9 @@
                            1
                        FROM check_plan_volume
                        WHERE volume_id  = v.id) as check_state,
+               (Select IFNULL(max( check_month ) = #{nowMonth},FALSE)
+                   FROM check_plan_volume
+                where volume_id = v.id) as check_month,
                u.name as confirm_user,
                cast(v.confirm_time as char(10))confirm_time
         FROM `volume` v
@@ -4236,6 +4236,9 @@
                            1
                        FROM check_plan_volume
                        WHERE volume_id  = v.id) as check_state,
+               (Select IFNULL(max( check_month ) = #{nowMonth},FALSE)
+                FROM check_plan_volume
+                where volume_id = v.id) as check_month,
                 u.name as confirm_user,
                cast(v.confirm_time as char(10))confirm_time
         FROM `volume` v
@@ -4267,6 +4270,9 @@
         1
         FROM check_plan_volume
         WHERE volume_id  = v.id) as check_state,
+        (select IFNULL(max( check_month ) = #{nowMonth},FALSE)
+        FROM check_plan_volume
+        where volume_id = v.id) as check_month,
         u.name as confirm_user,
         cast(v.confirm_time as char(10))confirm_time
         FROM

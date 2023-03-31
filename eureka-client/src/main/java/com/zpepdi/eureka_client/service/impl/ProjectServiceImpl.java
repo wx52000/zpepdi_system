@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.dao.zjepdi.ZJEPDIDataTransmissionDao;
+import com.zpepdi.eureka_client.service.DeclareDayService;
 import com.zpepdi.eureka_client.tools.*;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.Row;
@@ -65,6 +66,8 @@ public class ProjectServiceImpl implements ProjectService {
     public void setProjectWorkDayDao(ProjectWorkdayDao projectWorkDayDao) {
         this.projectWorkDayDao = projectWorkDayDao;
     }
+    @Autowired
+    private DeclareDayService declareDayService;
 
     @Override
     public Result queryUser(Integer userId, Integer id) {
@@ -899,7 +902,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result homepageProject(Integer userId) {
-        return Result.ok(projectDao.homepageProject(userId,DateUtils.getDateMonth(new Date().getTime() - (3600L *24*declareDay()*1000))));
+        return Result.ok(projectDao.homepageProject(userId,DateUtils.getDateMonth(new Date().getTime() - (3600L *24*declareDayService.declareDay()*1000))));
     }
 
     @Override
@@ -991,27 +994,6 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Integer declareDay() {
-        Object object = redisTemplate.opsForValue().get("declareDay");
-        if (object == null){
-            System.out.println("数据库查询");
-            object = projectDao.declareDay();
-            redisTemplate.opsForValue().set("declareDay",object);
-        } else {
-            System.out.println("redis查询");
-        }
-        return Integer.valueOf(object.toString());
-    }
-
-    @Override
-    @Transactional
-    public Result setDeclareDay(Integer day) {
-        projectDao.setDeclareDay(day);
-        redisTemplate.opsForValue().set("declareDay",day);
-        return Result.ok();
-    }
-
-    @Override
     public Integer confirmDay() {
         Object object = redisTemplate.opsForValue().get("confirmDay");
         if (object == null){
@@ -1039,8 +1021,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result notSubmitByManage(Integer id) {
-        if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == declareDay()) {
-            return Result.ok(projectDao.notSubmitByManage(id,DateUtils.getDateMonth(new Date().getTime() - (3600L *24*declareDay()*1000))));
+        if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == declareDayService.declareDay()) {
+            return Result.ok(projectDao.notSubmitByManage(id,DateUtils.getDateMonth(new Date().getTime() - (3600L *24*declareDayService.declareDay()*1000))));
         }else {
             return Result.ok();
         }
@@ -1048,8 +1030,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result notSubmitByAdmin() {
-        if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == declareDay()) {
-            return Result.ok(projectDao.notSubmitByAdmin(DateUtils.getDateMonth(new Date().getTime() - (3600L *24*declareDay()*1000))));
+        if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == declareDayService.declareDay()) {
+            return Result.ok(projectDao.notSubmitByAdmin(DateUtils.getDateMonth(new Date().getTime() - (3600L *24*declareDayService.declareDay()*1000))));
         }else {
             return Result.ok();
         }
@@ -1058,7 +1040,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Result backOff(Integer userId, Map<String,Object> map){
         if (DateUtils.getDateMonth(
-                new Date().getTime() - (3600L *24*declareDay()*1000))
+                new Date().getTime() - (3600L *24*declareDayService.declareDay()*1000))
                 .equals(map.get("date").toString())){
             projectDao.backOff(userId,map);
             return Result.ok();
@@ -1079,18 +1061,23 @@ public class ProjectServiceImpl implements ProjectService {
         return Result.ok(projectDao.projectProgressById(map));
     }
 
+    //所有卷册 月完成卷册 以及合计
     @Override
     public Result progressVolume(Map<String, Object> map) {
+        map.put("nowMonth",DateUtils.getDateMonth());
         return Result.ok(projectDao.progressVolume(map));
     }
 
+//    计划完成卷册
     @Override
     public Result planVolume(Map<String, Object> map) {
+        map.put("nowMonth",DateUtils.getDateMonth());
         return Result.ok(projectDao.planVolume(map));
     }
-
+//    未完成卷册
     @Override
     public Result progressIncompleteVolume(Map<String, Object> map) {
+        map.put("nowMonth",DateUtils.getDateMonth());
         return Result.ok(projectDao.progressIncompleteVolume(map));
     }
 

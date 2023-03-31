@@ -279,16 +279,6 @@ public class ProjectController {
         return projectService.setDeclare(userId,list,date);
     }
 
-    @RequestMapping("declareDay")
-    public Result declareDay(){
-        return Result.ok(projectService.declareDay());
-    }
-
-    @RequestMapping("setDeclareDay")
-    public Result setDeclareDay(@RequestHeader("day") Integer day){
-        return projectService.setDeclareDay(day);
-    }
-
     @RequestMapping("confirmDay")
     public Result confirmDay(){
         return Result.ok(projectService.confirmDay());

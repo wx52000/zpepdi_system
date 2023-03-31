@@ -174,4 +174,9 @@
           AND w.submit_date = #{map.date}
           AND w.user_id = u.id
     </select>
+    <select id="getCheckerList" resultType="java.util.Map">
+        select generalId, general, true as disabled
+        from scientific_project
+        where  id = #{id}
+    </select>
 </mapper>

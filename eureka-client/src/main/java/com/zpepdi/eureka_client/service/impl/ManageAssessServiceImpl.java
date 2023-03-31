@@ -2,9 +2,11 @@ package com.zpepdi.eureka_client.service.impl;
 
 import com.zpepdi.eureka_client.dao.appraise.ManageAssessDao;
 import com.zpepdi.eureka_client.result.Result;
+import com.zpepdi.eureka_client.service.DeclareDayService;
 import com.zpepdi.eureka_client.service.ManageAssessService;
 import com.zpepdi.eureka_client.service.ProjectService;
 import com.zpepdi.eureka_client.tools.DateUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,8 @@ public class ManageAssessServiceImpl implements ManageAssessService {
     private ManageAssessDao manageAssessDao;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private DeclareDayService declareDayService;
 
     @Override
     public Result queryDidAssessSum() {
@@ -108,7 +112,7 @@ public class ManageAssessServiceImpl implements ManageAssessService {
         return Result.ok(manageAssessDao.queryAssessSum(userId,getDeclareMonth()));
     }
     private String getDeclareMonth(){
-        int declareDay = projectService.declareDay();
+        int declareDay = declareDayService.declareDay();
         Calendar calendar = Calendar.getInstance();
         String date = DateUtils.getDateMonth(calendar.getTimeInMillis());
         if (calendar.get(Calendar.DAY_OF_MONTH) <= declareDay){

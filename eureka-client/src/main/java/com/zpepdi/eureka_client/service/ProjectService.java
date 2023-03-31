@@ -108,10 +108,6 @@ public interface ProjectService {
 
     Result setDeclare(Integer userId, List<Map<String,Object>> list,String date);
 
-    Integer declareDay();
-
-    Result setDeclareDay(Integer day);
-
     Object confirmDay();
 
     Result setConfirmDay(Integer day);

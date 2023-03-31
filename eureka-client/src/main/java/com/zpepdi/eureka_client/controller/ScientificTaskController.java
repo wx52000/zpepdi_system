@@ -33,6 +33,11 @@ public class ScientificTaskController {
         return scientificTaskService.queryTask(userId,id);
     }
 
+    @RequestMapping("getCheckerList")
+    public Result getCheckerList(@RequestHeader("id") Integer id){
+        return scientificTaskService.getCheckerList(id);
+    }
+
     @RequestMapping("queryTaskBySubmitDate")
     public Result queryTaskBySubmitDate(@UserId Integer userId,@RequestBody Map<String,Object> map){
         return scientificTaskService.queryTaskBySubmitDate(userId,map);
