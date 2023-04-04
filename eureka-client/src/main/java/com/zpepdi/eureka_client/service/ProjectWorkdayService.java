@@ -57,4 +57,6 @@ public interface ProjectWorkdayService {
 
 
   Result queryBackupList(Integer id);
+
+  Result queryOfficeWorkday();
 }

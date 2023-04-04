@@ -244,6 +244,12 @@ public class UserController {
         return Result.ok(userService.queryByName(user));
     }
 
+    @RequestMapping("queryTask")
+    public Result queryTask(@UserId Integer userId,@RequestBody Map<String,Object> map){
+        return userService.queryTask(userId,map);
+    }
+
+
     @RequestMapping("paw")
     public Result paw(@UserId Integer userId,@RequestBody User user){
         userService.paw(userId,user);

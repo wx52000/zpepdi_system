@@ -902,7 +902,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result homepageProject(Integer userId) {
-        return Result.ok(projectDao.homepageProject(userId,DateUtils.getDateMonth(new Date().getTime() - (3600L *24*declareDayService.declareDay()*1000))));
+        return Result.ok(projectDao.homepageProject(userId,DateUtils.getDateMonth(new Date().getTime() - (3600L *24* projectDao.confirmDay()*1000))));
     }
 
     @Override
@@ -995,6 +995,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Integer confirmDay() {
+//        工时确认日期
         Object object = redisTemplate.opsForValue().get("confirmDay");
         if (object == null){
             System.out.println("数据库查询");
@@ -1021,8 +1022,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result notSubmitByManage(Integer id) {
-        if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == declareDayService.declareDay()) {
-            return Result.ok(projectDao.notSubmitByManage(id,DateUtils.getDateMonth(new Date().getTime() - (3600L *24*declareDayService.declareDay()*1000))));
+//        经理页面截止日设总未确认任务提醒
+        if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == confirmDay()) {
+            return Result.ok(projectDao.notSubmitByManage(id,DateUtils.getDateMonth(new Date().getTime() - (3600L *24* confirmDay()*1000))));
         }else {
             return Result.ok();
         }
@@ -1030,8 +1032,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result notSubmitByAdmin() {
-        if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == declareDayService.declareDay()) {
-            return Result.ok(projectDao.notSubmitByAdmin(DateUtils.getDateMonth(new Date().getTime() - (3600L *24*declareDayService.declareDay()*1000))));
+        //        管理页面截止日设总未确认任务提醒
+        if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == confirmDay()) {
+            return Result.ok(projectDao.notSubmitByAdmin(DateUtils.getDateMonth(new Date().getTime() - (3600L *24*confirmDay()*1000))));
         }else {
             return Result.ok();
         }
@@ -1040,7 +1043,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Result backOff(Integer userId, Map<String,Object> map){
         if (DateUtils.getDateMonth(
-                new Date().getTime() - (3600L *24*declareDayService.declareDay()*1000))
+                new Date().getTime() - (3600L *24*confirmDay()*1000))
                 .equals(map.get("date").toString())){
             projectDao.backOff(userId,map);
             return Result.ok();

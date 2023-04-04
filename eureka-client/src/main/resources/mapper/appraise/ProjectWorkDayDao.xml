@@ -1091,5 +1091,49 @@
       AND b.project_id = #{id}
     order by `time` desc
   </select>
+  <select id="queryOfficeWorkday" resultType="java.util.Map">
+    SELECT
+    SUM(y.sumYear) as sumYear,
+    office_id
+    FROM(
+    SELECT
+    SUM( num ) as sumYear,
+    office_id
+    FROM
+    project_note p,
+    project_workday w
+    WHERE
+    p.project_id = w.project_id
+    AND w.date &gt;= CONCAT( #{year}, "-01-01" )
+    AND w.date &lt;= CONCAT( #{year}, "-12-31" )
+    GROUP BY
+    p.office_id UNION ALL
+    SELECT
+    SUM( num ) as sumYear,
+    office_id
+    FROM
+    project_note p,
+    project_workday_add a
+    WHERE
+    p.project_id = a.project_id
+    AND a.check_time &gt;= CONCAT( #{year}, "-01-01" )
+    AND a.check_time &lt;= CONCAT( #{year}, "-12-31" )
+    GROUP BY
+    p.office_id UNION all
+    SELECT
+    SUM( num ) as sumYear,
+    office_id
+    FROM
+    project_children p,
+    project_workday w
+    WHERE
+    p.project_id = w.project_id
+    AND w.date &gt;= CONCAT( #{year}, "-01-01" )
+    AND w.date &lt;= CONCAT( #{year}, "-12-31" )
+    GROUP BY
+    p.office_id
+    )  y
+    GROUP BY y.office_id
+  </select>
 
 </mapper>

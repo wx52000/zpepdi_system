@@ -346,6 +346,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Result queryTask(Integer userId,Map<String,Object> map) {
+        return Result.ok(userDao.queryTask(userId,map));
+    }
+
+    @Override
     public List<Integer> queryByUsername(List<ExcelData> list) {
         return userDao.queryByUsername(list);
     }

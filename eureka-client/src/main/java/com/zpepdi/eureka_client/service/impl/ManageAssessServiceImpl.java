@@ -112,10 +112,10 @@ public class ManageAssessServiceImpl implements ManageAssessService {
         return Result.ok(manageAssessDao.queryAssessSum(userId,getDeclareMonth()));
     }
     private String getDeclareMonth(){
-        int declareDay = declareDayService.declareDay();
+        int confirmDay = (int) projectService.confirmDay();
         Calendar calendar = Calendar.getInstance();
         String date = DateUtils.getDateMonth(calendar.getTimeInMillis());
-        if (calendar.get(Calendar.DAY_OF_MONTH) <= declareDay){
+        if (calendar.get(Calendar.DAY_OF_MONTH) <= confirmDay){
             calendar.add(Calendar.MONTH,-1);
             date = DateUtils.getDateMonth(calendar.getTimeInMillis());
         }

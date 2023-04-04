@@ -147,6 +147,7 @@ public class VolumeServiceImpl implements VolumeService {
         double used = Double.parseDouble(map1.get(usedField).toString());
         double num = Double.parseDouble(map1.get(numField).toString());
         double old = 0;
+        //判断卷册
         if (map.get("spider").equals(1)) {
             Map<String,Object> oldMap = projectDao.queryByVolumeId(Integer.valueOf(map.get("taskId").toString()));
             old = Double.parseDouble(oldMap.get("workday").toString());
@@ -461,6 +462,12 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public Result sentConfirmDelay(Integer userId, Map<String, Object> map) {
         volumeDao.sentConfirmDelay(userId,map);
+        return Result.ok();
+    }
+
+    @Override
+    public Result setVolumeImportant(Map<String, Object> map) {
+        volumeDao.setVolumeImportant(map);
         return Result.ok();
     }
 

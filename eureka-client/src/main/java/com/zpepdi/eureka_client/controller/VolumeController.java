@@ -223,6 +223,11 @@ public class VolumeController {
         return volumeService.sentConfirmDelay(userId,map);
     }
 
+    @RequestMapping("setVolumeImportant")
+    public Result setVolumeImportant(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return volumeService.setVolumeImportant(map);
+    }
+
 
 
 }

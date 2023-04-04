@@ -122,4 +122,6 @@ public interface VolumeDao {
     void sendConfirmVolume(Map<String,Object> map);
 
     void sentConfirmDelay(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
+
+    void setVolumeImportant(Map<String,Object> map);
 }

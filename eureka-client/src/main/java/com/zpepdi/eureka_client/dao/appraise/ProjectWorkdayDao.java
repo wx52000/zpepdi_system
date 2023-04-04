@@ -104,4 +104,8 @@ public interface ProjectWorkdayDao {
   Map<String,Object> queryLimitAndAddSum(Integer id);
 
   List<Map<String,Object>> queryBackupList(Integer id);
+
+  List<Map<String,Object>> queryOfficeWorkday(Integer year);
+
+
 }

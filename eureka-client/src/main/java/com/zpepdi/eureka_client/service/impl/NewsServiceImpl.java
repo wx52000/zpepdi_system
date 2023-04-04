@@ -156,7 +156,8 @@ public class NewsServiceImpl implements NewsService {
   public Result check(Integer id, List<Map<String, Object>> list, Integer check) {
     boolean limit = false;
     int count = 0;
-    int confirmDay = (int) projectService.confirmDay();
+    //卷册申报截止日期
+    int declareDay = declareDayDao.declareDay();
     Calendar calendar = Calendar.getInstance();
     int day = calendar.get(Calendar.DAY_OF_MONTH);
       AtomicBoolean except = new AtomicBoolean(false);
@@ -167,7 +168,7 @@ public class NewsServiceImpl implements NewsService {
         if (check == 1) {
           if (type.equals("5")) {
             if (!DateUtils.getDateMonth(
-                            new Date().getTime() - (3600L * 24 * declareDayDao.declareDay() * 1000))
+                            new Date().getTime() - (3600L * 24 *(int) projectService.confirmDay() * 1000))
                     .equals(list.get(i).get("submit_date").toString())) {
               map.put("submit_date", DateUtils.getDateMonth());
             }
@@ -212,7 +213,7 @@ public class NewsServiceImpl implements NewsService {
         }
         if (type.equals("11")){
           count++;
-          if (day > confirmDay){
+          if (day > declareDay){
             map.put("workday_month",DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
             Calendar calendar1 = Calendar.getInstance();
             calendar1.add(Calendar.MONTH,1);

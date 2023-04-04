@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.ProjectRelativeContractDao">
+    <insert id="addProjectRelativeContract">
+        insert ignore into project_relative_contract(project_id, contract_id, handler, handle_time)
+        values (#{map.projectId}, #{map.contractId}, #{userId}, now())
+    </insert>
+</mapper>

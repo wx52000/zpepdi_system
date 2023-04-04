@@ -248,4 +248,20 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
   public Result queryBackupList(Integer id) {
     return Result.ok(proWorkdayDao.queryBackupList(id));
   }
+
+  @Override
+  public Result queryOfficeWorkday() {
+    int year = Calendar.getInstance().get(Calendar.YEAR);
+    List<Map<String,Object>> data = proWorkdayDao.queryOfficeWorkday(year);
+    if (data != null && data.size()> 0) {
+      for (Map<String, Object> mapData : data) {
+        if (mapData.get("office_id").toString().equals("4")) {
+          if (Double.parseDouble(mapData.get("sumYear").toString()) > 2700) {
+            return Result.ok(mapData);
+          }
+        }
+      }
+    }
+    return Result.ok(false);
+  }
 }

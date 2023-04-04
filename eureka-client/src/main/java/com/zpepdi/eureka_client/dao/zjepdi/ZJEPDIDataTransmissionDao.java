@@ -20,5 +20,6 @@ public interface ZJEPDIDataTransmissionDao {
 
     List<Map<String,Object>> queryTecList(String number);
 
+    List<Map<String,Object>> queryContractListBySearch(String search);
 
 }

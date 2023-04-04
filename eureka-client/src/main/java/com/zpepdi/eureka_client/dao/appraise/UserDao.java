@@ -133,6 +133,8 @@ public interface UserDao {
     List<Map> queryByTec(Integer id);
     //用于设总选择时模糊查询
     List<Map> queryByName(User user);
+
+    List<Map<String,Object>> queryTask(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
     //用于excel导入时的精确查询
     Integer selectByName(User user);
 

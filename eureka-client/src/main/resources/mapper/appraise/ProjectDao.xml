@@ -3908,6 +3908,7 @@
                                volume v
                                    left join check_plan c on v.tec = c.tec
                                                                  and v.project_id = c.project_id
+                                   AND c.plan_month = #{date}
                                    LEFT JOIN major_contrast_technology m on v.tec = m.small_name,
                                workday_tec t,
                                workday_tec_principal tp
@@ -3988,15 +3989,14 @@
                         m.id AS mid
                     FROM
                         check_plan c
-                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name ,
-                        check_plan_volume v
-
+                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name
+                            left join
+                        check_plan_volume v on v.check_plan_id = c.id
+                        AND v.number NOT LIKE "%+%"
+                        and v.delay in (-1,2)
                     WHERE
                         c.project_id = #{id}
                       AND c.plan_month = #{date}
-                      AND v.number NOT LIKE "%+%"
-                      AND v.check_plan_id = c.id
-                      and v.delay = -1
                     GROUP BY
                         c.id
                 ) AS n
@@ -4035,15 +4035,15 @@
                         m.id AS mid
                     FROM
                         check_plan c
-                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name ,
-                        check_plan_volume v
+                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name
+                            left join
+                        check_plan_volume v on v.check_plan_id = c.id
+                            AND v.number NOT LIKE "%+%"
+                            and v.delay in (-1,2)
 
                     WHERE
                         c.project_id = #{id}
                       AND c.plan_month = #{date}
-                      AND v.number LIKE "%+%"
-                      AND v.check_plan_id = c.id
-                      and v.delay = -1
                     GROUP BY
                         c.id
                 ) AS n
@@ -4153,6 +4153,7 @@
         v.plan_confirm,
         w.workday,
         v.remark,
+        v.important,
         EXISTS (SELECT
         1
         FROM check_plan_volume
@@ -4200,6 +4201,7 @@
                v.plan_confirm,
                w.workday,
                v.remark,
+               v.important,
                EXISTS (SELECT
                            1
                        FROM check_plan_volume
@@ -4232,6 +4234,7 @@
                v.plan_confirm,
                w.workday,
                 v.remark,
+               v.important,
                EXISTS (SELECT
                            1
                        FROM check_plan_volume
@@ -4266,6 +4269,7 @@
         v.plan_confirm,
         w.workday,
         v.remark,
+        v.important,
         EXISTS (SELECT
         1
         FROM check_plan_volume
@@ -4660,7 +4664,7 @@ as t group by date
     <select id="getdateInfo" resultType="java.util.Map">
         SELECT
             DATE_FORMAT(max(v.planned_publication_date), '%Y-%m' ) AS maxDate,
-            DATE_FORMAT(max(v.actual_publication_date), '%Y-%m' ) AS minDate
+            DATE_FORMAT(min(v.actual_publication_date), '%Y-%m' ) AS minDate
         FROM
             volume v
         where project_id=#{id}

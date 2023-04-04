@@ -250,6 +250,9 @@
         `check` = values(`check`)
     </insert>
     <insert id="sendConfirmVolume">
+        delete
+        from check_plan_volume
+        where check_plan_id = #{id};
         INSERT ignore INTO check_plan_volume (check_plan_id,volume_id,`number`,`name`,`state`,
                                        designer,checker,principal,plan_publication,check_month, tec,project_id  )
         VALUES
@@ -438,6 +441,11 @@
           AND p.plan_month = #{date}
           AND t.submit_date = p.workday_month
           AND t.submit = 5;
+    </update>
+    <update id="setVolumeImportant">
+        update volume
+        set important = #{important}
+        where id = #{id}
     </update>
     <delete id="del">
         DELETE volume, volume_workday, volume_workday_high
@@ -3216,6 +3224,7 @@
         v.start_date,
         v.actual_publication_date,
         v.wfInstId,
+        v.important,
         w.workday,
          exists( select  1
              from  check_plan_volume pv
@@ -3261,6 +3270,7 @@
             v.start_date,
             v.planned_publication_date,
             v.wfInstId,
+            v.important,
             w.workday,
             exists( select  1
             from  check_plan_volume pv
@@ -3300,6 +3310,7 @@
         v.start_date,
         v.planned_publication_date,
         v.wfInstId,
+        v.important,
         w.workday,
         exists( select  1
         from  check_plan_volume pv
@@ -3347,6 +3358,7 @@
         v.start_date,
         v.planned_publication_date,
         v.wfInstId,
+        v.important,
         w.workday,
         exists( select  1
         from  check_plan_volume pv
@@ -3388,6 +3400,7 @@
         cast(v.planned_publication_date as char(10)) as planned_publication_date,
         v.wfInstId,
         pv.reason,
+        v.important,
         w.workday,
         exists( select  1
         from  check_plan_volume pv
@@ -4193,6 +4206,7 @@
         v.start_date,
         v.actual_publication_date,
         v.wfInstId,
+        v.important,
         w.workday
         FROM
         `volume` v
@@ -4233,6 +4247,7 @@
         v.start_date,
         v.planned_publication_date,
         v.wfInstId,
+        v.important,
         w.workday
         FROM
         `volume` v left join volume_workday w on v.id = w.volume_id
@@ -4265,6 +4280,7 @@
         v.start_date,
         v.planned_publication_date,
         v.wfInstId,
+        v.important,
         w.workday
         FROM
         `volume` v left join volume_workday w on v.id = w.volume_id
@@ -4306,6 +4322,7 @@
         v.planned_publication_date,
         vp.planned_publication_date AS original_plan,
         v.wfInstId,
+        v.important,
         w.workday
         FROM
         `volume` v
@@ -4342,6 +4359,7 @@
         cast(v.start_date as char(10)) as start_date,
         cast(v.planned_publication_date as char(10)) as planned_publication_date,
         v.wfInstId,
+        v.important,
         w.workday
         FROM
         major_contrast_technology m,
@@ -4530,12 +4548,16 @@
     </resultMap>
     <select id="queryConfirmTec" resultMap="queryConfirmNotCheck">
         SELECT
-            t.project_id as id, t.volume_tec as tec
+            t.project_id AS id,
+            IF
+                ( m.big_name = NULL, t.volume_tec, m.small_name ) AS tec
         FROM
-            workday_tec t,
+            workday_tec t
+                LEFT JOIN major_contrast_technology m ON t.volume_tec = m.big_name,
             workday_tec_principal tp
-        WHERE t.id = tp.workday_tec_id
-          and t.project_id = #{id}
+        WHERE
+            t.id = tp.workday_tec_id
+          AND t.project_id = #{id}
           AND tp.user_id = #{userId}
     </select>
     <select id="queryConfirmNotCheck" resultType="java.util.Map">

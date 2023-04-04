@@ -104,6 +104,8 @@ public interface UserService {
 
     List<Map> queryByName(User user);
 
+    Result queryTask(Integer userId,Map<String,Object> map);
+
     List<Integer> queryByUsername(List<ExcelData> list);
 
     void paw(Integer id,User user);
