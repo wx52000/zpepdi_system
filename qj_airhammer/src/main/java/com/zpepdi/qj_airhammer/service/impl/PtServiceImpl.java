@@ -1,15 +1,13 @@
 package com.zpepdi.qj_airhammer.service.impl;
 
+import com.zpepdi.qj_airhammer.service.PtService;
 import com.zpepdi.qj_airhammer.capacity.Water;
 import com.zpepdi.qj_airhammer.dao.WaterDao;
 import com.zpepdi.qj_airhammer.result.Result;
-import com.zpepdi.qj_airhammer.service.PtService;
-import org.apache.commons.lang.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 @Service
@@ -27,8 +25,13 @@ public class PtServiceImpl implements PtService {
         String t=map.get("t").toString();
         String bt=map.get("bt").toString();
         String x1=map.get("X").toString();
+        double mark;
         if(x1.equals("NaN")){
+            mark=1;
             x1="1";
+        }
+        else{
+            mark=2;
         }
         double Btemp=0;
         double BMpa=0;
@@ -121,17 +124,20 @@ public class PtServiceImpl implements PtService {
             x2=Double.valueOf(x1);
             x3=Double.valueOf(x1);
         }
+        System.out.println(x2);
+        System.out.println(x1);
         double h=water.h_pt(mpa,temp,x3);
         double s=water.s_pt(mpa,temp,x3);
-        double v=water.v_pt(mpa,temp);
-        double den=water.den_pt(mpa,temp);
-        double u=water.u_pt(mpa,temp);
-        double cv=water.Cv_pt(mpa,temp);
-        double cp=water.Cp_pt(mpa,temp);
-        double w=water.w_pt(mpa,temp);
+        double v=water.v_pt(mpa,temp,x3);
+        double den=water.den_pt(mpa,temp,x3);
+        double u=water.u_pt(mpa,temp,x3);
+        double cv=water.Cv_pt(mpa,temp,x3);
+        double cp=water.Cp_pt(mpa,temp,x3);
+        double w=water.w_pt(mpa,temp,x3);
         Map<String,Object> map1=new HashMap<>();
         map1.put("H",h);
         map1.put("X",x2);
+        map1.put("mark",mark);
         map1.put("S",s);
         map1.put("V",v);
         map1.put("Den",den);
@@ -369,8 +375,13 @@ public class PtServiceImpl implements PtService {
         String t1=map.get("t1").toString();
         String t2=map.get("t2").toString();
         String x1=map.get("X").toString();
+        double mark;
         if(x1.equals("NaN")){
+            mark=1;
             x1="1";
+        }
+        else{
+            mark=2;
         }
         double mpa = 0;
         if(Mpa1.equals("")){
@@ -480,6 +491,7 @@ public class PtServiceImpl implements PtService {
         map1.put("Mpa2",mpa2);
         map1.put("H",h);
         map1.put("X1",x3);
+        map1.put("mark",mark);
         map1.put("X2",x2);
         map1.put("meduim1",m_type);
         map1.put("meduim2",m_type2);
@@ -497,8 +509,13 @@ public class PtServiceImpl implements PtService {
         String t1=map.get("t1").toString();
         String t2=map.get("t2").toString();
         String x1=map.get("X").toString();
+        double mark;
         if(x1.equals("NaN")){
+            mark=1;
             x1="1";
+        }
+        else{
+            mark=2;
         }
         double mpa = 0;
         if(Mpa1.equals("")){
@@ -591,6 +608,7 @@ public class PtServiceImpl implements PtService {
         map1.put("Mpa2",mpa2);
         map1.put("S",s);
         map1.put("X1",x3);
+        map1.put("mark",mark);
         map1.put("X2",x2);
         map1.put("meduim1",m_type);
         map1.put("meduim2",m_type2);
