@@ -248,8 +248,7 @@ public class Water {
         return subregion_pT;
     }
 
-    public double v_pt(double Mpa, double temperature) {
-        int x = 1;
+    public double v_pt(double Mpa, double temperature,double x) {
         String areatype = subregion_pT(Mpa, temperature);
         if (areatype.equals("Critical point"))
             return v3z(Mpa, temperature);
@@ -3077,8 +3076,7 @@ public class Water {
 
     }
 
-    public double u_pt(double Mpa, double temperature) {
-        int x = 1;
+    public double u_pt(double Mpa, double temperature,double x) {
         String areatype = subregion_pT(Mpa, temperature);
         if (areatype.equals("Critical point"))
             return u_3z(Mpa, temperature);
@@ -3147,8 +3145,8 @@ public class Water {
 
     }
 
-    public double Cv_pt(double Mpa, double temperature) {
-        int x = 1;
+    public double Cv_pt(double Mpa, double temperature,double x) {
+
         String areatype = subregion_pT(Mpa, temperature);
         if (areatype.equals("Critical point"))
             return cv_3z(Mpa, temperature);
@@ -3217,8 +3215,8 @@ public class Water {
 
     }
 
-    public double Cp_pt(double Mpa, double temperature) {
-        int x = 1;
+    public double Cp_pt(double Mpa, double temperature,double x) {
+
         String areatype = subregion_pT(Mpa, temperature);
         if (areatype.equals("Critical point"))
             return cp_3z(Mpa, temperature);
@@ -3287,8 +3285,7 @@ public class Water {
 
     }
 
-    public double w_pt(double Mpa, double temperature) {
-        int x = 1;
+    public double w_pt(double Mpa, double temperature,double x) {
         String areatype = subregion_pT(Mpa, temperature);
         if (areatype.equals("Critical point"))
             return w_3z(Mpa, temperature);
@@ -3428,9 +3425,9 @@ public class Water {
 
     }
 
-    public double den_pt(double Mpa, double temperature) {
+    public double den_pt(double Mpa, double temperature,double x) {
         double den_pt;
-        double a = v_pt(Mpa, temperature);
+        double a = v_pt(Mpa, temperature,x);
         if (a == Double.valueOf(0) || a == Double.valueOf(-1000)) {
 
             den_pt = -1000;
@@ -6018,7 +6015,7 @@ cv_pt计算
     public double v_ph(double p, double h) {
         String areatype;
         double v_ph;
-        double x;
+        double x = 1;
         double Temp;
         areatype = subregion_ph(p, h);
         if (areatype.equals("0")) {
@@ -6038,7 +6035,7 @@ cv_pt计算
         } 
         else {
             Temp = t_ph(p, h);
-            v_ph = v_pt(p, Temp);
+            v_ph = v_pt(p, Temp,x);
         }
         return v_ph;
     }
@@ -6179,7 +6176,7 @@ cv_pt计算
     public double u_ph(double p, double h) {
         String areatype;
         double u_ph;
-        double x;
+        double x=1;
         double Temp = t_ph(p, h);
         areatype = subregion_ph(p, h);
         if (areatype.equals("0")) {
@@ -6192,7 +6189,7 @@ cv_pt计算
             x = x_ph(p, h);
             u_ph = um(p, Temp, x);
         } else {
-            u_ph = u_pt(p, Temp);
+            u_ph = u_pt(p, Temp,x);
         }
         return u_ph;
     }
@@ -6200,7 +6197,7 @@ cv_pt计算
     public double cv_ph(double p, double h) {
         String areatype;
         double cv_ph;
-        double x;
+        double x=1;
         double Temp = t_ph(p, h);
         areatype = subregion_ph(p, h);
         if (areatype.equals("0")) {
@@ -6213,7 +6210,7 @@ cv_pt计算
             x = x_ph(p, h);
             cv_ph = cvm(p, Temp, x);
         } else {
-            cv_ph = Cv_pt(p, Temp);
+            cv_ph = Cv_pt(p, Temp,x);
         }
         return cv_ph;
     }
@@ -6221,7 +6218,7 @@ cv_pt计算
     public double cp_ph(double p, double h) {
         String areatype;
         double cp_ph;
-        double x;
+        double x=1;
         double Temp = t_ph(p, h);
         areatype = subregion_ph(p, h);
         if (areatype.equals("0")) {
@@ -6234,7 +6231,7 @@ cv_pt计算
             x = x_ph(p, h);
             cp_ph = cpm(p, Temp, x);
         } else {
-            cp_ph = Cp_pt(p, Temp);
+            cp_ph = Cp_pt(p, Temp,x);
         }
         return cp_ph;
     }
@@ -6242,7 +6239,7 @@ cv_pt计算
     public double w_ph(double p, double h) {
         String areatype;
         double w_ph;
-        double x;
+        double x=1;
         double Temp = t_ph(p, h);
         areatype = subregion_ph(p, h);
         if (areatype.equals("0")) {
@@ -6255,7 +6252,7 @@ cv_pt计算
             x = x_ph(p, h);
             w_ph = wm(p, Temp, x);
         } else {
-            w_ph = w_pt(p, Temp);
+            w_ph = w_pt(p, Temp,x);
         }
         return w_ph;
     }
@@ -6811,7 +6808,7 @@ cv_pt计算
         String areatype;
 
         double v_ps;
-        double x;
+        double x=1;
         double Temp;
         areatype = subregion_ps(p, s);
         if (areatype.equals("0")) {
@@ -6830,7 +6827,7 @@ cv_pt计算
         }
         else{
             Temp = t_ps(p, s);
-            v_ps = v_pt(p, Temp);
+            v_ps = v_pt(p, Temp,x);
         }
         return v_ps;
     }
@@ -6980,7 +6977,7 @@ cv_pt计算
         String areatype;
 
         double u_ps;
-        double x;
+        double x=1;
         double Temp;
         areatype = subregion_ps(p, s);
         if (areatype.equals("0")) {
@@ -6995,7 +6992,7 @@ cv_pt计算
             u_ps = um(p, Temp, x);
         }
         else{
-            u_ps = u_pt(p, Temp);
+            u_ps = u_pt(p, Temp,x);
         }
         return u_ps;
     }
@@ -7004,7 +7001,7 @@ cv_pt计算
         String areatype;
 
         double cv_ps;
-        double x;
+        double x=1;
         double Temp;
         areatype = subregion_ps(p, s);
         if (areatype.equals("0")) {
@@ -7019,7 +7016,7 @@ cv_pt计算
             cv_ps = cvm(p, Temp, x);
         }
         else{
-            cv_ps = Cv_pt(p, Temp);
+            cv_ps = Cv_pt(p, Temp,x);
         }
         return cv_ps;
     }
@@ -7028,7 +7025,7 @@ cv_pt计算
         String areatype;
 
         double cp_ps;
-        double x;
+        double x=1;
         double Temp;
         areatype = subregion_ps(p, s);
         if (areatype.equals("0")) {
@@ -7043,7 +7040,7 @@ cv_pt计算
             cp_ps = cpm(p, Temp, x);
         }
         else{
-            cp_ps = Cp_pt(p, Temp);
+            cp_ps = Cp_pt(p, Temp,x);
         }
         return cp_ps;
     }
@@ -7051,7 +7048,7 @@ cv_pt计算
     public double w_ps(double p, double s) {
         String areatype;
         double w_ps;
-        double x;
+        double x=1;
         double Temp;
         areatype = subregion_ps(p, s);
         if (areatype.equals("0")) {
@@ -7066,7 +7063,7 @@ cv_pt计算
             w_ps = wm(p, Temp, x);
         }
         else{
-            w_ps = w_pt(p, Temp);
+            w_ps = w_pt(p, Temp,x);
         }
         return w_ps;
     }
