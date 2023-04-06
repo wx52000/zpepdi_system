@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zpepdi.qj_heating.dao.ThicknessDao">
+
+    <select id="queryRank" resultType="java.util.Map">
+        select product,stress.rank from stress
+    </select>
+
+    <select id="queryjiezhi" resultType="java.util.Map">
+        select mediumType,pipelineName,recommend from velocity
+    </select>
+
+</mapper>
