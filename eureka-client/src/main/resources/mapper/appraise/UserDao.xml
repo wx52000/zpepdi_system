@@ -5198,7 +5198,7 @@
             v.checker,
             v.principal,
             v.headman,
-            GROUP_CONCAT( vid.role ) as role
+            GROUP_CONCAT( vid.role ) AS role
         FROM
             (
                 SELECT
@@ -5229,12 +5229,19 @@
                     volume_user
                 WHERE
                     headman = #{userId}
+
             ) AS vid,
-            volume v
+            volume v,
+            check_plan_volume pv
         WHERE
             vid.volume_id = v.id
-        and v.planned_publication_date &gt;= concat(#{map.startDate},"-01")
-        and v.state in ("尚未开展","尚未确定","正在设计","正在校审")
+          AND pv.volume_id = v.id
+          AND pv.check_month &lt;
+              ADDDATE(
+                      CONCAT(#{map.endDate},"-01" ), INTERVAL 1 MONTH )
+
+          AND pv.check_month &gt;= concat(#{map.startDate},"-01")
+          AND v.state IN ( "尚未开展", "尚未确定", "正在设计", "正在校审" )
         GROUP BY
             v.id
     </select>

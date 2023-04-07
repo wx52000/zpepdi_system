@@ -41,6 +41,10 @@ public class ProjectServiceImpl implements ProjectService {
     private TechnologyDao technologyDao;
     private ProjectWorkdayDao projectWorkDayDao;
     @Autowired
+    private ContractDao contractDao;
+    @Autowired
+    private ProjectRelativeContractDao projectRelativeContractDao;
+    @Autowired
     private ZJEPDIDataTransmissionDao zjepdiDataTransmissionDao;
     @Autowired
     private RedisTemplate<String,Object> redisTemplate;
@@ -250,6 +254,9 @@ public class ProjectServiceImpl implements ProjectService {
                 map.put("typeNote",2);
                 projectDao.setOtherProject(id, map, 1);
                 projectDao.setOtherProjectNote(map);
+            }
+            if (map.get("contract_number") != null && !map.get("contract_number").equals("")){
+                contractDao.insertContract(id,map);
             }
         }
         return Result.ok();
@@ -1296,5 +1303,10 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
         return response;
+    }
+
+    @Override
+    public Result queryBySearchFromZjepdi(String search) {
+        return Result.ok(zjepdiDataTransmissionDao.proListBySearch(search));
     }
 }

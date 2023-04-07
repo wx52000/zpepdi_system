@@ -393,6 +393,7 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public Result updatePlanedPublicDate() {
         Map<String,Object> map = new HashMap<>();
+        map.put("nowMonth",DateUtils.getDateMonth());
         Calendar calendar = Calendar.getInstance();
         //获取当前月最后一天
         calendar.add(Calendar.MONTH,1);

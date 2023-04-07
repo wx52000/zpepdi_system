@@ -139,4 +139,6 @@ public interface ProjectService {
 
     HttpServletResponse downinfo(HttpServletResponse response,Integer userId, Map<String, Object> map);
 
+    Result queryBySearchFromZjepdi(String search);
+
 }

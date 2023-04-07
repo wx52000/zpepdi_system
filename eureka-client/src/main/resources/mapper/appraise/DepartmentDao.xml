@@ -100,48 +100,68 @@
     </select>
     <select id="queryManageSurplus" resultType="java.util.Map">
         SELECT
-            IF( d.`limit` = 0, 99999, amount ) AS amount,
-               IF( d.`limit` = 0, 99999, surplus ) AS surplus
+            (select
+                 sum(amount) as  amount
+             from checker_amount a where
+                 a.cd_id = c.id
+                                     AND a.year = YEAR(now())) as amount,
+        (select ifnull(sum(used),0)
+        from checker_used u
+        where u.cd_id = c.id
+          AND u.year = YEAR(now())) as used
         FROM
             checker_dep d
-                LEFT JOIN checker_amount a on cd_id = d.id AND a.`year` = YEAR (NOW())
         WHERE
             d.id = #{id}
     </select>
     <select id="querySurplus" resultType="java.util.Map">
         SELECT
-            IF( d.`limit` = 0, 99999, amount ) AS amount,
-            IF( d.`limit` = 0, 99999, surplus ) AS surplus
+            (select
+                 sum(amount) as  amount
+             from checker_amount a where
+                 a.cd_id = d.id
+                                     AND a.year = YEAR(now())) as amount,
+        (select ifnull(sum(used),0)
+        from checker_used u
+        where u.cd_id = d.id
+          AND u.year = YEAR(now())) as used
         FROM
             checker_dep d
-                LEFT JOIN checker_amount a on cd_id = d.id AND a.`year` = YEAR (NOW())
         WHERE
             d.user_id = #{userId}
             and d.did = #{did}
     </select>
     <select id="queryCheckerAndDep" resultType="java.util.Map">
-        SELECT
+        select
             c.id,
             c.user_id,
             c.did,
-            CONCAT_WS(
-                    "-",
-                    u.`name`,
-                    SUBSTRING_INDEX( d.`name`, "-",- 1 )) AS `name`,
-            CASE
-                WHEN                 IF
-                    ( c.`limit` = 0, 9999, a.surplus ) > 0 THEN
-                    true ELSE false
-                END AS disabled
+            c.name,
+            if(c.amount-a.used >0, true, false) as disabled
+        from(
+                SELECT
+                    c.id,
+                    c.user_id,
+                    c.did,
+                    CONCAT_WS(
+                            "-",
+                            u.`name`,
+                            SUBSTRING_INDEX( d.`name`, "-",- 1 )) AS `name`,
+                    (select
+                         sum(amount) as  amount
+                     from checker_amount a where
+                         a.cd_id = c.id
+                                             AND a.year = YEAR(now())) as amount,
+             (select ifnull(sum(used),0)
+                from checker_used u
+                where u.cd_id = c.id
+                AND u.year = YEAR(now())) as used
         FROM
             `user` u,
             department d,
             checker_dep c
-                LEFT JOIN checker_amount a ON c.id = a.cd_id
-                AND a.YEAR = YEAR (
-            now())
         WHERE
             c.user_id = u.id
-          AND c.did = d.id
+          AND c.did = d.id)c
     </select>
 </mapper>

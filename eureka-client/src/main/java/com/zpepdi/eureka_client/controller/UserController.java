@@ -249,7 +249,6 @@ public class UserController {
         return userService.queryTask(userId,map);
     }
 
-
     @RequestMapping("paw")
     public Result paw(@UserId Integer userId,@RequestBody User user){
         userService.paw(userId,user);

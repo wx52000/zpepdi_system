@@ -56,9 +56,9 @@ public class CheckerServiceImpl implements CheckerService {
     }
 
     @Override
-    public Result setDepChecker(Map<String, Object> map) {
+    public Result setDepChecker(Integer userId, Map<String, Object> map) {
         checkerDao.setDepChecker(map);
-        checkerDao.setCheckerAmount(map);
+        checkerDao.setCheckerAmount(userId, map);
         return null;
     }
 

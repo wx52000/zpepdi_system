@@ -1,5 +1,6 @@
 package com.zpepdi.eureka_client.dao.appraise;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,5 +19,5 @@ public interface CheckerDao {
 
     void setDepChecker(Map<String,Object> map);
 
-    void setCheckerAmount(Map<String,Object> map);
+    void setCheckerAmount(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 }

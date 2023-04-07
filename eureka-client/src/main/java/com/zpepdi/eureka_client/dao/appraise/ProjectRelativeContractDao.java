@@ -10,4 +10,7 @@ public interface ProjectRelativeContractDao {
 
 
     void addProjectRelativeContract(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
+
+    void queryRelativeLog(Map<String,Object> map);
+
 }

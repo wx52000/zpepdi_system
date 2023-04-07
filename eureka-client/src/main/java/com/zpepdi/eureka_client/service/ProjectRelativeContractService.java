@@ -9,4 +9,6 @@ import java.util.Map;
 public interface ProjectRelativeContractService {
 
     Result addProjectRelativeContract(Integer userId, Map<String,Object> map);
+
+    Result queryRelativeLog(Map<String,Object> map);
 }

@@ -20,4 +20,9 @@ public class ProjectRelativeContractController {
     public Result relativeContract(@UserId Integer userId, @RequestBody Map<String,Object> map){
         return projectRelativeContractService.addProjectRelativeContract(userId,map);
     }
+
+    @RequestMapping("queryRelativeLog")
+    public Result queryRelativeLog(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return projectRelativeContractService.queryRelativeLog(map);
+    }
 }

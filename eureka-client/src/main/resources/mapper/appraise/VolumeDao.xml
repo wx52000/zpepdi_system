@@ -380,6 +380,14 @@
         where id = #{map.id}
     </update>
     <update id="updatePlanedPublicDate">
+        DELETE
+        FROM check_plan_volume pv
+        WHERE EXISTS(
+        SELECT 1
+        FROM volume
+        WHERE id = pv.volume_id
+        AND actual_publication_date &lt; concat(#{nowMonth},"-01"))
+        AND pv.check_month = #{nowMonth};
     UPDATE volume v, major_contrast_technology m
     SET v.planned_publication_date = #{date}, v.entry_plan_time = now()
     WHERE

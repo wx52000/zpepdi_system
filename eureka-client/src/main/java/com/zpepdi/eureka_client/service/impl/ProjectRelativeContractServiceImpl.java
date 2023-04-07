@@ -17,4 +17,10 @@ public class ProjectRelativeContractServiceImpl implements ProjectRelativeContra
         projectRelativeContractDao.addProjectRelativeContract(userId,map);
         return Result.ok();
     }
+
+    @Override
+    public Result queryRelativeLog(Map<String, Object> map) {
+        projectRelativeContractDao.queryRelativeLog(map);
+        return Result.ok();
+    }
 }

@@ -5,4 +5,24 @@
         insert ignore into project_relative_contract(project_id, contract_id, handler, handle_time)
         values (#{map.projectId}, #{map.contractId}, #{userId}, now())
     </insert>
+    <select id="queryRelativeLog">
+        SELECT
+        p.number,
+        p.`name`,
+        c.number AS cNumber,
+        c.`name` AS cName,
+        u.`name` as handler,
+        CAST(prc.handle_time AS CHAR ( 10 )) AS time
+        FROM
+        project_relative_contract prc,
+        `user` u,
+        project p,
+        contract c
+        WHERE
+        u.id = prc.`handler`
+        AND prc.project_id = p.id
+        AND prc.contract_id = c.id
+        AND prc.handle_time &lt;= #{end}
+        AND prc.handle_time &gt;= #{start}
+    </select>
 </mapper>

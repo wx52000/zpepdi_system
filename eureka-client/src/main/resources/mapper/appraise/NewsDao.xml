@@ -291,8 +291,8 @@
                 </trim>
             where project_id = #{item.id};
             <if test="check == 1 and item.typeNote == 1">
-                update checker_amount a left join checker_dep d on a.cd_id = d.id
-                set surplus = surplus-${item.workday}
+                update checker_used a left join checker_dep d on a.cd_id = d.id
+                set used = used+${item.workday}
                 where d.user_id = #{id} and d.did = #{item.did};
             </if>
             <if test="check != 2">
