@@ -562,7 +562,7 @@
         workday_tec wt
         WHERE
         NOT EXISTS ( SELECT 1 FROM volume_workday w WHERE v.id = w.volume_id AND w.workday &lt;&gt; 0 )
-        AND v.actual_publication_date > "2023-03-01"
+        AND v.actual_publication_date > "2023-04-06"
         AND wt.project_id = v.project_id
         AND wt.volume_tec = v.tec
         GROUP BY
