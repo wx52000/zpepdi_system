@@ -11,4 +11,8 @@
         select mediumType,pipelineName,recommend from velocity
     </select>
 
+    <select id="queryyingli" resultType="string">
+        select stress.#{wendu} from stress where stress.product= #{product} and stress.rank=#{rank}
+    </select>
+
 </mapper>

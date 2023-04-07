@@ -4,8 +4,11 @@ import com.zpepdi.qj_heating.result.Result;
 import com.zpepdi.qj_heating.service.ThicknessSerice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("Thickness")
@@ -24,6 +27,11 @@ public class ThicknessController {
     @RequestMapping("queryjiezhi")
     public Result queryjiezhi(){
         Result result = thicknessSerice.queryjiezhi();
+        return result;
+    }
+    @RequestMapping("queryyingli")
+    public Result queryyingli(@RequestBody Map<String, String> map){
+        Result result = thicknessSerice.queryyingli(map);
         return result;
     }
 }

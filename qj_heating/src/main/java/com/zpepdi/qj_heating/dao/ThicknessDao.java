@@ -1,6 +1,7 @@
 package com.zpepdi.qj_heating.dao;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -9,4 +10,5 @@ import java.util.Map;
 public interface ThicknessDao {
     List<Map<String,String>> queryRank();
     List<Map<String,String>> queryjiezhi();
+    List<String> queryyingli(@Param("wendu") Integer wendu,@Param("product") String product,@Param("rank") String rank);
 }
