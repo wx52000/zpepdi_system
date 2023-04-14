@@ -10,5 +10,6 @@ import java.util.Map;
 public interface ThicknessDao {
     List<Map<String,String>> queryRank();
     List<Map<String,String>> queryjiezhi();
-    List<String> queryyingli(@Param("wendu") Integer wendu,@Param("product") String product,@Param("rank") String rank);
+    String queryyingli(@Param("wendu") Integer wendu,@Param("product") String product,@Param("rank") String rank);
+    List<Map<String,String>> queryyingliY();
 }
