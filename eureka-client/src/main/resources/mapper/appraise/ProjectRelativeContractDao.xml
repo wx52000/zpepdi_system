@@ -2,9 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zpepdi.eureka_client.dao.appraise.ProjectRelativeContractDao">
     <insert id="addProjectRelativeContract">
-        insert ignore into project_relative_contract(project_id, contract_id, handler, handle_time)
-        values (#{map.projectId}, #{map.contractId}, #{userId}, now())
+        insert ignore into project_relative_contract(project_id, contract_id,
+            handler, handle_time
+            <if test="map.childrenId != null">
+        ,children_id
+            </if>)
+        values (#{map.projectId}, #{map.contractId}, #{userId}, now()
+                <if test="map.childrenId != null">
+                ,#{map.children_id}
+            </if>)
     </insert>
+    <update id="submitRelative">
+        update project_relative_contract
+        set submit = #{submit}
+        where project_id = #{projectId} and
+            contract_id = #{contractId};
+    </update>
+    <delete id="delRelative">
+        delete
+        from project_relative_contract
+        where project_id = #{projectId} and
+              contract_id = #{contractId};
+    </delete>
     <select id="queryRelativeLog">
         SELECT
         p.number,
@@ -24,5 +43,24 @@
         AND prc.contract_id = c.id
         AND prc.handle_time &lt;= #{end}
         AND prc.handle_time &gt;= #{start}
+    </select>
+    <select id="queryByProjectId" resultType="java.util.Map">
+        select prc.project_id, prc.contract_id, c.name, c.number, c.code
+        from project_relative_contract prc,
+             contract c
+        where prc.submit = 1
+        and prc.project_id = #{id}
+        and prc.contract_id = c.id
+    </select>
+    <select id="queryNotSubmit" resultType="java.util.Map">
+        select prc.project_id, prc.contract_id, c.name as cName, c.number as cNumber, p.number, p.name,
+               c.code
+        from project_relative_contract prc,
+             contract c,
+             project p
+        where prc.submit = 0
+          and prc.project_id = p.id
+          and prc.contract_id = c.id
+          and p.generalId = #{userId}
     </select>
 </mapper>

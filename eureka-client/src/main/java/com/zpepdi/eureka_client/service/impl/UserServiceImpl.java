@@ -1,8 +1,13 @@
 package com.zpepdi.eureka_client.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.event.AnalysisEventListener;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zpepdi.eureka_client.dao.appraise.*;
+import com.zpepdi.eureka_client.excel.UserListListener;
+import com.zpepdi.eureka_client.tools.Download;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.zpepdi.eureka_client.entity.Department;
@@ -12,7 +17,12 @@ import com.zpepdi.eureka_client.entity.UserOut;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.UserService;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
@@ -445,4 +455,57 @@ public class UserServiceImpl implements UserService {
     return list;
   }
 
+    @Override
+    public void conditionalDown(MultipartFile file, Map<String, Object> map,
+                                               HttpServletResponse response) {
+        response.setHeader("Access-Control-Expose-Headers","*");
+//        response.setContentType("application/octet-stream");
+        UserListListener userListListener = new UserListListener();
+        try {
+            EasyExcel.read(file.getInputStream(),userListListener).sheet().doRead();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        List<String> userList = userListListener.getList();
+        List<Map<String,Object>> data = new ArrayList<>();
+        long num = 0;
+        if (userList != null && userList.size() > 0){
+            num = Math.round(userList.size() * Double.parseDouble(map.get("ratio").toString())/100);
+            map.put("num",num);
+            data = userDao.conditionalWorkday(JSONObject.toJSONString(userList),map);
+        }else {
+            data = userDao.workday(map);
+        }
+//        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-Disposition", "attachment;filename=123.xlsx");
+        String []head = {"工号","姓名","工时"};
+        try {
+            EasyExcel.write(response.getOutputStream()).head(headHandlerToExcel(head)).autoCloseStream(false).sheet("工时信息列表").doWrite(dataHandlerToExcel(data));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<List<String>> headHandlerToExcel(String []s){
+        List<List<String>> data = new ArrayList<>();
+        for (String s1 : s){
+            List<String> head = new ArrayList<>();
+            head.add(s1);
+            data.add(head);
+        }
+        return data;
+    }
+
+    private List<List<String>> dataHandlerToExcel(List<Map<String,Object>> list){
+        List<List<String>> data = new ArrayList<>();
+        for (Map<String,Object> map : list){
+            List<String> children = new ArrayList<>();
+            children.add(map.get("username").toString());
+            children.add(map.get("name").toString());
+            children.add(map.get("workday").toString());
+            data.add(children);
+        }
+        return data;
+    }
 }

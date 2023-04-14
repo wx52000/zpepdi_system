@@ -84,7 +84,28 @@ public class ScheduledConfig implements SchedulingConfigurer {
 
 
 
-//  @Scheduled(cron = "0 0 0 * * ?")
+
+
+  @Override
+  public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
+      Method[] methods = BatchProperties.Job.class.getMethods();
+      int defaultPoolSize = 3;
+      int corePoolSize = 0;
+      if (methods != null && methods.length > 0) {
+        for (Method method : methods) {
+          Scheduled annotation = method.getAnnotation(Scheduled.class);
+          if (annotation != null) {
+            corePoolSize++;
+          }
+        }
+        if (defaultPoolSize > corePoolSize)
+          corePoolSize = defaultPoolSize;
+      }
+    scheduledTaskRegistrar.setScheduler(Executors.newScheduledThreadPool(corePoolSize));
+    }
+
+
+    //  @Scheduled(cron = "0 0 0 * * ?")
 //  public void  spider(){
 ////      String[] cmdArr = new String[]{"G:","/c","cd G:\\python_project\\zpepdi\\zpepdi\\zpepdi","/C",
 ////        "pyhton start_scrapy.py"};
@@ -107,24 +128,5 @@ public class ScheduledConfig implements SchedulingConfigurer {
 //      e.printStackTrace();
 //    }
 //  }
-
-
-  @Override
-  public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-      Method[] methods = BatchProperties.Job.class.getMethods();
-      int defaultPoolSize = 3;
-      int corePoolSize = 0;
-      if (methods != null && methods.length > 0) {
-        for (Method method : methods) {
-          Scheduled annotation = method.getAnnotation(Scheduled.class);
-          if (annotation != null) {
-            corePoolSize++;
-          }
-        }
-        if (defaultPoolSize > corePoolSize)
-          corePoolSize = defaultPoolSize;
-      }
-    scheduledTaskRegistrar.setScheduler(Executors.newScheduledThreadPool(corePoolSize));
-    }
 
 }

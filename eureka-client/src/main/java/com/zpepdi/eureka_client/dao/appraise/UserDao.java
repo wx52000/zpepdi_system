@@ -63,6 +63,8 @@ public interface UserDao {
 
     List<Map<String,Object>> workday(Map<String,Object> map);
 
+    List<Map<String,Object>> conditionalWorkday(@Param("list") String list, @Param("map") Map<String,Object> map);
+
     List<Map<String,Object>> workdayByManager(@Param("id")Integer id, @Param("map")Map<String,Object> map);
 
     List<Map<String,Object>> workdayByGeneral( @Param("userId") Integer userId,

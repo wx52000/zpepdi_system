@@ -50,6 +50,8 @@ public interface ProjectDao {
 
     void sameNameInsert( Map<String,Object> map);
 
+    Map<String,Object> queryBaseById(Integer id);
+
     Map<String,Object> queryById(@Param("userId") Integer userId,@Param("id") Integer id);
 
     List<Map<String,Object>> queryChildren(Integer id);
@@ -57,8 +59,6 @@ public interface ProjectDao {
     Integer queryByNumber(@Param("id") Integer id ,@Param("number") String number);
 
     List<Map<String,Object>> queryTecById(Integer id);
-
-    List<Map<String,Object>> setFrozenExistNotWorkdayTec(Integer id);
 
     List<Map<String,Object>> queryBySelfCheck(Integer id);
 
@@ -98,7 +98,7 @@ public interface ProjectDao {
 //作为主设人查询
     List<Map> queryByPrincipal(User user);
     List<Map> queryProByPrincipal(User user);
-    List<Map> queryDesigner(User user);
+
 //作为设计人查询
     List<Map> queryByDesigner(User user);
 //作为互校人查询
@@ -139,7 +139,7 @@ public interface ProjectDao {
 
     List<Map<String,Object>> queryDeclare(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 
-    void setDeclare(@Param("id")Integer id, @Param("list") List<Map<String,Object>> list,@Param("date")String date);
+    void setDeclare(@Param("id")Integer id, @Param("map") Map<String,Object> map);
 
     void resetDeclare(Map<String,Object> map);
 

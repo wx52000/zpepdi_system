@@ -93,7 +93,7 @@
                         ( type = 0, count * 20, 0 )) AS formal,
             max(
                     IF
-                        ( type = 1, count * 15 ,0 )) AS `external`,
+                        ( type = 1, count * 20 ,0 )) AS `external`,
             max(
             IF
             ( type = 0, workday, 0 )) AS formalUsed,

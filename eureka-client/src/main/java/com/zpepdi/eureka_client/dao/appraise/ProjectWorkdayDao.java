@@ -90,6 +90,8 @@ public interface ProjectWorkdayDao {
 
   List<Map<String,Object>> queryTecVolumeRatio(Integer id);
 
+  void reSetFrozen(@Param("userId") Integer userId, @Param("projectId") Integer projectId);
+
   void setTecVolumeRatio(@Param("id")Integer id, @Param("map")Map<String,Object> map);
 
   void setVolumeWorkday(@Param("map")Map<String,Object> map,@Param("id")Integer id,@Param("date")String date);

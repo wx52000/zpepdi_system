@@ -1,18 +1,18 @@
 package com.zpepdi.eureka_client.controller;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.eureka_client.annotation.UserId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.zpepdi.eureka_client.entity.User;
 import com.zpepdi.eureka_client.entity.UserOut;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.UserService;
 import com.zpepdi.eureka_client.tools.Download;
 import com.zpepdi.eureka_client.excel.ExcelProperty;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -270,6 +270,19 @@ public class UserController {
       return Result.ok(userService.userAllAndGroup(id,mode));
     }
 
+    @RequestMapping("conditionalDown")
+    public void conditionalDown(@RequestParam("file") MultipartFile file, @RequestParam("data") String data, HttpServletResponse response){
+        JSONObject jsonObject = JSON.parseObject(data);
+        Map<String,Object> map = new HashMap<>();
+        map.put("startMonth",jsonObject.get("startMonth"));
+        map.put("endMonth",jsonObject.get("endMonth"));
+        map.put("ratio",jsonObject.get("ratio"));
+        userService.conditionalDown(file,map,response);
+
+    }
+
+
+
   @RequestMapping("excel")
   public Result personExcel(HttpServletRequest request , HttpServletResponse response) {
     String s = "";
@@ -302,5 +315,4 @@ public class UserController {
     return Result.ok(s);
   }
 
-
-  }
+}

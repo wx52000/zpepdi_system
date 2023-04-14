@@ -28,4 +28,7 @@ public interface DataTransmissionDao {
     void insertIncome(List<Map<String,Object>> list);
 
     void delIncome();
+
+    //判断是否存在为工时0卷册，若存在 则冻结专业不允许发工时
+    void setFrozenExistNotWorkdayTec();
 }

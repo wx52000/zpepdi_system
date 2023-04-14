@@ -106,7 +106,7 @@ public interface ProjectService {
 
     Result queryNotDeclare(Integer userId, Map<String,Object> map);
 
-    Result setDeclare(Integer userId, List<Map<String,Object>> list,String date);
+    Result setDeclare(Integer userId, Map<String,Object> map);
 
     Object confirmDay();
 

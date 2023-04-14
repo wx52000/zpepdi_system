@@ -227,6 +227,54 @@
     on duplicate key update
     amount = values(amount)
   </update>
+  <update id="reSetFrozen">
+    UPDATE workday_tec wt,
+    workday_tec_principal wp
+    SET wt.frozen = 0,
+    wt.frozen_reason = NULL
+    WHERE
+    NOT EXISTS (
+    SELECT
+    t.tec,
+    t.project_id
+    FROM
+    (
+    SELECT
+    COUNT( v.id ) AS count,
+    v.tec,
+    v.project_id
+    FROM
+    volume v
+    WHERE
+    NOT EXISTS ( SELECT 1 FROM volume_workday w WHERE v.id = w.volume_id AND w.workday &lt;&gt; 0 )
+    AND v.actual_publication_date > "2023-04-06"
+    AND wt.volume_tec = v.tec
+    AND wt.project_id = v.project_id
+    GROUP BY
+    v.tec UNION
+    SELECT
+    COUNT( v.id ) AS count,
+    v.tec,
+    v.project_id
+    FROM
+    volume v
+    WHERE
+    NOT EXISTS ( SELECT 1 FROM volume_workday w WHERE v.id = w.volume_id AND w.workday &lt;&gt; 0 )
+    AND v.state IN ( "尚未确认", "尚未开展", "正在设计", "正在校审" )
+    AND wt.volume_tec = v.tec
+    AND wt.project_id = v.project_id
+    GROUP BY
+    v.tec
+    ) AS t
+    LEFT JOIN frozen_workday_config fc ON t.project_id = fc.project_id
+    WHERE
+    t.count &gt; IFNULL( fc.number, 0 )
+    )
+    AND wt.frozen = 1
+    AND wt.id = wp.workday_tec_id
+    AND wp.user_id = #{userId}
+    and wt.project_id = #{projectId}
+  </update>
   <update id="setTecVolumeRatio">
     insert into tec_ratio(project_id, tec, designer, checker, principal, headman, `check`, time, handler)
     values

@@ -4,6 +4,7 @@ import com.zpepdi.eureka_client.annotation.UserId;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.ContractService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +23,7 @@ public class ContractController {
     }
 
     @RequestMapping("insertContract")
-    public Result insertContract(@UserId Integer userId, Map<String,Object> map){
+    public Result insertContract(@UserId Integer userId, @RequestBody Map<String,Object> map){
         return contractService.insertContract(userId,map);
     }
 

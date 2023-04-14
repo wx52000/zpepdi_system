@@ -48,7 +48,10 @@ public class DataTransmissionServiceImpl implements DataTransmissionService {
                 }
                 dataTransmissionDao.delNotAlive();
             }
+            //数据中人名和id关联
             dataTransmissionDao.reSetUser();
+//            判断是否存在工时为0卷册 存在则使项目专业为0
+            dataTransmissionDao.setFrozenExistNotWorkdayTec();
         }).start();
         Result.ok();
     }

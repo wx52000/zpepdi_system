@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.dao.zjepdi.ZJEPDIDataTransmissionDao;
+import com.zpepdi.eureka_client.service.ContractService;
 import com.zpepdi.eureka_client.service.DeclareDayService;
 import com.zpepdi.eureka_client.tools.*;
 import org.apache.poi.hssf.usermodel.*;
@@ -41,7 +42,7 @@ public class ProjectServiceImpl implements ProjectService {
     private TechnologyDao technologyDao;
     private ProjectWorkdayDao projectWorkDayDao;
     @Autowired
-    private ContractDao contractDao;
+    private ContractService contractService;
     @Autowired
     private ProjectRelativeContractDao projectRelativeContractDao;
     @Autowired
@@ -50,6 +51,8 @@ public class ProjectServiceImpl implements ProjectService {
     private RedisTemplate<String,Object> redisTemplate;
     @Autowired
     private ProjectTaskDao projectTaskDao;
+    @Autowired
+    private FrozenWorkdayConfigDao frozenWorkdayConfigDao;
     @Autowired
     public void setProjectDao(ProjectDao projectDao){
         this.projectDao = projectDao;
@@ -223,18 +226,18 @@ public class ProjectServiceImpl implements ProjectService {
                     }else {
                         typeMap.put("type",2);
                     }
-                    int valWorkdayRate = projectDao.valWorkdayRate(typeMap);
-                    map.put("calculationRatio",valWorkdayRate);
-                    double calculation = Double.parseDouble(map.get("spiderMoney").toString())/valWorkdayRate;
-                    map.put("calculation",calculation);
-                    List<Map<String,Object>> tecList = zjepdiDataTransmissionDao.queryTecList(projectNumber);
-                    if (tecList != null && tecList.size() > 0){
-                        if (map.get("tec").toString().equals("综合")) {
-                            map.put("thisCalculation", calculation);
-                        }else {
-                            map.put("thisCalculation", calculation/tecList.size());
-                        }
-                    }
+//                    int valWorkdayRate = projectDao.valWorkdayRate(typeMap);
+//                    map.put("calculationRatio",valWorkdayRate);
+//                    double calculation = Double.parseDouble(map.get("spiderMoney").toString())/valWorkdayRate;
+//                    map.put("calculation",calculation);
+//                    List<Map<String,Object>> tecList = zjepdiDataTransmissionDao.queryTecList(projectNumber);
+//                    if (tecList != null && tecList.size() > 0){
+//                        if (map.get("tec").toString().equals("综合")) {
+//                            map.put("thisCalculation", calculation);
+//                        }else {
+//                            map.put("thisCalculation", calculation/tecList.size());
+//                        }
+//                    }
                     map.put("spider",1);
                     projectDao.setProjectChildren(map);
                 }else {
@@ -255,8 +258,18 @@ public class ProjectServiceImpl implements ProjectService {
                 projectDao.setOtherProject(id, map, 1);
                 projectDao.setOtherProjectNote(map);
             }
-            if (map.get("contract_number") != null && !map.get("contract_number").equals("")){
-                contractDao.insertContract(id,map);
+        }
+        if (type.equals("0")){
+            if (map.get("contractNumber") != null && !map.get("contractNumber").equals("")) {
+                Map<String, Object> contractMap = new HashMap<>();
+                contractMap.put("projectId", map.get("projectId"));
+                contractMap.put("number", map.get("contractNumber"));
+                contractMap.put("name", map.get("contractName"));
+                contractMap.put("code", map.get("contractCode"));
+                if (map.get("childrenId") != null && !map.get("childrenId").equals("")){
+                    contractMap.put("childrenId", map.get("childrenId"));
+                }
+                contractService.insertContract(user.getId(), contractMap);
             }
         }
         return Result.ok();
@@ -478,6 +491,7 @@ public class ProjectServiceImpl implements ProjectService {
                 projectWorkDayDao.setVolumeWorkday(
                         map,userId, DateUtils.getDateMonth());
             }
+            projectWorkDayDao.reSetFrozen(userId, Integer.valueOf(map.get("id").toString()));
         }else {
             return Result.build(500,"超出工时上限");
         }
@@ -987,15 +1001,39 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result queryNotDeclare(Integer userId, Map<String, Object> map) {
-        return Result.ok(projectDao.queryNotDeclare(userId,map));
+        Result isFrozen = isFrozen(userId,map);
+        if (isFrozen.getCode() == 0) {
+            return Result.ok(projectDao.queryNotDeclare(userId, map));
+        }else {
+            return isFrozen;
+        }
     }
 
     @Override
-    public Result setDeclare(Integer userId, List<Map<String, Object>> list, String date) {
-        if (list.size() > 0) {
-            projectDao.setDeclare(userId, list, date);
+    public Result setDeclare(Integer userId, Map<String, Object> map) {
+        Result isFrozen = isFrozen(userId,map);
+        if (isFrozen.getCode() == 0) {
+            if (map.get("list") != null && !map.get("list").toString().equals("[]")) {
+                projectDao.setDeclare(userId, map);
+            } else {
+                return Result.build(212, "未选择需申报的任务");
+            }
+            return Result.ok();
         }else {
-            return Result.build(212,"未选择需申报的任务");
+            return isFrozen;
+        }
+    }
+
+    private Result isFrozen(Integer userId,Map<String,Object> map){
+        Integer projectId = Integer.valueOf(map.get("projectId").toString());
+        Map<String,Object> project = projectDao.queryBaseById(projectId);
+        if (project.get("frozen").toString().equals("0")) {
+            String reason = frozenWorkdayConfigDao.queryByUserAndProject(userId,projectId);
+            if (reason != null){
+                return Result.build(772,"专业工时被冻结，原因为："+ reason);
+            }
+        } else {
+            return Result.build(772,"项目被冻结，原因为："+project.get("frozen_reason"));
         }
         return Result.ok();
     }
@@ -1223,7 +1261,11 @@ public class ProjectServiceImpl implements ProjectService {
             }
             //分专业创建sheet
             for(int i=0;i<info.size();i++){
-                tec.add(info.get(i).get("专业").toString());
+                if (info.get(i).get("专业")!= null) {
+                    tec.add(info.get(i).get("专业").toString());
+                }else {
+                    tec.add(String.valueOf(i));
+                }
             }
             LinkedHashSet<String> hashSet = new LinkedHashSet<>(tec);
             ArrayList<String> listWithoutDuplicates = new ArrayList<>(hashSet);

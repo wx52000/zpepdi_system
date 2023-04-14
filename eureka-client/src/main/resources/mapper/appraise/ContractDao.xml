@@ -2,18 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zpepdi.eureka_client.dao.appraise.ContractDao">
     <insert id="insertContract">
-        <selectKey resultType="integer" keyProperty="map.id" order="AFTER">
+        <selectKey resultType="integer" keyProperty="map.contractId" order="AFTER">
             select id
             from contract
             where number = #{map.number}
         </selectKey>
-        insert ignore into contract(`number`, `name`, handler, handle_time
-            <if test="map.children_id != null">
-                ,children_id
-            </if> )
-        values (#{map.number}, #{map.name}, #{userId}, now()
-        <if test="map.children_id != null">
-        ,#{map.children_id}
-        </if>)
+        insert ignore into contract(`number`, `name`, handler, handle_time, code )
+        values (#{map.number}, #{map.name}, #{userId}, now(), #{map.code})
     </insert>
 </mapper>

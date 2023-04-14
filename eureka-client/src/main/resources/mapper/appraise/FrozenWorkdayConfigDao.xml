@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.FrozenWorkdayConfigDao">
+    <update id="setFrozenNumber">
+        insert into frozen_workday_config(project_id, number, handler, handle_time)
+        values (#{map.id}, #{map.number}, #{userId}, now())
+    </update>
+    <select id="query" resultType="java.util.Map">
+        select
+            p.number, p.name, p.general, ifnull(fc.number,0) as num
+        from project p left join frozen_workday_config fc on p.id = fc.project_id
+        where p.control = 1
+    </select>
+    <select id="queryByUserAndProject" resultType="string">
+        SELECT
+            GROUP_CONCAT( w.volume_tec, w.frozen_reason ) AS reason
+        FROM
+            project p,
+            workday_tec w,
+            workday_tec_principal wp
+        WHERE
+            p.id = #{projectId}
+          AND w.id = wp.workday_tec_id
+          AND wp.user_id = #{userId}
+          AND w.frozen = 1
+          and p.id = w.project_id
+          AND p.frozen = 0
+    </select>
+    <select id="queryByUserId" resultType="java.util.Map">
+        SELECT
+            p.id,
+            p.number,
+            p.`name`,
+            wt.volume_tec AS tec,
+            wt.frozen_reason
+        FROM
+            project p,
+            workday_tec wt,
+            workday_tec_principal wtp
+        WHERE
+            wtp.user_id = #{userId}
+          AND wtp.workday_tec_id = wt.id
+          AND wt.frozen = 1
+          AND p.id = wt.project_id
+        GROUP BY
+            wt.id
+    </select>
+</mapper>

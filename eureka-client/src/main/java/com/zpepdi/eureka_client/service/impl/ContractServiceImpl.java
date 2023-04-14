@@ -26,8 +26,10 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Result insertContract(Integer userId, Map<String, Object> map) {
-        contractDao.insertContract(userId,map);
-        projectRelativeContractDao.addProjectRelativeContract(userId,map);
-        return Result.ok();
+        if (map.get("number") != null && !map.get("number").toString().equals("")) {
+            contractDao.insertContract(userId, map);
+            projectRelativeContractDao.addProjectRelativeContract(userId, map);
+        }
+        return Result.ok(map);
     }
 }
