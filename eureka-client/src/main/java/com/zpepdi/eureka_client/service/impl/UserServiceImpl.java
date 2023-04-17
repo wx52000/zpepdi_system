@@ -468,9 +468,9 @@ public class UserServiceImpl implements UserService {
         }
         List<String> userList = userListListener.getList();
         List<Map<String,Object>> data = new ArrayList<>();
-        long num = 0;
+        int num = 0;
         if (userList != null && userList.size() > 0){
-            num = Math.round(userList.size() * Double.parseDouble(map.get("ratio").toString())/100);
+            num = (int) Math.ceil(userList.size() * Double.parseDouble(map.get("ratio").toString())/100);
             map.put("num",num);
             data = userDao.conditionalWorkday(JSONObject.toJSONString(userList),map);
         }else {

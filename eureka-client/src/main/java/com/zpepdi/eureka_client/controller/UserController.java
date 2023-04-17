@@ -278,7 +278,6 @@ public class UserController {
         map.put("endMonth",jsonObject.get("endMonth"));
         map.put("ratio",jsonObject.get("ratio"));
         userService.conditionalDown(file,map,response);
-
     }
 
 
