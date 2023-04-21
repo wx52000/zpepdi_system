@@ -1,6 +1,7 @@
 package com.zpepdi.qj_heating.service.Impl;
 
 import com.zpepdi.qj_heating.dao.ThicknessDao;
+import com.zpepdi.qj_heating.entity.Userpiping;
 import com.zpepdi.qj_heating.result.Result;
 import com.zpepdi.qj_heating.service.ThicknessSerice;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,56 @@ public class ThicknessServiceImpl implements ThicknessSerice {
     @Autowired
     private ThicknessDao thicknessDao;
 
+    /**
+     * 修改管道名称
+     * @param id
+     * @param gdname
+     * @return
+     */
+    @Override
+    public Result upgdname(Integer id, String gdname) {
+        return Result.ok(thicknessDao.upgdname(id,gdname));
+    }
 
+    /**
+     * 保存管道
+     * @param userpiping
+     * @return
+     */
+    @Override
+    public Result savepiping(Userpiping userpiping) {
+        return Result.ok(thicknessDao.savepiping(userpiping));
+    }
+
+    /**
+     * 查询用户管道
+     * @param userpiping
+     * @return
+     */
+    @Override
+    public Result querypiping(String username,String name,String defstr1) {
+        return Result.ok(thicknessDao.querypiping(username,name,defstr1));
+    }
+
+    /**
+     * 根据id查询管道
+     * @param id
+     * @return
+     */
+    @Override
+    public Result byidquerypiping(Integer id) {
+        return Result.ok(thicknessDao.byidquerypiping(id));
+    }
+
+    /**
+     * 删除管道
+     * @param id
+     * @return
+     */
+    @Override
+    public Result delgd(Integer id) {
+        return Result.ok(thicknessDao.delgd(id));
+    }
     @Override
     public Result queryRank() {
         return Result.ok(thicknessDao.queryRank());
