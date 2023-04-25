@@ -78,7 +78,7 @@ public class Userpiping {
     private String endls;
     //是否外径管
     private String defstr1;
-    private String defstr2;
+    private Integer defstr2;
     private String defstr3;
     private String defstr4;
 
@@ -379,11 +379,11 @@ public class Userpiping {
         this.defstr1 = defstr1;
     }
 
-    public String getDefstr2() {
+    public Integer getDefstr2() {
         return defstr2;
     }
 
-    public void setDefstr2(String defstr2) {
+    public void setDefstr2(Integer defstr2) {
         this.defstr2 = defstr2;
     }
 

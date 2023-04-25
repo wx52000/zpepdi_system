@@ -28,23 +28,130 @@ public class ThicknessServiceImpl implements ThicknessSerice {
     }
 
     /**
+     * 修改管道排序
+     * @param id
+     * @param defstr2
+     * @return
+     */
+    @Override
+    public Result upsort(Integer id, Integer defstr2) {
+        return Result.ok(thicknessDao.upsort(id,defstr2));
+    }
+
+    /**
      * 保存管道
      * @param userpiping
      * @return
      */
     @Override
     public Result savepiping(Userpiping userpiping) {
-        return Result.ok(thicknessDao.savepiping(userpiping));
+        int savepiping = thicknessDao.savepiping(userpiping);
+        String maxsort = querymaxsort(userpiping);
+        Integer defstr2;
+        if(maxsort == null){
+            defstr2 = 1;
+        }else {
+            defstr2 = Integer.parseInt(maxsort)+1;
+        }
+        userpiping.setDefstr2(defstr2);
+        upgd(userpiping);
+        Userpiping userpiping1 = new Userpiping();
+        userpiping1.setId(userpiping.getId());
+        userpiping1.setDefstr2(defstr2);
+        return Result.ok(userpiping1);
     }
-
-    /**
-     * 查询用户管道
+ /**
+     * 保存管道文件
      * @param userpiping
      * @return
      */
     @Override
-    public Result querypiping(String username,String name,String defstr1) {
-        return Result.ok(thicknessDao.querypiping(username,name,defstr1));
+    public Result filesave(Userpiping userpiping) {
+        String defstr3 = userpiping.getDefstr3();
+        //直接查询id更优，若后续需要优化可修改
+        List<Userpiping> querypiping = querypiping(userpiping.getUsername(), userpiping.getName(), null);
+        for(Userpiping gd:querypiping){
+            Integer id = gd.getId();
+            thicknessDao.upfilename(id,defstr3);
+        }
+        return Result.ok(defstr3);
+    }
+
+    /**
+     * 保存管道文件（另存为）
+     * @param userpiping
+     * @return
+     */
+    @Override
+    public Result filesave2(Userpiping userpiping) {
+        //新管道名称
+        String defstr3 = userpiping.getDefstr3();
+        List<Userpiping> querypiping = querypiping(userpiping.getUsername(), userpiping.getName(), null);
+        for(Userpiping gd:querypiping){
+            thicknessDao.updefstr4(gd.getId(),"false");
+        }
+        for(Userpiping gd:querypiping){
+            gd.setDefstr2(null);
+            gd.setDefstr3(defstr3);
+            gd.setDefstr4("true");
+            savepiping(gd);
+        }
+        return Result.ok();
+    }  /**
+     * 打开文件
+     * @param userpiping
+     * @return
+     */
+    @Override
+    public Result dakaifile(Userpiping userpiping) {
+
+        List<Userpiping> querypiping = querypiping(userpiping.getUsername(), userpiping.getName(), null);
+        for(Userpiping gd:querypiping){
+            thicknessDao.updefstr4(gd.getId(),"false");
+        }
+        List<Userpiping> byfilequerypiping = thicknessDao.byfilequerypiping(userpiping.getUsername(), userpiping.getName(), userpiping.getDefstr3());
+        for(Userpiping gd:byfilequerypiping){
+            thicknessDao.updefstr4(gd.getId(),"true");
+        }
+        return Result.ok();
+    }
+
+    /**
+     * 查询最大排序号
+     * @param userpiping
+     * @return
+     */
+    public String querymaxsort(Userpiping userpiping) {
+        return thicknessDao.querymaxsort(userpiping);
+    }
+   /**
+     * 查询用户文件列表
+     * @param
+     * @return
+     */
+   @Override
+    public Result queryfilenamelist(Userpiping userpiping) {
+        return Result.ok(thicknessDao.queryfilenamelist(userpiping));
+    }
+
+
+    /**
+     * 修改管道
+     * @param userpiping
+     * @return
+     */
+    public Result upgd(Userpiping userpiping) {
+        return Result.ok(thicknessDao.upgd(userpiping));
+    }
+
+    /**
+     * 查询用户管道(区分外径还是内径)
+     * @param
+     * @return
+     */
+    @Override
+    public List<Userpiping> querypiping(String username,String name,String defstr1) {
+        return thicknessDao.querypiping(username,name,defstr1);
     }
 
     /**

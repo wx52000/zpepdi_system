@@ -3,13 +3,66 @@
 
 <mapper namespace="com.zpepdi.qj_heating.dao.ThicknessDao">
 
+
+
     <update id="upgdname">
         UPDATE userpiping SET gdname = #{gdname} WHERE id = #{id}
     </update>
+    <update id="upfilename">
+        UPDATE userpiping SET defstr3 = #{defstr3} WHERE id = #{id}
+    </update>
+    <update id="upsort">
+        UPDATE userpiping SET defstr2 = #{defstr2} WHERE id = #{id}
+    </update>
+    <update id="updefstr4">
+        UPDATE userpiping SET defstr4 = #{defstr4} WHERE id = #{id}
+    </update>
+
+    <update id="upgd" parameterType="com.zpepdi.qj_heating.entity.Userpiping">
+        update userpiping
+        <trim prefix="set" suffixOverrides=",">
+            <if test="radio!=null and radio!=''">radio = #{radio},</if>
+            <if test="radio2!=null and radio2!=''">radio2 = #{radio2},</if>
+            <if test="value1!=null and value1!=''">value1 = #{value1},</if>
+            <if test="value2!=null and value2!=''">value2 = #{value2},</if>
+            <if test="bzhao!=null and bzhao!=''">bzhao = #{bzhao},</if>
+            <if test="value3!=null and value3!=''">value3 = #{value3},</if>
+            <if test="recommend!=null and recommend!=''">recommend = #{recommend},</if>
+            <if test="recommend2!=null and recommend2!=''">recommend2 = #{recommend2},</if>
+            <if test="wendu!=null and wendu!=''">wendu = #{wendu},</if>
+            <if test="yali!=null and yali!=''">yali = #{yali},</if>
+            <if test="pipingG!=null and pipingG!=''">pipingG = #{pipingG},</if>
+            <if test="pipingQ!=null and pipingQ!=''">pipingQ = #{pipingQ},</if>
+            <if test="birong!=null and birong!=''">birong = #{birong},</if>
+            <if test="pipingDi!=null and pipingDi!=''">pipingDi = #{pipingDi},</if>
+            <if test="pipingDo!=null and pipingDo!=''">pipingDo = #{pipingDo},</if>
+            <if test="dhneijing!=null and dhneijing!=''">dhneijing = #{dhneijing},</if>
+            <if test="sjwendu!=null and sjwendu!=''">sjwendu = #{sjwendu},</if>
+            <if test="sjyali!=null and sjyali!=''">sjyali = #{sjyali},</if>
+            <if test="yingli!=null and yingli!=''">yingli = #{yingli},</if>
+            <if test="pipingY!=null and pipingY!=''">pipingY = #{pipingY},</if>
+            <if test="pipingyingliY!=null and pipingyingliY!=''">pipingyingliY = #{pipingyingliY},</if>
+            <if test="pipingC!=null and pipingC!=''">pipingC = #{pipingC},</if>
+            <if test="pipingSm!=null and pipingSm!=''">pipingSm = #{pipingSm},</if>
+            <if test="pipingC1!=null and pipingC1!=''">pipingC1 = #{pipingC1},</if>
+            <if test="endC1!=null and endC1!=''">endC1 = #{endC1},</if>
+            <if test="pipingSc!=null and pipingSc!=''">pipingSc = #{pipingSc},</if>
+            <if test="pipingAA!=null and pipingAA!=''">pipingAA = #{pipingAA},</if>
+            <if test="pipingAG!=null and pipingAG!=''">pipingAG = #{pipingAG},</if>
+            <if test="dhbihou!=null and dhbihou!=''">dhbihou = #{dhbihou},</if>
+            <if test="endnj!=null and endnj!=''">endnj = #{endnj},</if>
+            <if test="endls!=null and endls!=''">endls = #{endls},</if>
+            <if test="defstr1!=null and defstr1!=''">defstr1 = #{defstr1},</if>
+            <if test="defstr2!=null and defstr2!=''">defstr2 = #{defstr2},</if>
+            <if test="defstr3!=null and defstr3!=''">defstr3 = #{defstr3},</if>
+            <if test="defstr4!=null and defstr4!=''">defstr4 = #{defstr4},</if>
+        </trim>
+        where id = #{id};
+    </update>
+
     <insert id="savepiping"  parameterType="com.zpepdi.qj_heating.entity.Userpiping" useGeneratedKeys="true" keyProperty="id">
         insert into userpiping
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id!=0 and id!=null">id,</if>
             <if test="username!=null and username!=''">username,</if>
             <if test="name!=null and name!=''">name,</if>
             <if test="xuhao!=null and xuhao!=''">xuhao,</if>
@@ -51,7 +104,6 @@
             <if test="defstr4!=null and defstr4!=''">defstr4,</if>
         </trim>
         <trim prefix="values(" suffix=")" suffixOverrides=",">
-            <if test="id!=0 and id!=null">#{id},</if>
             <if test="username!=null and username!=''">#{username},</if>
             <if test="name!=null and name!=''">#{name},</if>
             <if test="xuhao!=null and xuhao!=''">#{xuhao},</if>
@@ -95,8 +147,38 @@
 
     </insert>
 
+    <select id="querymaxsort" parameterType="com.zpepdi.qj_heating.entity.Userpiping" resultType="string">
+        SELECT
+            max(defstr2)
+        FROM
+            userpiping
+        where username = #{username} and name = #{name} and defstr1 = #{defstr1} and xuhao = #{xuhao} and defstr4 = "true"
+    </select>
+    <select id="queryfilenamelist" parameterType="com.zpepdi.qj_heating.entity.Userpiping"  resultType="string">
+        SELECT DISTINCT
+            defstr3
+        FROM
+            userpiping
+        where username = #{username} and name = #{name}
+    </select>
     <select id="querypiping" resultType="com.zpepdi.qj_heating.entity.Userpiping">
-        select * from userpiping where username = #{username} and name = #{name} and defstr1 = #{defstr1}
+        select * from userpiping
+        <trim prefix="where">
+            <if test="username!=null and username!=''">username = #{username}</if>
+            <if test="name!=null and name!=''">and name = #{name}</if>
+            <if test="defstr1!=null and defstr1!=''">and defstr1 = #{defstr1}</if>
+            and defstr4 = "true"
+        </trim>
+        ORDER BY defstr2
+    </select>
+    <select id="byfilequerypiping" resultType="com.zpepdi.qj_heating.entity.Userpiping">
+        select * from userpiping
+        <trim prefix="where">
+            <if test="username!=null and username!=''">username = #{username}</if>
+            <if test="name!=null and name!=''">and name = #{name}</if>
+            <if test="defstr3!=null and defstr3!=''">and defstr3 = #{defstr3}</if>
+        </trim>
+        ORDER BY defstr2
     </select>
     <select id="byidquerypiping" resultType="com.zpepdi.qj_heating.entity.Userpiping">
         select * from userpiping where id = #{id}
