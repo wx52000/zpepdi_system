@@ -1,16 +1,28 @@
 package com.zpepdi.qj_heating.controller;
 
+import com.zpepdi.qj_heating.Utils.FileUtil;
 import com.zpepdi.qj_heating.Utils.FileZipUtil;
 import com.zpepdi.qj_heating.entity.UserUnitcy;
 import com.zpepdi.qj_heating.entity.Userpiping;
 import com.zpepdi.qj_heating.result.Result;
 import com.zpepdi.qj_heating.service.ThicknessSerice;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.system.ApplicationHome;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -118,8 +130,34 @@ public class ThicknessController {
         return result;
     }
 
-    @GetMapping("/download")
-    public void download(HttpServletResponse response) throws IOException {
-        FileZipUtil.exportZip(response,"temp\\newfile\\","文件名",".zip");
+    @RequestMapping("/download")
+    public ResponseEntity<byte[]> downloadWordFile(@RequestBody Map<String,String> map) throws Exception {
+        ApplicationHome applicationHome = new ApplicationHome(new FileUtil().getClass());
+        // 保存目录位置根据项目需求可随意更改
+        String absolutePath = applicationHome.getDir().getParentFile().getParentFile().getAbsolutePath();
+        String path=absolutePath+"\\src\\main\\resources";
+        //先删除计算书
+        try {
+            new ClassPathResource("管道规格计算书.docx").getInputStream();
+            File file = new File(path,"管道规格计算书.docx");
+            file.delete();
+        }catch (Exception e){
+            System.out.println("暂无计算书");
+        }
+
+        //创建计算书
+        if(map!=null){
+            List<Userpiping> querypiping = thicknessSerice.querypiping(map.get("username"), map.get("name"), null);
+            FileUtil.createjisuanFile2(querypiping);
+        }
+        // 读取计算书
+        InputStream inputStream = new FileInputStream(path + "\\管道规格计算书.docx");
+        byte[] bytes = IOUtils.toByteArray(inputStream);
+        // 设置响应头
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "管道规格计算书");
+        // 返回ResponseEntity对象
+        return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
 }
