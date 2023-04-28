@@ -37,6 +37,7 @@ public class MyUserDetailsService implements UserDetailsService {
             MyUserDetails userDetails = new MyUserDetails();
             userDetails.setUserId(user.getId());
             userDetails.setUsername(username);
+            userDetails.setName(user.getName());
             userDetails.setPassword(password);
             userDetails.setRoleId(user.getRoleId());
             userDetails.setAuthorities(authorities);

@@ -223,4 +223,25 @@
             f.id = #{id}
           AND u.id = f.upload_user
     </select>
+    <select id="queryTermById" resultType="java.util.Map">
+        SELECT DISTINCT
+            sp.id as projectId,
+            sp.`name` as pName,
+            sp.number as pNumber,
+            st.id,
+            st.`name`,
+            st.plan_workday,
+            st.plan_complete_date,
+            u.id as checkerId,
+            u.username as checkerNumber,
+            u.name as checkerName
+        FROM
+            `user` u,
+            scientific_term st,
+            scientific_project sp
+        WHERE
+            sp.generalId = u.id
+          AND sp.id = st.scientific_id
+          AND st.id = #{id}
+    </select>
 </mapper>

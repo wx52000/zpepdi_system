@@ -22,6 +22,7 @@ public class MyJwtAccessTokenConverter extends DefaultAccessTokenConverter {
             //这里添加你的参数
             response.put("userId", ((MyUserDetails) authentication.getPrincipal()).getUserId());
             response.put("username", ((MyUserDetails) authentication.getPrincipal()).getUsername());
+            response.put("name",((MyUserDetails) authentication.getPrincipal()).getName());
             response.put("roleId",((MyUserDetails) authentication.getPrincipal()).getRoleId());
             if (authentication.getAuthorities() != null && !authentication.getAuthorities().isEmpty()) {
                 response.put("authorities", AuthorityUtils.authorityListToSet(authentication.getAuthorities()));

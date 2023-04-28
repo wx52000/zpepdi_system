@@ -13,6 +13,7 @@ public interface CheckerDao {
 
     void set(Map<String,Object> map);
 
+    Map<String,Object> queryChecker2();
     List<Map<String,Object>> queryDepChecker();
 
     void delDepChecker(Map<String,Object> map);
@@ -20,4 +21,12 @@ public interface CheckerDao {
     void setDepChecker(Map<String,Object> map);
 
     void setCheckerAmount(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
+
+    void setCheckerUsed(Map<String,Object> map);
+
+    Map<String,Object> queryByProjectAndTec(@Param("userId") Integer userId,
+                                            @Param("map") Map<String,Object> map);
+
+    List<Map<String,Object>> queryByUserId(Integer userId);
+
 }

@@ -44,4 +44,14 @@ public class CheckerController {
         return checkerService.setDepChecker(userId, map);
     }
 
+    @RequestMapping("setCheckerAmount")
+    public Result setCheckerAmount(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return checkerService.setCheckerAmount(userId, map);
+    }
+
+    @RequestMapping("queryByUser")
+    public Result queryByUser(@UserId Integer userId){
+        return checkerService.queryByUser(userId);
+    }
+
 }

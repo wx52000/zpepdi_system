@@ -17,4 +17,8 @@ public interface CheckerService {
     Result delDepChecker(Map<String,Object> map);
 
     Result setDepChecker(Integer userId, Map<String,Object> map);
+
+    Result setCheckerAmount(Integer userId, Map<String,Object> map);
+
+    Result queryByUser(Integer id);
 }

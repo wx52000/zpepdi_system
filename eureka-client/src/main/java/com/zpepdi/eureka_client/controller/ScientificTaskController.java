@@ -45,6 +45,6 @@ public class ScientificTaskController {
 
     @RequestMapping("taskSubmit")
     public Result taskSubmit(@UserId Integer userId,@RequestBody Map<String,Object> map){
-        return scientificTaskService.taskSubmit(map);
+        return scientificTaskService.taskSubmit(userId, map);
     }
 }

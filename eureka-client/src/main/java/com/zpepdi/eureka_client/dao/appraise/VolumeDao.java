@@ -23,6 +23,8 @@ public interface VolumeDao {
 
     List<Map<String,String>> queryByProjectId(Integer id);
 
+    Map<String,Object> queryProjectById(Integer id);
+
     List<Map<String,String>> queryByDate(String date);
 
     void upd(Volume volume);

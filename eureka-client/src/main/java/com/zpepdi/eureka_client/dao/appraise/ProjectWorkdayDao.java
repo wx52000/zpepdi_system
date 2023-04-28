@@ -98,7 +98,6 @@ public interface ProjectWorkdayDao {
 
   List<Map<String,Object>> queryNewWorkday(Integer id);
 
-
   Map<String,Object> queryNewWorkdayByAddId(Integer id);
 
   List<Map<String,Object>> queryTecWorkdayList(Integer id);

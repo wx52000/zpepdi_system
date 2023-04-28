@@ -289,7 +289,7 @@
     <update id="setPlanDate">
         <foreach collection="list" item="item" separator=";">
             update volume
-            set planned_publication_date = #{item.date},entry_plan_time = now()
+            set planned_publication_date = 	DATE_FORMAT(#{item.date},"%Y-%m-%d"),entry_plan_time = now()
             where `number` = #{item.number}
         </foreach>
     </update>
@@ -4328,7 +4328,7 @@
         v.state,
         v.start_date,
         v.planned_publication_date,
-        vp.planned_publication_date AS original_plan,
+        min(vp.planned_publication_date) AS original_plan,
         v.wfInstId,
         v.important,
         w.workday
@@ -4354,6 +4354,7 @@
             AND v.number LIKE "%+%"
         </if>
         AND DATE_FORMAT( v.planned_publication_date, '%Y-%m' ) = #{date}
+        group by v.id
     </select>
     <select id="tecVolumeRecordByDateByProjectId" resultType="java.util.Map">
         SELECT
@@ -4558,7 +4559,7 @@
         SELECT
             t.project_id AS id,
             IF
-                ( m.big_name = NULL, t.volume_tec, m.small_name ) AS tec
+                ( m.big_name IS NULL, t.volume_tec, m.small_name ) AS tec
         FROM
             workday_tec t
                 LEFT JOIN major_contrast_technology m ON t.volume_tec = m.big_name,
@@ -4603,5 +4604,21 @@
     </select>
     <select id="tecProgressAllDateByProjectId" resultType="java.util.Map">
 
+    </select>
+    <select id="queryProjectById" resultType="java.util.Map">
+        select
+            p.id,
+            p.number,
+            p.name,
+            v.tec,
+            p.generalId,
+            p.general,
+            u.username
+        from volume v,
+            project p,
+            `user` u
+        where v.id = #{id}
+        and v.project_id = p.id
+        and p.generalId = u.id
     </select>
 </mapper>

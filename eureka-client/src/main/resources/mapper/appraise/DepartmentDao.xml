@@ -137,7 +137,7 @@
             c.user_id,
             c.did,
             c.name,
-            if(c.amount-a.used >0, true, false) as disabled
+            if(c.amount-c.used >0, true, false) as disabled
         from(
                 SELECT
                     c.id,

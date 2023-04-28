@@ -181,7 +181,9 @@ public interface NewsDao {
 
   boolean isWithdrawOverAll7Or8(Map<String,Object> map);
 
+  List<Map<String,Object>> queryType0();
 
+  List<Map<String,Object>> queryType0List(Map<String,Object> map);
 
 }
 

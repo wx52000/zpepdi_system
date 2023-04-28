@@ -5433,60 +5433,56 @@
     </select>
     <select id="queryTask" resultType="java.util.Map">
         SELECT
-            v.number,
-            v.`name`,
-            v.state,
-            v.planned_publication_date,
-            v.designer,
-            v.checker,
-            v.principal,
-            v.headman,
-            GROUP_CONCAT( vid.role ) AS role
+        v.number,
+        v.`name`,
+        v.state,
+        v.planned_publication_date,
+        v.designer,
+        v.checker,
+        v.principal,
+        v.headman,
+        GROUP_CONCAT( vid.role ) AS role
         FROM
-            (
-                SELECT
-                    volume_id,
-                    "设计" AS role
-                FROM
-                    volume_user
-                WHERE
-                    designer = #{userId} UNION
-                SELECT
-                    volume_id,
-                    "校核" AS role
-                FROM
-                    volume_user
-                WHERE
-                    checker = #{userId} UNION
-                SELECT
-                    volume_id,
-                    "主设" AS role
-                FROM
-                    volume_user
-                WHERE
-                    principal = #{userId} UNION
-                SELECT
-                    volume_id,
-                    "组长" AS role
-                FROM
-                    volume_user
-                WHERE
-                    headman = #{userId}
-
-            ) AS vid,
-            volume v,
-            check_plan_volume pv
+        (
+        SELECT
+        volume_id,
+        "设计" AS role
+        FROM
+        volume_user
         WHERE
-            vid.volume_id = v.id
-          AND pv.volume_id = v.id
-          AND pv.check_month &lt;
-              ADDDATE(
-                      CONCAT(#{map.endDate},"-01" ), INTERVAL 1 MONTH )
-
-          AND pv.check_month &gt;= concat(#{map.startDate},"-01")
-          AND v.state IN ( "尚未开展", "尚未确定", "正在设计", "正在校审" )
+        designer = #{userId} UNION
+        SELECT
+        volume_id,
+        "校核" AS role
+        FROM
+        volume_user
+        WHERE
+        checker = #{userId} UNION
+        SELECT
+        volume_id,
+        "主设" AS role
+        FROM
+        volume_user
+        WHERE
+        principal = #{userId} UNION
+        SELECT
+        volume_id,
+        "组长" AS role
+        FROM
+        volume_user
+        WHERE
+        headman = #{userId}
+        ) AS vid,
+        volume v,
+        check_plan_volume pv
+        WHERE
+        vid.volume_id = v.id
+        AND pv.volume_id = v.id
+        AND pv.check_month &lt; DATE_FORMAT( ADDDATE( CONCAT( #{map.endDate}, "-01" ), INTERVAL 1 MONTH ), "%Y-%m" )
+          AND pv.check_month &gt;= #{map.startDate}
+        AND v.state IN ( "尚未开展", "尚未确定", "正在设计", "正在校审" )
         GROUP BY
-            v.id
+        v.id
     </select>
 
 </mapper>

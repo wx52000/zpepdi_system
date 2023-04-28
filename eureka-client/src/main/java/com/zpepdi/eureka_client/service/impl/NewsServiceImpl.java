@@ -1,5 +1,6 @@
 package com.zpepdi.eureka_client.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
@@ -7,6 +8,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.entity.User;
+import com.zpepdi.eureka_client.feign.AuditInformationFeign;
 import com.zpepdi.eureka_client.service.ProjectService;
 import com.zpepdi.eureka_client.service.VolumeService;
 import com.zpepdi.eureka_client.tools.DateUtils;
@@ -38,6 +40,8 @@ public class NewsServiceImpl implements NewsService {
   @Autowired
   private DepartmentDao departmentDao;
   @Autowired
+  private AuditInformationFeign auditInformationFeign;
+  @Autowired
   public void setNewsDao(NewsDao newsDao){
     this.newsDao = newsDao;
   }
@@ -47,7 +51,7 @@ public class NewsServiceImpl implements NewsService {
 
   @Override
   public Result newsCount(Integer id) {
-    return Result.ok(newsDao.count(id));
+    return Result.ok("请刷新");
   }
 
   @Override
@@ -373,4 +377,5 @@ public class NewsServiceImpl implements NewsService {
       return Result.build(843,"当前项目已不可撤回");
     }
   }
+
 }

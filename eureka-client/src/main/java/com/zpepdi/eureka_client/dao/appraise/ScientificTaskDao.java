@@ -23,4 +23,6 @@ public interface ScientificTaskDao {
 
     void taskSubmit(Map<String,Object> map);
 
+    Map<String,Object> queryProjectByTask(Integer taskId);
+
 }

@@ -1,8 +1,10 @@
 package com.zpepdi.eureka_client.service.impl;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.fastjson.JSON;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.excel.PlanDateListener;
+import com.zpepdi.eureka_client.feign.AuditInformationFeign;
 import com.zpepdi.eureka_client.service.ProjectService;
 import com.zpepdi.eureka_client.tools.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +30,13 @@ public class VolumeServiceImpl implements VolumeService {
     @Autowired
     private ProjectDao projectDao;
     @Autowired
-    private ProjectWorkdayDao projectWorkdayDao;
+    private CheckerDao checkerDao;
     @Autowired
     private ProjectTaskDao projectTaskDao;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private AuditInformationFeign auditInformationFeign;
     @Autowired
     public void  setVolumeDao(VolumeDao volumeDao){
         this.volumeDao = volumeDao;
@@ -175,6 +179,22 @@ public class VolumeServiceImpl implements VolumeService {
                 map1.put("checker",String.format("%.1f",checker));
                 map1.put("principal",String.format("%.1f",principal));
                 map1.put("headman",String.format("%.1f",headman));
+                Map<String,Object> auditMap = new HashMap<>();
+                auditMap.put("type",4);
+                auditMap.put("information", map1.get("name").toString() + map.get("tec") + "卷册工时调整");
+                auditMap.put("projectId",map.get("projectId"));
+                auditMap.put("tec", map.get("tec"));
+                auditMap.put("auditKey",map.get("id").toString()+map.get("tec").toString()+ userId);
+                auditMap.put("data", JSON.toJSONString(auditMap));
+
+                Map<String,Object> user = new HashMap<>();
+                user.put("projectId",map.get("id"));
+                user.put("tec",map.get("tec"));
+                user = checkerDao.queryByProjectAndTec(userId,user);
+                auditMap.put("auditor_id", user.get("id"));
+                auditMap.put("auditor_username", user.get("username"));
+                auditMap.put("auditor_name", user.get("name"));
+                auditInformationFeign.addAuditInformation(auditMap);
             }else {
                 return Result.build(566, "可用工时不足，请重新输入");
             }
@@ -369,6 +389,20 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public Result setSinglePlanDate(Integer userId,Map<String, Object> map) {
         volumeDao.setSinglePlanDate(userId,map);
+        Map<String,Object> project = volumeDao.queryProjectById(Integer.valueOf(map.get("id").toString()));
+        //不是设总则需要审核
+        if (Integer.parseInt(project.get("generalId").toString()) != userId) {
+            map.put("auditType", 12);
+            map.put("information", project.get("name").toString() + project.get("tec") + "卷册计划调整");
+            map.put("projectId", project.get("id"));
+            map.put("tec", project.get("tec"));
+            map.put("auditKey", project.get("id").toString() + project.get("tec").toString() + userId);
+            map.put("data", JSON.toJSONString(map));
+            map.put("auditor_id", project.get("generalId"));
+            map.put("auditor_username", project.get("username"));
+            map.put("auditor_name", project.get("general"));
+            auditInformationFeign.addAuditInformation(map);
+        }
         return Result.ok();
     }
 
@@ -457,12 +491,39 @@ public class VolumeServiceImpl implements VolumeService {
         if (map.get("list") != null && !map.get("list").toString().equals("[]")) {
             volumeDao.sendConfirmVolume(map);
         }
+
+        Map<String,Object> project = projectDao.queryBaseById(Integer.valueOf(map.get("projectId").toString()));
+        map.put("auditType",11);
+        map.put("information", project.get("name").toString() + map.get("tec") +
+                map.get("planMonth") + "卷册计划申报");
+        map.put("projectId",map.get("projectId"));
+        map.put("tec", map.get("tec"));
+        map.put("auditKey",map.get("projectId").toString()+map.get("tec").toString() + map.get("planMonth") + userId);
+        map.put("data", JSON.toJSONString(map));
+        map.put("auditor_id", project.get("generalId"));
+        map.put("auditor_username", project.get("generalNumber"));
+        map.put("auditor_name", project.get("general"));
+        List<Object> auditList = new ArrayList<>();
+        auditList.add(map.get("id"));
+        map.put("auditList",auditList);
+        auditInformationFeign.addAuditInformation(map);
         return Result.ok();
     }
 
     @Override
     public Result sentConfirmDelay(Integer userId, Map<String, Object> map) {
         volumeDao.sentConfirmDelay(userId,map);
+        Map<String,Object> project = volumeDao.queryProjectById(Integer.valueOf(map.get("id").toString()));
+        map.put("auditType",13);
+        map.put("information", project.get("name").toString() + project.get("tec") + "申报卷册延期");
+        map.put("projectId",project.get("id"));
+        map.put("tec", project.get("tec"));
+        map.put("auditKey",project.get("id").toString()+project.get("tec").toString() + userId);
+        map.put("data", JSON.toJSONString(map));
+        map.put("auditor_id", project.get("generalId"));
+        map.put("auditor_username", project.get("username"));
+        map.put("auditor_name", project.get("general"));
+        auditInformationFeign.addAuditInformation(map);
         return Result.ok();
     }
 

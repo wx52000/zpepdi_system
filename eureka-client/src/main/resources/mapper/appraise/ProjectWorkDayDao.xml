@@ -130,7 +130,7 @@
         `num` = values(`num`),
         `check` = values(`check`)
   </insert>
-  <insert id="setProWorkdayDistribut">
+  <insert id="setProWorkdayDistribut" useGeneratedKeys="true" keyColumn="id" keyProperty="map.id">
     insert into project_workday_distribute
     <trim prefix="(" suffix=")" suffixOverrides=",">
         project_id,
@@ -163,6 +163,7 @@
     `manage` = values(`manage`),
     `backup` = values(`backup`),
     `tec` = values(`tec`),
+    `time` = values(`time`),
     `check` = values(`check`)
   </insert>
   <insert id="setNewProWorkdayDistribut">
@@ -306,7 +307,7 @@
           #{item.workday} * #{map.checker} /100,
           #{item.workday} * #{map.principal} /100,
           #{item.workday} * #{map.headman} /100,
-           #{date}, 1, now(), #{id})
+           #{date}, 0, now(), #{id})
         </when>
       </choose>
   </foreach>
@@ -360,6 +361,8 @@
       IFNULL( `backup`, 0 ) AS `backup`,
       d.`check`,
       c.checker AS checkerId,
+      u.username as checkerNumber,
+      u.name as checkerName,
       EXISTS (
               SELECT
                 w.id
@@ -374,6 +377,7 @@
         LEFT JOIN project_workday w ON p.id = w.project_id
         LEFT JOIN project_workday_distribute d ON w.project_id = d.project_id
         LEFT JOIN project_checker c ON c.project_id = p.id
+        LEFT JOIN `user` u ON c.checker = u.id
     WHERE
       p.id = #{id}
     GROUP BY

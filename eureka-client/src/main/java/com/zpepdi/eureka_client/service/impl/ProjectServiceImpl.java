@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.dao.zjepdi.ZJEPDIDataTransmissionDao;
+import com.zpepdi.eureka_client.feign.AuditInformationFeign;
 import com.zpepdi.eureka_client.service.ContractService;
 import com.zpepdi.eureka_client.service.DeclareDayService;
 import com.zpepdi.eureka_client.tools.*;
@@ -54,6 +55,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private FrozenWorkdayConfigDao frozenWorkdayConfigDao;
     @Autowired
+    private AuditInformationFeign auditInformationFeign;
+    @Autowired
     public void setProjectDao(ProjectDao projectDao){
         this.projectDao = projectDao;
     }
@@ -97,22 +100,21 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Result getOtherProjectN(Integer id, Map<String, Object> map) {
-//        try {
-//            Calendar calendar = Calendar.getInstance();
-//            String yearMonth = calendar.get(Calendar.YEAR) + "" + (calendar.get(Calendar.MONTH) + 1);
-//            String number = map.get("abbreviate").toString() +
-//                    TaskNumberUtils.getFirstSpell(map.get("tec").toString())
-//                    + yearMonth +
-//                    Integer.valueOf((int) ((Math.random() * 9 + 1) * 100)).toString();
-//            String name = map.get("name").toString() + "项目" + map.get("tec") + yearMonth;
-//            Map<String, Object> map1 = new HashMap<>();
-//            map1.put("number", number);
-//            map1.put("name", name);
-//            return Result.ok(map1);
-//        }catch (Exception e){
-//            return Result.build(785,"外部门或专业为空");
-//        }
-        return Result.ok();
+        try {
+            Calendar calendar = Calendar.getInstance();
+            String yearMonth = calendar.get(Calendar.YEAR) + "" + (calendar.get(Calendar.MONTH) + 1);
+            String number = map.get("abbreviate").toString() +
+                    TaskNumberUtils.getFirstSpell(map.get("tec").toString())
+                    + yearMonth +
+                    Integer.valueOf((int) ((Math.random() * 9 + 1) * 100)).toString();
+            String name = map.get("name").toString() + "项目" + map.get("tec") + yearMonth;
+            Map<String, Object> map1 = new HashMap<>();
+            map1.put("number", number);
+            map1.put("name", name);
+            return Result.ok(map1);
+        }catch (Exception e){
+            return Result.build(785,"外部门或专业为空");
+        }
     }
 
     @Override
@@ -226,18 +228,18 @@ public class ProjectServiceImpl implements ProjectService {
                     }else {
                         typeMap.put("type",2);
                     }
-//                    int valWorkdayRate = projectDao.valWorkdayRate(typeMap);
-//                    map.put("calculationRatio",valWorkdayRate);
-//                    double calculation = Double.parseDouble(map.get("spiderMoney").toString())/valWorkdayRate;
-//                    map.put("calculation",calculation);
-//                    List<Map<String,Object>> tecList = zjepdiDataTransmissionDao.queryTecList(projectNumber);
-//                    if (tecList != null && tecList.size() > 0){
-//                        if (map.get("tec").toString().equals("综合")) {
-//                            map.put("thisCalculation", calculation);
-//                        }else {
-//                            map.put("thisCalculation", calculation/tecList.size());
-//                        }
-//                    }
+                    int valWorkdayRate = projectDao.valWorkdayRate(typeMap);
+                    map.put("calculationRatio",valWorkdayRate);
+                    double calculation = Double.parseDouble(map.get("spiderMoney").toString())/valWorkdayRate;
+                    map.put("calculation",calculation);
+                    List<Map<String,Object>> tecList = zjepdiDataTransmissionDao.queryTecList(projectNumber);
+                    if (tecList != null && tecList.size() > 0){
+                        if (map.get("tec").toString().equals("综合")) {
+                            map.put("thisCalculation", calculation);
+                        }else {
+                            map.put("thisCalculation", calculation/tecList.size());
+                        }
+                    }
                     map.put("spider",1);
                     projectDao.setProjectChildren(map);
                 }else {
@@ -272,21 +274,33 @@ public class ProjectServiceImpl implements ProjectService {
                 contractService.insertContract(user.getId(), contractMap);
             }
         }
+        Map<String,Object> project = projectDao.queryBaseById(Integer.valueOf(map.get("projectId").toString()));
+        map.put("auditType",7);
+        map.put("information", project.get("name").toString() + "新增项目申请");
+        map.put("auditKey",map.get("projectId"));
+        map.put("data", JSON.toJSONString(map));
+        map.put("auditor_id", project.get("generalId"));
+        map.put("auditor_username", project.get("generalNumber"));
+        map.put("auditor_name", project.get("general"));
+        List<Object> auditList = new ArrayList<>();
+        auditList.add(map.get("projectId"));
+        map.put("auditList",auditList);
+        auditInformationFeign.addAuditInformation(map);
         return Result.ok();
     }
 
     //                    new File("G:\\python_project\\valueScrapy\\valueScrapy"));
-    private void cmdMethod(String number, String type){
-        Runtime run = Runtime.getRuntime();
-        String cmd = "cmd /c start scrapy crawl outputValue -a number=" + number + "," + type;
-        try {
-           Process process =  run.exec(cmd,null,
-                    new File("C:\\Users\\admin\\Desktop\\zpepdi-system\\valueScrapy\\valueScrapy"));
-           process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void cmdMethod(String number, String type){
+//        Runtime run = Runtime.getRuntime();
+//        String cmd = "cmd /c start scrapy crawl outputValue -a number=" + number + "," + type;
+//        try {
+//           Process process =  run.exec(cmd,null,
+//                    new File("C:\\Users\\admin\\Desktop\\zpepdi-system\\valueScrapy\\valueScrapy"));
+//           process.waitFor();
+//        } catch (IOException | InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 //    public static void main(String[] args) {
 //        ProjectServiceImpl projectService = new ProjectServiceImpl();
@@ -444,6 +458,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Result distributeTecWorkday(Integer userId, Map<String,Object> map) {
         Map<String,Object> map1 = projectDao.queryUsedByTec(userId, map);
+//        总工时
         double amount = Double.parseDouble(map1.get("amount").toString());
         map1.put("backup",Double.parseDouble(map1.get("amount").toString()) -
                 Double.parseDouble(map1.get("volume").toString()) - Double.parseDouble(map1.get("manage").toString()));
@@ -487,10 +502,41 @@ public class ProjectServiceImpl implements ProjectService {
         if (amount >= (manage + volume + used)) {
             projectDao.distributeTecWorkday(userId,map);
             projectWorkDayDao.setTecVolumeRatio(userId,map);
+            String name = map1.get("name").toString();
+            String tec = map.get("tec").toString();
+            User user = userDao.queryById(Integer.valueOf(map.get("checkerId").toString()));
             if (isUpdate){
                 projectWorkDayDao.setVolumeWorkday(
                         map,userId, DateUtils.getDateMonth());
+                Map<String,Object> auditMap = new HashMap<>();
+                auditMap.put("auditType",4);
+                auditMap.put("information",name + tec + "卷册工时调整");
+                auditMap.put("projectId",map.get("id"));
+                auditMap.put("tec", map.get("tec"));
+                auditMap.put("auditKey",map.get("id").toString()+map.get("tec").toString()+user.getId());
+                auditMap.put("data", JSON.toJSONString(auditMap));
+                auditMap.put("auditor_id", user.getId());
+                auditMap.put("auditor_username", user.getUsername());
+                auditMap.put("auditor_name", user.getName());
+                auditInformationFeign.addAuditInformation(auditMap);
             }
+            map.put("auditType", 3);
+            map.put("information",name + tec + "专业工时划分");
+            map.put("number",map1.get("number"));
+            map.put("name", name);
+            map.put("amount", amount);
+            map.put("backup",map1.get("backup"));
+            //移除卷册，因为会在审核卷册数据时进行一次查询
+            map.remove("list");
+            map.put("auditKey",map.get("keyId"));
+            map.put("data", JSON.toJSONString(map));
+            map.put("auditor_id", user.getId());
+            map.put("auditor_username", user.getUsername());
+            map.put("auditor_name", user.getName());
+            List<Object> auditList = new ArrayList<>();
+            auditList.add(map.get("keyId"));
+            map.put("auditList",auditList);
+            auditInformationFeign.addAuditInformation(map);
             projectWorkDayDao.reSetFrozen(userId, Integer.valueOf(map.get("id").toString()));
         }else {
             return Result.build(500,"超出工时上限");
@@ -1015,6 +1061,18 @@ public class ProjectServiceImpl implements ProjectService {
         if (isFrozen.getCode() == 0) {
             if (map.get("list") != null && !map.get("list").toString().equals("[]")) {
                 projectDao.setDeclare(userId, map);
+                Map<String,Object> project = projectDao.queryBaseById(Integer.valueOf(map.get("projectId").toString()));
+                map.put("auditType", 5);
+                map.put("information",project.get("name")
+                        + map.get("declareDate").toString() + "工时发放");
+                map.put("number",project.get("number"));
+                map.put("name", project.get("name"));
+                //移除卷册，因为会在审核卷册数据时进行一次查询
+                map.put("data", JSON.toJSONString(map));
+                map.put("auditor_id", project.get("generalId"));
+                map.put("auditor_username", project.get("generalNumber"));
+                map.put("auditor_name", project.get("general"));
+                auditInformationFeign.addAuditInformation(map);
             } else {
                 return Result.build(212, "未选择需申报的任务");
             }
@@ -1091,6 +1149,22 @@ public class ProjectServiceImpl implements ProjectService {
                 new Date().getTime() - (3600L *24*confirmDay()*1000))
                 .equals(map.get("date").toString())){
             projectDao.backOff(userId,map);
+            Map<String,Object> project = projectDao.queryBaseById(Integer.valueOf(map.get("projectId").toString()));
+            map.put("auditType", 6);
+            map.put("information",project.get("name")
+                    + map.get("date").toString() + "工时撤回");
+            map.put("projectId",map.get("projectId"));
+            map.put("submit_date",map.get("date"));
+            map.put("handler", userId);
+            map.put("number",project.get("number"));
+            map.put("name", project.get("name"));
+            map.put("auditKey",map.get("projectId").toString() + map.get("date") + userId);
+            //移除卷册，因为会在审核卷册数据时进行一次查询
+            map.put("data", JSON.toJSONString(map));
+            map.put("auditor_id", project.get("generalId"));
+            map.put("auditor_username", project.get("generalNumber"));
+            map.put("auditor_name", project.get("general"));
+            auditInformationFeign.addAuditInformation(map);
             return Result.ok();
         }else {
             return Result.build(422,"该任务申报月份已结束，不可申请回退");
