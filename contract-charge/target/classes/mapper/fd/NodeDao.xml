@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.NodeDao">
+    <update id="setNode">
+        insert into contract_node
+            (`contract_id`, `index`, `money`,`details`, `date`, `state`, `handle_time`, `handler`)
+        values (#{map.contract_id}, #{map.index}, #{map.money},#{map.details},
+                #{map.date},  #{map.state}, now(), #{userId})
+        on duplicate key update
+        `money` = values(`money`),
+        `details` = values(`details`),
+        `date` = values(`date`),
+        `state` = values(`state`),
+        `handle_time` = values(`handle_time`),
+        `handler` = values(`handler`)
+    </update>
+    <select id="queryByContractId" resultType="java.util.Map">
+        SELECT
+            id,
+            `index`,
+            money,
+            details,
+            cast(`date` as char(10)) as `date`,
+            state
+        FROM
+            contract_node
+        WHERE
+            contract_id = #{contractId}
+    </select>
+</mapper>

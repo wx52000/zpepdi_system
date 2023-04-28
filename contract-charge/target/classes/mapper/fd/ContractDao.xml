@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zpepdi.system.dao.fd.ContractDao">
+  <resultMap id="ContractMap" type="zpepdi.system.entity.Contract">
+    <id column="id" jdbcType="CHAR" property="id" />
+    <result column="number" jdbcType="VARCHAR" property="number" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="first_party" jdbcType="VARCHAR" property="firstParty" />
+    <result column="business_manage" jdbcType="VARCHAR" property="businessManage" />
+    <result column="budget" jdbcType="DECIMAL" property="budget" />
+    <result column="money" jdbcType="DECIMAL" property="money" />
+    <result column="sign_date" jdbcType="DATE" property="signDate" />
+    <result column="settlement" jdbcType="DECIMAL" property="settlement" />
+    <result column="attribute" jdbcType="CHAR" property="attribute" />
+    <result column="property" jdbcType="VARCHAR" property="property" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="is_off_shore" jdbcType="INTEGER" property="isOffShore" />
+    <result column="state" jdbcType="CHAR" property="state" />
+    <result column="complete_state" jdbcType="CHAR" property="completeState" />
+    <result column="sponsor_dep" jdbcType="VARCHAR" property="sponsorDep" />
+    <result column="classes" jdbcType="VARCHAR" property="classes" />
+    <result column="kind" jdbcType="INTEGER" property="kind" />
+  </resultMap>
+  <insert id="addChildren">
+    update contract
+    set parent_id = #{parent}, add_sub = #{addSub}
+    where id = #{id}
+  </insert>
+    <insert id="insertSingle">
+        insert IGNORE  INTO contract(`number`, `name`, first_party, business_manage, budget, money, settlement, attribute,
+        property, `type`, is_off_shore, `state`, complete_state, sponsor_dep, classes, id, entry_user)
+        values
+        (#{map.ContractCode},#{map.ContractName},#{map.FirstName},#{map.SponsorUserName},
+        #{map.ContractValueOfEstimate},#{map.ContractValue},#{map.NetSettlement},
+        #{map.ContractAttribute},#{map.ContractProperty},
+        #{map.ContractTypeName},#{map.IsOffShore},
+        #{map.ContractState},#{map.CompleteState},
+        #{map.SponsorDeptName},#{map.ProjectClassesSecondName},
+        #{map.ContractID}, #{userId})
+    </insert>
+  <update id="setChildren">
+    update contract
+    set add_sub = #{addSub}
+    where id = #{id}
+  </update>
+  <update id="setConfirm">
+    <foreach collection="list" item="item" separator=";">
+    update contract
+    set kind = #{item.kind}, income_expend = #{item.income_expend}, is_new = 0,
+        handler = #{userId}, handle_time = now()
+    where id = #{item.id}
+    </foreach>
+  </update>
+    <update id="setType">
+      update contract
+      set `type` = #{type}
+      where `id` = #{id}
+    </update>
+  <update id="setEndTime">
+    update contract
+    set `end_time` = #{endTime}
+    where `id` = #{id}
+  </update>
+  <delete id="delChildren">
+    update contract
+    set parent_id = 0
+    where id = #{id}
+  </delete>
+  <select id="query" resultType="map">
+    SELECT
+      c.id,
+      c.number,
+      c.`name`,
+      c.business_manage,
+      c.first_party,
+      c.budget,
+      c.money,
+      cast(c.sign_date as char(10)) as sign_date,
+      c.settlement,
+      c.attribute,
+      c.property,
+      c.type,
+      c.is_off_shore,
+      c.state,
+      c.sponsor_dep,
+      c.complete_state,
+      c.classes,
+      c.kind,
+      c.end_time,
+      p.number as pnumber,
+      p.name as pname,
+      p.level as level,
+      p.general,
+      p.stage
+    FROM
+      contract c LEFT JOIN
+      contract_relate_project cp on c.id = cp.contract_id
+                   LEFT JOIN market_project p on cp.project_id = p.id
+    where parent_id = 0
+    and  c.income_expend = #{income}
+    ORDER BY sign_date DESC
+  </select>
+  <select id="queryById" resultType="java.util.Map">
+    SELECT
+      c.id,
+      c.number,
+      c.`name`,
+      c.business_manage,
+      c.first_party,
+      c.budget,
+      c.money,
+      cast(c.sign_date as char(10)) as sign_date,
+      c.settlement,
+      c.attribute,
+      c.property,
+      c.type,
+      c.is_off_shore,
+      c.state,
+      c.sponsor_dep,
+      c.complete_state,
+      c.classes,
+      c.kind,
+      s.consultation,
+      s.survey,
+      s.design,
+      s.management,
+      s.equipment,
+      s.construction,
+      s.other,
+      s.cost,
+      c.end_time
+    FROM
+      contract c
+    left join contract_split s on c.id = s.contract_id
+    where id = #{id}
+    ORDER BY sign_date DESC
+  </select>
+  <select id="contractReceive" resultType="java.util.Map">
+    SELECT
+      r.id,
+      r.happen_date,
+      r.money,
+      r.manage,
+      r.note,
+      receive_date,
+      i.income,
+      cast(i.date as CHAR(10)) as `date`
+    FROM
+      contract_receivable r left join
+          income i on r.id = i.receivable_id
+    WHERE
+        REPLACE ( number, "-", "" ) = REPLACE (#{id},"-","")
+  </select>
+  <select id="queryPlan" resultType="java.util.Map">
+    SELECT
+    c.`name`,
+    c.number,
+    c.money,
+    c.business_manage,
+    y.year_budget,
+    isum.chargeSum,
+    isum.addSum,
+    iyear.addYear,
+    iyear.chargeYear
+    FROM
+    contract c
+    LEFT JOIN invoice_budget_year y ON c.id = y.contract_id
+    AND y.`year` = #{year},
+    (
+    SELECT
+    SUM( i.charge ) AS chargeSum,
+    SUM( i.added_value ) AS addSum,
+    ii.contract_id
+    FROM
+    invoice_information ii,
+    invoice i
+    WHERE
+    ii.id = i.invoice_information_id
+    GROUP BY
+    ii.contract_id
+    ) AS isum,
+    (
+    SELECT
+    SUM( i.charge ) AS chargeYear,
+    SUM( i.added_value ) AS addYear,
+    ii.contract_id
+    FROM
+    invoice_information ii,
+    invoice i
+    WHERE
+    ii.id = i.invoice_information_id
+    AND i.out_date &gt;= concat(#{year},"-01-01")
+    AND i.out_date &lt; concat(#{year}+1, "-01-01")
+    GROUP BY
+    ii.contract_id
+    ) AS iyear
+    WHERE
+    isum.contract_id = c.id
+    AND iyear.contract_id = c.id
+  </select>
+  <select id="queryChildren" resultType="java.util.Map">
+    select  id, number, name, money, add_sub
+    from contract
+    where parent_id = #{id}
+  </select>
+  <select id="queryBlur" resultType="java.util.Map">
+    select
+    id, number, name, money
+    from contract
+    where number like concat("%",#{search},"%")
+    union
+    select
+    id, number, name, money
+    from contract
+    where number like concat("%",#{search},"%")
+  </select>
+  <select id="queryConfirm" resultType="java.util.Map">
+      SELECT
+      c.id,
+	c.`name`,
+	c.number,
+	c.kind,
+	c.income_expend
+    FROM
+      appraise.`user` u,
+      contract c
+    WHERE
+      u.id = #{userId}
+      AND u.`name` = c.business_manage
+      AND c.income_expend = 2
+    UNION
+    SELECT
+      c.id,
+      c.`name`,
+      c.number,
+      c.kind,
+      c.income_expend
+    FROM
+      appraise.`user` u,
+      contract c
+    WHERE
+      u.id = #{userId}
+      AND u.`name` = c.business_manage
+      AND c.is_new = 1
+  </select>
+  <select id="queryRelativeProject" resultType="java.util.Map">
+    SELECT
+      p.id, p.number, p.`name`, p.`level`, p.general, p.stage
+    FROM contract_relate_project cp,
+         market_project p
+    WHERE cp.contract_id = #{id}
+      AND cp.project_id = p.id
+  </select>
+</mapper>

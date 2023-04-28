@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.DataEntryDao">
+    <insert id="insertContractData">
+        insert IGNORE  INTO contract(number, `name`, first_party, business_manage, budget, money, settlement, attribute,
+property, type, is_off_shore, state, complete_state, sponsor_dep, classes, id)
+            values <foreach collection="list" separator="," item=",">
+        (#{#{item.ContractCode},#{#{item.ContractName},#{#{item.FirstName},#{#{item.SponsorUserName},
+        #{#{item.ContractValueOfEstimate},#{#{item.ContractValue},#{#{item.NetSettlement},
+        #{#{item.ContractAttribute},#{#{item.ContractProperty},
+        #{#{item.ContractTypeName},#{#{item.IsOffShore},
+        #{#{item.ContractState},#{#{item.CompleteState},
+        #{#{item.SponsorDeptName},#{#{item.ProjectClassesSecondName},
+        #{#{item.ContractID})
+            </foreach>
+    </insert>
+    <insert id="insertProjectData">
+        INSERT INTO `contract_charge`.`project`(`id`, `number`, `name`, `manager`, `phase`,
+                        `type`, `level`, `first_party`, `place`, `build_type`)
+        values <foreach collection="list" separator="," item=",">
+        (
+        #{item.OrganizationId},#{item.ProjectPhaseCode},#{item.ProjectPhaseName},#{item.PhaseName},
+         #{item.ProjectTypeName},#{item.CapabilityLevelName},#{item.CustomerName},
+        #{item.ProjectManagerAName},#{item.BulidPlace},#{item.BuildType}
+        )
+    </foreach>
+    </insert>
+    <insert id="insertMarketProjectData">
+        INSERT ignore INTO `contract_charge`.`market_project`(`id`, `number`, `name`,
+            `first_party`, `task_resource`, `type`, `level`,
+            `is_off_shore`, `state`, `province`, `build_place`, `build_type`, `dep`)
+        values <foreach collection="list" separator="," item=",">
+        (
+        #{item.MarketProjectID},#{item.MarketProjectCode}, #{item.MarketProjectName}, #{item.CustomerName},
+            #{item.TaskResource},#{item.ProjectTypeName}, #{item.ProjectLevel}, #{item.IsOffShore},
+            #{item.MarketProjectState}, #{item.Province}, #{item.BuildPlace},#{item.BuildType}, #{item.DeptName}
+        )
+    </foreach>
+    </insert>
+</mapper>

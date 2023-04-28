@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.audit_service.dao.AuditDataDao">
+    <insert id="addAuditData">
+        insert into audit_data(audit_information_id, audit_data_id)
+        values
+            <foreach collection="auditList" item="item" separator=",">
+            (#{id}, #{item})
+            </foreach>
+    </insert>
+</mapper>

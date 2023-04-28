@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.zjepdi.ProjectDataDao">
+    <select id="queryList" resultType="java.util.Map">
+        SELECT DISTINCT
+            p.OrganizationId,p.ProjectPhaseCode,p.ProjectPhaseName,p.PhaseName,p.ProjectTypeName,p.CapabilityLevelName,p.CustomerName,
+            p.ProjectManagerAName,p.BulidPlace,p.BuildType
+        FROM ProjectPhaseEntity p,
+             MM_ContractRelateProject r,
+             MM_ContractEntity c
+        WHERE
+            r.ProjectPhaseID = p.OrganizationId
+          AND c.ContractID = r.ContractID
+          and c.BussinessSegment = '发电业务'
+    </select>
+    <select id="queryMarketList" resultType="java.util.Map">
+        SELECT DISTINCT
+            m.MarketProjectID,m.MarketProjectCode, m.MarketProjectName, m.CustomerName,
+            m.TaskResource,m.ProjectTypeName, m.ProjectLevel,m.MarketProjectState, m.IsOffShore, m.Province,
+            m.BuildPlace,m.BuildType, m.DeptName
+            FROM ProjectPhaseEntity p,
+            MM_ContractRelateProject r,
+            MM_ContractEntity c,
+            MarketProjectEntity m
+            WHERE
+            r.ProjectPhaseID = p.OrganizationId
+          AND c.ContractID = r.ContractID
+          and c.BussinessSegment = '发电业务'
+          and p.MarketProjectID = m.MarketProjectID
+    </select>
+    <select id="queryListBySearch" resultType="java.util.Map">
+        SELECT
+            m.MarketProjectID,m.MarketProjectCode, m.MarketProjectName, m.CustomerName,
+            m.TaskResource,m.ProjectTypeName, m.ProjectLevel,m.MarketProjectState, m.IsOffShore, m.Province,
+            m.BuildPlace,m.BuildType, m.DeptName
+        FROM
+             MarketProjectEntity m
+        WHERE
+            m.MarketProjectCode like '%#'+#{search} +'%'
+        union
+        SELECT
+            m.MarketProjectID,m.MarketProjectCode, m.MarketProjectName, m.CustomerName,
+            m.TaskResource,m.ProjectTypeName, m.ProjectLevel, m.MarketProjectState, m.IsOffShore, m.Province,
+            m.BuildPlace,m.BuildType, m.DeptName
+        FROM
+            MarketProjectEntity m
+        WHERE
+            m.MarketProjectName like '%#'+#{search} +'%'
+    </select>
+</mapper>

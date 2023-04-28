@@ -1,0 +1,118 @@
+#开发
+eurekaIp : localhost
+sqlIp : 10.136.238.23
+##生产
+#sqlIp : 10.136.238.28
+#eurekaIp : 10.136.238.28
+
+spring:
+  application:
+    name: contract-charge
+  mvc:
+    servlet:
+      load-on-startup: 1
+  servlet:
+    multipart:
+      enabled : true
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+    static-path-pattern: /excel/**
+  redis:
+    database: 0
+    host: ${sqlIp}
+    port: 7001
+    password: 7499
+#     连接超时时间（毫秒）
+    timeout: 3000
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+
+  security:
+    user:
+      name: 7499
+      password: 7499
+  main:
+    allow-bean-definition-overriding: true
+
+  resources:
+    static-locations: file:D://excel/
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      fd:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+#                useSSL=false为连接linux服务器使用
+#        url: jdbc:mysql://10.136.238.23:3306/contract_charge?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+        url: jdbc:mysql://${sqlIp}:3306/contract_charge?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+        username: root
+        password: 7499
+      zjepdi:
+        driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+        url: jdbc:sqlserver://10.136.232.90:1433;DatabaseName=ZJEPDI
+        username: fdgcgs
+        password: fd&0725gcgsSZH
+
+      filters: stat
+    tomcat:
+      max-idle: 20
+      max-wait: 10000
+      min-idle: 5
+      initial-size: 5
+#      filter: stat,wall
+  aop:
+    auto: true
+    proxy-target-class: true
+
+
+server:
+  port: 9200
+  servlet:
+    encoding:
+      enabled: true
+      force: true
+      charset: UTF-8
+    session:
+      timeout: 3000m
+
+  tomcat:
+    uri-encoding: UTF-8
+    max-http-form-post-size: -1
+
+debug: true
+
+security:
+  oauth2:
+    client:
+      client-id: contract-charge
+      client-secret: zpepdi7499
+    resource:
+      id: contract-charge
+      user-info-uri: http://localhost:9100/oauth/check_token
+      jwt:
+        key-uri: http://localhost:9100/oauth/token_key
+        key-value: dev
+
+#mybatis:
+#  config-location: classpath:mybatis-config.xml
+#  mapper-locations: classpath:mapper/*.xml
+#  type-aliases-package: com.zpepdi.eureka_client.entity
+
+logging:
+  config: classpath:logback-spring.xml
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    # 注册到Eureka的注册中心
+    register-with-eureka: true
+    # 获取注册实例列表
+    fetch-registry: true
+    service-url:
+      # 配置注册中心地址
+      defaultZone: http://${eurekaIp}:9000/eureka/

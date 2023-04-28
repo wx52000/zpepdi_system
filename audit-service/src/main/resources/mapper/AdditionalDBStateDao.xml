@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.audit_service.dao.AdditionalDBStateDao">
+    <update id="auditOperation0">
+        update appraise.project_workday_distribute p
+        set p.`check` = #{map.check}, p.check_handler = #{user.id}, p.check_time = now()
+        where p.id in (
+        select audit_data_id
+        from audit_data ad
+        where ad.audit_information_id = #{map.id})
+    </update>
+    <update id="auditOperation1">
+        update appraise.project_workday_add p
+        set p.`check` = #{map.check}, p.check_handler = #{user.id}, p.check_time = now()
+        where p.id in (
+            select audit_data_id
+            from audit_data ad
+            where ad.audit_information_id = #{map.id})
+    </update>
+    <update id="auditOperation3">
+        update appraise.workday_tec_distribute p
+        set p.`check` = #{map.check}, p.check_handler = #{user.id}, p.check_time = now()
+        where p.id in (
+            select audit_data_id
+            from audit_data ad
+            where ad.audit_information_id = #{map.id})
+    </update>
+    <update id="auditOperation4">
+        <foreach collection="map.data.list" item="item" index="index=" separator=";">
+        update appraise.volume_workday
+        set `check` = #{map.check}, check_handler = #{user.id}, check_time = now()
+        where id = #{item.id}
+        </foreach>
+</update>
+    <update id="auditOperation5">
+        <foreach collection="map.data.list" item="i" separator=";">
+            update <if test="i.task == 0 and i.advance == 0">
+            appraise.volume_workday
+        </if>
+            <if test="i.task == 0 and i.advance == 1">
+                appraise.volume_workday_high
+            </if>
+            <if test="i.task == 1 and i.advance == 0">
+                appraise.project_task
+            </if>
+            <if test="i.task == 1 and i.advance == 1">
+                appraise.task_advance
+            </if>
+            set submit = #{map.submit}, submit_time = now(), submit_date = #{map.declareDate}, `submit_handler` = #{user.id}
+            where
+            id = #{i.id}
+        </foreach>
+    </update>
+    <update id="auditOperation6">
+        <foreach collection="map.data.list" item="i" separator=";">
+            update
+            <if test="i.task == 0 and i.advance == 0">
+                appraise.volume_workday
+            </if>
+            <if test="i.task == 0 and i.advance == 1">
+                appraise.volume_workday_high
+            </if>
+            <if test="i.task == 1 and i.advance == 0">
+                appraise.project_task
+            </if>
+            set
+            <if test="map.check == 1">
+                submit = 0, backOff = 0,
+            </if>
+            <if test="map.check == 2">
+                backOff = 2,
+            </if>
+            backOff_handler_time = now()
+            where
+            id = #{i.id}
+        </foreach>
+    </update>
+    <update id="auditOperation7">
+        update appraise.project_note
+        set `check` = #{map.check},
+             `check_handler` = #{user.id},
+            `check_time` = now()
+        where project_id = #{map.auditKey};
+        <if test="map.check == 1">
+        INSERT INTO appraise.project_workday(project_id, num, `date`)
+        VALUEs(#{map.auditKey}, #{map.workday}, NOW())
+        </if>
+    </update>
+    <update id="auditOperation7Type1">
+        update appraise.project_note
+        set `check` = #{map.check},
+        check_handler = #{user.id},
+        `check_time` = now()
+        where project_id = #{map.auditKey};
+        <if test="map.check == 1">
+            INSERT INTO appraise.project_workday(project_id, num, `date`)
+            VALUEs(#{map.auditKey}, #{map.workday}, NOW());
+            update appraise.checker_used a left join appraise.checker_dep d on a.cd_id = d.id
+            set used = used+${map.workday}
+            where d.user_id = #{user.id} and d.did = #{map.departmentId};
+        </if>
+    </update>
+    <update id="auditOperation7Type0Other">
+        update appraise.project_children
+        set `check` = #{map.check}, `workday` = #{map.workday},`check_time` = now()
+        where id = #{map.auditKey};
+        <if test="map.check == 1">
+            INSERT INTO appraise.project_workday(project_id, num, `date`)
+            VALUEs(#{map.auditKey}, #{map.workday}, NOW())
+            ON DUPLICATE KEY UPDATE
+                num = num + VALUES( num ),
+                `date` = now();
+            UPDATE appraise.project_workday_distribute d,
+            appraise.project_workday w
+            SET d.`backup` = w.num - d.tec - d.manage
+            WHERE
+            d.project_id = #{map.auditKey}
+            AND w.project_id = d.project_id
+        </if>
+    </update>
+    <update id="auditOperation9">
+        update appraise.scientific_term
+        set `check` = #{map.check}, `workday` = #{map.workday}, checker = #{user.id},
+            check_date = now(), back_reason = #{map.reason}
+        where id = (select audit_data_id
+                    from audit_data
+                    where audit_information_id = #{map.id})
+    </update>
+    <update id="auditOperation10">
+        <foreach collection="map.data.list" item="i" separator=";">
+            update appraise.scientific_task_workday
+            set submit = #{map.submit}, submit_time = now()
+              <if test="map.submit == 3">
+                ,back_reason = #{item.reason}
+              </if>
+            where id = #{i.id}
+        </foreach>
+    </update>
+    <update id="auditOperation11">
+        update appraise.check_plan
+        set plan_month = #{map.plan_month}, workday_month = #{map.workday_month},
+            `check` = #{map.check}, checker = #{user.id}, check_time = now()
+        where id in (
+            select audit_data_id
+            from audit_data ad
+            where ad.audit_information_id = #{map.id});
+        update appraise.check_plan_volume
+        set check_month = #{map.plan_month}
+        where check_plan_id in (
+            select audit_data_id
+            from audit_data ad
+            where ad.audit_information_id = #{map.id});
+        UPDATE appraise.volume v, appraise.check_plan_volume pv
+        SET v.planned_publication_date = #{map.end}
+        WHERE pv.volume_id = v.id
+          and check_plan_id in (
+            select audit_data_id
+            from audit_data ad
+            where ad.audit_information_id = #{map.id})
+          AND( v.planned_publication_date is NULL
+           OR v.planned_publication_date &lt; #{map.start}
+           OR v.planned_publication_date &gt; #{map.end});
+    </update>
+    <update id="auditOperation12">
+        <foreach collection="map.data.list" item="i" separator=";">
+        <if test="map.check == 1">
+            update appraise.volume
+            set plan_publication_check = #{map.check}
+            where id = #{i.id}
+        </if>
+        <if test="map.check == 2">
+            update appraise.volume v, appraise.volume_plan_log l
+            set v.plan_publication_check = #{map.check}, v.planned_publication_date = l.plan_publiction_date
+            where v.id = #{i.id} and v.id = l.volume_id
+        </if>
+        </foreach>
+    </update>
+    <update id="auditOperation13">
+        <foreach collection="map.data.list" item="i" separator=";">
+            update appraise.check_plan_volume
+            set delay = #{map.check}
+            where id = #{i.id}
+        </foreach>
+    </update>
+</mapper>

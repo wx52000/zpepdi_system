@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.ExpendSplitDao">
+    <update id="setSplitContract" useGeneratedKeys="true" keyProperty="map.id" keyColumn="id">
+        INSERT into expend_split(contract_id,split_contract_id,split_money,`handler`, handle_time)
+        VALUES (#{map.contract_id}, #{map.split_contract_id}, #{map.split_money}, #{userId}, now())
+    </update>
+    <delete id="delSplitContract">
+        delete
+        from  expend_split
+        where id = #{id}
+    </delete>
+    <select id="queryById" resultType="java.util.Map">
+        select
+            s.id, c.number, c.name, c.money,
+            s.contract_id,s.split_contract_id,s.split_money,s.`handler`, s.handle_time
+        from expend_split s,
+             contract c
+        where s.contract_id = #{id}
+        and c.id = s.contract_id
+    </select>
+</mapper>

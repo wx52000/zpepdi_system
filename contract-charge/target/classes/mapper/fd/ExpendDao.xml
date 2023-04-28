@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.ExpendDao">
+    <update id="setExpend" useGeneratedKeys="true" keyColumn="id" keyProperty="map.id">
+        INSERT INTO expend_month (
+                                         <if test="map.id != null and map.id != ''">
+                                          id, </if>
+                                         contract_id, invoice_money, invoice_rate,
+                                         invoice_date, income, income_date, handler, handle_time )
+        VALUES
+            ( <if test="map.id != null and map.id != ''">
+             #{map.id}, </if> #{map.contract_id}, #{map.invoice_money},
+        #{map.invoice_rate} / 100, #{map.invoice_date}, #{map.income}, #{map.income_date}, #{userId},now())
+        ON DUPLICATE KEY UPDATE
+        invoice_money =VALUES( invoice_money),
+        invoice_rate =VALUES( invoice_rate ),
+        invoice_date =VALUES( invoice_date ),
+        income =VALUES( income ),
+        income_date =VALUES(income_date),
+        handler =VALUES(handler),
+        handle_time =VALUES(handle_time)
+    </update>
+    <select id="queryById" resultType="java.util.Map">
+        SELECT
+            id,
+            contract_id,
+            invoice_money,
+            invoice_rate * 100 as invoice_rate,
+            cast(invoice_date as char(10)) as invoice_date,
+            income,
+            cast(income_date as char(10)) as income_date
+        FROM
+            expend_month
+        WHERE contract_id = #{id}
+    </select>
+</mapper>
