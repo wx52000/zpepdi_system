@@ -375,7 +375,7 @@ public class FileUtil {
             map1.put("a",String.format("%.3f",(m*100)/(100-(m*100))));
             map1.put("c",gd.getEndC1());
             map1.put("sc",gd.getPipingSc());
-            map1.put("sn",gd.getPipingAG());
+            map1.put("sn",gd.getDhbihou());
             map1.put("endnorw",gd.getEndnj());
             map1.put("endls",gd.getEndls());
 

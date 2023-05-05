@@ -56,6 +56,10 @@
             <if test="defstr2!=null and defstr2!=''">defstr2 = #{defstr2},</if>
             <if test="defstr3!=null and defstr3!=''">defstr3 = #{defstr3},</if>
             <if test="defstr4!=null and defstr4!=''">defstr4 = #{defstr4},</if>
+            <if test="defstr5!=null and defstr5!=''">defstr5 = #{defstr5},</if>
+            <if test="defstr6!=null and defstr6!=''">defstr6 = #{defstr6},</if>
+            <if test="defstr7!=null and defstr7!=''">defstr7 = #{defstr7},</if>
+            <if test="defstr8!=null and defstr8!=''">defstr8 = #{defstr8},</if>
         </trim>
         where id = #{id};
     </update>
@@ -102,6 +106,10 @@
             <if test="defstr2!=null and defstr2!=''">defstr2,</if>
             <if test="defstr3!=null and defstr3!=''">defstr3,</if>
             <if test="defstr4!=null and defstr4!=''">defstr4,</if>
+            <if test="defstr5!=null and defstr5!=''">defstr5,</if>
+            <if test="defstr6!=null and defstr6!=''">defstr6,</if>
+            <if test="defstr7!=null and defstr7!=''">defstr7,</if>
+            <if test="defstr8!=null and defstr8!=''">defstr8,</if>
         </trim>
         <trim prefix="values(" suffix=")" suffixOverrides=",">
             <if test="username!=null and username!=''">#{username},</if>
@@ -143,6 +151,10 @@
             <if test="defstr2!=null and defstr2!=''">#{defstr2},</if>
             <if test="defstr3!=null and defstr3!=''">#{defstr3},</if>
             <if test="defstr4!=null and defstr4!=''">#{defstr4},</if>
+            <if test="defstr5!=null and defstr5!=''">#{defstr5},</if>
+            <if test="defstr6!=null and defstr6!=''">#{defstr6},</if>
+            <if test="defstr7!=null and defstr7!=''">#{defstr7},</if>
+            <if test="defstr8!=null and defstr8!=''">#{defstr8},</if>
         </trim>
 
     </insert>
@@ -188,7 +200,7 @@
     </delete>
 
     <select id="queryRank" resultType="java.util.Map">
-        select steelpipeTpye,product,stress.rank from stress
+        select steelpipeTpye,product,stress.rank,scope,rbwendu from stress
     </select>
 
     <select id="queryjiezhi" resultType="java.util.Map">
@@ -201,6 +213,12 @@
 
     <select id="queryyingliY" resultType="java.util.Map">
         select joint,solderingtype,checkout,coefficient from stresscoefficient
+    </select>
+    <select id="querycailiao3087" resultType="java.util.Map">
+        select method,dors,size,deviation from deviation_GB3087_2008
+    </select>
+    <select id="querycailiao5310" resultType="java.util.Map">
+        select method,DorS,size,ordinary,senior from deviation_GB5310_2008
     </select>
 
 </mapper>

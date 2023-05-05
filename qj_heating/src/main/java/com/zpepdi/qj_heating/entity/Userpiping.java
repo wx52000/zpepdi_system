@@ -81,6 +81,10 @@ public class Userpiping {
     private Integer defstr2;
     private String defstr3;
     private String defstr4;
+    private String defstr5;
+    private String defstr6;
+    private String defstr7;
+    private String defstr8;
 
 
     public Integer getId() {
@@ -403,6 +407,38 @@ public class Userpiping {
         this.defstr4 = defstr4;
     }
 
+    public String getDefstr5() {
+        return defstr5;
+    }
+
+    public void setDefstr5(String defstr5) {
+        this.defstr5 = defstr5;
+    }
+
+    public String getDefstr6() {
+        return defstr6;
+    }
+
+    public void setDefstr6(String defstr6) {
+        this.defstr6 = defstr6;
+    }
+
+    public String getDefstr7() {
+        return defstr7;
+    }
+
+    public void setDefstr7(String defstr7) {
+        this.defstr7 = defstr7;
+    }
+
+    public String getDefstr8() {
+        return defstr8;
+    }
+
+    public void setDefstr8(String defstr8) {
+        this.defstr8 = defstr8;
+    }
+
     @Override
     public String toString() {
         return "Userpiping{" +
@@ -443,9 +479,13 @@ public class Userpiping {
                 ", endnj='" + endnj + '\'' +
                 ", endls='" + endls + '\'' +
                 ", defstr1='" + defstr1 + '\'' +
-                ", defstr2='" + defstr2 + '\'' +
+                ", defstr2=" + defstr2 +
                 ", defstr3='" + defstr3 + '\'' +
                 ", defstr4='" + defstr4 + '\'' +
+                ", defstr5='" + defstr5 + '\'' +
+                ", defstr6='" + defstr6 + '\'' +
+                ", defstr7='" + defstr7 + '\'' +
+                ", defstr8='" + defstr8 + '\'' +
                 '}';
     }
 }

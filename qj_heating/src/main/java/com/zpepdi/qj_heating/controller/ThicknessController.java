@@ -129,6 +129,16 @@ public class ThicknessController {
         Result result = thicknessSerice.queryyingliY();
         return result;
     }
+    @RequestMapping("querycailiao5310")
+    public Result querycailiao5310(){
+        Result result = thicknessSerice.querycailiao5310();
+        return result;
+    }
+    @RequestMapping("querycailiao3087")
+    public Result querycailiao3087(){
+        Result result = thicknessSerice.querycailiao3087();
+        return result;
+    }
 
     @RequestMapping("/download")
     public ResponseEntity<byte[]> downloadWordFile(@RequestBody Map<String,String> map) throws Exception {

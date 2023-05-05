@@ -26,4 +26,8 @@ public interface ThicknessDao {
     List<Map<String,String>> queryjiezhi();
     String queryyingli(@Param("wendu") Integer wendu,@Param("product") String product,@Param("rank") String rank);
     List<Map<String,String>> queryyingliY();
+
+    List<Map<String,String>>  querycailiao3087();
+
+    List<Map<String,String>>  querycailiao5310();
 }

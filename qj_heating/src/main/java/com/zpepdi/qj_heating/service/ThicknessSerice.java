@@ -25,4 +25,8 @@ public interface ThicknessSerice {
 
     Result queryyingli(Map<String, String> map);
     Result queryyingliY();
+
+    Result querycailiao3087();
+
+    Result querycailiao5310();
 }

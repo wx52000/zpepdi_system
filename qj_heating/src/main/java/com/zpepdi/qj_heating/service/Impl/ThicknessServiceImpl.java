@@ -185,7 +185,7 @@ public class ThicknessServiceImpl implements ThicknessSerice {
     @Override
     public Result queryyingli(Map<String, String> map) {
         String name = map.get("name");
-        if(name.split(":").length==3){
+        if(name.split(":").length==5){
             String product = name.split(":")[1];
             String rank = name.split(":")[2];
             String wd = map.get("wendu");
@@ -271,4 +271,13 @@ public class ThicknessServiceImpl implements ThicknessSerice {
         return Result.ok(thicknessDao.queryyingliY());
     }
 
+    @Override
+    public Result querycailiao3087() {
+        return Result.ok(thicknessDao.querycailiao3087());
+    }
+
+    @Override
+    public Result querycailiao5310() {
+        return Result.ok(thicknessDao.querycailiao5310());
+    }
 }
