@@ -191,6 +191,9 @@ public class AuditInformationServiceImpl implements AuditInformationService {
                 additionalDBStateDao.auditOperation13(user,map);
                 auditInformationDao.updateData(Integer.valueOf(map.get("id").toString()),JSON.toJSONString(map.get("data")));
                 break;
+            case 15 :
+                additionalDBStateDao.auditOperation15(user,map);
+                break;
             default:
                 break;
         }

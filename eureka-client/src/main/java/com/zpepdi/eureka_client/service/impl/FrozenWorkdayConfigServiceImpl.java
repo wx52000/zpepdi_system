@@ -19,6 +19,12 @@ public class FrozenWorkdayConfigServiceImpl implements FrozenWorkdayConfigServic
     }
 
     @Override
+    public Result setProjectFrozen(Map<String, Object> map) {
+        frozenWorkdayConfigDao.setProjectFrozen(map);
+        return Result.ok();
+    }
+
+    @Override
     public Result setFrozenNumber(Integer userId, Map<String, Object> map) {
         frozenWorkdayConfigDao.setFrozenNumber(userId,map);
         return Result.ok();

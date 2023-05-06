@@ -79,7 +79,7 @@
              type t
         where a.state = 0
         and a.`key` = #{map.auditKey}
-        and a.type = #{map.type}
+        and a.type = #{map.auditType}
         and t.id = a.type
         and a.alive = 1
     </select>

@@ -11,6 +11,12 @@
         from project p left join frozen_workday_config fc on p.id = fc.project_id
         where p.control = 1
     </select>
+    <update id="setProjectFrozen">
+        UPDATE project
+        SET frozen = #{frozen}
+        WHERE
+            id = #{projectId}
+    </update>
     <select id="queryByUserAndProject" resultType="string">
         SELECT
             GROUP_CONCAT( w.volume_tec, w.frozen_reason ) AS reason

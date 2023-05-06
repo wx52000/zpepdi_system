@@ -14,6 +14,7 @@ public interface ProjectDao {
 
     //冻结6个月内未关联合同项目
     void frozenProject();
+
     Map<String,Object> queryUser(@Param("userId")Integer userId, @Param("id")Integer id);
     // 查询角色在项目中的权限 返回1则管理员 2设总 3主设人 null则无权限
     Integer queryProjectRole(@Param("userId") Integer userId,

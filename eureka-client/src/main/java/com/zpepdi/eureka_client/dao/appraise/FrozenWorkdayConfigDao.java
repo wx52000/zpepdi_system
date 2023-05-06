@@ -11,6 +11,8 @@ public interface FrozenWorkdayConfigDao {
 
     List<Map<String,Object>> query();
 
+    void setProjectFrozen(Map<String,Object> map);
+
     void setFrozenNumber(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 
     String queryByUserAndProject(@Param("userId") Integer userId, @Param("projectId") Integer projectId);

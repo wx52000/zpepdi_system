@@ -25,4 +25,6 @@ public interface NewsService {
 
   Result withdrawOverAll(Map<String,Object> map);
 
+  Result test();
+
 }

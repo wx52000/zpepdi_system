@@ -274,14 +274,14 @@ public class ProjectServiceImpl implements ProjectService {
                 contractService.insertContract(user.getId(), contractMap);
             }
         }
-        Map<String,Object> project = projectDao.queryBaseById(Integer.valueOf(map.get("projectId").toString()));
+        User user1 = userDao.queryById(Integer.valueOf(map.get("handler").toString()));
         map.put("auditType",7);
-        map.put("information", project.get("name").toString() + "新增项目申请");
+        map.put("information", map.get("name").toString() + "新增项目申请");
         map.put("auditKey",map.get("projectId"));
         map.put("data", JSON.toJSONString(map));
-        map.put("auditor_id", project.get("generalId"));
-        map.put("auditor_username", project.get("generalNumber"));
-        map.put("auditor_name", project.get("general"));
+        map.put("auditor_id", user1.getId());
+        map.put("auditor_username", user1.getUsername());
+        map.put("auditor_name", user1.getName());
         List<Object> auditList = new ArrayList<>();
         auditList.add(map.get("projectId"));
         map.put("auditList",auditList);
@@ -513,7 +513,7 @@ public class ProjectServiceImpl implements ProjectService {
                 auditMap.put("information",name + tec + "卷册工时调整");
                 auditMap.put("projectId",map.get("id"));
                 auditMap.put("tec", map.get("tec"));
-                auditMap.put("auditKey",map.get("id").toString()+map.get("tec").toString()+user.getId());
+                auditMap.put("auditKey",map.get("id").toString()+map.get("tec").toString()+userId);
                 auditMap.put("data", JSON.toJSONString(auditMap));
                 auditMap.put("auditor_id", user.getId());
                 auditMap.put("auditor_username", user.getUsername());

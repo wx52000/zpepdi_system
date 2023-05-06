@@ -185,5 +185,9 @@ public interface NewsDao {
 
   List<Map<String,Object>> queryType0List(Map<String,Object> map);
 
+  List<Map<String,Object>> test();
+
+  void test1(Map<String,Object> map);
+
 }
 

@@ -39,6 +39,7 @@
             c.id,
             c.user_id,
             u.`name`,
+            u.username,
             c.did,
             d.`name` as dep,
             c.`limit`,

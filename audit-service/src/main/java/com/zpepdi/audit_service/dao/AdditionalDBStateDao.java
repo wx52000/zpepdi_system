@@ -34,4 +34,7 @@ public interface AdditionalDBStateDao {
     void auditOperation12(@Param("user") User user, @Param("map") Map<String, Object> map);
 
     void auditOperation13(@Param("user") User user, @Param("map") Map<String, Object> map);
+
+    void auditOperation15(@Param("user") User user, @Param("map") Map<String, Object> map);
+
 }

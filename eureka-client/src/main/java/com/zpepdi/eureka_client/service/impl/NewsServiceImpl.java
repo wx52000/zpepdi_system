@@ -378,4 +378,15 @@ public class NewsServiceImpl implements NewsService {
     }
   }
 
+  @Override
+  public Result test() {
+    List<Map<String,Object>> list = newsDao.test();
+    for (Map<String,Object> map : list){
+      JSONObject jsonObject = JSONObject.parseObject(map.get("audit_data").toString());
+      map.put("projectId",jsonObject.get("projectId"));
+      System.out.println(map);
+      newsDao.test1(map);
+    }
+    return Result.ok();
+  }
 }

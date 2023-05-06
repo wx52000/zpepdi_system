@@ -433,6 +433,21 @@
             where id = #{item.id}
         </foreach>
     </update>
+    <update id="test1">
+        INSERT IGNORE INTO audit.auditor_information ( audit_information_id, state, auditor_id, auditor_username, auditor_name )
+        SELECT
+            #{id},
+            0,
+            u.id,
+            u.username,
+            u.NAME
+        FROM
+            project p,
+            user u
+        WHERE
+            p.id = #{projectId}
+        and u.id = p.generalId
+    </update>
     <select id="count" resultType="java.lang.Integer">
         SELECT
             COUNT(*)
@@ -2925,5 +2940,23 @@
         where project_id = #{id}
           and tec = #{tec}
           and delay = 0
+    </select>
+    <select id="test" resultType="java.util.Map">
+        SELECT
+            a.id,a.audit_data
+        FROM
+            audit.audit_information a
+        WHERE
+            NOT EXISTS (
+                    SELECT
+                        1
+                    FROM
+                        audit.auditor_information ai
+                    WHERE
+                        ai.audit_information_id = a.id
+                )
+          AND state = 0
+        and type = 5
+        ORDER BY type
     </select>
 </mapper>

@@ -180,7 +180,7 @@ public class VolumeServiceImpl implements VolumeService {
                 map1.put("principal",String.format("%.1f",principal));
                 map1.put("headman",String.format("%.1f",headman));
                 Map<String,Object> auditMap = new HashMap<>();
-                auditMap.put("type",4);
+                auditMap.put("auditType",4);
                 auditMap.put("information", map1.get("name").toString() + map.get("tec") + "卷册工时调整");
                 auditMap.put("projectId",map.get("projectId"));
                 auditMap.put("tec", map.get("tec"));

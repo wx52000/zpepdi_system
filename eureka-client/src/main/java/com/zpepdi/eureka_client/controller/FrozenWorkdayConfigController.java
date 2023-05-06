@@ -21,6 +21,11 @@ public class FrozenWorkdayConfigController {
         return frozenWorkdayConfigService.query();
     }
 
+    @RequestMapping("setProjectFrozen")
+    public Result setProjectFrozen(@RequestBody Map<String,Object> map){
+        return frozenWorkdayConfigService.setProjectFrozen(map);
+    }
+
     @RequestMapping("setFrozenNumber")
     public Result setFrozenNumber(@UserId Integer userId, @RequestBody Map<String,Object> map){
         return frozenWorkdayConfigService.setFrozenNumber(userId,map);

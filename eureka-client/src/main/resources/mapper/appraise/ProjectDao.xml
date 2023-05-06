@@ -346,6 +346,9 @@
             <if test="spider != null and spider != '' || spider == 0">
                 `spider` = #{spider},
             </if>
+            <if test="frozen != null and frozen != '' || frozen == 0">
+                `frozen` = #{frozen},
+            </if>
         </set>
         where id = #{project_id}
     </update>
@@ -567,6 +570,7 @@
                tab.`limit`,
                tab.workdayState,
                tab.distributeState,
+               tab.frozen,
                CASE
                    tab.frozen
                    WHEN 1 THEN
@@ -1006,6 +1010,7 @@
                count(v.id)                                AS `count`,
                p.general,
                p.control,
+               p.frozen,
                (select exists(
                    select
                        1

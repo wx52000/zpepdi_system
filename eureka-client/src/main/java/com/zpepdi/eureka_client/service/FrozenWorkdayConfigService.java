@@ -10,6 +10,8 @@ public interface FrozenWorkdayConfigService {
 
     Result query();
 
+    Result setProjectFrozen(Map<String, Object> map);
+
     Result setFrozenNumber(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 
     Result queryByUserAndProject(Integer userId,Integer projectId);
