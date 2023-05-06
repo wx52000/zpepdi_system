@@ -20,5 +20,13 @@ public interface ZJEPDIDataTransmissionDao {
 
     List<Map<String,Object>> queryTecList(String number);
 
+    //    合同数据 检索 模糊查询
+    List<Map<String,Object>> queryContractListBySearch(String search);
+
+    //项目数据检索 模糊查询
+    List<Map<String,Object>> proListBySearch(String search);
+
+
+
 
 }

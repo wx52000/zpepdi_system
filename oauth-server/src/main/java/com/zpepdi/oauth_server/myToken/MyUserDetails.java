@@ -13,6 +13,8 @@ public class MyUserDetails implements UserDetails {
 
     private String username;
 
+    private String name;
+
     private String password;
 
     private Integer roleId;
@@ -95,6 +97,14 @@ public class MyUserDetails implements UserDetails {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

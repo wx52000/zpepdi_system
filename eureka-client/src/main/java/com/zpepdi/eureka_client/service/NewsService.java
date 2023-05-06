@@ -24,4 +24,5 @@ public interface NewsService {
   Result queryExtend(Integer userId,Map<String,Object> map);
 
   Result withdrawOverAll(Map<String,Object> map);
+
 }

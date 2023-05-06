@@ -35,6 +35,8 @@ public interface ScientificLeaderDao {
 
     List<Map<String,Object>> queryTerm(@Param("userId") Integer userId, @Param("projectId")Integer projectId);
 
+    Map<String,Object> queryTermById(Integer id);
+
     List<Map<String,Object>> queryFilesByTerm(Integer id);
 
     Map<String,Object> queryFilesById(Integer id);

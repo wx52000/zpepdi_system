@@ -107,4 +107,11 @@ public class ProjectWorkdayController {
   public Result queryBackupList(@UserId Integer userId,@RequestHeader("id")Integer id){
     return proWorkdayService.queryBackupList(id);
   }
+
+  @RequestMapping("queryOfficeWorkday")
+  public Result queryOfficeWorkday(@UserId Integer userId){
+    return proWorkdayService.queryOfficeWorkday();
+  }
+
+
 }

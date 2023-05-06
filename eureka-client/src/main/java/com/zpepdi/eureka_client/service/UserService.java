@@ -6,7 +6,10 @@ import com.zpepdi.eureka_client.entity.ExcelData;
 import com.zpepdi.eureka_client.entity.User;
 import com.zpepdi.eureka_client.entity.UserOut;
 import com.zpepdi.eureka_client.result.Result;
+import org.springframework.security.core.parameters.P;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -104,6 +107,8 @@ public interface UserService {
 
     List<Map> queryByName(User user);
 
+    Result queryTask(Integer userId,Map<String,Object> map);
+
     List<Integer> queryByUsername(List<ExcelData> list);
 
     void paw(Integer id,User user);
@@ -115,5 +120,7 @@ public interface UserService {
     List<Map> userAllAndState(Integer id);
 
     List<Map> userAllAndGroup(Integer id,Integer mode);
+
+    void conditionalDown(MultipartFile file ,Map<String, Object> map, HttpServletResponse response);
 
 }

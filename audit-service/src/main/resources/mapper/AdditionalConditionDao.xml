@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.audit_service.dao.AdditionalConditionDao">
+    <select id="confirmDay" resultType="java.lang.Integer">
+        select `day`
+        from appraise.confirm_day
+        where id = 1
+    </select>
+    <select id="declareDay" resultType="java.lang.Integer">
+        select `day`
+        from appraise.declare_day
+        where id = 1
+    </select>
+    <select id="declareDelay" resultType="java.lang.Integer">
+        select `day`
+        from appraise.declare_day
+        where id = 2
+    </select>
+    <select id="queryDepWorkday" resultType="java.util.Map">
+        SELECT
+            (select
+                 sum(amount) as  amount
+             from appraise.checker_amount a where
+                 a.cd_id = d.id
+                                     AND a.year = YEAR(now())) as amount,
+        (select ifnull(sum(used),0)
+        from appraise.checker_used u
+        where u.cd_id = d.id
+          AND u.year = YEAR(now())) as used
+        FROM
+            appraise.checker_dep d
+        WHERE
+            d.id = #{map.handlerNote.id}
+    </select>
+</mapper>

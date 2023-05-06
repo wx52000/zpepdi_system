@@ -11,12 +11,14 @@
         on duplicate key update
         limit = values(limit)
 </update>
-    <update id="setCheckerAmount">
-        insert into checker_amount(cd_id, amount, `date`, `year`, surplus)
-        values(#{id}, #{amount}, DATE_FORMAT(NOW(),'%Y-%m-%d'), YEAR(now()), #{surplus})
-        on duplicate key update
-            amount = values(amount),
-            surplus = values(surplus)
+    <update id="setCheckerAmount" useGeneratedKeys="true" keyColumn="id" keyProperty="map.key">
+        insert into checker_amount(cd_id, `amount`, `date`, `year`, `remark`, `handler`, handle_time, `check`, `checker`)
+        values(#{map.id}, #{map.amount}, DATE_FORMAT(NOW(),'%Y-%m-%d'), YEAR(now()), #{map.remark},
+         #{userId}, now(), 0, #{map.checkerId});
+    </update>
+    <update id="setCheckerUsed">
+        insert ignore checker_used(cd_id, `year`)
+        values (#{map.id}, YEAR(now()))
     </update>
     <delete id="del">
         delete
@@ -40,16 +42,59 @@
             c.did,
             d.`name` as dep,
             c.`limit`,
-            a.amount,
-            a.surplus
+        (select
+            sum(amount) as  amount
+        from checker_amount a where
+                                  a.cd_id = c.id
+                                AND a.year = YEAR(now())) as amount,
+        (select ifnull(sum(used),0)
+        from checker_used u
+        where u.cd_id = c.id
+          AND u.year = YEAR(now())) as used
         FROM
             `user` u,
             department d,
             checker_dep c
-                LEFT JOIN checker_amount a ON c.id = a.cd_id
-                AND a.YEAR = YEAR(now())
         WHERE
             c.user_id = u.id
           AND c.did = d.id
+    </select>
+    <select id="queryByProjectAndTec" resultType="java.util.Map">
+        select u.id, u.name, u.username
+        from project_tec_checker ptc,
+             user u
+        where ptc.project_id = #{map.projectId}
+        and ptc.tec = #{map.tec}
+        and ptc.principal = #{userId}
+        and u.id = ptc.checker
+    </select>
+    <select id="queryByUserId" resultType="java.util.Map">
+        SELECT
+            cd.id,
+            d.`name` as department,
+            SUM( ca.amount ) as amount,
+            IFNULL( SUM( cu.used ), 0 ) as used
+        FROM
+            checker_dep cd,
+            checker_amount ca
+                LEFT JOIN checker_used cu ON cu.cd_id = ca.cd_id
+                AND cu.used = YEAR (
+            NOW()),
+            department d
+        WHERE
+            cd.id = ca.cd_id
+          AND cd.did = d.id
+          AND cd.user_id = #{userId}
+          AND ca.`year` = YEAR (
+            NOW())
+        GROUP BY
+            cd.id
+    </select>
+    <select id="queryChecker2" resultType="java.util.Map">
+        select u.id , u.username, u.name
+        from checker c,
+             user u
+        where c.checkerId = u.id
+        and c.type = 2
     </select>
 </mapper>

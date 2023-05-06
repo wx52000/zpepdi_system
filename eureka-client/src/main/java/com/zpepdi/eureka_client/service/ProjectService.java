@@ -106,11 +106,7 @@ public interface ProjectService {
 
     Result queryNotDeclare(Integer userId, Map<String,Object> map);
 
-    Result setDeclare(Integer userId, List<Map<String,Object>> list,String date);
-
-    Integer declareDay();
-
-    Result setDeclareDay(Integer day);
+    Result setDeclare(Integer userId, Map<String,Object> map);
 
     Object confirmDay();
 
@@ -142,5 +138,7 @@ public interface ProjectService {
     Result getdateInfo(Map<String,Object> map);
 
     HttpServletResponse downinfo(HttpServletResponse response,Integer userId, Map<String, Object> map);
+
+    Result queryBySearchFromZjepdi(String search);
 
 }

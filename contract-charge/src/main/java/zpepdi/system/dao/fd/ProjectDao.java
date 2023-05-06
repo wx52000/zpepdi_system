@@ -9,6 +9,7 @@ public interface ProjectDao {
 
     void addRelateContract(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 
+    void updateData(Map<String,Object> map);
     void delRelateContract(Map<String,Object> map);
     void insertSingle(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
     List<Map<String,Object>> query();
@@ -22,4 +23,6 @@ public interface ProjectDao {
     void setLedger(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 
     List<Map<String,Object>> queryLedger(String id);
+
+    List<Map<String,Object>> querySearch(String search);
 }

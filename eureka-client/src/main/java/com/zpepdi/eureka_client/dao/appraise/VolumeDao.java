@@ -23,6 +23,8 @@ public interface VolumeDao {
 
     List<Map<String,String>> queryByProjectId(Integer id);
 
+    Map<String,Object> queryProjectById(Integer id);
+
     List<Map<String,String>> queryByDate(String date);
 
     void upd(Volume volume);
@@ -120,4 +122,8 @@ public interface VolumeDao {
     void sendConfirm(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
 
     void sendConfirmVolume(Map<String,Object> map);
+
+    void sentConfirmDelay(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
+
+    void setVolumeImportant(Map<String,Object> map);
 }

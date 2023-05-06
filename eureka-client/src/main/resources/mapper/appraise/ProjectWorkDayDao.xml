@@ -130,7 +130,7 @@
         `num` = values(`num`),
         `check` = values(`check`)
   </insert>
-  <insert id="setProWorkdayDistribut">
+  <insert id="setProWorkdayDistribut" useGeneratedKeys="true" keyColumn="id" keyProperty="map.id">
     insert into project_workday_distribute
     <trim prefix="(" suffix=")" suffixOverrides=",">
         project_id,
@@ -163,6 +163,7 @@
     `manage` = values(`manage`),
     `backup` = values(`backup`),
     `tec` = values(`tec`),
+    `time` = values(`time`),
     `check` = values(`check`)
   </insert>
   <insert id="setNewProWorkdayDistribut">
@@ -227,6 +228,54 @@
     on duplicate key update
     amount = values(amount)
   </update>
+  <update id="reSetFrozen">
+    UPDATE workday_tec wt,
+    workday_tec_principal wp
+    SET wt.frozen = 0,
+    wt.frozen_reason = NULL
+    WHERE
+    NOT EXISTS (
+    SELECT
+    t.tec,
+    t.project_id
+    FROM
+    (
+    SELECT
+    COUNT( v.id ) AS count,
+    v.tec,
+    v.project_id
+    FROM
+    volume v
+    WHERE
+    NOT EXISTS ( SELECT 1 FROM volume_workday w WHERE v.id = w.volume_id AND w.workday &lt;&gt; 0 )
+    AND v.actual_publication_date > "2023-04-06"
+    AND wt.volume_tec = v.tec
+    AND wt.project_id = v.project_id
+    GROUP BY
+    v.tec UNION
+    SELECT
+    COUNT( v.id ) AS count,
+    v.tec,
+    v.project_id
+    FROM
+    volume v
+    WHERE
+    NOT EXISTS ( SELECT 1 FROM volume_workday w WHERE v.id = w.volume_id AND w.workday &lt;&gt; 0 )
+    AND v.state IN ( "尚未确认", "尚未开展", "正在设计", "正在校审" )
+    AND wt.volume_tec = v.tec
+    AND wt.project_id = v.project_id
+    GROUP BY
+    v.tec
+    ) AS t
+    LEFT JOIN frozen_workday_config fc ON t.project_id = fc.project_id
+    WHERE
+    t.count &gt; IFNULL( fc.number, 0 )
+    )
+    AND wt.frozen = 1
+    AND wt.id = wp.workday_tec_id
+    AND wp.user_id = #{userId}
+    and wt.project_id = #{projectId}
+  </update>
   <update id="setTecVolumeRatio">
     insert into tec_ratio(project_id, tec, designer, checker, principal, headman, `check`, time, handler)
     values
@@ -258,7 +307,7 @@
           #{item.workday} * #{map.checker} /100,
           #{item.workday} * #{map.principal} /100,
           #{item.workday} * #{map.headman} /100,
-           #{date}, 1, now(), #{id})
+           #{date}, 0, now(), #{id})
         </when>
       </choose>
   </foreach>
@@ -312,6 +361,8 @@
       IFNULL( `backup`, 0 ) AS `backup`,
       d.`check`,
       c.checker AS checkerId,
+      u.username as checkerNumber,
+      u.name as checkerName,
       EXISTS (
               SELECT
                 w.id
@@ -326,6 +377,7 @@
         LEFT JOIN project_workday w ON p.id = w.project_id
         LEFT JOIN project_workday_distribute d ON w.project_id = d.project_id
         LEFT JOIN project_checker c ON c.project_id = p.id
+        LEFT JOIN `user` u ON c.checker = u.id
     WHERE
       p.id = #{id}
     GROUP BY
@@ -1090,6 +1142,50 @@
       b.`handler` = u.id
       AND b.project_id = #{id}
     order by `time` desc
+  </select>
+  <select id="queryOfficeWorkday" resultType="java.util.Map">
+    SELECT
+    SUM(y.sumYear) as sumYear,
+    office_id
+    FROM(
+    SELECT
+    SUM( num ) as sumYear,
+    office_id
+    FROM
+    project_note p,
+    project_workday w
+    WHERE
+    p.project_id = w.project_id
+    AND w.date &gt;= CONCAT( #{year}, "-01-01" )
+    AND w.date &lt;= CONCAT( #{year}, "-12-31" )
+    GROUP BY
+    p.office_id UNION ALL
+    SELECT
+    SUM( num ) as sumYear,
+    office_id
+    FROM
+    project_note p,
+    project_workday_add a
+    WHERE
+    p.project_id = a.project_id
+    AND a.check_time &gt;= CONCAT( #{year}, "-01-01" )
+    AND a.check_time &lt;= CONCAT( #{year}, "-12-31" )
+    GROUP BY
+    p.office_id UNION all
+    SELECT
+    SUM( num ) as sumYear,
+    office_id
+    FROM
+    project_children p,
+    project_workday w
+    WHERE
+    p.project_id = w.project_id
+    AND w.date &gt;= CONCAT( #{year}, "-01-01" )
+    AND w.date &lt;= CONCAT( #{year}, "-12-31" )
+    GROUP BY
+    p.office_id
+    )  y
+    GROUP BY y.office_id
   </select>
 
 </mapper>

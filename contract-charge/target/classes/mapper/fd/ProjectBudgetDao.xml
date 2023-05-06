@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.ProjectBudgetDao">
+    <resultMap id="queryByProjectId" type="map">
+        <result column="year" jdbcType="INTEGER" property="year"/>
+        <result column="type0" jdbcType="INTEGER" property="year"/>
+        <result column="type1" jdbcType="INTEGER" property="year"/>
+        <result column="project_id" jdbcType="CHAR" property="project_id"/>
+        <result column="year_budget" jdbcType="DECIMAL" property="year_budget"/>
+        <result column="quarter1_budget" jdbcType="DECIMAL" property="quarter1"/>
+        <result column="quarter2_budget" jdbcType="DECIMAL" property="quarter2"/>
+        <result column="quarter3_budget" jdbcType="DECIMAL" property="quarter3"/>
+        <result column="quarter4_budget" jdbcType="DECIMAL" property="quarter4"/>
+        <collection property="incomeList" javaType="ARRAYLIST"
+                    column="year=year, id = project_id,type = type0"
+                    select="queryMonthByProjectId"/>
+        <collection property="expendList" javaType="ARRAYLIST"
+                    column="year=year, id = project_id, type = type1"
+                    select="queryMonthByProjectId"/>
+    </resultMap>
+    <update id="setBudgetMonth">
+        insert into project_budget_month(project_id, `month`, `quarter`, `year`, `single`, `type`,
+                                         `invoice`,`income`, `remark`, handler,`time` )
+        values (#{map.project_id}, #{map.month},#{map.quarter}, #{map.year},#{map.single},
+                #{map.type}, #{map.invoice},#{map.income}, #{map.remark}, #{userId},now())
+            on duplicate key update
+            `invoice` = values(`invoice`),
+            `income` = values(`income`),
+            `remark` = values(`remark`),
+             `time` = values(`time`),
+             `handler` = values(`handler`)
+    </update>
+    <update id="setBudgetYear">
+        insert into project_budget_year(project_id, `year_budget`, quarter1_budget,quarter2_budget,
+                                       quarter3_budget, quarter4_budget, `year`, `time`, handler)
+        values (#{map.project_id}, #{map.year_budget}, #{map.quarter1}, #{map.quarter2},
+                #{map.quarter3}, #{map.quarter4}, #{map.year}, now(), #{userId})
+            on duplicate key update
+                                 `year_budget` = values(`year_budget`),
+                                 `quarter1_budget` = values(`quarter1_budget`),
+                                 `quarter2_budget` = values(`quarter2_budget`),
+                                 `quarter3_budget` = values(`quarter3_budget`),
+                                 `quarter4_budget` = values(`quarter4_budget`),
+                                 `time` = values(`time`),
+                                 `handler` = values(`handler`)
+    </update>
+    <select id="queryByProjectId" resultMap="queryByProjectId">
+        select ifnull(`year_budget`,0) as year_budget,
+               ifnull(quarter1_budget,0) as quarter1_budget,
+               ifnull(quarter2_budget,0) as quarter2_budget,
+               ifnull(quarter3_budget,0) as quarter3_budget,
+               ifnull(quarter4_budget,0) as quarter4_budget,
+               `year`, project_id, 0 as type0, 1 as type1
+        from project_budget_year
+        where project_id = #{id}
+          and `year` = #{year}
+    </select>
+    <select id="queryMonthByProjectId" resultType="java.util.Map">
+        SELECT
+            id,
+            project_id,
+            `month`,
+            `quarter`,
+            `year`,
+            `year`,
+            single,
+            `type`,
+            `invoice`,
+            `income`,
+            remark,
+            `handler`,
+            `time`
+        FROM
+            project_budget_month
+        WHERE
+            project_id = #{id}
+          AND `year` = #{year}
+         and type = #{type}
+        ORDER BY
+            `month`
+    </select>
+</mapper>

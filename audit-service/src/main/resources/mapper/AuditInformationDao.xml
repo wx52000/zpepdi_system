@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.audit_service.dao.AuditInformationDao">
+    <insert id="addAuditInformation" useGeneratedKeys="true" keyColumn="id" keyProperty="map.id">
+        insert into audit_information(`state`, initiator_id, initiator_username, initiator_name,
+                                      initiate_time, information, type, Is_sequential, audit_data
+                                      <if test="map.auditKey != null and map.auditKey != ''">
+                                          ,`key`
+                                      </if> )
+        values(0, #{user.id}, #{user.username}, #{user.name},
+               now(), #{map.information}, #{map.auditType}, 0, #{map.data}
+        <if test="map.auditKey != null and map.auditKey != ''">
+            ,#{map.auditKey}
+        </if>)
+    </insert>
+    <insert id="renew" useGeneratedKeys="true" keyColumn="id" keyProperty="map.id">
+        insert into audit_information(`state`, initiator_id, initiator_username, initiator_name,
+        initiate_time, information, type, Is_sequential, audit_data
+        <if test="map.auditKey != null and map.auditKey != ''">
+            ,`key`
+        </if> )
+        values(#{map.check}, #{map.initiator_id}, #{map.initiator_username}, #{map.initiator_name},
+        #{map.time}, #{map.information}, #{map.auditType}, 0, #{map.data}
+        <if test="map.auditKey != null and map.auditKey != ''">
+            ,#{map.auditKey}
+        </if>)
+    </insert>
+    <update id="updateState">
+        update audit_information
+        set state = #{check}
+        where id = #{id}
+    </update>
+    <update id="updateData">
+        update audit_information
+        set audit_data = #{data}
+        where id = #{id}
+    </update>
+    <delete id="delAuditInformation">
+        update audit_information
+        set cancel_time = now(), alive = 0
+        where id = #{id}
+    </delete>
+    <select id="queryBySelf" resultType="java.util.Map">
+        SELECT
+            ai.id,
+            ai.state,
+            ai.initiator_id,
+            ai.initiator_username,
+            ai.initiator_name,
+            cast(ai.initiate_time as char(10)) as initiate_time,
+            ai.information,
+            ai.type,
+            ai.alive,
+            ai.is_seen,
+            ri.id AS atr_id,
+            ri.auditor_id,
+            ri.auditor_username,
+            ri.auditor_name,
+            ri.remark,
+            ri.state AS atr_remark
+        FROM
+            audit_information ai,
+            type t,
+            auditor_information ri
+        WHERE
+            ai.initiator_id = #{user.id}
+          AND ri.audit_information_id = ai.id
+          and ai.type = t.id
+          and t.species = #{map.species}
+    </select>
+    <select id="queryById" resultType="java.util.Map">
+        select audit_data as data, type, state, initiator_id
+        from audit_information ai
+        where id = #{id}
+    </select>
+    <select id="queryByKey" resultType="java.util.Map">
+        select a.id, t.operation
+        from audit_information a,
+             type t
+        where a.state = 0
+        and a.`key` = #{map.auditKey}
+        and a.type = #{map.type}
+        and t.id = a.type
+        and a.alive = 1
+    </select>
+    <select id="queryCount" resultType="java.lang.Integer">
+        select count(id)
+        from (select id
+              from audit_information
+              where initiator_id = #{id}
+                and state = 2
+                and alive = 1
+              union all
+              select r.id
+              from auditor_information r,
+                   audit_information a
+              where auditor_id = #{id}
+                and a.id = r.audit_information_id
+                and a.alive = 1
+                and r.state = 0) t
+    </select>
+</mapper>

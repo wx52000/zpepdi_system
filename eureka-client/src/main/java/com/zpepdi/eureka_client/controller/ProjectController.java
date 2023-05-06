@@ -275,18 +275,8 @@ public class ProjectController {
     }
 
     @RequestMapping("setDeclare")
-    public Result setDeclare(@UserId Integer userId,@RequestBody List<Map<String,Object>> list, @RequestHeader("declareDate")String date){
-        return projectService.setDeclare(userId,list,date);
-    }
-
-    @RequestMapping("declareDay")
-    public Result declareDay(){
-        return Result.ok(projectService.declareDay());
-    }
-
-    @RequestMapping("setDeclareDay")
-    public Result setDeclareDay(@RequestHeader("day") Integer day){
-        return projectService.setDeclareDay(day);
+    public Result setDeclare(@UserId Integer userId,@RequestBody Map<String,Object> map){
+        return projectService.setDeclare(userId,map);
     }
 
     @RequestMapping("confirmDay")

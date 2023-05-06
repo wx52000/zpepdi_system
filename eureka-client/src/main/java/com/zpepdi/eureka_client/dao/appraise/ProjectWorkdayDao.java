@@ -90,12 +90,13 @@ public interface ProjectWorkdayDao {
 
   List<Map<String,Object>> queryTecVolumeRatio(Integer id);
 
+  void reSetFrozen(@Param("userId") Integer userId, @Param("projectId") Integer projectId);
+
   void setTecVolumeRatio(@Param("id")Integer id, @Param("map")Map<String,Object> map);
 
   void setVolumeWorkday(@Param("map")Map<String,Object> map,@Param("id")Integer id,@Param("date")String date);
 
   List<Map<String,Object>> queryNewWorkday(Integer id);
-
 
   Map<String,Object> queryNewWorkdayByAddId(Integer id);
 
@@ -104,4 +105,8 @@ public interface ProjectWorkdayDao {
   Map<String,Object> queryLimitAndAddSum(Integer id);
 
   List<Map<String,Object>> queryBackupList(Integer id);
+
+  List<Map<String,Object>> queryOfficeWorkday(Integer year);
+
+
 }

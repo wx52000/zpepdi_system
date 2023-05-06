@@ -1,5 +1,6 @@
 package com.zpepdi.eureka_client.controller;
 
+import com.zpepdi.eureka_client.annotation.UserId;
 import com.zpepdi.eureka_client.entity.User;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.CheckerService;
@@ -39,8 +40,18 @@ public class CheckerController {
     }
 
     @RequestMapping("setDepChecker")
-    public Result setDepChecker(@RequestBody Map<String,Object> map){
-        return checkerService.setDepChecker(map);
+    public Result setDepChecker(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return checkerService.setDepChecker(userId, map);
+    }
+
+    @RequestMapping("setCheckerAmount")
+    public Result setCheckerAmount(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return checkerService.setCheckerAmount(userId, map);
+    }
+
+    @RequestMapping("queryByUser")
+    public Result queryByUser(@UserId Integer userId){
+        return checkerService.queryByUser(userId);
     }
 
 }

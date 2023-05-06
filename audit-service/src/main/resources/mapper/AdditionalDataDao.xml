@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.audit_service.dao.AdditionalDataDao">
+    <select id="queryType1" resultType="java.util.Map">
+        SELECT
+            IFNULL(SUM( num ),0) AS num
+        FROM
+            `appraise`.project_workday_add
+        WHERE
+            project_id = 4024
+          AND `check` = 1
+    </select>
+    <select id="queryType4" resultType="java.util.Map">
+        SELECT distinct
+        v.id as vId,
+        v.number,
+        v.name,
+        v.designer,
+        v.checker,
+        v.actual_principal as principal,
+        v.headman,
+        w.id,
+        w.workday,
+        w.designer_workday,
+        w.checker_workday,
+        w.principal_workday,
+        w.headman_workday
+        FROM
+        `appraise`.volume_workday w,
+        `appraise`.volume v
+        WHERE
+            v.id = w.volume_id
+        and v.project_id = #{projectId}
+        AND v.tec = #{tec}
+        AND w.`check` in (0 , 2)
+        group by v.number
+    </select>
+    <select id="queryType6" resultType="java.util.Map">
+        SELECT
+            v.project_id,
+            w.id,
+            v.id AS task_id,
+            v.number,
+            v.`name`,
+            v.tec,
+            v.designer as designerName,
+            v.checker as checkerName,
+            v.actual_principal AS principalName,
+            v.headman as headmanName,
+            vu.designer AS designerId,
+            vu.checker AS checkerId,
+            vu.principal AS principalId,
+            vu.headman AS headmanId,
+            w.workday,
+            w.designer_workday AS designer,
+            w.checker_workday AS checker,
+            w.principal_workday AS principal,
+            w.headman_workday AS headman,
+            w.type AS type,
+            w.submit,#{submit_date} as `date`,
+            0 AS task,
+            0 AS advance
+        FROM
+            `appraise`.volume v
+                LEFT JOIN `appraise`.volume_user vu ON v.id = vu.volume_id,
+            `appraise`.volume_workday w
+        WHERE
+            v.id = w.volume_id
+          AND v.project_id = #{projectId}
+
+          AND w.backOff = 1
+          AND w.`check` = 1
+          AND w.submit_date = #{submit_date}
+
+          AND w.`handler` = #{handler}
+        UNION
+        SELECT
+            v.project_id,
+            h.id,
+            v.id AS task_id,
+            v.number,
+            v.`name`,
+            v.tec,
+            v.designer as designerName,
+            v.checker as checkerName,
+            v.actual_principal AS principalName,
+            v.headman as headmanName,
+            vu.designer AS designerId,
+            vu.checker AS checkerId,
+            vu.principal AS principalId,
+            vu.headman AS headmanId,
+            w.workday,
+            h.`grant` AS designer,
+            0 AS checker,
+            0 AS principal,
+            0 AS headman,
+            w.type AS type,
+            h.submit,#{submit_date} as `date`,
+            0 AS task,
+            1 AS advance
+        FROM
+            `appraise`.volume v
+                LEFT JOIN `appraise`.volume_user vu ON v.id = vu.volume_id,
+            `appraise`.volume_workday w,
+            `appraise`.volume_workday_high h
+        WHERE
+            v.id = w.volume_id
+          AND v.project_id = #{projectId}
+
+          AND h.volume_id = v.id
+          AND h.backOff = 1
+          AND w.`check` = 1
+          AND h.submit_date = #{submit_date}
+
+          AND w.`handler` = #{handler}
+        UNION
+        SELECT
+            t.project_id,
+            t.id,
+            t.id AS task_id,
+            t.number,
+            t.`name`,
+            t.tec,
+            u.`name` as designerName,
+            u1.`name` as checkerName,
+            u2.`name` AS principalName,
+            u3.`name` AS headmanName,
+            u.id AS designerId,
+            u1.id AS checkerId,
+            u2.id AS principalId,
+            u3.id AS headmanId,
+            IFNULL( designer_workday, 0 ) + IFNULL( checker_workday, 0 ) + IFNULL( principal_workday, 0 ) + IFNULL( headman_workday, 0 ) AS workday,
+            designer_workday AS designer,
+            checker_workday AS checker,
+            principal_workday AS principal,
+            headman_workday AS headman,
+            t.type AS type,
+            t.submit,#{submit_date} as `date`,
+            1 AS task,
+            0 AS advance
+        FROM
+            `appraise`.project_task t
+                LEFT JOIN `appraise`.`user` u ON t.designer = u.id
+                LEFT JOIN `appraise`.`user` u1 ON t.checker = u1.id
+                LEFT JOIN `appraise`.`user` u2 ON t.principal = u2.id
+                LEFT JOIN `appraise`.`user` u3 ON t.headman = u3.id
+        WHERE
+            t.project_id = #{projectId}
+
+          AND t.backOff = 1
+          AND t.submit_date = #{submit_date}
+
+          AND t.principal = #{handler}
+        UNION
+        SELECT
+            t.project_id,
+            a.id,
+            t.id AS task_id,
+            t.number,
+            t.`name`,
+            t.tec,
+            u.`name` as designerName,
+            u1.`name` as checkerName,
+            u2.`name` AS principalName,
+            u3.`name` AS headmanName,
+            u.id AS designerId,
+            u1.id AS checkerId,
+            u2.id AS principalId,
+            u3.id AS headmanId,
+            IFNULL( t.designer_workday, 0 ) + IFNULL( t.checker_workday, 0 ) + IFNULL( t.principal_workday, 0 ) + IFNULL( t.headman_workday, 0 ) AS workday,
+            a.advance AS designer,
+            0 AS checker,
+            0 AS principal,
+            0 AS headman,
+            t.type AS type,
+            a.submit,#{submit_date} as `date`,
+            1 AS task,
+            1 AS advance
+        FROM
+            `appraise`.project_task t
+                LEFT JOIN `appraise`.`user` u ON t.designer = u.id
+                LEFT JOIN `appraise`.`user` u1 ON t.checker = u1.id
+                LEFT JOIN `appraise`.`user` u2 ON t.principal = u2.id
+                LEFT JOIN `appraise`.`user` u3 ON t.headman = u3.id,
+            `appraise`.task_advance a
+        WHERE
+            project_id = #{projectId}
+          AND a.backOff = 1
+          AND a.submit_date = #{submit_date}
+          AND a.task_id = t.id
+          AND t.principal = #{handler}
+    </select>
+    <select id="queryType9" resultType="java.util.Map">
+        SELECT
+            f.id,
+            f.upload_location,
+            f.name,
+            u.`name` as upload_user,
+            CAST(
+                    f.upload_date AS CHAR ( 19 )) AS upload_date
+        FROM
+            `appraise`.scientific_term_files f,
+            `appraise`.`user` u
+        WHERE
+            scientific_term_id = #{auditKey}
+          AND u.id = f.upload_user
+    </select>
+    <select id="queryType10" resultType="java.util.Map">
+        SELECT
+            w.id,
+            w.workday,
+            u.username as username,
+            u.`name` AS `user`,
+            t.number,
+            t.`name`
+        FROM
+            `appraise`.scientific_task_workday w,
+            `appraise`.scientific_task t,
+            `appraise`.`user` u
+        WHERE
+           w.scientific_task_id = t.id
+          AND w.submit = 1
+          AND u.id = w.user_id
+          and w.submit_date = #{submit_date}
+          AND t.scientific_id = #{projectId}
+          and t.creator = #{handler}
+    </select>
+    <select id="queryType12" resultType="java.util.Map">
+        select
+            id,`number`,`name`,state,designer,checker,principal,planned_publication_date
+        from
+            `appraise`.volume
+        where project_id = #{projectId}
+          and tec = #{tec}
+          and plan_publication_check = 0
+    </select>
+    <select id="queryType13" resultType="java.util.Map">
+        select
+            id,`number`,`name`,`state`,designer,checker,principal,reason
+        from
+            `appraise`.check_plan_volume
+        where project_id = #{projectId}
+          and tec = #{tec}
+          and delay = 0
+    </select>
+</mapper>

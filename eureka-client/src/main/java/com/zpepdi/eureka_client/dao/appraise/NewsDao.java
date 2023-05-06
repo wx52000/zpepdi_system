@@ -76,6 +76,8 @@ public interface NewsDao {
 
   void checkPlanAdjustReturn(Map<String,Object> map);
 
+  void checkConfirmDelay(@Param("map") Map<String, Object> map,@Param("check")Integer check);
+
   void checkLog0(@Param("map") Map<String,Object> map,
              @Param("check") Integer check, @Param("id")Integer id);
 
@@ -130,6 +132,10 @@ public interface NewsDao {
   List<Map<String,Object>> planAdjustGeneral(Integer id);
 
   List<Map<String,Object>> planAdjustVolumeGeneral(Map<String,Object> map);
+
+  List<Map<String,Object>> confirmDelay(Integer id);
+
+  List<Map<String,Object>> confirmDelayList(Map<String,Object> map);
   //查询个人审核的实现的记录
   List<Map<String,Object>> adminQueryApply(Integer userId);
 
@@ -175,7 +181,9 @@ public interface NewsDao {
 
   boolean isWithdrawOverAll7Or8(Map<String,Object> map);
 
+  List<Map<String,Object>> queryType0();
 
+  List<Map<String,Object>> queryType0List(Map<String,Object> map);
 
 }
 

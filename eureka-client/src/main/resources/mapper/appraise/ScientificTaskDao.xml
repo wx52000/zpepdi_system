@@ -174,4 +174,28 @@
           AND w.submit_date = #{map.date}
           AND w.user_id = u.id
     </select>
+    <select id="getCheckerList" resultType="java.util.Map">
+        select generalId, general, true as disabled
+        from scientific_project
+        where  id = #{id}
+    </select>
+    <select id="queryProjectByTask" resultType="java.util.Map">
+        SELECT
+            sp.id,
+            sp.number,
+            sp.`name`,
+            sp.generalId,
+            sp.general,
+            u.id as checkerId,
+            u.username as checkerNumber,
+            u.`name` as checkerName
+        FROM scientific_task_workday stw,
+             scientific_task st,
+             scientific_project sp,
+             `user` u
+        WHERE stw.id = #{taskId}
+          AND stw.scientific_task_id = st.id
+          AND st.scientific_id = sp.id
+          AND stw.submit_checker = u.id
+    </select>
 </mapper>

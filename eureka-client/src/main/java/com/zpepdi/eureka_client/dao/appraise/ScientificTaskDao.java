@@ -17,8 +17,12 @@ public interface ScientificTaskDao {
 
     List<Map<String,Object>> queryTask(@Param("userId")Integer userId, @Param("id")Integer id);
 
+    List<Map<String,Object>> getCheckerList(Integer id);
+
     List<Map<String,Object>> queryTaskBySubmitDate(@Param("userId")Integer userId, @Param("map")Map<String,Object> map);
 
     void taskSubmit(Map<String,Object> map);
+
+    Map<String,Object> queryProjectByTask(Integer taskId);
 
 }

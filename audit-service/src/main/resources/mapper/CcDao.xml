@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.audit_service.dao.CcDao">
+    <insert id="addCc" useGeneratedKeys="true" keyProperty="map.key">
+        insert ignore into cc(audit_information_id, initiator_id, initiator_username, initiator_name,
+            accepter_id, accepter_username, accepter_name, initiate_time)
+        values(#{map.id}, #{user.id}, #{user.username}, #{user.name}, #{map.userId},
+                #{map.username}, #{map.name}, now())
+    </insert>
+    <delete id="delCc">
+        delete
+        from cc
+        where id = #{id}
+    </delete>
+    <select id="queryBySelf" resultType="java.util.Map">
+        SELECT
+            ai.id,
+            ai.state,
+            ai.initiator_id,
+            ai.initiator_username,
+            ai.initiator_name,
+            cast(ai.initiate_time as char(10)) as initiate_time,
+            ai.information,
+            ai.type,
+            ai.alive,
+            ai.is_seen,
+            ri.id AS atr_id,
+            ri.auditor_id,
+            ri.auditor_username,
+            ri.auditor_name,
+            ri.remark,
+            ri.state AS atr_remark,
+            cc.initiator_id as cc_userId,
+            cc.initiator_username as cc_username,
+            cc.initiator_name as cc_name,
+            cc.accepter_id,
+            cc.accepter_username,
+            cc.accepter_name
+        FROM
+            audit_information ai,
+            auditor_information ri,
+            cc
+        WHERE
+            cc.accepter_id = #{id}
+        and cc.audit_information_id = ai.id
+        and ai.id = ri.audit_information_id
+    </select>
+    <select id="queryById" resultType="java.util.Map">
+        select
+            cc.id,
+            cc.initiator_id as cc_userId,
+            cc.initiator_username as cc_username,
+            cc.initiator_name as cc_name,
+            cc.accepter_id,
+            cc.accepter_username,
+            cc.accepter_name,
+            Cast(cc.initiate_time as char(10)) as initiate_time
+        from cc
+        where cc.audit_information_id = #{id}
+    </select>
+</mapper>

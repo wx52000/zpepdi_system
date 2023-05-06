@@ -13,6 +13,7 @@
         <option value="$PROJECT_DIR$/test/pom.xml" />
         <option value="$PROJECT_DIR$/qj_airhammer/pom.xml" />
         <option value="$PROJECT_DIR$/qj_heating/pom.xml" />
+        <option value="$PROJECT_DIR$/audit-service/pom.xml" />
       </list>
     </option>
   </component>

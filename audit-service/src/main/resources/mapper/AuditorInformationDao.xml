@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.audit_service.dao.AuditorInformationDao">
+    <insert id="addAuditor">
+        insert into auditor_information(audit_information_id, state,
+                                        auditor_id, auditor_username, auditor_name )
+        values (#{id}, 0, #{auditor_id}, #{auditor_username}, #{auditor_name})
+    </insert>
+    <insert id="renew">
+        insert into auditor_information(audit_information_id, state,
+                                        auditor_id, auditor_username, auditor_name, audit_time )
+        values (#{id}, #{check}, #{auditor_id}, #{auditor_username}, #{auditor_name}, #{check_time})
+    </insert>
+    <update id="updateAuditor">
+        update auditor_information
+        set state = #{map.check}, remark = #{map.remark},  audit_time = now()
+        where audit_information_id = #{map.id}
+        and auditor_id = #{user.id}
+    </update>
+    <select id="queryBySelf" resultType="java.util.Map">
+        SELECT
+        ai.id,
+        ai.state,
+        ai.initiator_id,
+        ai.initiator_username,
+        ai.initiator_name,
+        cast(ai.initiate_time as char(10)) as initiate_time,
+        ai.information,
+        ai.type,
+        ai.alive,
+        ai.is_seen,
+        ri.id AS atr_id,
+        ri.auditor_id,
+        ri.auditor_username,
+        ri.auditor_name,
+        ri.remark,
+        ri.state AS atr_remark
+        FROM
+        audit_information ai,
+        auditor_information ri
+        WHERE
+        ri.auditor_id = #{userId}
+        AND ri.audit_information_id = ai.id
+        and ai.alive = 1
+        and ai.state = 0
+    </select>
+    <select id="queryBySelfDown" resultType="java.util.Map">
+        SELECT
+        ai.id,
+        ai.state,
+        ai.initiator_id,
+        ai.initiator_username,
+        ai.initiator_name,
+        cast(ai.initiate_time as char(10)) as initiate_time,
+        ai.information,
+        ai.type,
+        ai.alive,
+        ai.is_seen,
+        ri.id AS atr_id,
+        ri.auditor_id,
+        ri.auditor_username,
+        ri.auditor_name,
+        ri.remark,
+        ri.state AS atr_remark
+        FROM
+        audit_information ai,
+        auditor_information ri
+        WHERE
+        ri.auditor_id = #{userId}
+        AND ri.audit_information_id = ai.id
+        and ai.alive = 1
+        and ai.state = 1
+    </select>
+</mapper>

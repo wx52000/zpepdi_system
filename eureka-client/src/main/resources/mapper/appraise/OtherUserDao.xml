@@ -44,7 +44,6 @@
             p.id = n.project_id
           AND n.check_other_handler = #{id}
           AND `check_other` = 0
-          AND `check` = 0
     </select>
     <select id="queryById" resultType="java.util.Map">
         select username, u.`name`, paw_state, o.`name` as office

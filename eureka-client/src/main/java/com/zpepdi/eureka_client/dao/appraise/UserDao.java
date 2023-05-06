@@ -63,6 +63,8 @@ public interface UserDao {
 
     List<Map<String,Object>> workday(Map<String,Object> map);
 
+    List<Map<String,Object>> conditionalWorkday(@Param("list") String list, @Param("map") Map<String,Object> map);
+
     List<Map<String,Object>> workdayByManager(@Param("id")Integer id, @Param("map")Map<String,Object> map);
 
     List<Map<String,Object>> workdayByGeneral( @Param("userId") Integer userId,
@@ -133,6 +135,8 @@ public interface UserDao {
     List<Map> queryByTec(Integer id);
     //用于设总选择时模糊查询
     List<Map> queryByName(User user);
+
+    List<Map<String,Object>> queryTask(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
     //用于excel导入时的精确查询
     Integer selectByName(User user);
 

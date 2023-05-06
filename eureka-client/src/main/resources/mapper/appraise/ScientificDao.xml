@@ -30,6 +30,8 @@
         p.number,
         p.`name`,
         p.general,
+        u.id as generalId,
+        u.username as generalUsername,
         p.workday,
         IF
         ( p.generalId = #{userId}, TRUE, FALSE ) AS generalRole,
@@ -39,8 +41,10 @@
         FROM
         scientific_project p
         LEFT JOIN scientific_leader l ON p.id = l.scientific_id
-        AND l.leader = #{userId}
+        AND l.leader = #{userId},
+        user u
         WHERE
         p.id = #{id}
+        and u.id = p.generalId
     </select>
 </mapper>

@@ -12,6 +12,7 @@
         <module name="test" />
         <module name="qj_airhammer" />
         <module name="contract-charge" />
+        <module name="audit-service" />
         <module name="api-gateway" />
         <module name="feign-service" />
         <module name="eureka-server" />

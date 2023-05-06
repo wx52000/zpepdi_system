@@ -12,6 +12,8 @@ import java.util.Map;
 @Repository
 public interface ProjectDao {
 
+    //冻结6个月内未关联合同项目
+    void frozenProject();
     Map<String,Object> queryUser(@Param("userId")Integer userId, @Param("id")Integer id);
     // 查询角色在项目中的权限 返回1则管理员 2设总 3主设人 null则无权限
     Integer queryProjectRole(@Param("userId") Integer userId,
@@ -47,6 +49,8 @@ public interface ProjectDao {
     List<Map<String,Object>> sameName(Integer id);
 
     void sameNameInsert( Map<String,Object> map);
+
+    Map<String,Object> queryBaseById(Integer id);
 
     Map<String,Object> queryById(@Param("userId") Integer userId,@Param("id") Integer id);
 
@@ -94,7 +98,7 @@ public interface ProjectDao {
 //作为主设人查询
     List<Map> queryByPrincipal(User user);
     List<Map> queryProByPrincipal(User user);
-    List<Map> queryDesigner(User user);
+
 //作为设计人查询
     List<Map> queryByDesigner(User user);
 //作为互校人查询
@@ -135,13 +139,9 @@ public interface ProjectDao {
 
     List<Map<String,Object>> queryDeclare(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 
-    void setDeclare(@Param("id")Integer id, @Param("list") List<Map<String,Object>> list,@Param("date")String date);
+    void setDeclare(@Param("id")Integer id, @Param("map") Map<String,Object> map);
 
     void resetDeclare(Map<String,Object> map);
-
-    Integer declareDay();
-
-    void setDeclareDay(Integer day);
 
     Integer confirmDay();
 

@@ -1,5 +1,5 @@
-#eurekaIp : 10.136.238.28
-eurekaIp : localhost
+eurekaIp : 10.136.238.28
+#eurekaIp : localhost
 spring:
   application:
     name: gateway-service
@@ -43,6 +43,10 @@ spring:
           uri: lb://contract-charge
           predicates:
             - Path=/contract/**
+        - id: audit-service
+          uri: lb://audit-service
+          predicates:
+            - Path=/audit/**
 #        单个超时
 #          metadata:
 #            response-timeout: 7000

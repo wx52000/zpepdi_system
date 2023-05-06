@@ -14,7 +14,8 @@ public interface ScientificTaskService {
 
     Result queryTask(Integer userId,Integer id);
 
+    Result getCheckerList(Integer id);
     Result queryTaskBySubmitDate(Integer userId,Map<String,Object> map);
 
-    Result taskSubmit(Map<String,Object> map);
+    Result taskSubmit(Integer userId, Map<String,Object> map);
 }

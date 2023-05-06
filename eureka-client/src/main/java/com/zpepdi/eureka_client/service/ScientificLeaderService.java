@@ -25,7 +25,7 @@ public interface ScientificLeaderService {
 
     Result addTermByLeader(Integer userId, Map<String,Object> map);
 
-    Result setToCheck(Integer id);
+    Result setToCheck(Integer userId, Integer id);
 
     Result uploadFile(Integer userId, MultipartFile file, Map<String, Object> map);
 

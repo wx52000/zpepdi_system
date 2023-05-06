@@ -59,7 +59,7 @@
         `type` = values(`type`),
         `create_time` = values(`create_time`)
     </insert>
-    <update id="setProjectChildren">
+    <update id="setProjectChildren" useGeneratedKeys="true" keyProperty="map.childrenId">
         insert into project_children
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null and id != ''">
@@ -181,7 +181,7 @@
         planned_date = values(`planned_date`),
         `note` = values(`note`)
     </update>
-    <insert id="setOtherProjectNote" parameterType="map">
+    <insert id="setOtherProjectNote" parameterType="map" useGeneratedKeys="true" keyProperty="childrenId">
         insert into project_note
         <trim prefix="(" suffix=")" suffixOverrides=",">
             `project_id` , `check`, `check_handler`, `office_id`, `check_other`, `type`, applicant, application_time,
@@ -371,7 +371,7 @@
         set spider = #{spider}
         where id = #{id}
     </update>
-    <update id="distributeTecWorkday">
+    <update id="distributeTecWorkday" useGeneratedKeys="true" keyColumn="id" keyProperty="map.keyId">
         insert into workday_tec_distribute
         <trim prefix="(" suffix=")" suffixOverrides=",">
             project_id,tec,
@@ -398,6 +398,7 @@
         manage = values(manage),
         volume = values(volume),
         `check` = values(`check`),
+        `time` = now(),
         `handler` = values(`handler`)
     </update>
     <select id="getCheckerList" resultType="java.util.Map">
@@ -480,7 +481,7 @@
         where id = #{id}
     </update>
     <update id="setDeclare">
-        <foreach collection="list" item="item" separator=";">
+        <foreach collection="map.list" item="item" separator=";">
             update
             <if test="item.task == 0 and item.advance == 0">
                 volume_workday
@@ -494,15 +495,10 @@
             <if test="item.task == 1 and item.advance == 1">
                 task_advance
             </if>
-            set submit = 1, submit_date = #{date}
+            set submit = 1, submit_date = #{map.declareDate}
             where
             id = #{item.id}
         </foreach>
-    </update>
-    <update id="setDeclareDay">
-        update declare_day
-        set `day` = #{day}
-        where id = 1
     </update>
     <update id="setConfirmDay">
         update confirm_day
@@ -544,7 +540,17 @@
         set backOff = 1, backOff_time = now(), backOff_user = #{userId}
         where id = #{map.id}
     </update>
-
+    <update id="frozenProject">
+        UPDATE project
+        SET frozen = 1, frozen_reason = "项目超出6个月未关联合同,已被系统冻结"
+        WHERE
+        ADDDATE( create_time, INTERVAL 6 MONTH ) &lt; NOW()
+        AND frozen = 0
+          AND NOT EXISTS(
+                SELECT 1
+                FROM project_relative_contract prc
+                WHERE prc.project_id = p.id)
+    </update>
     <select id="queryProjectRole" resultType="java.lang.Integer" statementType="CALLABLE">
         call queryProjectRole(#{userId,mode=IN}, #{projectId,mode = IN})
     </select>
@@ -916,9 +922,6 @@
                 #{name},
                 REPLACE(v.principal, ";", ","))
     </select>
-    <select id="queryDesigner" resultType="java.util.Map">
-
-    </select>
     <select id="queryByDesigner" resultType="java.util.Map">
         SELECT DISTINCT p.id   AS pid,
                         p.NAME AS projectName,
@@ -978,6 +981,22 @@
         ORDER BY field(v.state, '正在校审', '正在设计'),
                  p.NAME,
                  v.number
+    </select>
+    <select id="queryBaseById" resultType="java.util.Map">
+        SELECT p.id,
+               p.`name`,
+               p.state,
+               p.`number`,
+               p.general,
+               u.username as generalNumber,
+               p.generalId,
+               p.control,
+               p.frozen,
+               p.frozen_reason
+        from project p,
+             user u
+        where p.id = #{id}
+        and p.generalId = u.id
     </select>
     <select id="queryById" resultType="java.util.Map">
         SELECT p.id,
@@ -2586,14 +2605,15 @@
     <select id="queryUsed" resultMap="queryUsed">
         SELECT v.project_id                                                                                         AS id,
                v.tec,
+               v.frozen,
+               v.frozen_reason,
                IFNULL(v.manage, 0)                                                                                  AS manage,
                IFNULL(v.volume, 0)                                                                                  AS volume,
                IFNULL(v.amount, 0)                                                                                  AS amount,
                IFNULL(v.manageUsed, 0)                                                                              AS manageUsed,
                IFNULL(v.volumeUsed, 0)                                                                              AS volumeUsed,
                IFNULL(v.backupUsed, 0) +
-               IFNULL(SUM(t1.designer_workday + t1.principal_workday + t1.checker_workday + t1.headman_workday),
-                      0)                                                                                            AS backupUsed,
+               IFNULL(SUM(t1.designer_workday + t1.principal_workday + t1.checker_workday + t1.headman_workday),0)  AS backupUsed,
                v.`check`,
                v.tecCheck,
                r.designer * 100                                                                                     AS designer,
@@ -2605,6 +2625,8 @@
         FROM (
                  SELECT v.project_id,
                         v.tec,
+                        v.frozen,
+                        v.frozen_reason,
                         v.manage,
                         v.volume,
                         v.amount - v.manageDeduct - v.volumeDeduct - v.backupDeduct AS amount,
@@ -2620,6 +2642,8 @@
                  FROM (
                           SELECT v.project_id,
                                  v.tec,
+                                 v.frozen,
+                                 v.frozen_reason,
                                  v.manage,
                                  v.volume,
                                  v.amount,
@@ -2633,6 +2657,8 @@
                           FROM (
                                    SELECT v.project_id,
                                           v.tec,
+                                          v.frozen,
+                                          v.frozen_reason,
                                           v.manage,
                                           v.volume,
                                           IFNULL(SUM(ta.amount), 0) + v.amount AS amount,
@@ -2643,6 +2669,8 @@
                                    FROM (
                                             SELECT v.project_id,
                                                    v.tec,
+                                                   v.frozen,
+                                                   v.frozen_reason,
                                                    t.manage,
                                                    t.volume,
                                                    ifnull(wt.amount, 0) + ifnull(sum(b.workday), 0) AS amount,
@@ -2653,15 +2681,21 @@
                                             FROM (
                                                      SELECT t.project_id,
                                                             t.tec,
+                                                            t.frozen,
+                                                            t.frozen_reason,
                                                             t.volumeUsed,
                                                             IFNULL(SUM(w.workday), 0) AS backupUsed
                                                      FROM (
                                                               SELECT t.project_id,
                                                                      t.tec,
+                                                                     t.frozen,
+                                                                     t.frozen_reason,
                                                                      IFNULL(SUM(w.workday), 0) AS volumeUsed
                                                               FROM (
                                                                        SELECT project_id,
-                                                                              volume_tec AS tec
+                                                                              volume_tec AS tec,
+                                                                              t.frozen,
+                                                                              t.frozen_reason
                                                                        FROM workday_tec t,
                                                                             workday_tec_principal p
                                                                        WHERE p.workday_tec_id = t.id
@@ -2725,6 +2759,9 @@
     </select>
     <select id="queryUsedByTec" resultType="java.util.Map">
         SELECT DISTINCT p.mold,
+                        p.number,
+                        p.name,
+                        p.id as projectId,
                         IFNULL(v.manage, 0) - IFNULL(deduct.manageDeduct, 0) AS manage,
                         IFNULL(v.volume, 0) - IFNULL(deduct.volumeDeduct, 0) AS volume,
                         v.amount - IFNULL(deduct.manageDeduct, 0) - IFNULL(deduct.volumeDeduct, 0) -
@@ -2845,6 +2882,9 @@
                v.name,
                v.designer,
                v.checker,
+                IF
+            ( v.actual_publication_date &gt; "2023-04-06" ||
+             v.state in ("尚未确定","尚未开展","正在设计", "正在校审") ,TRUE,FALSE ) as required,
                ifnull(w.workday, 0) as workday,
                w.submit,
                v.tips
@@ -2888,7 +2928,7 @@
                  left join volume_user vu on v.id = vu.volume_id,
              volume_workday w
         WHERE v.id = w.volume_id
-          AND v.project_id = #{map.id}
+          AND v.project_id = #{map.projectId}
           AND w.handler = #{userId}
           AND w.submit IN (0, 3)
           AND w.`check` = 1
@@ -2918,7 +2958,7 @@
              volume_workday w,
              volume_workday_high h
         WHERE v.id = w.volume_id
-          AND v.project_id = #{map.id}
+          AND v.project_id = #{map.projectId}
           AND w.handler = #{userId}
           and h.volume_id = v.id
           and h.submit in (0, 3)
@@ -2950,39 +2990,10 @@
                  left join `user` u2 on t.checker = u2.id
                  left join `user` u3 on t.principal = u3.id
                  left join `user` u4 on t.headman = u4.id
-        WHERE t.project_id = #{map.id}
+        WHERE t.project_id = #{map.projectId}
           AND t.`handler` = #{userId}
           and t.`end` is not null
           AND submit IN (0, 3)
-        union
-        SELECT a.id,
-               t.number,
-               t.`name`,
-               IFNULL(t.designer_workday, 0) + IFNULL(t.checker_workday, 0) + IFNULL(t.principal_workday, 0) +
-               IFNULL(t.headman_workday, 0) AS workday,
-               u1.`name`                    as designerName,
-               null                         as checkerName,
-               null                         as principalName,
-               null                         as headmanName,
-               t.designer                   as designerId,
-               null                         as checkerId,
-               null                         as principalId,
-               null                         as headmanId,
-               a.advance                    AS designer,
-               0                            AS checker,
-               0                            AS principal,
-               0                            AS headman,
-               t.type                       AS type,
-               1                            AS task,
-               1                            as advance
-        FROM project_task t
-                 left join `user` u1 on t.designer = u1.id,
-             task_advance a
-        WHERE project_id = #{map.id}
-          AND `handler` = #{userId}
-          and t.`end` is null
-          AND a.submit IN (0, 3)
-          and a.task_id = t.id
     </select>
     <select id="queryDeclare" resultType="java.util.Map">
         SELECT w.id,
@@ -3075,11 +3086,6 @@
           and t.`end` is null
           and a.submit_date = #{map.date}
           and a.task_id = t.id
-    </select>
-    <select id="declareDay" resultType="java.lang.Integer">
-        select `day`
-        from declare_day
-        where id = 1
     </select>
     <select id="confirmDay" resultType="java.lang.Integer">
         select `day`
@@ -3715,11 +3721,13 @@
         tab.nowMonthUp,
         tab.allZero,
         tab.completeZero,
+        tab.planZero,
         tab.comRatio,
         tab.incompleteZero,
         ut.`time`
-        from
-        (SELECT
+        FROM
+        (
+        SELECT
         p.id,
         p.number,
         p.`name`,
@@ -3730,24 +3738,61 @@
         IFNULL( n1.num, 0 ) AS nowMonthUp,
         IFNULL( a.num, 0 ) AS allZero,
         IFNULL( c.num, 0 ) AS completeZero,
+        IFNULL((
+        SELECT
+        count( id )
+        FROM
+        (
+        SELECT
+        cpv.volume_id AS id
+        FROM
+        check_plan_volume cpv
+        WHERE
+        cpv.check_month = #{date}
+        AND cpv.project_id = p.id
+        AND cpv.number NOT LIKE "%+%"
+        AND cpv.delay = - 1 UNION
+        SELECT
+        v.id
+        FROM
+        volume v
+        WHERE
+        v.planned_publication_date &lt; DATE_ADD(concat(#{date},"-01"),INTERVAL 1 month)
+          AND v.planned_publication_date &gt;= concat(#{date},"-01")
+        AND v.project_id = p.id
+        AND NOT EXISTS (
+        SELECT
+        1
+        FROM
+        check_plan cp
+        LEFT JOIN major_contrast_technology m ON cp.tec = m.big_name
+        WHERE
+        IFNULL( m.small_name, cp.tec ) = v.tec
+        AND cp.plan_month = #{date}
+        AND cp.project_id = p.id
+        )
+        ) t
+        ),
+        0
+        ) AS planZero,
         IFNULL( c.num, 0 )/ IFNULL( a.num, 0 ) AS comRatio,
         IFNULL( a.num, 0 ) - IFNULL( c.num, 0 ) AS incompleteZero
         FROM
         (
-            SELECT
-                p.id,
-                p.number,
-                p.`name`,
-                p.design_size,
-                p.control,
-                cast(p.start_time as char(10)) as start_time
-            FROM
-                project p
-            WHERE
-
-                RIGHT ( p.number, 1 ) IN ( "Z", "S" )
-            GROUP BY
-                p.id
+        SELECT
+        p.id,
+        p.number,
+        p.`name`,
+        p.design_size,
+        p.control,
+        cast(
+        p.start_time AS CHAR ( 10 )) AS start_time
+        FROM
+        project p
+        WHERE
+        RIGHT ( p.number, 1 ) IN ( "Z", "S" )
+        GROUP BY
+        p.id
         ) AS p
         LEFT JOIN (
         SELECT
@@ -3803,15 +3848,19 @@
         WHERE
         p.id = v.project_id
         AND v.actual_publication_date IS NOT NULL
-        AND v.actual_publication_date &lt;&gt; ''
+        AND v.actual_publication_date &lt;&gt;''
         AND v.number NOT LIKE "%+%"
         AND RIGHT ( p.number, 1 ) IN ( "Z", "S" )
         GROUP BY
         p.id
         ) AS c ON p.id = c.id
-        ) tab LEFT JOIN user_defined_top ut on ut.top_id = tab.id
-        AND user_id = #{userId} AND menus_id = 18
-        order by ut.time desc,tab.start_time desc
+        ) tab
+        LEFT JOIN user_defined_top ut ON ut.top_id = tab.id
+        AND user_id = #{userId}
+        AND menus_id = 18
+        ORDER BY
+        ut.time DESC,
+        tab.start_time DESC
     </select>
     <select id="projectProgressById" resultType="java.util.Map">
         SELECT p.id,
@@ -3918,6 +3967,7 @@
                                volume v
                                    left join check_plan c on v.tec = c.tec
                                                                  and v.project_id = c.project_id
+                                   AND c.plan_month = #{date}
                                    LEFT JOIN major_contrast_technology m on v.tec = m.small_name,
                                workday_tec t,
                                workday_tec_principal tp
@@ -3998,14 +4048,14 @@
                         m.id AS mid
                     FROM
                         check_plan c
-                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name ,
-                        check_plan_volume v
-
+                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name
+                            left join
+                        check_plan_volume v on v.check_plan_id = c.id
+                        AND v.number NOT LIKE "%+%"
+                        and v.delay in (-1,2)
                     WHERE
                         c.project_id = #{id}
                       AND c.plan_month = #{date}
-                      AND v.number NOT LIKE "%+%"
-                      AND v.check_plan_id = c.id
                     GROUP BY
                         c.id
                 ) AS n
@@ -4044,14 +4094,14 @@
                         m.id AS mid
                     FROM
                         check_plan c
-                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name ,
-                        check_plan_volume v
-
+                            LEFT JOIN major_contrast_technology m ON c.tec = m.small_name
+                            left join
+                        check_plan_volume v on v.check_plan_id = c.id
+                            AND v.number LIKE "%+%"
+                            and v.delay in (-1,2)
                     WHERE
                         c.project_id = #{id}
                       AND c.plan_month = #{date}
-                      AND v.number LIKE "%+%"
-                      AND v.check_plan_id = c.id
                     GROUP BY
                         c.id
                 ) AS n
@@ -4161,6 +4211,14 @@
         v.plan_confirm,
         w.workday,
         v.remark,
+        v.important,
+        EXISTS (SELECT
+        1
+        FROM check_plan_volume
+        WHERE volume_id  = v.id) as check_state,
+        (select IFNULL(max( check_month ) = #{nowMonth},FALSE)
+            FROM check_plan_volume
+            where volume_id = v.id) as check_month,
         u.name as confirm_user,
         cast(v.confirm_time as char(10))confirm_time
         FROM
@@ -4201,10 +4259,14 @@
                v.plan_confirm,
                w.workday,
                v.remark,
+               v.important,
                EXISTS (SELECT
                            1
                        FROM check_plan_volume
                        WHERE volume_id  = v.id) as check_state,
+               (Select IFNULL(max( check_month ) = #{nowMonth},FALSE)
+                   FROM check_plan_volume
+                where volume_id = v.id) as check_month,
                u.name as confirm_user,
                cast(v.confirm_time as char(10))confirm_time
         FROM `volume` v
@@ -4230,10 +4292,14 @@
                v.plan_confirm,
                w.workday,
                 v.remark,
+               v.important,
                EXISTS (SELECT
                            1
                        FROM check_plan_volume
                        WHERE volume_id  = v.id) as check_state,
+               (Select IFNULL(max( check_month ) = #{nowMonth},FALSE)
+                FROM check_plan_volume
+                where volume_id = v.id) as check_month,
                 u.name as confirm_user,
                cast(v.confirm_time as char(10))confirm_time
         FROM `volume` v
@@ -4261,10 +4327,14 @@
         v.plan_confirm,
         w.workday,
         v.remark,
+        v.important,
         EXISTS (SELECT
         1
         FROM check_plan_volume
         WHERE volume_id  = v.id) as check_state,
+        (select IFNULL(max( check_month ) = #{nowMonth},FALSE)
+        FROM check_plan_volume
+        where volume_id = v.id) as check_month,
         u.name as confirm_user,
         cast(v.confirm_time as char(10))confirm_time
         FROM
@@ -4290,6 +4360,7 @@
          pv.project_id = #{id}
         AND pv.check_month = #{date}
         AND v.id = pv.volume_id
+        and pv.delay in (-1, 2)
         ),
         DATE_FORMAT( planned_publication_date, '%Y-%m' ) = #{date})
         <if test="type == 1">
@@ -4346,8 +4417,6 @@
           and stage = #{stage}
           and grade = #{grade}
     </select>
-
-
     <select id="drawlineInfo" resultType="java.util.Map">
         SELECT
         IFNULL( n0.num, 0 ) + IFNULL( n1.num, 0 ) AS allNowComplete,
@@ -4651,7 +4720,7 @@ as t group by date
     <select id="getdateInfo" resultType="java.util.Map">
         SELECT
             DATE_FORMAT(max(v.planned_publication_date), '%Y-%m' ) AS maxDate,
-            DATE_FORMAT(max(v.actual_publication_date), '%Y-%m' ) AS minDate
+            DATE_FORMAT(min(v.actual_publication_date), '%Y-%m' ) AS minDate
         FROM
             volume v
         where project_id=#{id}

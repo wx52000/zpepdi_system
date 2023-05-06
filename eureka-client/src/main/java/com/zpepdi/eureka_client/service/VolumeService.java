@@ -102,6 +102,10 @@ public interface VolumeService {
 
     Result sentConfirm(Integer userId,Map<String,Object> map);
 
+    Result sentConfirmDelay(Integer userId,Map<String,Object> map);
+
+    Result setVolumeImportant(Map<String,Object> map);
+
     Result timingConfirmWorkday(String date);
 
 }

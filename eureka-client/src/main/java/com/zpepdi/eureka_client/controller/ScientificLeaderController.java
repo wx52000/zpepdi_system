@@ -55,8 +55,8 @@ public class ScientificLeaderController {
     }
 
     @RequestMapping("setToCheck")
-    public Result setToCheck(@RequestHeader Integer id) {
-        return scientificLeaderService.setToCheck(id);
+    public Result setToCheck(@UserId Integer userId, @RequestHeader Integer id) {
+        return scientificLeaderService.setToCheck(userId, id);
     }
 
     @RequestMapping("uploadFile")

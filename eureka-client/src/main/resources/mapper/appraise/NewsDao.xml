@@ -291,8 +291,8 @@
                 </trim>
             where project_id = #{item.id};
             <if test="check == 1 and item.typeNote == 1">
-                update checker_amount a left join checker_dep d on a.cd_id = d.id
-                set surplus = surplus-${item.workday}
+                update checker_used a left join checker_dep d on a.cd_id = d.id
+                set used = used+${item.workday}
                 where d.user_id = #{id} and d.did = #{item.did};
             </if>
             <if test="check != 2">
@@ -424,6 +424,13 @@
         update volume v, volume_plan_log l
         set v.plan_publication_check = 2, v.planned_publication_date = l.plan_publiction_date
         where v.id = #{item.id} and v.id = l.volume_id
+        </foreach>
+    </update>
+    <update id="checkConfirmDelay">
+        <foreach collection="map.list" item="item" separator=";">
+            update check_plan_volume
+            set delay = #{check}
+            where id = #{item.id}
         </foreach>
     </update>
     <select id="count" resultType="java.lang.Integer">
@@ -696,6 +703,14 @@
                 and v.project_id = p.id
                 and p.generalId = #{id}
                 GROUP BY project_id, tec
+                UNION ALL
+                select p.id
+                from check_plan_volume c,
+                     project p
+                where c.project_id = p.id
+                  and p.generalId = #{id}
+                  and c.delay = 0
+                GROUP BY p.id, c.tec
             ) AS tab
     </select>
     <select id="queryCountByType" resultType="java.util.Map">
@@ -1020,7 +1035,21 @@
                      GROUP BY
                          project_id,
                          tec
-                 ) as t) as count12
+                 ) as t) as count12,
+            (
+                SELECT
+                    count( c.id )
+                FROM
+                    check_plan_volume c,
+                    project p
+                WHERE
+                    c.project_id = p.id
+                  AND p.generalId = #{id}
+                  AND c.`delay` = 0
+                GROUP BY
+                    p.id,
+                    tec
+            ) as count13
     </select>
     <select id="queryByAdmin" resultMap="queryByAdminList">
       select 0 as type, p.id as id,
@@ -2862,5 +2891,39 @@
         and tec = #{tec}
         and plan_publication_check = 0
     </select>
-
+    <resultMap id="confirmDelay" type="map">
+        <result column="id" property="id"></result>
+        <result column="number" property="number"></result>
+        <result column="name" property="name"></result>
+        <result column="tec" property="tec"></result>
+        <result column="result" property="result"></result>
+        <result column="type" property="type"></result>
+        <collection property="list" column="id = id,tec,tec"
+                    javaType="ARRAYLIST" select="confirmDelayList"></collection>
+    </resultMap>
+    <select id="confirmDelay" resultMap="confirmDelay">
+        SELECT
+            p.id, v.tec, p.name, p.number,
+            FALSE AS result,
+            13 as `type`
+        FROM
+            check_plan_volume v,
+            project p
+        WHERE
+            delay = 0
+          AND v.project_id = p.id
+          AND p.generalId = #{id}
+        GROUP BY
+            project_id,
+            tec
+    </select>
+    <select id="confirmDelayList" resultType="java.util.Map">
+        select
+            id,`number`,`name`,`state`,designer,checker,principal,reason
+        from
+            check_plan_volume
+        where project_id = #{id}
+          and tec = #{tec}
+          and delay = 0
+    </select>
 </mapper>

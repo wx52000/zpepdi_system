@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.eureka_client.dao.appraise.DeclareDayDao">
+    <update id="setDeclareDay">
+        update declare_day
+        set `day` = #{day}
+        where id = 1
+    </update>
+    <update id="setDeclareDelay">
+        update declare_day
+        set `day` = #{day}
+        where id = 2
+    </update>
+    <select id="declareDay" resultType="java.lang.Integer">
+        select `day`
+        from declare_day
+        where id = 1
+    </select>
+    <select id="declareDelay" resultType="java.lang.Integer">
+        select `day`
+        from declare_day
+        where id = 2
+    </select>
+</mapper>

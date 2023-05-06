@@ -1,6 +1,9 @@
 package com.zpepdi.eureka_client.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.eureka_client.dao.appraise.ProjectTaskDao;
+import com.zpepdi.eureka_client.feign.AuditInformationFeign;
 import com.zpepdi.eureka_client.service.ProjectWorkdayService;
 import com.zpepdi.eureka_client.tools.DateUtils;
 import com.zpepdi.eureka_client.tools.TaskNumberUtils;
@@ -11,6 +14,7 @@ import com.zpepdi.eureka_client.dao.appraise.ProjectWorkdayDao;
 import com.zpepdi.eureka_client.dao.appraise.UserDao;
 import com.zpepdi.eureka_client.entity.ProjectExcelTec;
 import com.zpepdi.eureka_client.result.Result;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,6 +26,9 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
   private UserDao userDao;
   @Autowired
   private ProjectTaskDao projectTaskDao;
+
+  @Autowired
+  private AuditInformationFeign auditInformationFeign;
   @Autowired
   public void setWorkdayDao(ProjectWorkdayDao projectWorkdayDao){
     this.proWorkdayDao = projectWorkdayDao;
@@ -105,7 +112,7 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
         proWorkdayDao.setBWorkdayByGeneral(userId, map);
       }
     }else {
-      return Result.build(33,"设总工时未分配或设总工时违背审核");
+      return Result.build(33,"设总工时未分配或设总工时未被审核");
     }
     return Result.ok();
   }
@@ -142,6 +149,7 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
   }
 
   @Override
+  @Transactional
   public Result setProWorkday(Integer id, Map map) {
     Map<String,Object> map1 = proWorkdayDao.queryProWorkday(Integer.valueOf(map.get("project_id").toString()));
       double manage = 0;
@@ -170,6 +178,21 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
       if (map.get("manage") != "" || map.get("tec") != "" || map.get("backup") != "") {
       if (Double.parseDouble(map1.get("num").toString()) >= (manage + tec + backup)) {
         proWorkdayDao.setProWorkdayDistribut(id,map);
+        //此处用于发送审核
+        String name = map1.get("name").toString();
+        map.put("auditType", 0);
+        map.put("information",name + "项目工时初次分配");
+        map.put("number",map1.get("number"));
+        map.put("name", map1.get("name"));
+        map.put("auditKey", map.get("id"));
+        map.put("data", JSON.toJSONString(map));
+        map.put("auditor_id", map1.get("checkerId"));
+        map.put("auditor_username", map1.get("checkerNumber"));
+        map.put("auditor_name", map1.get("checkerName"));
+        List<Object> auditList = new ArrayList<>();
+        auditList.add(map.get("id"));
+        map.put("auditList",auditList);
+        auditInformationFeign.addAuditInformation(map);
       } else {
         return Result.build(500, "管理工时和专业工时备用工时总数超出");
       }
@@ -182,13 +205,31 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
   }
 
   @Override
+  @Transactional
   public Result setNewProWorkday(Integer id, Map map) {
     Integer projectId = Integer.valueOf(map.get("project_id").toString());
-    Map<String,Object> limitMap = proWorkdayDao.queryLimitAndAddSum(projectId);
-    if (limitMap == null){
-      return Result.build(498,"该项目工时未分配");
-    }
+//    项目额外工时申请限制
+//    Map<String,Object> limitMap = proWorkdayDao.queryLimitAndAddSum(projectId);
+//    if (limitMap == null){
+//      return Result.build(498,"该项目工时未分配");
+//    }
     proWorkdayDao.setNewProWorkday(id,map);
+    Map<String,Object> map1 = proWorkdayDao.queryProWorkday(projectId);
+    String name = map1.get("name").toString();
+    map.put("auditType", 1);
+    map.put("information",name + "项目工时额外申请");
+    map.put("number",map1.get("number"));
+    map.put("name", name);
+    map.put("initialWorkday",map1.get("num"));
+    map.put("auditKey", map.get("addId"));
+    map.put("data", JSON.toJSONString(map));
+    map.put("auditor_id", map1.get("checkerId"));
+    map.put("auditor_username", map1.get("checkerNumber"));
+    map.put("auditor_name", map1.get("checkerName"));
+    List<Object> auditList = new ArrayList<>();
+    auditList.add(map.get("addId"));
+    map.put("auditList",auditList);
+    auditInformationFeign.addAuditInformation(map);
     proWorkdayDao.setNewProWorkdayDistribut(id,map);
     if (map.get("tecWorkday") != null) {
       proWorkdayDao.setNewTecWorkday(id,projectId,
@@ -247,5 +288,21 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
   @Override
   public Result queryBackupList(Integer id) {
     return Result.ok(proWorkdayDao.queryBackupList(id));
+  }
+
+  @Override
+  public Result queryOfficeWorkday() {
+    int year = Calendar.getInstance().get(Calendar.YEAR);
+    List<Map<String,Object>> data = proWorkdayDao.queryOfficeWorkday(year);
+    if (data != null && data.size()> 0) {
+      for (Map<String, Object> mapData : data) {
+        if (mapData.get("office_id").toString().equals("4")) {
+          if (Double.parseDouble(mapData.get("sumYear").toString()) > 2700) {
+            return Result.ok(mapData);
+          }
+        }
+      }
+    }
+    return Result.ok(false);
   }
 }

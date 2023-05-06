@@ -15,16 +15,76 @@
         `user` u,
         department_produce dp
         where u.did = dp.did
+        and u.alive = 1
     </insert>
+    <update id="grantAuthority">
+        <foreach collection="list" item="item" separator=";">
+            update manage_assess_user
+            set role_user = #{id}
+            where user_id = #{item.id}
+        </foreach>
+    </update>
     <update id="setUserAssess">
-        INSERT IGNORE INTO manage_assess
-            (user_id,did,workday, remark, submit_date, handler, handler_time)
+        INSERT INTO manage_assess
+            (user_id,did,workday, remark, submit_date, `handler`, handler_time)
         values(#{map.id}, #{map.did}, #{map.workday}, #{map.remark}, #{map.submit_date},#{userId}, now())
         on duplicate key update
         workday = values(workday),
         remark = values(remark),
-        handler = values(handler),
+        `handler` = values(`handler`),
         handler_time = values(handler_time)
+    </update>
+    <update id="setUserAssessConfirm">
+        update manage_assess
+        set confirm = 1
+        where handler = #{userId}
+    </update>
+    <update id="setUserAssessTo0">
+        delete
+        from manage_assess
+        where
+         submit_date = #{date}
+        and handler = #{userId}
+    </update>
+    <update id="setUserAssessAvg">
+        INSERT IGNORE INTO manage_assess
+            ( user_id, did, workday, remark, submit_date, `handler`, handler_time )
+        SELECT
+            u.user_id,
+            u.did,
+            if(u.type=0,#{map.formal}, #{map.external}),
+            '' AS remark,
+            #{map.date},
+            #{userId},
+            now()
+        FROM
+            `manage_assess_user` u
+        WHERE
+                u.did = (
+                SELECT
+                    did
+                FROM
+                    `user`
+                WHERE
+                    id = #{userId})
+          and exists(select 1
+                     from `user` u,
+                          role_button rb
+                     where u.id = #{userId}
+                       AND pid = rb.role_id
+                       AND button_id = 14)
+        union
+        SELECT
+            u.user_id,
+            u.did,
+            if(u.type=0,#{map.formal}, #{map.external}),
+            '' AS remark,
+            #{map.date},
+            #{userId},
+            now()
+        FROM
+            `manage_assess_user` u
+        WHERE role_user = #{userId}
     </update>
     <select id="queryAssessSum" resultType="java.util.Map">
         SELECT
@@ -33,13 +93,13 @@
                         ( type = 0, count * 20, 0 )) AS formal,
             max(
                     IF
-                        ( type = 1, count * 15 ,0 )) AS `external`,
-	max(
-	IF
-	( type = 0, workday, 0 )) AS formalUsed,
-	max(
-	IF
-	( type = 1, workday, 0 )) AS externalUsed
+                        ( type = 1, count * 20 ,0 )) AS `external`,
+            max(
+            IF
+            ( type = 0, workday, 0 )) AS formalUsed,
+            max(
+            IF
+            ( type = 1, workday, 0 )) AS externalUsed
         FROM
             (
             SELECT
@@ -72,5 +132,36 @@
             GROUP BY
             mu.type
             ) t
+    </select>
+    <select id="queryNotAssessCount" resultType="java.util.Map">
+        SELECT MAX(IF(type = 0, count, 0)) as formal,
+               MAX(IF(type = 1, count, 0)) as `external`
+        FROM (SELECT COUNT(*) as `count`,
+                     type
+              FROM manage_assess_user mu
+              WHERE mu.did = (SELECT did FROM `user` u WHERE u.id = #{userId} )
+                AND NOT EXISTS(
+                      SELECT 1
+                      FROM manage_assess m
+                      WHERE m.user_id = mu.user_id
+                        AND m.submit_date = #{date})
+                    and exists(select 1
+                        from `user` u,
+                             role_button rb
+                        where u.id = #{userId}
+                          AND pid = rb.role_id
+                          AND button_id = 14)
+              GROUP BY `type`
+              union
+              SELECT COUNT(*) as `count`,
+                     type
+              FROM manage_assess_user mu
+              WHERE mu.role_user = #{userId}
+                AND NOT EXISTS(
+                      SELECT 1
+                      FROM manage_assess m
+                      WHERE m.user_id = mu.user_id
+                        AND m.submit_date = #{date})
+              GROUP BY `type`)t
     </select>
 </mapper>
