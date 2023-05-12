@@ -342,26 +342,27 @@ public class FileUtil {
             map1.put("gdname",gd.getGdname());
             map1.put("ggtype",gd.getValue1());
             map1.put("cailiao",gd.getValue2());
+            map1.put("jiezhi",gd.getValue3());
+            map1.put("bzhao",gd.getBzhao());
             map1.put("ssliusu",gd.getRecommend2());
+            map1.put("tjliusu",gd.getRecommend());
             map1.put("liuliang",gd.getPipingG());
+            map1.put("tjliuliang",gd.getPipingQ());
             map1.put("yali",gd.getYali());
             map1.put("wendu",gd.getWendu());
             map1.put("birong",gd.getBirong());
             //图片
-            map1.put("image", Pictures.ofLocal(templateFilePath+"img\\njwai.png")
-                    .size(100, 30).create());
+            map1.put("image", Pictures.ofLocal(templateFilePath+"img\\njwai.png").size(150,50).create());
             map1.put("di",gd.getPipingDi());
             if("true".equals(gd.getDefstr1())){
                 map1.put("worn","外");
                 map1.put("wornzhi",gd.getPipingDo());
-                map1.put("bhimage",Pictures.ofLocal(templateFilePath+"img\\waibh.png")
-                        .size(100, 30).create());
+                map1.put("bhimage",Pictures.ofLocal(templateFilePath+"img\\waibh.png").size(200,50).create());
                 map1.put("norw","内");
             }else {
                 map1.put("worn","内");
                 map1.put("wornzhi",gd.getDhneijing());
-                map1.put("bhimage",Pictures.ofLocal(templateFilePath+"img\\neibh.png")
-                        .size(100, 30).create());
+                map1.put("bhimage",Pictures.ofLocal(templateFilePath+"img\\neibh.png").size(200,50).create());
                 map1.put("norw","外");
             }
             map1.put("sjyali",gd.getSjyali());
@@ -385,11 +386,22 @@ public class FileUtil {
 
 
         map.put("tests",maps);
-        map.put("gcname","工程名字，暂未确定");
+        map.put("gcname","工程名字暂未确定");
+        map.put("index","1");
+        map.put("bc","0");
+        map.put("pizhun","pizhun");
+        map.put("shenhe","shenhe");
+        map.put("jiaoyan","jiaoyan");
+        map.put("bianxie","bianxie");
+
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        int month = Calendar.getInstance().get(Calendar.MONTH)+1;
+        map.put("year",year);
+        map.put("month",month);
         map.put("gongshiimg",Pictures.ofLocal(templateFilePath+"img\\gongshi.png").create());
 
         ConfigureBuilder builder = Configure.builder();
-        XWPFTemplate compile = XWPFTemplate.compile(templateFilePath + "模版.docx",builder.build());
+        XWPFTemplate compile = XWPFTemplate.compile(templateFilePath + "模板.docx",builder.build());
         compile.render(map);
         compile.writeToFile(destFilePath+"管道规格计算书.docx");
     }

@@ -16,9 +16,10 @@ public interface ThicknessSerice {
     Result dakaifile(Userpiping userpiping);
     Result queryfilenamelist(Userpiping userpiping);
     Result upgd(Userpiping userpiping);
-    List<Userpiping> querypiping(String username, String name, String defstr1);
+    List<Userpiping> querypiping(Userpiping userpiping);
     Result byidquerypiping(Integer id);
     Result delgd(Integer id);
+    Result delfenzu(Userpiping userpiping);
     Result queryRank();
 
     Result queryjiezhi();
@@ -29,4 +30,8 @@ public interface ThicknessSerice {
     Result querycailiao3087();
 
     Result querycailiao5310();
+
+    Result rename2(Userpiping userpiping);
+
+    Result upfenzusort(Userpiping userpiping);
 }

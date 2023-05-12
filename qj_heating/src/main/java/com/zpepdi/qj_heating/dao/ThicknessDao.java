@@ -16,7 +16,7 @@ public interface ThicknessDao {
     int updefstr4(@Param("id") Integer id,@Param("defstr4") String defstr4);
     int savepiping(Userpiping userpiping);
     int upgd(Userpiping userpiping);
-    List<Userpiping> querypiping(@Param("username") String username,@Param("name") String name,@Param("defstr1") String defstr1);
+    List<Userpiping> querypiping(Userpiping userpiping);
     List<Userpiping> byfilequerypiping(@Param("username") String username,@Param("name") String name,@Param("defstr3") String defstr3);
     String querymaxsort(Userpiping userpiping);
     List<String> queryfilenamelist(Userpiping userpiping);
@@ -30,4 +30,10 @@ public interface ThicknessDao {
     List<Map<String,String>>  querycailiao3087();
 
     List<Map<String,String>>  querycailiao5310();
+
+    int delfenzu(Userpiping userpiping);
+
+    int rename2(Userpiping userpiping);
+
+    int upfenzusort(Userpiping userpiping);
 }

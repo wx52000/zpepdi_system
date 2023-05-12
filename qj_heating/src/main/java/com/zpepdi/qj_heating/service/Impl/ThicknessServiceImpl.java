@@ -39,6 +39,15 @@ public class ThicknessServiceImpl implements ThicknessSerice {
     }
 
     /**
+     * 修改分组排序
+     * @param userpiping
+     * @return
+     */
+    @Override
+    public Result upfenzusort(Userpiping userpiping) {
+        return Result.ok(thicknessDao.upfenzusort(userpiping));
+    }
+    /**
      * 保存管道
      * @param userpiping
      * @return
@@ -69,7 +78,7 @@ public class ThicknessServiceImpl implements ThicknessSerice {
     public Result filesave(Userpiping userpiping) {
         String defstr3 = userpiping.getDefstr3();
         //直接查询id更优，若后续需要优化可修改
-        List<Userpiping> querypiping = querypiping(userpiping.getUsername(), userpiping.getName(), null);
+        List<Userpiping> querypiping = querypiping(userpiping);
         for(Userpiping gd:querypiping){
             Integer id = gd.getId();
             thicknessDao.upfilename(id,defstr3);
@@ -86,7 +95,7 @@ public class ThicknessServiceImpl implements ThicknessSerice {
     public Result filesave2(Userpiping userpiping) {
         //新管道名称
         String defstr3 = userpiping.getDefstr3();
-        List<Userpiping> querypiping = querypiping(userpiping.getUsername(), userpiping.getName(), null);
+        List<Userpiping> querypiping = querypiping(userpiping);
         for(Userpiping gd:querypiping){
             thicknessDao.updefstr4(gd.getId(),"false");
         }
@@ -105,7 +114,7 @@ public class ThicknessServiceImpl implements ThicknessSerice {
     @Override
     public Result dakaifile(Userpiping userpiping) {
 
-        List<Userpiping> querypiping = querypiping(userpiping.getUsername(), userpiping.getName(), null);
+        List<Userpiping> querypiping = querypiping(userpiping);
         for(Userpiping gd:querypiping){
             thicknessDao.updefstr4(gd.getId(),"false");
         }
@@ -150,8 +159,8 @@ public class ThicknessServiceImpl implements ThicknessSerice {
      * @return
      */
     @Override
-    public List<Userpiping> querypiping(String username,String name,String defstr1) {
-        return thicknessDao.querypiping(username,name,defstr1);
+    public List<Userpiping> querypiping(Userpiping userpiping) {
+        return thicknessDao.querypiping(userpiping);
     }
 
     /**
@@ -172,6 +181,20 @@ public class ThicknessServiceImpl implements ThicknessSerice {
     @Override
     public Result delgd(Integer id) {
         return Result.ok(thicknessDao.delgd(id));
+    }
+
+    /**
+     * 删除分组
+     * @param userpiping
+     * @return
+     */
+    @Override
+    public Result delfenzu(Userpiping userpiping) {
+        return Result.ok(thicknessDao.delfenzu(userpiping));
+    }
+    @Override
+    public Result rename2(Userpiping userpiping) {
+        return Result.ok(thicknessDao.rename2(userpiping));
     }
     @Override
     public Result queryRank() {

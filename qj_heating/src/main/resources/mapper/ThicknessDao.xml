@@ -14,6 +14,9 @@
     <update id="upsort">
         UPDATE userpiping SET defstr2 = #{defstr2} WHERE id = #{id}
     </update>
+    <update id="upfenzusort">
+        UPDATE userpiping SET defstr7 = #{defstr7} WHERE username = #{username} and xuhao = #{xuhao}
+    </update>
     <update id="updefstr4">
         UPDATE userpiping SET defstr4 = #{defstr4} WHERE id = #{id}
     </update>
@@ -177,11 +180,10 @@
         select * from userpiping
         <trim prefix="where">
             <if test="username!=null and username!=''">username = #{username}</if>
-            <if test="name!=null and name!=''">and name = #{name}</if>
             <if test="defstr1!=null and defstr1!=''">and defstr1 = #{defstr1}</if>
             and defstr4 = "true"
         </trim>
-        ORDER BY defstr2
+        ORDER BY defstr7,defstr2
     </select>
     <select id="byfilequerypiping" resultType="com.zpepdi.qj_heating.entity.Userpiping">
         select * from userpiping
@@ -198,6 +200,13 @@
     <delete id="delgd">
         delete from userpiping where id = #{id}
     </delete>
+
+    <delete id="delfenzu">
+        delete from userpiping where username=#{username} and name = #{name} and xuhao = #{xuhao} and defstr4 = 'true'
+    </delete>
+    <update id="rename2">
+        update userpiping set xuhao = #{gdname} where username = #{username} and name = #{name} and xuhao = #{xuhao}
+    </update>
 
     <select id="queryRank" resultType="java.util.Map">
         select steelpipeTpye,product,stress.rank,scope,rbwendu from stress

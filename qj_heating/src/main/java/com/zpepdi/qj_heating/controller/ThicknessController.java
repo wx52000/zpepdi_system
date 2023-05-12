@@ -2,6 +2,7 @@ package com.zpepdi.qj_heating.controller;
 
 import com.zpepdi.qj_heating.Utils.FileUtil;
 import com.zpepdi.qj_heating.Utils.FileZipUtil;
+import com.zpepdi.qj_heating.dao.ThicknessDao;
 import com.zpepdi.qj_heating.entity.UserUnitcy;
 import com.zpepdi.qj_heating.entity.Userpiping;
 import com.zpepdi.qj_heating.result.Result;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,8 @@ public class ThicknessController {
 
     @Autowired
     private ThicknessSerice thicknessSerice;
+    @Autowired
+    private ThicknessDao thicknessDao;
 
 
     //删除管道
@@ -40,6 +44,16 @@ public class ThicknessController {
     public Result delgd(@RequestBody Userpiping userpiping){
         Integer id = userpiping.getId();
         return thicknessSerice.delgd(id);
+    }
+    //删除分组
+    @RequestMapping("delfenzu")
+    public Result delfenzu(@RequestBody Userpiping userpiping){
+        return thicknessSerice.delfenzu(userpiping);
+    }
+    //更改分组名称
+    @RequestMapping("rename2")
+    public Result rename2(@RequestBody Userpiping userpiping){
+        return thicknessSerice.rename2(userpiping);
     }
 
     //更新管道名称
@@ -55,6 +69,11 @@ public class ThicknessController {
         Integer id = userpiping.getId();
         Integer defstr2 = userpiping.getDefstr2();
         return thicknessSerice.upsort(id,defstr2);
+    }
+    //更新分组排序
+    @RequestMapping("upfenzusort")
+    public Result upfenzusort(@RequestBody Userpiping userpiping){
+        return thicknessSerice.upfenzusort(userpiping);
     }
     //保存管道
     @RequestMapping("savepiping")
@@ -95,11 +114,8 @@ public class ThicknessController {
     //查询管道
     @RequestMapping("querypiping")
     public Result querypiping(@RequestBody Userpiping userpiping){
-        String username = userpiping.getUsername();
-        String name = userpiping.getName();
-        String defstr1 = userpiping.getDefstr1();
-        List<Userpiping> querypiping = thicknessSerice.querypiping(username, name,defstr1);
-        return Result.ok(querypiping);
+        List<Userpiping> querypipinglist = thicknessSerice.querypiping(userpiping);
+        return Result.ok(querypipinglist);
     }
     //根据id查询管道
     @RequestMapping("byidquerypiping")
@@ -141,7 +157,7 @@ public class ThicknessController {
     }
 
     @RequestMapping("/download")
-    public ResponseEntity<byte[]> downloadWordFile(@RequestBody Map<String,String> map) throws Exception {
+    public ResponseEntity<byte[]> downloadWordFile(@RequestBody Map<String,Object> map) throws Exception {
         ApplicationHome applicationHome = new ApplicationHome(new FileUtil().getClass());
         // 保存目录位置根据项目需求可随意更改
         String absolutePath = applicationHome.getDir().getParentFile().getParentFile().getAbsolutePath();
@@ -157,7 +173,19 @@ public class ThicknessController {
 
         //创建计算书
         if(map!=null){
-            List<Userpiping> querypiping = thicknessSerice.querypiping(map.get("username"), map.get("name"), null);
+            Userpiping userpiping = new Userpiping();
+            List<Userpiping> querypiping = new ArrayList<Userpiping>();
+            String username = (String) map.get("username");
+            ArrayList xzidlist = (ArrayList)map.get("xzidlist");
+            if(username!=null){
+                userpiping.setUsername(username);
+                querypiping = thicknessSerice.querypiping(userpiping);
+            }else if(xzidlist.size()>0){
+                for(Object id: xzidlist){
+                    Userpiping byidquerypiping = thicknessDao.byidquerypiping((Integer) id);
+                    querypiping.add(byidquerypiping);
+                }
+            }
             FileUtil.createjisuanFile2(querypiping);
         }
         // 读取计算书
@@ -167,7 +195,9 @@ public class ThicknessController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentDispositionFormData("attachment", "管道规格计算书");
+        inputStream.close();
         // 返回ResponseEntity对象
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
+
 }
