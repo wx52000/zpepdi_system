@@ -14,7 +14,6 @@ public interface ProjectService {
 
     Result queryById(String id);
 
-    Result setContractZCBSplit(Map<String,Object> map);
 
     Result setLedger(Integer userId, Map<String,Object> map);
 

@@ -404,6 +404,18 @@
         ( p.type = 1, l.lastInvoice, 0 )) AS lastInvoice1,
         max(IF
         ( p.type = 1, l.lastPay, 0 )) AS lastPay1,
+        max(
+                IF
+                    ( p.type = 0, bnow.invoice, 0 )) AS bnowInvoice0,
+        max(
+                IF
+                    ( p.type = 0, bnow.income, 0 )) AS bnowIncome0,
+        max(
+                IF
+                    ( p.type = 1, bnow.invoice, 0 )) AS bnowInvoice1,
+        max(
+                IF
+                    ( p.type = 1, bnow.income, 0 )) AS bnowIncome1,
         max(IF
         ( p.type = 0, b.invoice, 0 )) AS bInvoice0,
         max(IF
@@ -414,26 +426,34 @@
         ( p.type = 1, b.income, 0 )) AS bIncome1
         FROM
         (
-        SELECT
-        p.id,
-        p.number,
-        p.`name`,
-        c.id AS cid,
-        c.classify,
-        0 AS type
-        FROM
-        market_project p,
-        classify c UNION
-        SELECT
-        p.id,
-        p.number,
-        p.`name`,
-        c.id AS cid,
-        c.classify,
-        1 AS type
-        FROM
-        market_project p,
-        classify c
+            SELECT
+                p.id,
+                p.number,
+                p.`name`,
+                c.id AS cid,
+                c.classify,
+                0 AS type
+            FROM
+                contract p,
+                classify c
+            WHERE
+                p.kind = 1
+              AND p.alive = 1
+              AND parent_id = '0' UNION
+            SELECT
+                p.id,
+                p.number,
+                p.`name`,
+                c.id AS cid,
+                c.classify,
+                0 AS type
+            FROM
+                contract p,
+                classify c
+            WHERE
+                p.kind = 1
+              AND p.alive = 1
+              AND parent_id = '0'
         ) AS p
         left join (
             SELECT
@@ -588,6 +608,22 @@
         AND `month` = #{month} ) AS b ON p.id = b.project_id
         AND p.cid = b.single
         AND p.type = b.type
+        LEFT JOIN (
+            SELECT
+                project_id,
+                single,
+                type,
+                invoice,
+                income,
+                remark
+            FROM
+                project_budget_month
+            WHERE
+                `year` = #{year}
+
+              AND `month` = #{nowMonth} ) AS bnow ON p.id = bnow.project_id
+            AND p.cid = bnow.single
+            AND p.type = bnow.type
         group by p.id,p.cid
     </select>
     <select id="queryZCBYear" resultType="java.util.Map">
@@ -689,7 +725,9 @@
                     pby.quarter4_budget,
                     pbm.income AS budget
                 FROM
-                    ( SELECT p.id, p.number, p.`name`, m.`month` FROM market_project p, `month` m ) p
+                    ( SELECT p.id, p.number, p.`name`, m.`month` FROM contract p, `month` m
+                      WHERE p.kind = 1
+                        and p.alive = 1 AND p.parent_id = '0' ) p
                         left join (SELECT
                                        cp.project_id,
                                        SUM(c.money) as money

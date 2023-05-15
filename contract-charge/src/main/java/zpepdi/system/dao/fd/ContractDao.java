@@ -13,11 +13,17 @@ public interface ContractDao {
     void insertSingle(@Param("userId") Integer userId,@Param("map") Map<String,Object> map);
     List<Map<String,Object>> query(Integer income);
 
+    List<Map<String,Object>> queryParent(Map<String,Object> map);
+
     List<Map<String,Object>> queryChildren(String id);
+
+    List<Map<String,Object>> queryZCBChildren(String id);
 
     List<Map<String,Object>> queryRelativeProject(String id);
 
     void setType(Map<String,Object> map);
+
+    void setContractDate(Map<String,Object> map);
 
     void setEndTime(Map<String,Object> map);
 

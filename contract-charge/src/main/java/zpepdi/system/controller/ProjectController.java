@@ -42,11 +42,6 @@ public class ProjectController {
     public Result queryById(@UserId Integer userId, @RequestHeader String id){
         return projectService.queryById(id);
     }
-
-    @RequestMapping("setContractZCBSplit")
-    public Result setContractZCBSplit(@UserId Integer userId, @RequestBody Map<String,Object> map){
-        return projectService.setContractZCBSplit(map);
-    }
     @RequestMapping("setLedger")
     public Result setLedger(@UserId Integer userId, @RequestBody Map<String,Object> map){
         return projectService.setLedger(userId,map);

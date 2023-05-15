@@ -10,5 +10,9 @@ public interface ProjectBudgetService {
 
     Result setBudgetYear(Integer userId, Map<String,Object> map);
 
+    Result setQuarter(Integer userId, Map<String,Object> map);
+
+    Result queryNowById(Map<String,Object> map);
+
     Result queryByProjectId(Map<String,Object> map);
 }

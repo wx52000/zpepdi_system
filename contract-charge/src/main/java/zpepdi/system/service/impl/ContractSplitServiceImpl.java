@@ -17,4 +17,10 @@ public class ContractSplitServiceImpl implements ContractSplitService {
         contractSplitDao.setSplit(userId,map);
         return Result.ok();
     }
+
+    @Override
+    public Result setContractZCBSplit(Map<String, Object> map) {
+        contractSplitDao.setContractZCBSplit(map);
+        return Result.ok();
+    }
 }

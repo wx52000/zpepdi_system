@@ -182,4 +182,19 @@
             where id = #{i.id}
         </foreach>
     </update>
+    <update id="auditOperation15">
+        <if test="map.check == 1">
+        update appraise.project
+        set frozen = 0
+        where id = (select project_id
+                    from appraise.project_thaw pt,
+                         audit_data ad
+                    where ad.audit_information_id = #{map.id}
+                    and audit_data_id = pt.id);
+        </if>
+        update appraise.project_thaw
+        set audit_user = #{user.id},
+            audit_time = now(),
+            audit = #{map.check}
+    </update>
 </mapper>

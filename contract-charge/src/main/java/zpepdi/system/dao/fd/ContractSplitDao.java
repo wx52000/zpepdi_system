@@ -9,4 +9,6 @@ import java.util.Map;
 public interface ContractSplitDao {
 
     void setSplit(@Param("userId")Integer userId, @Param("map")Map<String,Object> map);
+
+    void setContractZCBSplit(Map<String,Object> map);
 }

@@ -17,6 +17,8 @@ public interface InvoiceBudgetDao {
 
     Map<String,Object> queryByContractId(Map<String,Object> map);
 
+
+
     List<Map<String,Object>> queryMonthByContractId(Map<String,Object> map);
 
 }

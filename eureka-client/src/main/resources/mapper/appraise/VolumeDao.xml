@@ -2442,7 +2442,14 @@
                     cnc.num AS confirm_notCheck
                 FROM
                     ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
-                                                                                        `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
+                                                                                        `user` u WHERE u.id = #{userId} and
+                        IF(u.pid = 4, u.did = m.did,
+                           Exists(
+                                   select 1
+                                   from manage_tec mt
+                                   where mt.manage_user_id = u.id
+                                     and mt.tec = m.big_name
+                               ))) AS m
                         LEFT JOIN (
                         SELECT
                             cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,
@@ -2923,7 +2930,14 @@
                     cnc.num AS confirm_notCheck
                 FROM
                     ( SELECT DISTINCT m.small_name, m.big_name, mon.`month`, m.did FROM major_contrast_technology m, `month` mon,
-                                                                                        `user` u WHERE u.id = #{userId} and u.did = m.did) AS m
+                                                                                        `user` u WHERE u.id = #{userId} and
+                        IF(u.pid = 4, u.did = m.did,
+                           Exists(
+                                   select 1
+                                   from manage_tec mt
+                                   where mt.manage_user_id = u.id
+                                     and mt.tec = m.big_name
+                               ))) AS m
                         LEFT JOIN (
                         SELECT
                             cast(concat( sum( cnum ), '(', sum( num ), ')' ) as char) AS num,

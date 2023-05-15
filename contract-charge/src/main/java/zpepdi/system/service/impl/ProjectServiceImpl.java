@@ -3,6 +3,7 @@ package zpepdi.system.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import zpepdi.system.dao.fd.ContractDao;
 import zpepdi.system.dao.fd.ProjectDao;
 import zpepdi.system.dao.zjepdi.ProjectDataDao;
 import zpepdi.system.result.Result;
@@ -15,6 +16,8 @@ import java.util.UUID;
 public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private ProjectDao projectDao;
+    @Autowired
+    private ContractDao contractDao;
 
     @Autowired
     private ProjectDataDao projectDataDao;
@@ -23,7 +26,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public Result addRelateContract(Integer userId, Map<String, Object> map) {
         projectDao.addRelateContract(userId,map);
-        projectDao.setContractZCBSplit(map);
         return Result.ok();
     }
 
@@ -50,12 +52,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Result queryById(String id) {
         return Result.ok(projectDao.queryById(id));
-    }
-
-    @Override
-    public Result setContractZCBSplit(Map<String, Object> map) {
-        projectDao.setContractZCBSplit(map);
-        return Result.ok();
     }
 
     @Override

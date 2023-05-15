@@ -6,6 +6,7 @@
             MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
             MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
             MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.StampDate, MM_ContractEntity.BackDate,
             MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
             MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
             MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
@@ -17,6 +18,7 @@
             MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
             MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
             MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.StampDate, MM_ContractEntity.BackDate,
             MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
             MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
             MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
@@ -27,10 +29,59 @@
             MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
             MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
             MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.StampDate, MM_ContractEntity.BackDate,
             MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
             MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
             MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
         FROM MM_ContractEntity
         WHERE MM_ContractEntity.ContractName like '%'+#{search} +'%'
+    </select>
+    <select id="queryParentBySearch" resultType="java.util.Map">
+        SELECT
+            MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
+            MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
+            MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.StampDate, MM_ContractEntity.BackDate,
+            MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
+            MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
+            MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
+        FROM MM_ContractEntity
+        WHERE MM_ContractEntity.ContractCode like '%'+#{search} +'%'
+        and MM_ContractEntity.ContractCode like '%-001'
+        union
+        SELECT
+            MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
+            MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
+            MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.StampDate, MM_ContractEntity.BackDate,
+            MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
+            MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
+            MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
+        FROM MM_ContractEntity
+        WHERE MM_ContractEntity.ContractName like '%'+#{search} +'%'
+          and MM_ContractEntity.ContractCode like '%-001'
+    </select>
+    <select id="queryChildrenBySearch" resultType="java.util.Map">
+        SELECT
+            MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
+            MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
+            MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.StampDate, MM_ContractEntity.BackDate,
+            MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
+            MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
+            MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
+        FROM MM_ContractEntity
+        WHERE MM_ContractEntity.ContractCode like #{search} +'%'
+        union
+        SELECT
+            MM_ContractEntity.ContractCode,MM_ContractEntity.ContractName,MM_ContractEntity.FirstName,MM_ContractEntity.SponsorUserName,
+            MM_ContractEntity.ContractValueOfEstimate,MM_ContractEntity.ContractValue,MM_ContractEntity.NetSettlement,
+            MM_ContractEntity.ContractAttribute,MM_ContractEntity.ContractProperty,
+            MM_ContractEntity.StampDate, MM_ContractEntity.BackDate,
+            MM_ContractEntity.ContractTypeName,MM_ContractEntity.IsOffShore,
+            MM_ContractEntity.ContractState,MM_ContractEntity.CompleteState,
+            MM_ContractEntity.SponsorDeptName,MM_ContractEntity.ProjectClassesSecondName,MM_ContractEntity.ContractID
+        FROM MM_ContractEntity
+        WHERE MM_ContractEntity.ContractName like #{search} +'%'
     </select>
 </mapper>

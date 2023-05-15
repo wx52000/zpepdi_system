@@ -11,4 +11,8 @@ public interface ContractDataDao {
     List<Map<String,Object>> queryList();
 
     List<Map<String,Object>> queryListBySearch(String search);
+
+    List<Map<String,Object>> queryParentBySearch(Map<String,Object> map);
+
+    List<Map<String,Object>> queryChildrenBySearch(String search);
  }

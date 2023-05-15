@@ -27,16 +27,24 @@
     where id = #{id}
   </insert>
     <insert id="insertSingle">
-        insert IGNORE  INTO contract(`number`, `name`, first_party, business_manage, budget, money, settlement, attribute,
-        property, `type`, is_off_shore, `state`, complete_state, sponsor_dep, classes, id, entry_user)
+        insert IGNORE  INTO contract(`number`, `name`, first_party, business_manage, budget, money, settlement, `attribute`,
+        property, sign_date, return_date, filing_date,  `type`, is_off_shore, `state`, complete_state, sponsor_dep, classes,
+            id, entry_user, kind
+            <if test="map.parent != null and map.parent != ''">
+              ,parent_id
+            </if> )
         values
         (#{map.ContractCode},#{map.ContractName},#{map.FirstName},#{map.SponsorUserName},
         #{map.ContractValueOfEstimate},#{map.ContractValue},#{map.NetSettlement},
         #{map.ContractAttribute},#{map.ContractProperty},
+        #{map.StampDate}, #{map.BackDate}, #{map.filing_date},
         #{map.ContractTypeName},#{map.IsOffShore},
         #{map.ContractState},#{map.CompleteState},
         #{map.SponsorDeptName},#{map.ProjectClassesSecondName},
-        #{map.ContractID}, #{userId})
+        #{map.ContractID}, #{userId} , #{map.kind}
+      <if test="map.parent != null and map.parent != ''">
+        ,#{map.parent}
+      </if>)
     </insert>
   <update id="setChildren">
     update contract
@@ -59,6 +67,13 @@
   <update id="setEndTime">
     update contract
     set `end_time` = #{endTime}
+    where `id` = #{id}
+  </update>
+  <update id="setContractDate">
+    update contract
+    set `sign_date` = #{sign_date},
+        `return_date` = #{return_date},
+        `filing_date` = #{filing_date}
     where `id` = #{id}
   </update>
   <delete id="delChildren">
@@ -100,6 +115,44 @@
     and  c.income_expend = #{income}
     ORDER BY sign_date DESC
   </select>
+  <select id="queryParent" resultType="java.util.Map">
+    select
+    c.id,
+    c.number,
+    c.`name`,
+    c.business_manage,
+    c.first_party,
+    c.budget,
+    c.money,
+    cast(c.sign_date as char(10)) as sign_date,
+    cast(c.return_date as char(10)) as return_date,
+    c.settlement,
+    c.attribute,
+    c.property,
+    c.type,
+    c.is_off_shore,
+    c.state,
+    c.sponsor_dep,
+    c.complete_state,
+    c.classes,
+    c.kind,
+    c.end_time,
+    ifnull(GROUP_CONCAT(u1.user_name),'') as operator,
+    ifnull(GROUP_CONCAT(u2.user_name),'') as checker
+    from contract c
+    LEFT JOIN
+    contract_user u1 on c.id = u1.contract_id AND u1.role = 0
+    LEFT JOIN
+    contract_user u2 on c.id = u2.contract_id AND u2.role = 1
+    where kind = #{kind}
+      and parent_id = '0'
+      and alive = 1
+      <if test="income != null and income != ''">
+        and  c.income_expend = #{income}
+      </if>
+    group by c.id
+    order by number
+  </select>
   <select id="queryById" resultType="java.util.Map">
     SELECT
       c.id,
@@ -110,6 +163,7 @@
       c.budget,
       c.money,
       cast(c.sign_date as char(10)) as sign_date,
+      cast(c.return_date as char(10)) as return_date,
       c.settlement,
       c.attribute,
       c.property,
@@ -201,7 +255,38 @@
   <select id="queryChildren" resultType="java.util.Map">
     select  id, number, name, money, add_sub
     from contract
+    where id = #{id}
+    union
+    select  id, number, name, money, add_sub
+    from contract
     where parent_id = #{id}
+      and alive = 1
+    order by number
+  </select>
+  <select id="queryZCBChildren" resultType="java.util.Map">
+    select  c.id, c.number, c.name, c.money,
+            cast(c.sign_date as char(10)) as sign_date,
+            cast(c.return_date as char(10)) as return_date,
+            cast(c.filing_date as char(10)) as filing_date,
+            s.ja_contract_money,
+            s.sb_contract_money,
+            s.js_contract_money
+    from contract c left join
+         contract_zcb_split s on c.id = s.id
+    where c.id = #{id}
+    union
+    select  c.id, c.number, c.name, c.money,
+            cast(c.sign_date as char(10)) as sign_date,
+            cast(c.return_date as char(10)) as return_date,
+            cast(c.filing_date as char(10)) as filing_date,
+            s.ja_contract_money,
+            s.sb_contract_money,
+            s.js_contract_money
+    from contract c left join
+         contract_zcb_split s on c.id = s.id
+    where c.parent_id = #{id}
+      and c.alive = 1
+    order by number
   </select>
   <select id="queryBlur" resultType="java.util.Map">
     select

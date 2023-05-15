@@ -11,7 +11,13 @@ public interface ProjectBudgetDao {
 
     void setBudgetYear(@Param("userId")Integer userId,@Param("map") Map<String,Object> map);
 
+    Map<String,Object> queryNowById(Map<String,Object> map);
+
     Map<String,Object> queryByProjectId(Map<String,Object> map);
+
+    void setQuarter(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
+
+    List<Map<String,Object>> queryQuarterByProjectId(Map<String,Object> map);
 
     List<Map<String,Object>> queryMonthByProjectId(Map<String,Object> map);
 }

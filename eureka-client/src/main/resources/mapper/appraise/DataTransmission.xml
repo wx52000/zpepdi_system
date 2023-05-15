@@ -222,6 +222,7 @@
         WHERE
         NOT EXISTS ( SELECT 1 FROM volume_workday w WHERE v.id = w.volume_id AND w.workday &lt;&gt; 0 )
         AND v.actual_publication_date > "2023-04-06"
+        and v.number not like '%+%'
         GROUP BY
         v.project_id,
         v.tec UNION
@@ -234,6 +235,7 @@
         WHERE
         NOT EXISTS ( SELECT 1 FROM volume_workday w WHERE v.id = w.volume_id AND w.workday &lt;&gt; 0 )
         AND v.state IN ( "尚未确认", "尚未开展", "正在设计", "正在校审" )
+        and v.number not like '%+%'
         GROUP BY
         v.project_id,
         v.tec

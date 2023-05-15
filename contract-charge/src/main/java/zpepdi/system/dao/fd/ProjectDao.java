@@ -18,8 +18,6 @@ public interface ProjectDao {
 
     List<Map<String,Object>> queryContractByProjectId(String id);
 
-    void setContractZCBSplit(Map<String,Object> map);
-
     void setLedger(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 
     List<Map<String,Object>> queryLedger(String id);

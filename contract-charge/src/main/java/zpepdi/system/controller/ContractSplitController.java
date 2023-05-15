@@ -23,4 +23,9 @@ public class ContractSplitController {
     }
 
 
+    @RequestMapping("setContractZCBSplit")
+    public Result setContractZCBSplit(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return contractSplitService.setContractZCBSplit(map);
+    }
+
 }

@@ -19,4 +19,13 @@
              handle_time = VALUES(handle_time),
              `handler` = VALUES(`handler`)
     </update>
+    <update id="setContractZCBSplit">
+        insert into contract_zcb_split(id, ja_contract_money,
+                                       sb_contract_money, js_contract_money)
+        values (#{id}, #{ja_contract_money}, #{sb_contract_money}, #{js_contract_money})
+            on duplicate key update
+                                 ja_contract_money = values(ja_contract_money),
+                                 sb_contract_money = values(sb_contract_money),
+                                 js_contract_money = values(js_contract_money)
+    </update>
 </mapper>

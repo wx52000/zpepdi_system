@@ -68,4 +68,19 @@
         where contract_id= #{contract_id}
           and `year` = #{year}
     </select>
+    <select id="queryNowByContractId" resultType="java.util.Map">
+        select
+            c.id, y.year_budget, y.quarter1_budget,
+            y.quarter2_budget, y.quarter3_budget, y.quarter4_budget,
+            q.quarter_budget, q.month1_budget, q.month2_budget, q.month3_budget,
+            m.budget
+        from contract c
+                 LEFT JOIN income_budget_year y on c.id = y.contract_id
+            AND y.`year` = 2023
+                 LEFT JOIN income_budget_quarter q on c.id = q.contract_id
+            AND q.`year` = 2023 AND `quarter` = 2
+                 LEFT JOIN income_budget_month m on c.id = m.contract_id
+            AND m.`year` = 2023 and m.`month` = 5
+        WHERE c.id = '630EC0CF-5756-4BC8-BD03-5522A936188E'
+    </select>
 </mapper>

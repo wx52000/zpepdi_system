@@ -11,6 +11,9 @@
         <result column="quarter2_budget" jdbcType="DECIMAL" property="quarter2"/>
         <result column="quarter3_budget" jdbcType="DECIMAL" property="quarter3"/>
         <result column="quarter4_budget" jdbcType="DECIMAL" property="quarter4"/>
+        <collection property="quarterList" javaType="ARRAYLIST"
+                    column="year=year, id = project_id"
+                    select="queryQuarterByProjectId"/>
         <collection property="incomeList" javaType="ARRAYLIST"
                     column="year=year, id = project_id,type = type0"
                     select="queryMonthByProjectId"/>
@@ -43,6 +46,18 @@
                                  `quarter4_budget` = values(`quarter4_budget`),
                                  `time` = values(`time`),
                                  `handler` = values(`handler`)
+    </update>
+    <update id="setQuarter">
+        insert into project_budget_quarter(project_id, quarter_budget, month1_budget,
+                                           month2_budget, month3_budget, year ,quarter, time, handler)
+        values(#{map.id}, #{map.quarter_budget}, #{map.month1_budget}, #{map.month2_budget},
+               #{map.month3_budget}, #{map.year}, #{map.quarter}, now(), #{userId})
+        on duplicate key update
+        quarter_budget  = values(quarter_budget),
+        month1_budget  = values(month1_budget),
+        month2_budget  = values(month2_budget),
+        month3_budget  = values(month3_budget),
+        `time`  = values(`time`)
     </update>
     <select id="queryByProjectId" resultMap="queryByProjectId">
         select ifnull(`year_budget`,0) as year_budget,
@@ -78,5 +93,47 @@
          and type = #{type}
         ORDER BY
             `month`
+    </select>
+    <select id="queryNowById" resultType="java.util.Map">
+        SELECT
+            c.id,
+            y.year_budget,
+            y.quarter1_budget,
+            y.quarter2_budget,
+            y.quarter3_budget,
+            y.quarter4_budget,
+            q.quarter_budget,
+            q.month1_budget,
+            q.month2_budget,
+            q.month3_budget,
+                SUM( m.invoice ) AS invoice,
+            SUM( m1.invoice ) AS invoice1
+        FROM
+            contract c
+                LEFT JOIN project_budget_year y ON c.id = y.project_id
+                AND y.`year` = #{year}
+                LEFT JOIN project_budget_quarter q ON c.id = q.project_id
+                AND q.`year` = #{year}
+                AND `quarter` = #{quarter}
+                LEFT JOIN project_budget_month m ON c.id = m.project_id
+                AND m.`year` = #{year}
+                AND m.`month` = #{month}
+                LEFT JOIN project_budget_month m1 ON c.id = m1.project_id
+                AND m1.`year` = #{nextMonthYear}
+                AND m1.`month` = #{nextMonth}
+        WHERE
+            c.id = #{id}
+    </select>
+    <select id="queryQuarterByProjectId" resultType="java.util.Map">
+        select
+            quarter,
+            quarter_budget,
+            month1_budget,
+            month2_budget,
+            month3_budget
+        from project_budget_quarter
+        where project_id = #{id}
+        and `year` = #{year}
+        order by quarter
     </select>
 </mapper>

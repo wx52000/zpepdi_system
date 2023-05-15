@@ -26,6 +26,16 @@ public class ProjectBudgetController {
         return projectBudgetService.setBudgetYear(userId,map);
     }
 
+    @RequestMapping("setQuarter")
+    public Result setQuarter(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return projectBudgetService.setQuarter(userId,map);
+    }
+
+    @RequestMapping("queryNowById")
+    public Result queryNowById(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return projectBudgetService.queryNowById(map);
+    }
+
     @RequestMapping("queryByProjectId")
     public Result queryByProjectId(@RequestBody Map<String,Object> map){
         return projectBudgetService.queryByProjectId(map);

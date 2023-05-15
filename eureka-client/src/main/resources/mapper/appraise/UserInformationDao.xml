@@ -138,7 +138,13 @@
           AND u.did = d.id
           AND u.tid = t.id
           and u1.id = #{id}
-          and u.did = u1.did
+          and IF(u1.pid = 4, u.did = u1.did,
+            Exists(
+                select 1
+                from manage_user mu
+                where mu.manage_user_id = u1.id
+                and mu.user_id = u.id
+                ))
     </select>
     <select id="queryById" resultType="java.util.Map">
         SELECT

@@ -27,8 +27,12 @@ public class StatisticsServiceImpl implements StatisticsService {
         Map<String,Object> map = new HashMap<>();
         Date date1 = DateUtils.stringToDate(date,"yyyy-MM");
         map.put("date", date + "-01");
-        date1.setTime(date1.getTime()-1000);
-        map.put("lastDate", DateUtils.dateToString(date1,"yyyy-MM-01"));
+        map.put("nowMonth",DateUtils.dateToString(date1,"MM"));
+//        上个月最后一天时间
+//        date1.setTime(date1.getTime()-1000);
+//        本年度第一天
+        map.put("lastDate", DateUtils.dateToString(date1,"yyyy-01-01"));
+//        下个月时间
         date1.setTime(date1.getTime() + 3000000000L);
         int year = DateUtils.getYearOfDate(date1);
         int month = DateUtils.getMonthOfDate(date1);

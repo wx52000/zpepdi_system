@@ -3007,11 +3007,18 @@
         mu.user_id
         ) as man on man.user_id = u.id
         LEFT JOIN ( SELECT sum( workday ) AS workday, user_id AS userId FROM workday_deduct WHERE `date` &gt;= #{map.startMonth} AND `date` &lt;= #{map.endMonth} GROUP BY user_id ) AS de ON de.userId = u.id
-        LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date &gt;= #{map.startMonth} AND submit_date &lt;= #{map.endMonth} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id, `user` u1
+        LEFT JOIN ( SELECT SUM( workday ) AS workday, user_id FROM scientific_task_workday WHERE submit_date &gt;= #{map.startMonth} AND submit_date &lt;= #{map.endMonth} AND submit = 2 GROUP BY user_id ) AS sci ON sci.user_id = u.id,
+            `user` u1
         WHERE
         u1.id = #{id}
         AND u.alive = 1
-        AND u.did = u1.did
+        AND IF(u1.pid = 4, u.did = u1.did,
+            Exists(
+                select 1
+                from manage_user mu
+                where mu.manage_user_id = u1.id
+                and mu.user_id = u.id
+                ))
         GROUP BY
         u.id
         ) AS u
@@ -5056,7 +5063,13 @@
             u.did = d.id
           AND u.tid = t.id
           AND u1.id = #{id}
-          AND u1.did = u.did
+          AND IF(u1.pid = 4, u.did = u1.did,
+                 Exists(
+                         select 1
+                         from manage_user mu
+                         where mu.manage_user_id = u1.id
+                           and mu.user_id = u.id
+                     ))
     </select>
     <select id="projectGeneral" resultType="java.util.Map">
         SELECT

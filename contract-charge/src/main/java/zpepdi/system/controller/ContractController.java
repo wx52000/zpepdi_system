@@ -33,6 +33,11 @@ public class ContractController {
         return contractService.setType(map);
     }
 
+    @RequestMapping("setContractDate")
+    public Result setContractDate( @RequestBody Map<String,Object> map){
+        return contractService.setContractDate(map);
+    }
+
     @RequestMapping("setEndTime")
     public Result setEndTime( @RequestBody Map<String,Object> map){
         return contractService.setEndTime(map);
@@ -40,6 +45,16 @@ public class ContractController {
     @RequestMapping("query")
     public Result query(@RequestHeader("income") Integer income){
         return contractService.query(income);
+    }
+
+    @RequestMapping("queryParent")
+    public Result queryParent(@RequestBody Map<String,Object> map){
+        return contractService.queryParent(map);
+    }
+
+    @RequestMapping("queryZCBChildren")
+    public Result queryZCBChildren(@RequestHeader("id") String id){
+        return contractService.queryZCBChildren(id);
     }
 
     @RequestMapping("queryChildren")
@@ -86,5 +101,10 @@ public class ContractController {
     @RequestMapping("setConfirm")
     public Result setConfirm(@UserId Integer userId,@RequestBody List<Map<String,Object>> list){
         return contractService.setConfirm(userId,list);
+    }
+
+    @RequestMapping("queryParentBySearchFromZpepdi")
+    public Result queryParentBySearchFromZpepdi(@UserId Integer userId,@RequestBody Map<String,Object> map){
+        return contractService.queryParentBySearchFromZpepdi(userId,map);
     }
 }

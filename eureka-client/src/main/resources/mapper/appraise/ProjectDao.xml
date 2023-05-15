@@ -2888,8 +2888,8 @@
                v.designer,
                v.checker,
                 IF
-            ( v.actual_publication_date &gt; "2023-04-06" ||
-             v.state in ("尚未确定","尚未开展","正在设计", "正在校审") ,TRUE,FALSE ) as required,
+            ( v.number not like "%+%" and (v.actual_publication_date &gt; "2023-04-06" ||
+             v.state in ("尚未确定","尚未开展","正在设计", "正在校审")) ,TRUE,FALSE ) as required,
                ifnull(w.workday, 0) as workday,
                w.submit,
                v.tips
@@ -3876,6 +3876,7 @@
                IFNULL(c.num, 0) / IFNULL(a.num, 0)   AS completeRatio,
                IFNULL(n1.num, 0)                     AS upNowComplete,
                IFNULL(a.num, 0)                      AS allZero,
+               IFNULL(a1.num, 0)                      AS allUp,
                IFNULL(c.num, 0)                      AS completeZero,
                IFNULL(upc.num, 0)                      AS completeUp,
                IFNULL(inc.incomplete, 0)             AS incompleteZero,
@@ -3942,7 +3943,6 @@
                               project p,
                               technology t,
                               `user` u ,
-                              role_menus r,
                               volume v
                                   LEFT JOIN check_plan c ON v.tec = c.tec
                                   AND v.project_id = c.project_id
@@ -3953,9 +3953,13 @@
                             AND p.id = #{id}
                             AND
                               u.id = #{userId}
-                            AND u.pid = r.role_id
-                            AND r.menus_id = 28
-                            AND u.did = t.did
+                              IF(u.pid = 4, u.did = m.did,
+                           AND Exists(
+                                   select 1
+                                   from manage_tec mt
+                                   where mt.manage_user_id = u.id
+                                     and mt.tec = m.big_name
+                               ))
                             AND v.tec = t.`name`
                           GROUP BY
                               v.tec
@@ -4129,6 +4133,22 @@
                  ) AS n
             GROUP BY tec
         ) AS a ON a.tec = p.tec
+        LEFT JOIN (
+            SELECT SUM(
+                           IFNULL(num, 0)) AS num,
+                   tec
+            FROM (
+                     SELECT IFNULL(COUNT(v.id), 0) AS num,
+                            IFNULL(m.big_name,v.tec) as tec,
+                            m.id  as mid
+                     FROM volume v LEFT JOIN major_contrast_technology m on v.tec = m.small_name
+                     WHERE v.project_id = #{id}
+
+                       AND v.number LIKE "%+%"
+                     GROUP BY v.tec
+                 ) AS n
+            GROUP BY tec
+        ) AS a1 ON a1.tec = p.tec
                  LEFT JOIN (
             SELECT SUM(
                            IFNULL(num, 0)) AS num,

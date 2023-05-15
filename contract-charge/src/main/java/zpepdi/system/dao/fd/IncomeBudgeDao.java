@@ -15,6 +15,7 @@ public interface IncomeBudgeDao {
     void setBudgetYear(@Param("userId")Integer userId,
                        @Param("map") Map<String,Object> map);
 
+    Map<String,Object> queryNowByContractId(Map<String,Object> map);
     Map<String,Object> queryByContractId(Map<String,Object> map);
 
     List<Map<String,Object>> queryMonthByContractId(Map<String,Object> map);

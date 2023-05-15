@@ -14,10 +14,15 @@ public interface ContractService {
 
     Result setType(Map<String,Object> map);
 
+    Result setContractDate(Map<String,Object> map);
     Result setEndTime(Map<String,Object> map);
     Result query(Integer income);
 
+    Result queryParent(Map<String,Object> map);
+
     Result queryChildren(String id);
+
+    Result queryZCBChildren(String id);
 
     Result queryRelativeProject(String id);
 
@@ -32,4 +37,6 @@ public interface ContractService {
     Result queryConfirm(Integer userId);
 
     Result setConfirm(Integer userId, List<Map<String,Object>> list);
+
+    Result queryParentBySearchFromZpepdi(Integer userId, Map<String,Object> map);
 }
