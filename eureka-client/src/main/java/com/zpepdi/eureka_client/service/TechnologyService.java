@@ -33,4 +33,8 @@ public interface TechnologyService {
     List<Map> queryById(Project project);
 
     List<Map<String,Object>> queryByPrincipal(Integer userId, Integer id);
+
+    List<String> querySpeciality(Integer did);
+
+    Integer addMajorTec(Map<String, String> map);
 }

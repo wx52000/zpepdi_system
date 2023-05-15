@@ -121,7 +121,10 @@ public class UserServiceImpl implements UserService {
     public List<Map> query(User user) {
         return userDao.query(user);
     }
-
+    @Override
+    public List<Map> querylimits(User user) {
+        return userDao.querylimits(user);
+    }
     @Override
     public Result workday(Map<String,Object> map) {
         return Result.ok(userDao.workday(map));
@@ -507,5 +510,13 @@ public class UserServiceImpl implements UserService {
             data.add(children);
         }
         return data;
+    }
+
+    @Override
+    public Result addmanageUserid(Map<String, Integer> map){
+        Integer manageuserid = map.get("manageuserid");
+        Integer userid = map.get("userid");
+        return Result.ok(userDao.addmanageUserid(manageuserid,userid));
+
     }
 }

@@ -17,6 +17,10 @@
         insert into technology(`name`, did)
         values (#{name} , #{did} )
     </insert>
+    <insert id="addMajorTec">
+        INSERT ignore INTO manage_tec(`manage_user_id`, `tec`)
+        VALUES (#{manageuserid}, #{tec});
+    </insert>
     <delete id="del">
         delete
         from technology
@@ -125,6 +129,10 @@
             t.id = p.workday_tec_id
         and p.user_id = #{userId}
         and t.project_id = #{id}
+    </select>
+    <select id="querySpeciality" resultType="string">
+        SELECT DISTINCT big_name
+        from major_contrast_technology
     </select>
 
 

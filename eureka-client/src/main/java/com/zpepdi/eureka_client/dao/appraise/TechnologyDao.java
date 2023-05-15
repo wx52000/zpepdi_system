@@ -41,4 +41,8 @@ public interface TechnologyDao {
     List<Map> queryById(Project project);
 
     List<Map<String,Object>> queryByPrincipal(@Param("userId")Integer userId, @Param("id")Integer id);
+
+    List<String> querySpeciality(@Param("did") Integer did);
+
+    Integer addMajorTec(@Param("manageuserid")Integer manageuserid, @Param("tec")String tec);
 }

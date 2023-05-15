@@ -94,6 +94,17 @@ public class UserController {
     public Result query(@RequestBody User user){
         return Result.ok(userService.query(user));
     }
+    //条件查询用户
+    @RequestMapping("querylimits")
+    public Result querylimits(@RequestBody User user){
+        return Result.ok(userService.querylimits(user));
+    }
+    //分配用户权限
+    @RequestMapping("addmanageUserid")
+    public Result addmanageUserid(@RequestBody Map<String,Integer> map){
+        return Result.ok(userService.addmanageUserid(map));
+    }
+
 
     @RequestMapping("workday")
     public Result workday(@RequestBody Map<String,Object> map){
