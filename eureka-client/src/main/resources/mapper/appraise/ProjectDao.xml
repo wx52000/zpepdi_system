@@ -3953,8 +3953,8 @@
                             AND p.id = #{id}
                             AND
                               u.id = #{userId}
-                              IF(u.pid = 4, u.did = m.did,
-                           AND Exists(
+                              AND IF(u.pid = 4, u.did = m.did,
+                            Exists(
                                    select 1
                                    from manage_tec mt
                                    where mt.manage_user_id = u.id

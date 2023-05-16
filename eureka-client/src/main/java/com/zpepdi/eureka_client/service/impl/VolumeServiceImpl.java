@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.zpepdi.eureka_client.dao.appraise.*;
 import com.zpepdi.eureka_client.excel.PlanDateListener;
 import com.zpepdi.eureka_client.feign.AuditInformationFeign;
+import com.zpepdi.eureka_client.service.DeclareDayService;
 import com.zpepdi.eureka_client.service.ProjectService;
 import com.zpepdi.eureka_client.tools.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class VolumeServiceImpl implements VolumeService {
     @Autowired
     private ProjectTaskDao projectTaskDao;
     @Autowired
-    private ProjectService projectService;
+    private DeclareDayService declareDayService;
     @Autowired
     private AuditInformationFeign auditInformationFeign;
     @Autowired
@@ -477,7 +478,7 @@ public class VolumeServiceImpl implements VolumeService {
     public Result sentConfirm(Integer userId, Map<String, Object> map) {
         Calendar calendar = Calendar.getInstance();
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        int confirmDay = (int) projectService.confirmDay();
+        int confirmDay = (int) declareDayService.declareDay();
         if (day<=confirmDay) {
             map.put("planMonth", DateUtils.dateToString(calendar.getTime(), "yyyy-MM"));
             calendar.add(Calendar.MONTH, -1);
