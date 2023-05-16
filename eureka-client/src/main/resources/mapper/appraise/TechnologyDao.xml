@@ -133,6 +133,7 @@
     <select id="querySpeciality" resultType="string">
         SELECT DISTINCT big_name
         from major_contrast_technology
+        where did = #{did}
     </select>
 
 
