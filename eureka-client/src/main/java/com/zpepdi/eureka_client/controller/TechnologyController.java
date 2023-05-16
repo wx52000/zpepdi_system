@@ -11,6 +11,8 @@ import com.zpepdi.eureka_client.entity.Technology;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.TechnologyService;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("technology")
 public class TechnologyController {
@@ -28,6 +30,16 @@ public class TechnologyController {
     @RequestMapping("query")
     public Result query(@RequestHeader Integer id){
         return Result.ok(technologyService.query(id));
+    }
+    //查询专业
+    @RequestMapping("querySpeciality")
+    public Result querySpeciality(@RequestHeader Integer did){
+        return Result.ok(technologyService.querySpeciality(did));
+    }
+    //新增专业权限
+    @RequestMapping("addMajorTec")
+    public Result addMajorTec(@RequestBody Map<String,String> map){
+        return Result.ok(technologyService.addMajorTec(map));
     }
 
     @RequestMapping("queryByUserId")

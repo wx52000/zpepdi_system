@@ -39,6 +39,7 @@ public interface UserService {
     Result workdayLog(Map<String,Object> map);
 
     List<Map> query(User user);
+    List<Map> querylimits(User user);
 
     Result workday(Map<String,Object> map);
 
@@ -123,4 +124,5 @@ public interface UserService {
 
     void conditionalDown(MultipartFile file ,Map<String, Object> map, HttpServletResponse response);
 
+    Result addmanageUserid(Map<String, Integer> map);
 }

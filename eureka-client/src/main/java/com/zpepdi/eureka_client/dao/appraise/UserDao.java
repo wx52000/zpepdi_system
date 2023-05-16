@@ -56,6 +56,8 @@ public interface UserDao {
     List<Map<String,Object>> workdayAllLogById(Map<String,Object> map);
 
     List<Map> query(User user);
+    //条件查询
+    List<Map> querylimits(User user);
 
     /*
     * 查询所有角色的工时
@@ -146,4 +148,5 @@ public interface UserDao {
 
     List<Map> queryPrincipal(Integer id);
 
+    int addmanageUserid(@Param("manageuserid") Integer manageuserid, @Param("userid") Integer userid);
 }

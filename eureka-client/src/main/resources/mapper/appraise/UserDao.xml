@@ -21,11 +21,15 @@
     <collection property="group" javaType="ARRAYLIST"
                 column="id=id,vid= vid" select="getGroup1"/>
   </resultMap>
-    <insert id="add" parameterType="map" useGeneratedKeys="true" keyProperty="userId" keyColumn="id">
+    <insert id="add" parameterType="map" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         insert into user(pid , did , tid , `name` , username , paw , grade)
         values (#{pid} , #{did} , #{tid} , #{name} , #{username} ,AES_ENCRYPT("1234",'zpepdi') , 0)
             ON DUPLICATE KEY UPDATE
             alive = 1
+    </insert>
+    <insert id="addmanageUserid" parameterType="integer">
+        INSERT ignore INTO manage_user ( `manage_user_id`, `user_id`)
+         VALUES (#{manageuserid}, #{userid});
     </insert>
     <insert id="addExcel" parameterType="list" useGeneratedKeys="true" keyProperty="id">
         insert into user(pid , did , tid , `name` , username ,grade)
@@ -109,6 +113,31 @@
         </if>
         <if test="username != null and username != ''">
          and u.username like concat("%",#{username},"%")
+        </if>
+        </where>
+      GROUP BY u.id
+        order by d.id, t.id, u.username
+    </select>
+    <select id="querylimits" resultType="java.util.Map" parameterType="user">
+      select u.id , u.name , u.username, u.grade, d.id as did,d.name as department ,
+      t.name as technology  ,p.id as pid,p.`name` as `position`
+      from 	`user` u
+        LEFT JOIN `position` p ON p.id = u.pid
+        LEFT JOIN technology t ON u.tid = t.id
+        LEFT JOIN department d ON u.did = d.id
+        <where>
+        u.alive = 1
+        <if test="name != null and name != ''">
+         and u.name like concat("%",#{name},"%")
+        </if>
+        <if test="username != null and username != ''">
+         and u.username like concat("%",#{username},"%")
+        </if>
+        <if test="pid != null and pid != ''">
+            and u.pid = #{pid}
+        </if>
+        <if test="did != null and did != ''">
+            and u.did = #{did}
         </if>
         </where>
       GROUP BY u.id
