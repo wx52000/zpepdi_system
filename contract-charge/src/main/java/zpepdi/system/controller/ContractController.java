@@ -68,8 +68,8 @@ public class ContractController {
     }
 
     @RequestMapping("addChildren")
-    public Result addChildren(@RequestBody Map<String,Object> map){
-        return contractService.addChildren(map);
+    public Result addChildren(@UserId Integer userId,@RequestBody Map<String,Object> map){
+        return contractService.addChildren(userId, map);
     }
 
     @RequestMapping("delChildren")

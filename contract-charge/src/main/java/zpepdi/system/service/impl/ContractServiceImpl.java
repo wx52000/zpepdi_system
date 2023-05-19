@@ -117,8 +117,9 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Result addChildren(Map<String, Object> map) {
+    public Result addChildren(Integer userId, Map<String, Object> map) {
         contractDao.addChildren(map);
+        contractSplitDao.setSplit(userId,map);
         return Result.ok();
     }
 

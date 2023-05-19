@@ -36,5 +36,7 @@ public interface TechnologyService {
 
     List<String> querySpeciality(Integer did);
 
-    Integer addMajorTec(Map<String, String> map);
+    List<String> querySpecialityByUserId(Integer userId);
+
+    Integer addMajorTec(Map<String, Object> map);
 }

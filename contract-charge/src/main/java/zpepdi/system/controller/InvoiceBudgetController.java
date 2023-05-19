@@ -26,8 +26,23 @@ public class InvoiceBudgetController {
         return budgetService.setBudgetYear(userId,map);
     }
 
+    @RequestMapping("setBudgetQuarter")
+    public Result setBudgetQuarter(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return budgetService.setBudgetQuarter(userId,map);
+    }
+
     @RequestMapping("queryByContractId")
     public Result queryByContractId(@RequestBody Map<String,Object> map){
         return budgetService.queryByContractId(map);
+    }
+
+    @RequestMapping("queryNowById")
+    public Result queryNowById(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return budgetService.queryNowById(userId,map);
+    }
+
+    @RequestMapping("queryAllMonthByContractId")
+    public Result queryAllMonthByContractId(@UserId Integer userId, @RequestBody Map<String,Object> map){
+        return budgetService.queryAllMonthByContractId(userId,map);
     }
 }

@@ -7,5 +7,9 @@ import java.util.Map;
 
 public interface InvoiceService {
 
+    Result addRelativeBudget(Map<String,Object> map);
     Result queryByContractId(String id);
+
+    Result queryBaseByContractId(String id);
+
 }

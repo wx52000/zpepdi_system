@@ -101,7 +101,7 @@ public class UserController {
     }
     //分配用户权限
     @RequestMapping("addmanageUserid")
-    public Result addmanageUserid(@RequestBody Map<String,Integer> map){
+    public Result addmanageUserid(@RequestBody Map<String,Object> map){
         return Result.ok(userService.addmanageUserid(map));
     }
 

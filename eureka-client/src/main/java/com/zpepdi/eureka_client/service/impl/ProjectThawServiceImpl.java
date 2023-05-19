@@ -28,7 +28,7 @@ public class ProjectThawServiceImpl implements ProjectThawService {
         projectThawDao.addProjectThaw(userId,map);
         User user = userDao.queryById(Integer.valueOf(map.get("checkerId").toString()));
         map.put("auditType", 15);
-        map.put("information",map.get("name") + "项目解冻申请");
+        map.put("information",(map.get("number") != null ? map.get("number")+"-" : "") + map.get("name") + "项目解冻申请");
         map.put("auditKey", map.get("id"));
         map.put("data", JSON.toJSONString(map));
         map.put("auditor_id", user.getId());

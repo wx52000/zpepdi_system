@@ -3,14 +3,15 @@
 <mapper namespace="zpepdi.system.dao.fd.NodeDao">
     <update id="setNode">
         insert into contract_node
-            (`contract_id`, `index`, `money`,`details`, `date`, `state`, `handle_time`, `handler`)
+            (`contract_id`, `index`, `money`,`details`, `date`, `state`, `remark`,  `handle_time`, `handler`)
         values (#{map.contract_id}, #{map.index}, #{map.money},#{map.details},
-                #{map.date},  #{map.state}, now(), #{userId})
+                #{map.date},  #{map.state}, #{map.remark}, now(), #{userId})
         on duplicate key update
         `money` = values(`money`),
         `details` = values(`details`),
         `date` = values(`date`),
         `state` = values(`state`),
+        `remark` = values(`remark`),
         `handle_time` = values(`handle_time`),
         `handler` = values(`handler`)
     </update>
@@ -21,6 +22,7 @@
             money,
             details,
             cast(`date` as char(10)) as `date`,
+            remark,
             state
         FROM
             contract_node

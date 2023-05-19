@@ -88,9 +88,7 @@
                 left join
                 (SELECT
                      parent_id,
-                     sum(
-                             IF
-                                 ( add_sub = 0, money, - money )) as money
+                     sum(money) as money
                  FROM
                      contract
                  WHERE

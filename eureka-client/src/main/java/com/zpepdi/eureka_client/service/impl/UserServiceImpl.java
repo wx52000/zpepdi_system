@@ -513,10 +513,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result addmanageUserid(Map<String, Integer> map){
-        Integer manageuserid = map.get("manageuserid");
-        Integer userid = map.get("userid");
-        return Result.ok(userDao.addmanageUserid(manageuserid,userid));
+    public Result addmanageUserid(Map<String, Object> map){
+        Integer manageuserid = Integer.valueOf(map.get("manageuserid").toString());
+        userDao.addmanageUserid(map);
+        userDao.delManageUser(manageuserid);
+        return Result.ok();
 
     }
 }

@@ -11,5 +11,11 @@ public interface InvoiceBudgetService {
 
     Result setBudgetYear(Integer userId, Map<String,Object> map);
 
+    Result setBudgetQuarter(Integer userId, Map<String,Object> map);
+
     Result queryByContractId(Map<String,Object> map);
+
+    Result queryNowById(Integer userId, Map<String,Object> map);
+
+    Result queryAllMonthByContractId(Integer userId, Map<String,Object> map);
 }

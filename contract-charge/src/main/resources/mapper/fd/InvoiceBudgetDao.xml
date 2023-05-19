@@ -12,6 +12,9 @@
         <collection property="monthList" javaType="ARRAYLIST"
                     column="year=year, contract_id= contract_id"
                     select="queryMonthByContractId"/>
+        <collection property="quarterList" javaType="ARRAYLIST"
+                    column="year=year, contract_id = contract_id"
+                    select="queryQuarterByContractId"/>
     </resultMap>
     <update id="setBudgetMonth">
         insert into invoice_budget_month(contract_id, `budget`, `month`, quarter,
@@ -20,6 +23,7 @@
                 #{map.quarter}, #{map.year}, now(), #{userId}, #{map.single}, #{map.remark}, #{map.type}, #{map.expend})
         on duplicate key update
         `budget` = values(`budget`),
+        `expend` = values(`expend`),
         `time` = values(`time`),
         `handler` = values(`handler`),
         `remark` = values(`remark`)
@@ -37,6 +41,18 @@
         `quarter4_budget` = values(`quarter4_budget`),
         `time` = values(`time`),
         `handler` = values(`handler`)
+    </update>
+    <update id="setQuarter">
+        insert into invoice_budget_quarter(contract_id, quarter_budget, month1_budget,
+                                           month2_budget, month3_budget, year ,quarter, time, handler)
+        values(#{map.id}, #{map.quarter_budget}, #{map.month1_budget}, #{map.month2_budget},
+               #{map.month3_budget}, #{map.year}, #{map.quarter}, now(), #{userId})
+            on duplicate key update
+                                 quarter_budget  = values(quarter_budget),
+                                 month1_budget  = values(month1_budget),
+                                 month2_budget  = values(month2_budget),
+                                 month3_budget  = values(month3_budget),
+                                 `time`  = values(`time`)
     </update>
     <select id="queryMonthByContractId" resultType="java.util.Map">
         SELECT
@@ -74,5 +90,57 @@
         from invoice_budget_year
         where contract_id= #{contract_id}
           and `year` = #{year}
+    </select>
+    <select id="queryQuarterByContractId" resultType="java.util.Map">
+        select
+            quarter,
+            quarter_budget,
+            month1_budget,
+            month2_budget,
+            month3_budget
+        from invoice_budget_quarter
+        where contract_id = #{contract_id}
+          and `year` = #{year}
+        order by quarter
+    </select>
+    <select id="queryNowById" resultType="java.util.Map">
+        SELECT
+            c.id,
+            y.year_budget,
+            y.quarter1_budget,
+            y.quarter2_budget,
+            y.quarter3_budget,
+            y.quarter4_budget,
+            q.quarter_budget,
+            q.month1_budget,
+            q.month2_budget,
+            q.month3_budget,
+            SUM( m.budget ) AS invoice,
+            SUM( m1.budget ) AS invoice1
+        FROM
+            contract c
+                LEFT JOIN invoice_budget_year y ON c.id = y.contract_id
+                AND y.`year` = #{year}
+                LEFT JOIN invoice_budget_quarter q ON c.id = q.contract_id
+                AND q.`year` = #{year}
+                AND `quarter` = #{quarter}
+                LEFT JOIN invoice_budget_month m ON c.id = m.contract_id
+                AND m.`year` = #{year}
+                AND m.`month` = #{month}
+                LEFT JOIN invoice_budget_month m1 ON c.id = m1.contract_id
+                AND m1.`year` = #{nextMonthYear}
+                AND m1.`month` = #{nextMonth}
+        WHERE
+            c.id = #{id}
+    </select>
+    <select id="queryAllMonthByContractId" resultType="java.util.Map">
+        SELECT
+            id,
+            CONCAT( `year`, '-', `month` ) as `date`,
+            budget
+        FROM
+            invoice_budget_month
+        WHERE
+            contract_id = #{id}
     </select>
 </mapper>

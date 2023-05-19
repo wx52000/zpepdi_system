@@ -2,7 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="zpepdi.system.dao.fd.ContractSplitDao">
     <update id="setSplit">
-        INSERT INTO contract_split ( contract_id, consultation, survey, design, management, equipment, construction, other, cost, handle_time, `handler` )
+        INSERT INTO contract_split ( contract_id,
+                consultation, survey, design, management, equipment, construction, other, cost, handle_time, `handler` )
         VALUES
             ( #{map.contract_id}, #{map.consultation}, #{map.survey}, #{map.design},
               #{map.management}, #{map.equipment}, #{map.construction}, #{map.other},

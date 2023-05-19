@@ -91,29 +91,15 @@
         GROUP BY
             p.id
     </select>
-    <select id="queryTreeByRoleId" resultMap="queryRole">
-        SELECT DISTINCT
-            m.id, m.menus, null as path,null as  import,
-             null as router,
-                        TRUE as hasChildren, #{id} as roleId
-        FROM
-            role_menus r,
-            menus_path mp,
-            menus m
-        WHERE
-            r.menus_id = mp.id
-          AND mp.parent = m.id
-          AND r.role_id = #{id}
-        UNION
+    <select id="queryTreeByRoleId" resultType="map">
         SELECT DISTINCT
             mp.id, mp.`name` as menus, mp.path, mp.import, router_name as router,
-                        FALSE as hasChildren, #{id} as roleId
+            parent_router, mp.parent
         FROM
             role_menus r,
             menus_path mp
         WHERE
             r.menus_id = mp.id
-          AND mp.parent is NULL
           AND r.role_id = #{id}
     </select>
     <select id="queryMenusByRoleId" resultType="java.util.Map">

@@ -14,6 +14,7 @@
         <option value="$PROJECT_DIR$/qj_airhammer/pom.xml" />
         <option value="$PROJECT_DIR$/qj_heating/pom.xml" />
         <option value="$PROJECT_DIR$/audit-service/pom.xml" />
+        <option value="$PROJECT_DIR$/scheduled_task/pom.xml" />
       </list>
     </option>
   </component>

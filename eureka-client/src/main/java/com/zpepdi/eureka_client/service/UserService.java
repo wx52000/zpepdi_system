@@ -124,5 +124,5 @@ public interface UserService {
 
     void conditionalDown(MultipartFile file ,Map<String, Object> map, HttpServletResponse response);
 
-    Result addmanageUserid(Map<String, Integer> map);
+    Result addmanageUserid(Map<String, Object> map);
 }

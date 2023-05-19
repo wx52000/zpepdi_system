@@ -41,7 +41,7 @@ public class ProjectBudgetServiceImpl implements ProjectBudgetService {
         int quarter = (int) Math.ceil(month/3);
         calendar.add(Calendar.MONTH,1);
         int nextMonthYear = calendar.get(Calendar.YEAR);
-        int nextMonth = calendar.get(Calendar.MONTH);
+        int nextMonth = calendar.get(Calendar.MONTH)+1;
         map.put("year",year);
         map.put("month", month);
         map.put("quarter", quarter);

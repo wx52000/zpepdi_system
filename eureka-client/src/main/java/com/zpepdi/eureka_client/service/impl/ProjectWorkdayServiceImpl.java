@@ -181,7 +181,7 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
         //此处用于发送审核
         String name = map1.get("name").toString();
         map.put("auditType", 0);
-        map.put("information",name + "项目工时初次分配");
+        map.put("information",(map1.get("number") != null ? map1.get("number")+"-" : "") + name + "项目工时初次分配");
         map.put("number",map1.get("number"));
         map.put("name", map1.get("name"));
         map.put("auditKey", map.get("id"));
@@ -217,7 +217,7 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
     Map<String,Object> map1 = proWorkdayDao.queryProWorkday(projectId);
     String name = map1.get("name").toString();
     map.put("auditType", 1);
-    map.put("information",name + "项目工时额外申请");
+    map.put("information",(map1.get("number") != null ? map1.get("number")+"-" : "") + name + "项目工时额外申请");
     map.put("number",map1.get("number"));
     map.put("name", name);
     map.put("initialWorkday",map1.get("num"));

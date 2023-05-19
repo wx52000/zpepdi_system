@@ -23,8 +23,8 @@
   </resultMap>
   <insert id="addChildren">
     update contract
-    set parent_id = #{parent}, add_sub = #{addSub}
-    where id = #{id}
+    set parent_id = #{parent}
+    where id = #{contract_id}
   </insert>
     <insert id="insertSingle">
         insert IGNORE  INTO contract(`number`, `name`, first_party, business_manage, budget, money, settlement, `attribute`,
@@ -113,6 +113,7 @@
                    LEFT JOIN market_project p on cp.project_id = p.id
     where parent_id = 0
     and  c.income_expend = #{income}
+    and kind = 0
     ORDER BY sign_date DESC
   </select>
   <select id="queryParent" resultType="java.util.Map">
@@ -253,12 +254,16 @@
     AND iyear.contract_id = c.id
   </select>
   <select id="queryChildren" resultType="java.util.Map">
-    select  id, number, name, money, add_sub
-    from contract
+    select  c.id, c.number, c.name, c.money, cs.consultation, cs.survey,
+            cs.design, cs.management, cs.equipment, cs.construction,
+            cs.other, cs.cost
+    from contract c left join contract_split cs on c.id = cs.contract_id
     where id = #{id}
     union
-    select  id, number, name, money, add_sub
-    from contract
+    select  c.id, c.number, c.name, c.money, cs.consultation, cs.survey,
+            cs.design, cs.management, cs.equipment, cs.construction,
+            cs.other, cs.cost
+    from contract c left join contract_split cs on c.id = cs.contract_id
     where parent_id = #{id}
       and alive = 1
     order by number

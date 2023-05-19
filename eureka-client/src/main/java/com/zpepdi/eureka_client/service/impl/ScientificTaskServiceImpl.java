@@ -60,7 +60,7 @@ public class ScientificTaskServiceImpl implements ScientificTaskService {
         scientificTaskDao.taskSubmit(map);
         Map<String,Object> project = scientificTaskDao.queryProjectByTask(Integer.valueOf(map.get("id").toString()));
         map.put("auditType",10);
-        map.put("information",project.get("name") + "科技工时发放");
+        map.put("information",(project.get("number") != null ? project.get("number")+"-" : "") + project.get("name") + "科技工时发放");
         map.put("projectId",project.get("id"));
         map.put("handler", userId);
         map.put("submit_date",map.get("submitDate"));

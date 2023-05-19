@@ -182,7 +182,7 @@ public class VolumeServiceImpl implements VolumeService {
                 map1.put("headman",String.format("%.1f",headman));
                 Map<String,Object> auditMap = new HashMap<>();
                 auditMap.put("auditType",4);
-                auditMap.put("information", map1.get("name").toString() + map.get("tec") + "卷册工时调整");
+                auditMap.put("information",(map1.get("number") != null ? map1.get("number")+"-" : "") + map1.get("name").toString() + map.get("tec") + "卷册工时调整");
                 auditMap.put("projectId",map.get("projectId"));
                 auditMap.put("tec", map.get("tec"));
                 auditMap.put("auditKey",map.get("id").toString()+map.get("tec").toString()+ userId);
@@ -394,7 +394,7 @@ public class VolumeServiceImpl implements VolumeService {
         //不是设总则需要审核
         if (Integer.parseInt(project.get("generalId").toString()) != userId) {
             map.put("auditType", 12);
-            map.put("information", project.get("name").toString() + project.get("tec") + "卷册计划调整");
+            map.put("information", (project.get("number") != null ? project.get("number")+"-" : "") + project.get("name").toString() + project.get("tec") + "卷册计划调整");
             map.put("projectId", project.get("id"));
             map.put("tec", project.get("tec"));
             map.put("auditKey", project.get("id").toString() + project.get("tec").toString() + userId);
@@ -471,7 +471,15 @@ public class VolumeServiceImpl implements VolumeService {
 
     @Override
     public Result queryConfirmTec(Integer userId, Integer id) {
-        return Result.ok(volumeDao.queryConfirmTec(userId,id));
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int confirmDay = (int) declareDayService.declareDay();
+        String date = DateUtils.getDateMonth();
+        if (day >= confirmDay){
+            calendar.add(Calendar.MONTH, 1);
+            date = DateUtils.dateToString(calendar.getTime(), "yyyy-MM");
+        }
+        return Result.ok(volumeDao.queryConfirmTec(userId,id, date));
     }
 
     @Override
@@ -495,7 +503,7 @@ public class VolumeServiceImpl implements VolumeService {
 
         Map<String,Object> project = projectDao.queryBaseById(Integer.valueOf(map.get("projectId").toString()));
         map.put("auditType",11);
-        map.put("information", project.get("name").toString() + map.get("tec") +
+        map.put("information", (project.get("number") != null ? project.get("number")+"-" : "") + project.get("name").toString() + map.get("tec") +
                 map.get("planMonth") + "卷册计划申报");
         map.put("projectId",map.get("projectId"));
         map.put("tec", map.get("tec"));
@@ -516,7 +524,7 @@ public class VolumeServiceImpl implements VolumeService {
         volumeDao.sentConfirmDelay(userId,map);
         Map<String,Object> project = volumeDao.queryProjectById(Integer.valueOf(map.get("id").toString()));
         map.put("auditType",13);
-        map.put("information", project.get("name").toString() + project.get("tec") + "申报卷册延期");
+        map.put("information", (project.get("number") != null ? project.get("number")+"-" : "") + project.get("name").toString() + project.get("tec") + "申报卷册延期");
         map.put("projectId",project.get("id"));
         map.put("tec", project.get("tec"));
         map.put("auditKey",project.get("id").toString()+project.get("tec").toString() + userId);

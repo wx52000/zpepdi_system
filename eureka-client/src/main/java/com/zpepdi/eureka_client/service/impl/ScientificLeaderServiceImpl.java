@@ -70,7 +70,7 @@ public class ScientificLeaderServiceImpl implements ScientificLeaderService {
         scientificLeaderDao.addTermByLeader(userId,map);
         Map<String,Object> project = scientificDao.queryById(userId, Integer.valueOf(map.get("projectId").toString()));
         map.put("auditType",9);
-        map.put("information",project.get("name") + "科技工时申请");
+        map.put("information",(project.get("number") != null ? project.get("number")+"-" : "") + project.get("name") + "科技工时申请");
         map.put("auditKey",map.get("id"));
         map.put("list",scientificLeaderDao.queryFilesByTerm(Integer.valueOf(map.get("id").toString())));
         map.put("data", JSON.toJSONString(map));
@@ -90,7 +90,7 @@ public class ScientificLeaderServiceImpl implements ScientificLeaderService {
         Map<String,Object> project = scientificLeaderDao.queryTermById(id);
         Map<String,Object> map = new HashMap<>();
         map.put("auditType",9);
-        map.put("information",project.get("pName") + "科技工时申请");
+        map.put("information",(project.get("pNumber") != null ? project.get("pNumber")+"-" : "") + project.get("pName") + "科技工时申请");
         map.put("auditKey",id);
         map.put("list",scientificLeaderDao.queryFilesByTerm(id));
         map.put("data", JSON.toJSONString(map));

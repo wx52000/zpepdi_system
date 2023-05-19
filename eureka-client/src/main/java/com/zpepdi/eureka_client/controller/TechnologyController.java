@@ -36,9 +36,14 @@ public class TechnologyController {
     public Result querySpeciality(@RequestHeader Integer did){
         return Result.ok(technologyService.querySpeciality(did));
     }
+
+    @RequestMapping("querySpecialityByUserId")
+    public Result querySpecialityByUserId(@RequestHeader Integer id){
+        return Result.ok(technologyService.querySpecialityByUserId(id));
+    }
     //新增专业权限
     @RequestMapping("addMajorTec")
-    public Result addMajorTec(@RequestBody Map<String,String> map){
+    public Result addMajorTec(@RequestBody Map<String,Object> map){
         return Result.ok(technologyService.addMajorTec(map));
     }
 

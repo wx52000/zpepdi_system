@@ -11,6 +11,7 @@
         <module name="eureka-client" />
         <module name="test" />
         <module name="qj_airhammer" />
+        <module name="scheduled_task" />
         <module name="contract-charge" />
         <module name="audit-service" />
         <module name="api-gateway" />
@@ -27,6 +28,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="eureka-client" options="" />
       <module name="qj_heating" options="-parameters" />
+      <module name="scheduled_task" options="" />
       <module name="test" options="-parameters" />
     </option>
   </component>

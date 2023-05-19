@@ -4565,15 +4565,16 @@
     <resultMap id="queryConfirmNotCheck" type="map">
         <result column="id" property="id" ></result>
         <result column="tec" property="tec" ></result>
+        <result column="date" property="date" ></result>
         <collection property="list" javaType="ARRAYLIST"
-                    select="queryConfirmNotCheck" column="id = id, tec = tec">
+                    select="queryConfirmNotCheck" column="id = id, tec = tec,date = date">
         </collection>
     </resultMap>
     <select id="queryConfirmTec" resultMap="queryConfirmNotCheck">
         SELECT
             t.project_id AS id,
             IF
-                ( m.big_name IS NULL, t.volume_tec, m.small_name ) AS tec
+                ( m.big_name IS NULL, t.volume_tec, m.small_name ) AS tec, #{date} as date
         FROM
             workday_tec t
                 LEFT JOIN major_contrast_technology m ON t.volume_tec = m.big_name,
@@ -4586,7 +4587,11 @@
     <select id="queryConfirmNotCheck" resultType="java.util.Map">
         SELECT
             v.id, v.number, v.name, v.state, v.designer, v.checker,
-            v.principal, v.planned_publication_date as plan_publication
+            v.principal, v.planned_publication_date as plan_publication,
+            exists(select  1
+                from check_plan_volume pv
+                where pv.volume_id = v.id
+                and pv.check_month = #{date}) as selected
         FROM
             volume v
         WHERE

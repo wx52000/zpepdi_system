@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.ReceiveDao">
+    <insert id="addReceive" keyProperty="map.id" useGeneratedKeys="true" keyColumn="id">
+        insert into receive(
+                            <if test="map.id != null and map.id !=''">
+                                id,
+                            </if>  `contract_id`, `invoice_id`, `date`, `money`, `handler`, `handle_time`)
+        values(<if test="map.id != null and map.id !=''">
+        #{map.id},
+    </if> #{map.contract_id}, #{map.invoice_id}, #{map.date}, #{map.money},  #{userId}, now())
+        on duplicate key update
+        `date` = values(`date`),
+        money = values(money)
+    </insert>
+</mapper>

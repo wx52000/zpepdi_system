@@ -5,7 +5,57 @@
     </resultMap>
     <resultMap id="queryByContractId2" type="map">
     </resultMap>
+    <insert id="addRelativeBudget">
+        update invoice
+        set invoice_budget_month_id = #{budget_id}
+        where id = #{id}
+    </insert>
     <select id="queryByContractId" resultMap="queryByContractId1,queryByContractId2">
         call querySumWorkdayByDep(#{id,mode=IN})
+    </select>
+    <resultMap id="queryBaseByContractId" type="map">
+        <result column="id" property="id"></result>
+        <result column="invoice_information_id" property="invoice_information_id"></result>
+        <result column="charge" property="charge"></result>
+        <result column="added_value" property="added_value"></result>
+        <result column="out_date" property="out_date"></result>
+        <result column="number" property="number"></result>
+        <result column="content" property="content"></result>
+        <result column="redCharge" property="redCharge"></result>
+        <result column="red_id" property="red_id"></result>
+        <result column="red_serialNum" property="red_serialNum"></result>
+        <result column="invoice_budget_month_id" property="invoice_budget_month_id"></result>
+        <collection property="receiveList" column="id = id"
+                    javaType="ARRAYLIST" select="queryReceiveByInvoiceId"></collection>
+    </resultMap>
+    <select id="queryBaseByContractId" resultMap="queryBaseByContractId">
+        SELECT
+            i.`id`,
+            i.`invoice_information_id`,
+            i.`charge`,
+            i.`added_value`,
+            cast(
+                    i.`out_date` AS CHAR ( 10 )) AS out_date,
+            i.number,
+            i.content,
+            i.redCharge,
+            i.red_id,
+            i.red_serialNum,
+            i.invoice_budget_month_id,
+            CONCAT( m.`year`, '-', m.`month` ) AS budget_month,
+            m.budget
+        FROM
+            invoice i
+                LEFT JOIN invoice_budget_month m ON i.invoice_budget_month_id = m.id,
+            invoice_information ii
+        WHERE
+            ii.contract_id = #{id}
+          AND i.invoice_information_id = ii.id
+    </select>
+    <select id="queryReceiveByInvoiceId" resultType="java.util.Map">
+        select id, cast(`date` as char(20)) as `date`, money
+        from receive
+        where invoice_id = #{id}
+        order by `date`
     </select>
 </mapper>

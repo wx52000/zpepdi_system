@@ -26,7 +26,7 @@ public interface ContractService {
 
     Result queryRelativeProject(String id);
 
-    Result addChildren(Map<String,Object> map);
+    Result addChildren(Integer userId, Map<String,Object> map);
     Result delChildren(String id);
 
     Result queryBlur(String search);

@@ -276,7 +276,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
         User user1 = userDao.queryById(Integer.valueOf(map.get("handler").toString()));
         map.put("auditType",7);
-        map.put("information", map.get("name").toString() + "新增项目申请");
+        map.put("information", (map.get("number") != null ? map.get("number")+"-" : "")+ map.get("name").toString() + "新增项目申请");
         map.put("auditKey",map.get("projectId"));
         map.put("data", JSON.toJSONString(map));
         map.put("auditor_id", user1.getId());
@@ -510,7 +510,7 @@ public class ProjectServiceImpl implements ProjectService {
                         map,userId, DateUtils.getDateMonth());
                 Map<String,Object> auditMap = new HashMap<>();
                 auditMap.put("auditType",4);
-                auditMap.put("information",name + tec + "卷册工时调整");
+                auditMap.put("information",(map1.get("number") != null ? map1.get("number")+"-" : "") +name + tec + "卷册工时调整");
                 auditMap.put("projectId",map.get("id"));
                 auditMap.put("tec", map.get("tec"));
                 auditMap.put("auditKey",map.get("id").toString()+map.get("tec").toString()+userId);
@@ -521,7 +521,7 @@ public class ProjectServiceImpl implements ProjectService {
                 auditInformationFeign.addAuditInformation(auditMap);
             }
             map.put("auditType", 3);
-            map.put("information",name + tec + "专业工时划分");
+            map.put("information",(map1.get("number") != null ? map1.get("number")+"-" : "") + name + tec + "专业工时划分");
             map.put("number",map1.get("number"));
             map.put("name", name);
             map.put("amount", amount);
@@ -1063,7 +1063,7 @@ public class ProjectServiceImpl implements ProjectService {
                 projectDao.setDeclare(userId, map);
                 Map<String,Object> project = projectDao.queryBaseById(Integer.valueOf(map.get("projectId").toString()));
                 map.put("auditType", 5);
-                map.put("information",project.get("name")
+                map.put("information",(project.get("number") != null ? project.get("number")+"-" : "")+ project.get("name")
                         + map.get("declareDate").toString() + "工时发放");
                 map.put("number",project.get("number"));
                 map.put("name", project.get("name"));
@@ -1151,7 +1151,7 @@ public class ProjectServiceImpl implements ProjectService {
             projectDao.backOff(userId,map);
             Map<String,Object> project = projectDao.queryBaseById(Integer.valueOf(map.get("projectId").toString()));
             map.put("auditType", 6);
-            map.put("information",project.get("name")
+            map.put("information",(project.get("number") != null ? project.get("number")+"-" : "") + project.get("name")
                     + map.get("date").toString() + "工时撤回");
             map.put("projectId",map.get("projectId"));
             map.put("submit_date",map.get("date"));

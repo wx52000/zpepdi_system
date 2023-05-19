@@ -15,10 +15,17 @@ public interface InvoiceBudgetDao {
     void setBudgetYear(@Param("userId")Integer userId,
                         @Param("map") Map<String,Object> map);
 
+    void setQuarter(@Param("userId")Integer userId,
+                    @Param("map") Map<String,Object> map);
+
     Map<String,Object> queryByContractId(Map<String,Object> map);
 
-
+    List<Map<String,Object>> queryQuarterByContractId(Map<String,Object> map);
 
     List<Map<String,Object>> queryMonthByContractId(Map<String,Object> map);
+
+    List<Map<String,Object>> queryAllMonthByContractId(Map<String, Object> map);
+
+    Map<String,Object> queryNowById(Map<String,Object> map);
 
 }

@@ -39,11 +39,17 @@ public class TechnologyServiceImpl implements TechnologyService {
     public List<String> querySpeciality(Integer did) {
         return technologyDao.querySpeciality(did);
     }
+
     @Override
-    public Integer addMajorTec(Map<String, String> map) {
-        Integer manageuserid = Integer.valueOf(map.get("manageuserid"));
-        String tec = map.get("tec");
-        return technologyDao.addMajorTec(manageuserid,tec);
+    public List<String> querySpecialityByUserId(Integer userId) {
+        return technologyDao.querySpecialityByUserId(userId);
+    }
+
+    @Override
+    public Integer addMajorTec(Map<String, Object> map) {
+        Integer manageuserid = Integer.valueOf(map.get("manageuserid").toString());
+        technologyDao.delMajorTec(manageuserid);
+        return technologyDao.addMajorTec(map);
     }
 
     @Override

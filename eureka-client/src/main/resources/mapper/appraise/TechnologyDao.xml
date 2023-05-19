@@ -19,12 +19,19 @@
     </insert>
     <insert id="addMajorTec">
         INSERT ignore INTO manage_tec(`manage_user_id`, `tec`)
-        VALUES (#{manageuserid}, #{tec});
+        VALUES <foreach collection="list" item="item" separator=",">
+                (#{manageuserid}, #{item})
+            </foreach>
     </insert>
     <delete id="del">
         delete
         from technology
         where id = #{id}
+    </delete>
+    <delete id="delMajorTec">
+        delete
+        from manage_tec
+        where manage_user_id = #{manageUserId}
     </delete>
     <select id="query" resultType="com.zpepdi.eureka_client.entity.Technology">
         select *
@@ -135,6 +142,10 @@
         from major_contrast_technology
         where did = #{did}
     </select>
-
+    <select id="querySpecialityByUserId" resultType="string">
+        SELECT DISTINCT tec
+        from manage_tec
+        where manage_user_id
+    </select>
 
 </mapper>

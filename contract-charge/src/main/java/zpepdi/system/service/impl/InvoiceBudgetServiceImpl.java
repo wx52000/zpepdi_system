@@ -6,6 +6,7 @@ import zpepdi.system.dao.fd.InvoiceBudgetDao;
 import zpepdi.system.result.Result;
 import zpepdi.system.service.InvoiceBudgetService;
 
+import java.util.Calendar;
 import java.util.Map;
 
 @Service
@@ -29,7 +30,35 @@ public class InvoiceBudgetServiceImpl implements InvoiceBudgetService {
     }
 
     @Override
+    public Result setBudgetQuarter(Integer userId, Map<String, Object> map) {
+        budgetDao.setQuarter(userId,map);
+        return Result.ok();
+    }
+
+    @Override
     public Result queryByContractId(Map<String, Object> map) {
         return Result.ok(budgetDao.queryByContractId(map));
+    }
+
+    @Override
+    public Result queryNowById(Integer userId, Map<String, Object> map) {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH)+1;
+        int quarter = (int) Math.ceil(month/3);
+        calendar.add(Calendar.MONTH,1);
+        int nextMonthYear = calendar.get(Calendar.YEAR);
+        int nextMonth = calendar.get(Calendar.MONTH)+1;
+        map.put("year",year);
+        map.put("month", month);
+        map.put("quarter", quarter);
+        map.put("nextMonth", nextMonth);
+        map.put("nextMonthYear", nextMonthYear);
+        return Result.ok(budgetDao.queryNowById(map));
+    }
+
+    @Override
+    public Result queryAllMonthByContractId(Integer userId, Map<String, Object> map) {
+        return Result.ok(budgetDao.queryAllMonthByContractId(map));
     }
 }
