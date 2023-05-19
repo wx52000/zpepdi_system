@@ -368,6 +368,9 @@ public class FileUtil {
             map1.put("sjyali",gd.getSjyali());
             map1.put("sjwendu",gd.getSjwendu());
             map1.put("yingli",gd.getYingli());
+            if("false".equals(gd.getIsyingliinput())){
+                map1.put("isyingliinput","此许用应力为手工输入值");
+            }
             map1.put("y",gd.getPipingY());
             map1.put("yingliy",gd.getPipingyingliY());
             map1.put("fujiahd",gd.getPipingC());

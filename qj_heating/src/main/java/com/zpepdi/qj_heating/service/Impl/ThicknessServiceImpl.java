@@ -212,7 +212,11 @@ public class ThicknessServiceImpl implements ThicknessSerice {
             String product = name.split(":")[1];
             String rank = name.split(":")[2];
             String wd = map.get("wendu");
-            double wendu = Double.parseDouble(wd);
+            double wendu = 0.0;
+            if(wd != null){
+                wendu = Double.parseDouble(wd);
+            }
+
             int wen = (int) wendu;
             double wen2 = 0.0;
             if(wendu>=250 && wendu<=660){

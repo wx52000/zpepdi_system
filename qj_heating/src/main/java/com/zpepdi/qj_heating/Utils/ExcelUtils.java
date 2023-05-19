@@ -17,7 +17,7 @@ import static org.apache.poi.ss.usermodel.CellType.STRING;
 
 /**
  * 处理excel读入的工具类
- * Created by Liujishuai on 2015/8/5.
+ * Created by
  */
 public class ExcelUtils {
     /**
@@ -382,5 +382,17 @@ public class ExcelUtils {
         // 操作结束，关闭文件
         fos.close();
         System.out.println("excel文件生成成功");
+    }
+
+    /**
+     * 导出计算汇总表
+     * @throws Exception
+     */
+    public static void createJisuanbiao()
+            throws Exception {
+        // 创建新的Excel 工作簿
+        XSSFWorkbook workbook = new XSSFWorkbook();
+
+        System.out.println("计算汇总表文件生成成功");
     }
 }

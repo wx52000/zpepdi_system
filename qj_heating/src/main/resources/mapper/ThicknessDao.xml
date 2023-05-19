@@ -33,7 +33,9 @@
             <if test="recommend!=null and recommend!=''">recommend = #{recommend},</if>
             <if test="recommend2!=null and recommend2!=''">recommend2 = #{recommend2},</if>
             <if test="wendu!=null and wendu!=''">wendu = #{wendu},</if>
+            <if test="wenduUnit!=null and wenduUnit!=''">wenduUnit = #{wenduUnit},</if>
             <if test="yali!=null and yali!=''">yali = #{yali},</if>
+            <if test="yaliUnit!=null and yaliUnit!=''">yaliUnit = #{yaliUnit},</if>
             <if test="pipingG!=null and pipingG!=''">pipingG = #{pipingG},</if>
             <if test="pipingQ!=null and pipingQ!=''">pipingQ = #{pipingQ},</if>
             <if test="birong!=null and birong!=''">birong = #{birong},</if>
@@ -41,8 +43,11 @@
             <if test="pipingDo!=null and pipingDo!=''">pipingDo = #{pipingDo},</if>
             <if test="dhneijing!=null and dhneijing!=''">dhneijing = #{dhneijing},</if>
             <if test="sjwendu!=null and sjwendu!=''">sjwendu = #{sjwendu},</if>
+            <if test="sjwenduUnit!=null and sjwenduUnit!=''">sjwenduUnit = #{sjwenduUnit},</if>
             <if test="sjyali!=null and sjyali!=''">sjyali = #{sjyali},</if>
+            <if test="sjyaliUnit!=null and sjyaliUnit!=''">sjyaliUnit = #{sjyaliUnit},</if>
             <if test="yingli!=null and yingli!=''">yingli = #{yingli},</if>
+            <if test="isyingliinput!=null and isyingliinput!=''">isyingliinput = #{isyingliinput},</if>
             <if test="pipingY!=null and pipingY!=''">pipingY = #{pipingY},</if>
             <if test="pipingyingliY!=null and pipingyingliY!=''">pipingyingliY = #{pipingyingliY},</if>
             <if test="pipingC!=null and pipingC!=''">pipingC = #{pipingC},</if>
@@ -83,7 +88,9 @@
             <if test="recommend!=null and recommend!=''">recommend,</if>
             <if test="recommend2!=null and recommend2!=''">recommend2,</if>
             <if test="wendu!=null and wendu!=''">wendu,</if>
+            <if test="wenduUnit!=null and wenduUnit!=''">wenduUnit,</if>
             <if test="yali!=null and yali!=''">yali,</if>
+            <if test="yaliUnit!=null and yaliUnit!=''">yaliUnit,</if>
             <if test="pipingG!=null and pipingG!=''">pipingG,</if>
             <if test="pipingQ!=null and pipingQ!=''">pipingQ,</if>
             <if test="birong!=null and birong!=''">birong,</if>
@@ -91,8 +98,11 @@
             <if test="pipingDo!=null and pipingDo!=''">pipingDo,</if>
             <if test="dhneijing!=null and dhneijing!=''">dhneijing,</if>
             <if test="sjwendu!=null and sjwendu!=''">sjwendu,</if>
+            <if test="sjwenduUnit!=null and sjwenduUnit!=''">sjwenduUnit,</if>
             <if test="sjyali!=null and sjyali!=''">sjyali,</if>
+            <if test="sjyaliUnit!=null and sjyaliUnit!=''">sjyaliUnit,</if>
             <if test="yingli!=null and yingli!=''">yingli,</if>
+            <if test="isyingliinput!=null and isyingliinput!=''">isyingliinput,</if>
             <if test="pipingY!=null and pipingY!=''">pipingY,</if>
             <if test="pipingyingliY!=null and pipingyingliY!=''">pipingyingliY,</if>
             <if test="pipingC!=null and pipingC!=''">pipingC,</if>
@@ -128,7 +138,9 @@
             <if test="recommend!=null and recommend!=''">#{recommend},</if>
             <if test="recommend2!=null and recommend2!=''">#{recommend2},</if>
             <if test="wendu!=null and wendu!=''">#{wendu},</if>
+            <if test="wenduUnit!=null and wenduUnit!=''">#{wenduUnit},</if>
             <if test="yali!=null and yali!=''">#{yali},</if>
+            <if test="yaliUnit!=null and yaliUnit!=''">#{yaliUnit},</if>
             <if test="pipingG!=null and pipingG!=''">#{pipingG},</if>
             <if test="pipingQ!=null and pipingQ!=''">#{pipingQ},</if>
             <if test="birong!=null and birong!=''">#{birong},</if>
@@ -136,8 +148,11 @@
             <if test="pipingDo!=null and pipingDo!=''">#{pipingDo},</if>
             <if test="dhneijing!=null and dhneijing!=''">#{dhneijing},</if>
             <if test="sjwendu!=null and sjwendu!=''">#{sjwendu},</if>
+            <if test="sjwenduUnit!=null and sjwenduUnit!=''">#{sjwenduUnit},</if>
             <if test="sjyali!=null and sjyali!=''">#{sjyali},</if>
+            <if test="sjyaliUnit!=null and sjyaliUnit!=''">#{sjyaliUnit},</if>
             <if test="yingli!=null and yingli!=''">#{yingli},</if>
+            <if test="isyingliinput!=null and isyingliinput!=''">#{isyingliinput},</if>
             <if test="pipingY!=null and pipingY!=''">#{pipingY},</if>
             <if test="pipingyingliY!=null and pipingyingliY!=''">#{pipingyingliY},</if>
             <if test="pipingC!=null and pipingC!=''">#{pipingC},</if>
