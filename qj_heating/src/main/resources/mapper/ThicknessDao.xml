@@ -60,6 +60,7 @@
             <if test="dhbihou!=null and dhbihou!=''">dhbihou = #{dhbihou},</if>
             <if test="endnj!=null and endnj!=''">endnj = #{endnj},</if>
             <if test="endls!=null and endls!=''">endls = #{endls},</if>
+            <if test="bihouZheng!=null and bihouZheng!=''">bihouZheng = #{bihouZheng},</if>
             <if test="defstr1!=null and defstr1!=''">defstr1 = #{defstr1},</if>
             <if test="defstr2!=null and defstr2!=''">defstr2 = #{defstr2},</if>
             <if test="defstr3!=null and defstr3!=''">defstr3 = #{defstr3},</if>
@@ -115,6 +116,7 @@
             <if test="dhbihou!=null and dhbihou!=''">dhbihou,</if>
             <if test="endnj!=null and endnj!=''">endnj,</if>
             <if test="endls!=null and endls!=''">endls,</if>
+            <if test="bihouZheng!=null and bihouZheng!=''">bihouZheng,</if>
             <if test="defstr1!=null and defstr1!=''">defstr1,</if>
             <if test="defstr2!=null and defstr2!=''">defstr2,</if>
             <if test="defstr3!=null and defstr3!=''">defstr3,</if>
@@ -165,6 +167,7 @@
             <if test="dhbihou!=null and dhbihou!=''">#{dhbihou},</if>
             <if test="endnj!=null and endnj!=''">#{endnj},</if>
             <if test="endls!=null and endls!=''">#{endls},</if>
+            <if test="bihouZheng!=null and bihouZheng!=''">#{bihouZheng},</if>
             <if test="defstr1!=null and defstr1!=''">#{defstr1},</if>
             <if test="defstr2!=null and defstr2!=''">#{defstr2},</if>
             <if test="defstr3!=null and defstr3!=''">#{defstr3},</if>
@@ -182,7 +185,7 @@
             max(defstr2)
         FROM
             userpiping
-        where username = #{username} and name = #{name} and defstr1 = #{defstr1} and xuhao = #{xuhao} and defstr4 = "true"
+        where username = #{username} and name = #{name}  and xuhao = #{xuhao} and defstr4 = "true"
     </select>
     <select id="queryfilenamelist" parameterType="com.zpepdi.qj_heating.entity.Userpiping"  resultType="string">
         SELECT DISTINCT

@@ -359,11 +359,13 @@ public class FileUtil {
                 map1.put("wornzhi",gd.getPipingDo());
                 map1.put("bhimage",Pictures.ofLocal(templateFilePath+"img\\waibh.png").size(200,50).create());
                 map1.put("norw","内");
+                map1.put("endnorw",gd.getEndnj());
             }else {
                 map1.put("worn","内");
                 map1.put("wornzhi",gd.getDhneijing());
                 map1.put("bhimage",Pictures.ofLocal(templateFilePath+"img\\neibh.png").size(200,50).create());
                 map1.put("norw","外");
+                map1.put("endnorw",gd.getPipingDo());
             }
             map1.put("sjyali",gd.getSjyali());
             map1.put("sjwendu",gd.getSjwendu());
@@ -378,9 +380,11 @@ public class FileUtil {
             Double m = Double.valueOf(gd.getPipingC1());
             map1.put("a",String.format("%.3f",(m*100)/(100-(m*100))));
             map1.put("c",gd.getEndC1());
+            if("wan".equals(gd.getRadio2())){
+                map1.put("wguan",gd.getDefstr8()+"倍弯曲半径");
+            }
             map1.put("sc",gd.getPipingSc());
             map1.put("sn",gd.getDhbihou());
-            map1.put("endnorw",gd.getEndnj());
             map1.put("endls",gd.getEndls());
 
             maps.add(map1);

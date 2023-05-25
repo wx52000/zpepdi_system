@@ -81,6 +81,7 @@ public class Userpiping {
     private String endnj;
 //    流速
     private String endls;
+    private String bihouZheng;
     //是否外径管
     private String defstr1;
     private Integer defstr2;
@@ -484,6 +485,14 @@ public class Userpiping {
         this.isyingliinput = isyingliinput;
     }
 
+    public String getBihouZheng() {
+        return bihouZheng;
+    }
+
+    public void setBihouZheng(String bihouZheng) {
+        this.bihouZheng = bihouZheng;
+    }
+
     @Override
     public String toString() {
         return "Userpiping{" +
@@ -528,6 +537,7 @@ public class Userpiping {
                 ", dhbihou='" + dhbihou + '\'' +
                 ", endnj='" + endnj + '\'' +
                 ", endls='" + endls + '\'' +
+                ", bihouZheng='" + bihouZheng + '\'' +
                 ", defstr1='" + defstr1 + '\'' +
                 ", defstr2=" + defstr2 +
                 ", defstr3='" + defstr3 + '\'' +
