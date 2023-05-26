@@ -35,6 +35,11 @@
         set audit_data = #{data}
         where id = #{id}
     </update>
+    <update id="setIsSeen">
+        update audit_information
+        set is_seen = 1
+        where id = #{id}
+    </update>
     <delete id="delAuditInformation">
         update audit_information
         set cancel_time = now(), alive = 0
@@ -69,7 +74,7 @@
           and t.species = #{map.species}
     </select>
     <select id="queryById" resultType="java.util.Map">
-        select audit_data as data, type, state, initiator_id
+        select audit_data as data, is_seen, type, state, initiator_id
         from audit_information ai
         where id = #{id}
     </select>
@@ -90,6 +95,7 @@
               where initiator_id = #{id}
                 and state = 2
                 and alive = 1
+                and is_seen = 0
               union all
               select r.id
               from auditor_information r,
@@ -97,6 +103,7 @@
               where auditor_id = #{id}
                 and a.id = r.audit_information_id
                 and a.alive = 1
-                and r.state = 0) t
+                and a.state = 0
+              ) t
     </select>
 </mapper>

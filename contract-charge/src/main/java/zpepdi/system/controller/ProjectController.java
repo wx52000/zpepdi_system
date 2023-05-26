@@ -47,6 +47,11 @@ public class ProjectController {
         return projectService.setLedger(userId,map);
     }
 
+    @RequestMapping("delLedger")
+    public Result delLedger(@RequestHeader("id")Integer id){
+        return projectService.delLedger(id);
+    }
+
     @RequestMapping("queryLedger")
     public Result queryLedger(@UserId Integer userId, @RequestHeader String id){
         return projectService.queryLedger(id);

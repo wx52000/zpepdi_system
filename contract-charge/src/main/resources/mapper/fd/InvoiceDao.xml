@@ -38,6 +38,7 @@
                     i.`out_date` AS CHAR ( 10 )) AS out_date,
             i.number,
             i.content,
+            i.state,
             i.redCharge,
             i.red_id,
             i.red_serialNum,

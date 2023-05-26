@@ -4,7 +4,7 @@
     <update id="setWorkday">
         insert ignore into scientific_system_data(user_id, project_id,workday, `date` )
         SELECT
-        id,
+        u.id,
         project_id,
         (volume_workday + advance_workday + task_workday + `manage` + ifnull( deduct, 0 ))* 0.1 AS workday,
         #{scientific_date} as `date`

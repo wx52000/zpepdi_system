@@ -17,6 +17,8 @@ public interface ProjectService {
 
     Result setLedger(Integer userId, Map<String,Object> map);
 
+    Result delLedger(Integer id);
+
     Result queryLedger(String id);
 
     Result querySearchLocal(String search);

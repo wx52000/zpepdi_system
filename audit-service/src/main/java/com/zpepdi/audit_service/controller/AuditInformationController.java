@@ -33,6 +33,8 @@ public class AuditInformationController {
         return auditInformationService.renew(user,map);
     }
 
+
+
     @RequestMapping("queryBySelf")
     public Result queryBySelf(@RequestUser User user, @RequestBody Map<String,Object> map){
         return auditInformationService.queryBySelf(user,map);
@@ -53,5 +55,9 @@ public class AuditInformationController {
         return auditInformationService.delAuditInformation(id);
     }
 
+    @RequestMapping("setIsSeen")
+    public Result setIsSeen(@RequestHeader("id")Integer id){
+        return auditInformationService.setIsSeen(id);
+    }
 
 }

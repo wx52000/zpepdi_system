@@ -102,7 +102,7 @@
     </update>
     <update id="auditOperation7Type0Other">
         update appraise.project_children
-        set `check` = #{map.check}, `workday` = #{map.workday},`check_time` = now()
+        set `check` = #{map.check}, `workday` = ifnull(#{map.workday},0),`check_time` = now()
         where id = #{map.auditKey};
         <if test="map.check == 1">
             INSERT INTO appraise.project_workday(project_id, num, `date`)

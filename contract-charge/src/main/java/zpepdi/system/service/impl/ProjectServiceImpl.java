@@ -7,6 +7,7 @@ import zpepdi.system.dao.fd.ContractDao;
 import zpepdi.system.dao.fd.ProjectDao;
 import zpepdi.system.dao.zjepdi.ProjectDataDao;
 import zpepdi.system.result.Result;
+import zpepdi.system.service.ContractService;
 import zpepdi.system.service.ProjectService;
 
 import java.util.Map;
@@ -17,7 +18,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private ProjectDao projectDao;
     @Autowired
-    private ContractDao contractDao;
+    private ContractService contractService;
 
     @Autowired
     private ProjectDataDao projectDataDao;
@@ -26,6 +27,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public Result addRelateContract(Integer userId, Map<String, Object> map) {
         projectDao.addRelateContract(userId,map);
+        contractService.setContractDate(map);
         return Result.ok();
     }
 
@@ -58,6 +60,12 @@ public class ProjectServiceImpl implements ProjectService {
     public Result setLedger(Integer userId, Map<String, Object> map) {
         projectDao.setLedger(userId,map);
         return Result.ok(map.get("id"));
+    }
+
+    @Override
+    public Result delLedger(Integer id ) {
+        projectDao.delLeader(id);
+        return Result.ok();
     }
 
     @Override

@@ -145,7 +145,7 @@
     <select id="querySpecialityByUserId" resultType="string">
         SELECT DISTINCT tec
         from manage_tec
-        where manage_user_id
+        where manage_user_id = #{userId}
     </select>
 
 </mapper>

@@ -34,7 +34,8 @@
         ri.auditor_username,
         ri.auditor_name,
         ri.remark,
-        ri.state AS atr_remark
+        ri.state AS atr_remark,
+        1 as operation
         FROM
         audit_information ai,
         auditor_information ri
@@ -43,6 +44,34 @@
         AND ri.audit_information_id = ai.id
         and ai.alive = 1
         and ai.state = 0
+        UNION
+        SELECT
+            ai.id,
+            ai.state,
+            ai.initiator_id,
+            ai.initiator_username,
+            ai.initiator_name,
+            cast(ai.initiate_time as char(10)) as initiate_time,
+            ai.information,
+            ai.type,
+            ai.alive,
+            ai.is_seen,
+            ri.id AS atr_id,
+            ri.auditor_id,
+            ri.auditor_username,
+            ri.auditor_name,
+            ri.remark,
+            ri.state AS atr_remark,
+            0 as operation
+        FROM
+            audit_information ai,
+            auditor_information ri
+        WHERE
+            ai.initiator_id = #{userId}
+          AND ri.audit_information_id = ai.id
+          and ai.alive = 1
+          and ai.state = 2
+          And ai.is_seen = 0
     </select>
     <select id="queryBySelfDown" resultType="java.util.Map">
         SELECT

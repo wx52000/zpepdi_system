@@ -52,34 +52,34 @@ public class ScheduledConfig implements SchedulingConfigurer {
     public ScientificSystemService scientificSystemService;
 
 
-    @Scheduled(cron = "0 0 3 23 * ?")
-    public void createScientificProduce(){
-        scientificSystemService.createScientificProduce(DateUtils.getDateMonth());
-    }
-
-    @Scheduled(cron = "0 0 5 1 * ?")
-    public void resetPlanDate(){
-        volumeService.resetPlanDate();
-    }
+//    @Scheduled(cron = "0 0 3 23 * ?")
+//    public void createScientificProduce(){
+//        scientificSystemService.createScientificProduce(DateUtils.getDateMonth());
+//    }
 //
-//
-    @Scheduled(cron = "0 0 0/2 * * ?")
-//    @PostConstruct
-    public void dataTransmission(){
-        service.dataTransmissionService();
-    }
-    @Scheduled(cron = "0 59 23 * * ?")
-    @Async("taskExecutor")
-//    @PostConstruct
-    public void queryIncomeInformation(){
-        service.queryIncomeInformation();
-        Calendar calendar = Calendar.getInstance();
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        if (projectService.confirmDay().equals(day)) {
-            volumeService.updatePlanedPublicDate();
-            volumeService.timingConfirmWorkday(DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
-        }
-    }
+//    @Scheduled(cron = "0 0 5 1 * ?")
+//    public void resetPlanDate(){
+//        volumeService.resetPlanDate();
+//    }
+////
+////
+//    @Scheduled(cron = "0 0 0/2 * * ?")
+////    @PostConstruct
+//    public void dataTransmission(){
+//        service.dataTransmissionService();
+//    }
+//    @Scheduled(cron = "0 59 23 * * ?")
+//    @Async("taskExecutor")
+////    @PostConstruct
+//    public void queryIncomeInformation(){
+//        service.queryIncomeInformation();
+//        Calendar calendar = Calendar.getInstance();
+//        int day = calendar.get(Calendar.DAY_OF_MONTH);
+//        if (projectService.confirmDay().equals(day)) {
+//            volumeService.updatePlanedPublicDate();
+//            volumeService.timingConfirmWorkday(DateUtils.dateToString(calendar.getTime(),"yyyy-MM"));
+//        }
+//    }
 
 
 

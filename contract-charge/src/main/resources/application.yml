@@ -1,9 +1,9 @@
 #开发
-eurekaIp : localhost
-sqlIp : 10.136.238.23
+#eurekaIp : localhost
+#sqlIp : 10.136.238.23
 ##生产
-#sqlIp : 10.136.238.28
-#eurekaIp : 10.136.238.28
+sqlIp : 10.136.238.28
+eurekaIp : 10.136.238.28
 
 spring:
   application:

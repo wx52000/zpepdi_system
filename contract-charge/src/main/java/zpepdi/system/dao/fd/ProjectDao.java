@@ -20,6 +20,8 @@ public interface ProjectDao {
 
     void setLedger(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
 
+    void delLeader(Integer id);
+
     List<Map<String,Object>> queryLedger(String id);
 
     List<Map<String,Object>> querySearch(String search);

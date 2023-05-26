@@ -238,6 +238,11 @@
         where contract_id = #{contract_id}
         and project_id = #{project_id}
     </delete>
+    <delete id="delLeader">
+        delete
+        from general_project_ledger
+        where id = #{id}
+    </delete>
     <select id="query" resultType="java.util.Map">
         SELECT
             id,

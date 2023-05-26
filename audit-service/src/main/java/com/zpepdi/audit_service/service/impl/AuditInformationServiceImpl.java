@@ -113,8 +113,10 @@ public class AuditInformationServiceImpl implements AuditInformationService {
                 break;
             case 7 :
                 JSONObject jsonObject7 = JSON.parseObject(JSON.toJSONString(map.get("data")));
-                if (map.get("workday") == null || map.get("workday").toString().equals("")){
-                    return Result.build(587,"项目工时未赋值");
+                if (map.get("check").toString().equals("1")) {
+                    if (map.get("workday") == null || map.get("workday").toString().equals("")) {
+                        return Result.build(587, "项目工时未赋值");
+                    }
                 }
                 map.put("auditKey",jsonObject7.get("auditKey"));
                 if (jsonObject7.get("type").toString().equals("0")){
@@ -244,6 +246,12 @@ public class AuditInformationServiceImpl implements AuditInformationService {
     @Override
     public Result delAuditInformation(Integer id) {
         auditInformationDao.delAuditInformation(id);
+        return Result.ok();
+    }
+
+    @Override
+    public Result setIsSeen(Integer id) {
+        auditInformationDao.setIsSeen(id);
         return Result.ok();
     }
 }

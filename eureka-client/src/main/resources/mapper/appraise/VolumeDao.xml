@@ -1512,6 +1512,7 @@
         RIGHT ( p.number, 1 ) = "s"
         AND p.id = c.project_id
         AND vp.number NOT LIKE "%+%"
+        and c.check = 1
         AND c.id = vp.check_plan_id
         AND c.tec = m.small_name
         AND c.plan_month LIKE CONCAT( #{year}, "%" )
@@ -1548,6 +1549,7 @@
                         RIGHT ( p.number, 1 ) = "s"
                       AND p.id = c.project_id
                       AND vp.number NOT LIKE "%+%"
+                      and c.check = 1
                       AND c.id = vp.check_plan_id
                       AND c.tec = m.small_name
                       AND c.plan_month LIKE CONCAT( #{year}, "%" )
@@ -2001,6 +2003,7 @@
         RIGHT ( p.number, 1 ) = "s"
         AND p.id = c.project_id
         AND vp.number LIKE "%+%"
+          and c.check = 1
         AND c.id = vp.check_plan_id
         AND c.tec = m.small_name
         AND c.plan_month LIKE CONCAT( #{year}, "%" )
@@ -2037,6 +2040,7 @@
                         RIGHT ( p.number, 1 ) = "s"
                       AND p.id = c.project_id
                       AND vp.number LIKE "%+%"
+                      and c.check = 1
                       AND c.id = vp.check_plan_id
                       AND c.tec = m.small_name
                       AND c.plan_month LIKE CONCAT( #{year}, "%" )

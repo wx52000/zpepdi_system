@@ -28,4 +28,6 @@ public interface AuditInformationDao {
     void updateData(@Param("id") Integer id, @Param("data") String data);
     //    未审核时选择回退
     void delAuditInformation(Integer id);
+
+    void setIsSeen(Integer id);
 }

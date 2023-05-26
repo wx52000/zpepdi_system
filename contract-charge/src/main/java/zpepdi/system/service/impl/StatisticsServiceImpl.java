@@ -23,6 +23,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
+    public Result queryPlanQuarter(Map<String, Object> map) {
+        return Result.ok(statisticsDao.queryPlanQuarter(map));
+    }
+
+    @Override
     public Result queryZCBMonth(String date) {
         Map<String,Object> map = new HashMap<>();
         Date date1 = DateUtils.stringToDate(date,"yyyy-MM");

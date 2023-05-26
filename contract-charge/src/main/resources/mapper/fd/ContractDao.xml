@@ -66,7 +66,7 @@
     </update>
   <update id="setEndTime">
     update contract
-    set `end_time` = #{endTime}
+    set ${column} = #{data}
     where `id` = #{id}
   </update>
   <update id="setContractDate">
@@ -159,7 +159,7 @@
       c.id,
       c.number,
       c.`name`,
-      c.business_manage,
+        c.business_manage,
       c.first_party,
       c.budget,
       c.money,
@@ -273,9 +273,9 @@
             cast(c.sign_date as char(10)) as sign_date,
             cast(c.return_date as char(10)) as return_date,
             cast(c.filing_date as char(10)) as filing_date,
-            s.ja_contract_money,
-            s.sb_contract_money,
-            s.js_contract_money
+            ifnull(s.ja_contract_money,0) as ja_contract_money,
+            ifnull(s.sb_contract_money,0) as sb_contract_money,
+            ifnull(s.js_contract_money,0) as js_contract_money
     from contract c left join
          contract_zcb_split s on c.id = s.id
     where c.id = #{id}
@@ -284,9 +284,9 @@
             cast(c.sign_date as char(10)) as sign_date,
             cast(c.return_date as char(10)) as return_date,
             cast(c.filing_date as char(10)) as filing_date,
-            s.ja_contract_money,
-            s.sb_contract_money,
-            s.js_contract_money
+            ifnull(s.ja_contract_money,0) as ja_contract_money,
+            ifnull(s.sb_contract_money,0) as sb_contract_money,
+            ifnull(s.js_contract_money,0) as js_contract_money
     from contract c left join
          contract_zcb_split s on c.id = s.id
     where c.parent_id = #{id}

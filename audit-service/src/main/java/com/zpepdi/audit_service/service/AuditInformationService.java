@@ -18,4 +18,7 @@ public interface AuditInformationService {
     Result queryById(Integer id);
 
     Result delAuditInformation(Integer id);
+
+    Result setIsSeen(Integer id);
+
 }
