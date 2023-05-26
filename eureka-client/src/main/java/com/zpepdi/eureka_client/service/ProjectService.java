@@ -138,6 +138,7 @@ public interface ProjectService {
     Result getdateInfo(Map<String,Object> map);
 
     HttpServletResponse downinfo(HttpServletResponse response,Integer userId, Map<String, Object> map);
+    HttpServletResponse downExcel(HttpServletResponse response,Integer userId, Map<String, Object> map);
 
     Result queryBySearchFromZjepdi(String search);
 
