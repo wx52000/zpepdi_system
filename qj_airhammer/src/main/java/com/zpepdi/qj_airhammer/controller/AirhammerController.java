@@ -29,7 +29,6 @@ public class AirhammerController {
     public HttpServletResponse Compute(HttpServletResponse response,@RequestParam("file") MultipartFile file , @RequestParam("hammer") String data) throws IOException, WriteException {
         AirHammer airHammer = JSONObject.parseObject(data, AirHammer.class);
         return airHammerService.compute(response,airHammer,file);
-
     }
 
 

@@ -8,11 +8,12 @@ public class test {
     public  static void main(String[] args){
         Water water=new Water();
         double mpa=1;
-        double t=2500;
+        double t=179.8856;
+        double x=0.1;
         NumberFormat nf=NumberFormat.getNumberInstance();
         nf.setMaximumFractionDigits(12);
-        String x=nf.format(water.s_pt(1,179.8856,0.864));
-        System.out.println(x);
+        String s=nf.format(water.v_pt(mpa,t,x));
+        System.out.println(s);
     }
 
 }

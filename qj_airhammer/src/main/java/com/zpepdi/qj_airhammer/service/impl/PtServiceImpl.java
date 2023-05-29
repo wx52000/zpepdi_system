@@ -24,7 +24,9 @@ public class PtServiceImpl implements PtService {
         String bp=map.get("bp").toString();
         String t=map.get("t").toString();
         String bt=map.get("bt").toString();
-        String x1=map.get("X").toString();
+        String x1 = null;
+        x1=map.get("X").toString();
+
         double mark;
         if(x1.equals("NaN")){
             mark=1;
@@ -69,10 +71,10 @@ public class PtServiceImpl implements PtService {
         else if(t.equals("℉")){
             temp=(Double.valueOf(y)-32)* 5.0 / 9.0;
         }
-        else if(t.equals("K 开尔文")){
+        else if(t.equals("K")){
             temp=Double.valueOf(y)- 273.15;
         }
-        else if(t.equals("R 兰金")){
+        else if(t.equals("R")){
             temp=(Double.valueOf(y)-491.67)* 5.0 / 9.0;
         }
         double Mparesult=water.Ps(temp);
@@ -107,10 +109,10 @@ public class PtServiceImpl implements PtService {
             else if(bt.equals("℉")){
                 Btemp=Tempresult* 9.0 / 5.0 + 32;
             }
-            else if(bt.equals("K 开尔文")){
+            else if(bt.equals("K")){
                 Btemp=Tempresult+ 273.15;
             }
-            else if(bt.equals("R 兰金")){
+            else if(bt.equals("R")){
                 Btemp=Tempresult* 9.0 / 5.0 + 491.67;
             }
         }
@@ -153,8 +155,6 @@ public class PtServiceImpl implements PtService {
 
 
     }
-
-
     @Override
     public Result ph(Map<String, Object> map){
         Water water=new Water();
@@ -198,10 +198,10 @@ public class PtServiceImpl implements PtService {
             else if(bt.equals("℉")){
                 Btemp=Tempresult* 9.0 / 5.0 + 32;
             }
-            else if(bt.equals("K 开尔文")){
+            else if(bt.equals("K")){
                 Btemp=Tempresult+ 273.15;
             }
-            else if(bt.equals("R 兰金")){
+            else if(bt.equals("R")){
                 Btemp=Tempresult* 9.0 / 5.0 + 491.67;
             }
         }
@@ -238,7 +238,6 @@ public class PtServiceImpl implements PtService {
 
 
     }
-
     @Override
     public Result ps(Map<String, Object> map){
         Water water=new Water();
@@ -281,10 +280,10 @@ public class PtServiceImpl implements PtService {
             else if(bt.equals("℉")){
                 Btemp=Tempresult* 9.0 / 5.0 + 32;
             }
-            else if(bt.equals("K 开尔文")){
+            else if(bt.equals("K")){
                 Btemp=Tempresult+ 273.15;
             }
-            else if(bt.equals("R 兰金")){
+            else if(bt.equals("R")){
                 Btemp=Tempresult* 9.0 / 5.0 + 491.67;
             }
         }
@@ -321,8 +320,6 @@ public class PtServiceImpl implements PtService {
 
 
     }
-
-
     @Override
     public Result hs(Map<String, Object> map){
         Water water=new Water();
@@ -362,7 +359,6 @@ public class PtServiceImpl implements PtService {
 
 
     }
-
     @Override
     public Result jl(Map<String, Object> map){
         Water water=new Water();
@@ -418,10 +414,10 @@ public class PtServiceImpl implements PtService {
         else if(t1.equals("℉")){
             temp=(Double.valueOf(T1)-32)* 5.0 / 9.0;
         }
-        else if(t1.equals("K 开尔文")){
+        else if(t1.equals("K")){
             temp=Double.valueOf(T1)- 273.15;
         }
-        else if(t1.equals("R 兰金")){
+        else if(t1.equals("R")){
             temp=(Double.valueOf(T1)-491.67)* 5.0 / 9.0;
         }
         double mpa3=0;
@@ -478,10 +474,10 @@ public class PtServiceImpl implements PtService {
             else if(t2.equals("℉")){
                 temp2=(temp2-32)* 5.0 / 9.0;
             }
-            else if(t2.equals("K 开尔文")){
+            else if(t2.equals("K")){
                 temp2=temp2- 273.15;
             }
-            else if(t2.equals("R 兰金")){
+            else if(t2.equals("R")){
                 temp2=(temp2-491.67)* 5.0 / 9.0;
             }
         }
@@ -553,10 +549,10 @@ public class PtServiceImpl implements PtService {
         else if(t1.equals("℉")){
             temp=(Double.valueOf(T1)-32)* 5.0 / 9.0;
         }
-        else if(t1.equals("K 开尔文")){
+        else if(t1.equals("K")){
             temp=Double.valueOf(T1)- 273.15;
         }
-        else if(t1.equals("R 兰金")){
+        else if(t1.equals("R")){
             temp=(Double.valueOf(T1)-491.67)* 5.0 / 9.0;
         }
         double mpa3=0;
@@ -596,10 +592,10 @@ public class PtServiceImpl implements PtService {
         else if(t2.equals("℉")){
             temp2=(temp2-32)* 5.0 / 9.0;
         }
-        else if(t2.equals("K 开尔文")){
+        else if(t2.equals("K")){
             temp2=temp2- 273.15;
         }
-        else if(t2.equals("R 兰金")){
+        else if(t2.equals("R")){
             temp2=(temp2-491.67)* 5.0 / 9.0;
         }
         double x2=water.x_ps(mpa2,s);
