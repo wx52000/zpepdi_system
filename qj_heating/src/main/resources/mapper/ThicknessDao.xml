@@ -24,6 +24,7 @@
     <update id="upgd" parameterType="com.zpepdi.qj_heating.entity.Userpiping">
         update userpiping
         <trim prefix="set" suffixOverrides=",">
+            <if test="gdsortid!=null and gdsortid!=''">gdsortid = #{gdsortid},</if>
             <if test="radio!=null and radio!=''">radio = #{radio},</if>
             <if test="radio2!=null and radio2!=''">radio2 = #{radio2},</if>
             <if test="value1!=null and value1!=''">value1 = #{value1},</if>
@@ -79,6 +80,7 @@
             <if test="username!=null and username!=''">username,</if>
             <if test="name!=null and name!=''">name,</if>
             <if test="xuhao!=null and xuhao!=''">xuhao,</if>
+            <if test="gdsortid!=null and gdsortid!=''">gdsortid,</if>
             <if test="gdname!=null and gdname!=''">gdname,</if>
             <if test="radio!=null and radio!=''">radio,</if>
             <if test="radio2!=null and radio2!=''">radio2,</if>
@@ -130,6 +132,7 @@
             <if test="username!=null and username!=''">#{username},</if>
             <if test="name!=null and name!=''">#{name},</if>
             <if test="xuhao!=null and xuhao!=''">#{xuhao},</if>
+            <if test="gdsortid!=null and gdsortid!=''">#{gdsortid},</if>
             <if test="gdname!=null and gdname!=''">#{gdname},</if>
             <if test="radio!=null and radio!=''">#{radio},</if>
             <if test="radio2!=null and radio2!=''">#{radio2},</if>

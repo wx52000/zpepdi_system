@@ -13,6 +13,7 @@ public class Userpiping {
 //    序号
     private String xuhao;
 //    管道名
+    private String gdsortid;
     private String gdname;
 //    标准
     private String radio;
@@ -493,6 +494,14 @@ public class Userpiping {
         this.bihouZheng = bihouZheng;
     }
 
+    public String getGdsortid() {
+        return gdsortid;
+    }
+
+    public void setGdsortid(String gdsortid) {
+        this.gdsortid = gdsortid;
+    }
+
     @Override
     public String toString() {
         return "Userpiping{" +
@@ -500,6 +509,7 @@ public class Userpiping {
                 ", username='" + username + '\'' +
                 ", name='" + name + '\'' +
                 ", xuhao='" + xuhao + '\'' +
+                ", gdsortid='" + gdsortid + '\'' +
                 ", gdname='" + gdname + '\'' +
                 ", radio='" + radio + '\'' +
                 ", radio2='" + radio2 + '\'' +

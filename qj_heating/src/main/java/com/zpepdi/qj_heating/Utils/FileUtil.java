@@ -339,6 +339,7 @@ public class FileUtil {
 
         for(Userpiping gd:pipingList){
             Map<String,Object> map1 = new HashMap<>();
+            map1.put("gdsortid",gd.getGdsortid());
             map1.put("gdname",gd.getGdname());
             map1.put("ggtype",gd.getValue1());
             map1.put("cailiao",gd.getValue2());
