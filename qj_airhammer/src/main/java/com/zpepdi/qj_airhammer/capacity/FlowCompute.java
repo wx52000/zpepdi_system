@@ -2,7 +2,8 @@ package com.zpepdi.qj_airhammer.capacity;
 
 public class FlowCompute {
 
-    public double compute(double Out,double Width,double mpa,double temp,double x,double weight,double volume){Water water =new Water();
+    public double compute(double Out,double Width,double mpa,double temp,double x,double weight,double volume){
+        Water water =new Water();
     double Q=0;
     double in=Out/1000-2*Width/1000;
     double ap=Math.PI*Math.pow((in/2),2);

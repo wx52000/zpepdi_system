@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.utils.dao.SaveDao">
+
+
+    <insert id="doInsert">
+        INSERT INTO compute (
+        `data`,
+        `type`,
+        `userid`,
+        `nodeid`,
+    `updatetime`
+        )
+        VALUES
+        (#{datalist}, #{type}, #{userId},#{nodeId},now())
+
+    </insert>
+    <select id="doSelect" resultType="java.util.Map">
+        select * from  compute where userid=#{userId}  and type=#{type}  and nodeid=#{nodeId}
+    </select>
+
+    <insert id="doUpdate">
+        UPDATE compute SET data=#{datalist} ,updatetime=now()
+        WHERE userid=#{userId} and type=#{type} and nodeid=#{nodeId}
+    </insert>
+
+    <select id="selectTree" resultType="java.util.Map">
+        select * from  tree where userid=#{userId}  and type=#{type}
+    </select>
+
+    <insert id="insertTree">
+        INSERT INTO tree (
+            `data`,
+            `type`,
+            `userid`,`updatetime`,`startid`
+        )
+        VALUES
+            (#{data}, #{type}, #{userId},now(),#{startid})
+
+    </insert>
+
+
+    <insert id="updateTree">
+        UPDATE tree SET data=#{data},startid=#{startid},updatetime=now()
+        WHERE userid=#{userId} and type=#{type}
+    </insert>
+
+
+
+
+    <select id="selectTemporary" resultType="java.util.Map">
+        select * from  temporary where userid=#{userId}  and type=#{type}
+    </select>
+
+    <insert id="insertTemporary">
+        INSERT INTO temporary (
+            `data`,
+            `type`,
+            `userid`,
+            `updatetime`
+        )
+        VALUES
+            (#{data}, #{type}, #{userId},now())
+
+    </insert>
+
+
+    <insert id="updateTemporary">
+        UPDATE temporary SET data=#{data},updatetime=now()
+        WHERE userid=#{userId} and type=#{type}
+    </insert>
+
+
+    <insert id="insertfolder">
+        INSERT INTO folder (
+            `parentId`,
+            `name`,
+            `type`,
+            `userid`,
+            `updatetime`,
+                        `resType`,
+                            `nodeId`
+        )
+        VALUES
+            (#{parentid}, #{name}, #{type}, #{userId},now(), #{restype}, #{nodeid})
+    </insert>
+
+
+    <delete id="delete">
+        delete  from folder
+            where(nodeId in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">#{item.nodeId}</foreach>
+        or parentId in  <foreach collection="list" item="item" open="(" close=")" separator=",">#{item.nodeId}</foreach>) and userid=#{userId}
+    </delete>
+
+    <insert id="updatefolder">
+        UPDATE folder SET name=#{name},updatetime=now()
+        WHERE userid=#{userId} and type=#{type} and nodeId=#{nodeid}
+    </insert>
+
+</mapper>

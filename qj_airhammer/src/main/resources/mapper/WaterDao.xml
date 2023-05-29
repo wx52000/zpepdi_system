@@ -5,13 +5,10 @@
     <select id="show" resultType="java.util.Map">
        select temp,tempunit,mpa,mpaunit,btempunit,bmpaunit,h,s,temp1,temp1unit,x from water
        where kind=#{map.kind} and userId=#{userId}
-
     </select>
-
     <select id="doSelect" resultType="java.util.Map">
         select * from water
         where kind=#{kind} and userId=#{userId}
-
     </select>
 
 

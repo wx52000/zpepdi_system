@@ -1,0 +1,58 @@
+#myIp : localhost
+sqlIp : 10.136.238.23
+spring:
+  application:
+    name: utils
+  mvc:
+    servlet:
+      load-on-startup: 1
+  servlet:
+    multipart:
+      enabled : true
+      max-file-size: 20MB
+      max-request-size: 20MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+        #                useSSL=false为连接linux服务器使用
+        #        url: jdbc:mysql://10.136.238.23:3306/contract_charge?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://10.136.238.23:3306/page_definition?useUnicode=true&allowMultiQueries=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 7499
+
+    tomcat:
+      max-idle: 20
+      max-wait: 10000
+      min-idle: 5
+      initial-size: 5
+
+
+server:
+  port: 9010
+  servlet:
+    encoding:
+      enabled: true
+      force: true
+      charset: UTF-8
+    session:
+      timeout: 3000m
+
+  tomcat:
+    uri-encoding: UTF-8
+    max-http-form-post-size: -1
+
+mybatis:
+#  config-location: classpath:mybatis-config.xml
+  mapper-locations: classpath:mapper/*.xml
+#  type-aliases-package: com.zpepdi.eureka_client.entity
+
+#eureka:
+#  instance:
+#    hostname: localhost
+#  client:
+#    # 注册到Eureka的注册中心
+#    register-with-eureka: true
+#    # 获取注册实例列表
+#    fetch-registry: true
+#    service-url:
+#      # 配置注册中心地址
+#      defaultZone: http://localhost:9000/eureka/

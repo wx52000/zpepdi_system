@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.utils.dao.ShowDao">
+
+
+    <select id="show" resultType="java.util.Map">
+        select * from compute
+        where type=#{type} and userId=#{userId} and nodeid=#{nodeId}
+
+    </select>
+
+    <select id="temporary" resultType="java.util.Map">
+        select * from temporary
+        where type=#{type} and userId=#{userId}
+
+    </select>
+
+    <select id="choice" resultType="java.util.Map">
+        select * from compute
+        where type=#{type} and userId=#{userId} and pname is not null
+
+    </select>
+
+    <select id="tree" resultType="java.util.Map">
+        select * from tree
+        where type=#{type} and userId=#{userId}
+
+    </select>
+
+    <select id="folder" resultType="java.util.Map">
+        select * from folder
+        where type=#{type} and userId=#{userId} and parentId=#{parentid}
+
+    </select>
+
+    <select id="folderlist" resultType="java.util.Map">
+        select * from folder
+        where type=#{type} and parentId=#{parentid} and userid=#{userId}
+
+    </select>
+
+    <insert id="copyInfo">
+
+insert into folder(`parentid`,`name`,`type`,`userid`,`updatetime`,`restype`,`nodeid`)
+select #{parentid},`name`,#{type},#{userId},now(),0,#{nowid} from folder where nodeId=#{nodeId} and userid=#{userId} and type=#{type}and resType=0;
+    </insert>
+
+
+    <select id="fileinfo" resultType="java.util.Map">
+select * from folder where parentid=#{beforeid} and type=#{type} and userId=#{userId} and resType=1
+    </select>
+
+
+    <insert id="copyfile" >
+        insert into folder(`parentid`,`name`,`type`,`userId`,`updatetime`,`restype`,`nodeid`)
+        <foreach collection="list" item="item" separator="union">
+        select #{parentid},`name`,#{type},#{userId},now(),`resType`,#{item.newid} from folder where nodeId=#{item.nodeId} and userId=#{userId} and type=#{type} and resType=1
+        </foreach>
+
+
+       ; insert into compute(`data`,`type`,`userId`,`nodeid`,`updatetime`)
+        <foreach collection="list" item="item" separator="union">
+        select `data`,#{type},#{userId}, #{item.newid},now() from compute where nodeId=#{item.nodeId} and userId=#{userId} and type=#{type}
+        </foreach>
+    </insert>
+
+</mapper>
