@@ -96,19 +96,20 @@ public class ExcelUtils {
     public static List<List<Object>> docInsertXlsx(Map<String,List<String>> docdata,Map<String,List<String>> docdata2,List<List<Object>> xlsxdata){
 
         for(String key:docdata.keySet()){
-            int init = 33;
+            int init = 20;
             for(int i=init;i<xlsxdata.size();i++){
                 if(xlsxdata.get(i) == null || xlsxdata.get(i).size()==0){
                     continue;
                 }
                 String s = (String) xlsxdata.get(i).get(0);
-                if(s != null && !s.equals("")){
-                    if(key.equals(s.split(" ")[0])){
+                if(s != null && !s.equals("") && !s.equals(" ")){
+                    if(key.equals(s.split(" ")[0]) || (key+".0").equals(s.split(" ")[0])){
                         while (true){
                             i++;
-                            if(xlsxdata.get(i).get(1)==null || xlsxdata.get(i).get(1)=="" || ((String)xlsxdata.get(i).get(1)).trim().equals("MAX")){
+                            if(xlsxdata.get(i).size()<2 || xlsxdata.get(i).get(1)==null || xlsxdata.get(i).get(1)=="" || ((String)xlsxdata.get(i).get(1)).trim().equals("MAX")){
                                 break;
                             }
+
                         }
                         List<Object> newl = new ArrayList<>();
                         newl.add("");
@@ -118,39 +119,52 @@ public class ExcelUtils {
                         }
                         xlsxdata.add(i+1,newl);
                         //计算静动max
-                        List<Object> newl2 = new ArrayList<>();
-                        newl2.add("");
-                        newl2.add("MAX(S+D)");
-                        for(int k=2;k<8;k++){
-                            String max = "0";
-                            if(xlsxdata.get(i).get(k)==null||xlsxdata.get(i).get(k).equals("")){
-                                max = xlsxdata.get(i + 1).get(k).toString();
-                                newl2.add(max);
-                                continue;
+                        if(xlsxdata.get(i).size()<2){
+                            List<Object> newl2 = new ArrayList<>();
+                            newl2.add("");
+                            newl2.add("MAX(S+D)");
+                            for(String str:docdata.get(key)){
+                                newl2.add(str);
                             }
-                            String s1 = xlsxdata.get(i).get(k).toString().split("/")[0].trim();
-                            String s2 = xlsxdata.get(i + 1).get(k).toString();
-                            max = Math.abs(Integer.parseInt(s1))>Integer.parseInt(s2)?String.valueOf(Math.abs(Integer.parseInt(s1))):s2;
-                            newl2.add(max);
+                            xlsxdata.add(i+2,newl2);
+                            break;
+                        }else {
+                            List<Object> newl2 = new ArrayList<>();
+                            newl2.add("");
+                            newl2.add("MAX(S+D)");
+                            for(int k=2;k<8;k++){
+                                String max = "0";
+                                if(xlsxdata.get(i).get(k)==null||xlsxdata.get(i).get(k).equals("")){
+                                    max = xlsxdata.get(i + 1).get(k).toString();
+                                    newl2.add(max);
+                                    continue;
+                                }
+                                String s1 = xlsxdata.get(i).get(k).toString().split("/")[0].trim();
+                                String s2 = xlsxdata.get(i + 1).get(k).toString();
+                                max = Math.abs(Integer.parseInt(s1))>Integer.parseInt(s2)?String.valueOf(Math.abs(Integer.parseInt(s1))):s2;
+                                newl2.add(max);
+                            }
+                            xlsxdata.add(i+2,newl2);
+                            break;
                         }
-                        xlsxdata.add(i+2,newl2);
+
                     }
                 }
             }
         }
 
         for(String key:docdata2.keySet()){
-            int init = 33;
+            int init = 20;
             for(int i=init;i<xlsxdata.size();i++){
                 if(xlsxdata.get(i) == null || xlsxdata.get(i).size()==0){
                     continue;
                 }
                 String s = (String) xlsxdata.get(i).get(0);
-                if(s != null && !s.equals("")){
-                    if(key.equals(s.split(" ")[0])){
+                if(s != null && !s.equals("") && !s.equals(" ")){
+                    if(key.equals(s.split(" ")[0]) || (key+".0").equals(s.split(" ")[0])){
                         while (true){
                             i++;
-                            if(xlsxdata.get(i).get(1)==null || xlsxdata.get(i).get(1)=="" || ((String)xlsxdata.get(i).get(1)).trim().equals("MAX")){
+                            if(xlsxdata.get(i).size()<2 || xlsxdata.get(i).get(1)==null || xlsxdata.get(i).get(1)=="" || ((String)xlsxdata.get(i).get(1)).trim().equals("MAX")){
                                 break;
                             }
                         }
@@ -158,18 +172,27 @@ public class ExcelUtils {
                             xlsxdata.get(i+1).add(s2);
                         }
                         //计算静动max
-                        for(int k=8;k<11;k++){
-                            String max = "0";
-                            if(xlsxdata.get(i).get(k)==null||xlsxdata.get(i).get(k).equals("")){
-                                max = xlsxdata.get(i + 1).get(k).toString();
-                                xlsxdata.get(i+2).add(max);
-                                continue;
+                        if(xlsxdata.get(i).size()<2){
+                            for(String s2:docdata2.get(key)){
+                                xlsxdata.get(i+2).add(s2);
                             }
-                            String s1 = xlsxdata.get(i).get(k).toString().split("/")[0].trim();
-                            String s2 = xlsxdata.get(i + 1).get(k).toString();
-                            max = Math.abs(Double.parseDouble(s1))>Double.parseDouble(s2)?String.valueOf(Math.abs(Double.parseDouble(s1))):s2;
-                            xlsxdata.get(i+2).add(max);
+                            break;
+                        }else {
+                            for(int k=8;k<11;k++){
+                                String max = "0";
+                                if(xlsxdata.get(i).get(k)==null||xlsxdata.get(i).get(k).equals("")){
+                                    max = xlsxdata.get(i + 1).get(k).toString();
+                                    xlsxdata.get(i+2).add(max);
+                                    continue;
+                                }
+                                String s1 = xlsxdata.get(i).get(k).toString().split("/")[0].trim();
+                                String s2 = xlsxdata.get(i + 1).get(k).toString();
+                                max = Math.abs(Double.parseDouble(s1))>Double.parseDouble(s2)?String.valueOf(Math.abs(Double.parseDouble(s1))):s2;
+                                xlsxdata.get(i+2).add(max);
+                            }
+                            break;
                         }
+
                     }
                 }
             }
