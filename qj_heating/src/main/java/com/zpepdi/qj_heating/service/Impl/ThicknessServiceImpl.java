@@ -53,7 +53,7 @@ public class ThicknessServiceImpl implements ThicknessSerice {
      * @return
      */
     @Override
-    public Result savepiping(Userpiping userpiping) {
+    public synchronized Result savepiping(Userpiping userpiping) {
         int savepiping = thicknessDao.savepiping(userpiping);
         String maxsort = querymaxsort(userpiping);
         Integer defstr2;
