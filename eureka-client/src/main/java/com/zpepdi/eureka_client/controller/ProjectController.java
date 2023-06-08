@@ -357,6 +357,11 @@ public class ProjectController {
     public HttpServletResponse downinfo(HttpServletResponse response,@UserId Integer userId, @RequestBody Map<String, Object> map){
         return projectService.downinfo(response,userId,map);
     }
+    //下载项目信息
+    @RequestMapping("downExcel")
+    public HttpServletResponse downExcel(HttpServletResponse response,@UserId Integer userId, @RequestBody Map<String, Object> map){
+        return projectService.downExcel(response,userId,map);
+    }
 
 
 }

@@ -1,6 +1,8 @@
 package com.zpepdi.qj_heating.controller;
 
+import com.zpepdi.qj_heating.Utils.ExcelUtils;
 import com.zpepdi.qj_heating.Utils.FileUtil;
+import com.zpepdi.qj_heating.Utils.FileUtils1;
 import com.zpepdi.qj_heating.Utils.FileZipUtil;
 import com.zpepdi.qj_heating.dao.ThicknessDao;
 import com.zpepdi.qj_heating.entity.UserUnitcy;
@@ -8,6 +10,9 @@ import com.zpepdi.qj_heating.entity.Userpiping;
 import com.zpepdi.qj_heating.result.Result;
 import com.zpepdi.qj_heating.service.ThicknessSerice;
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.core.io.ClassPathResource;
@@ -20,13 +25,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("Thickness")
@@ -200,4 +202,78 @@ public class ThicknessController {
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
 
+
+    @RequestMapping("export2")
+    public HttpServletResponse export2(HttpServletResponse response,@RequestBody Map<String,Object> map) throws IOException {
+
+        ApplicationHome applicationHome = new ApplicationHome(new FileUtil().getClass());
+        // 保存目录位置根据项目需求可随意更改
+        String absolutePath = applicationHome.getDir().getParentFile().getParentFile().getAbsolutePath();
+        String path=absolutePath+"\\src\\main\\resources";
+        //先删除计算书
+        try {
+            new ClassPathResource("管道规格计算书.docx").getInputStream();
+            File file = new File(path,"管道规格计算书.docx");
+            file.delete();
+        }catch (Exception e){
+            System.out.println("暂无计算书");
+        }
+
+        //创建计算书
+        if(map!=null){
+            Userpiping userpiping = new Userpiping();
+            List<Userpiping> querypiping = new ArrayList<Userpiping>();
+            String username = (String) map.get("username");
+            ArrayList xzidlist = (ArrayList)map.get("xzidlist");
+            if(username!=null){
+                userpiping.setUsername(username);
+                querypiping = thicknessSerice.querypiping(userpiping);
+            }else if(xzidlist.size()>0){
+                for(Object id: xzidlist){
+                    Userpiping byidquerypiping = thicknessDao.byidquerypiping((Integer) id);
+                    querypiping.add(byidquerypiping);
+                }
+            }
+            FileUtil.createjisuanFile2(querypiping);
+        }
+        // 读取计算书
+        FileOutputStream fos = null;
+        String fileName = path + "\\管道规格计算书.docx";
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream(
+                "管道规格计算书.docx");
+        XWPFDocument xwpf = new XWPFDocument(in);//得到word文档的信息
+        try {
+            fos = new FileOutputStream(path + "\\管道规格计算书.docx");
+            xwpf.write(fos);
+            response.setContentType("application/pdf;charset=utf-8");
+            OutputStream os = response.getOutputStream();
+            //这里进行设置了一个文件名，其实也可以不要设置了，
+            //在前端进行下载的时候需要重新给定一个文件名进行下载
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+            response.setHeader("Content-disposition","attachment;filename=="+ URLEncoder.encode(fileName,"UTF-8"));
+            FileInputStream inputStream = new FileInputStream(fileName);
+            FileUtils1.wordTopdfByAspose(inputStream,os);
+            os.flush();
+            os.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.flush();
+                }
+                if (fos != null) {
+                    fos.close();
+                }
+                xwpf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+//        newFile.delete();
+        return response;
+    }
 }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zpepdi.qj_airhammer.dao.FlowDao">
+
+
+    <insert id="doInsert">
+        INSERT INTO flow (
+        `gname`,
+        `name`,
+        `mpa`,
+        `temperature`,
+        `out`,
+        `width`,
+        `volume`,
+        `weight`,
+        `p`,
+        `t`,
+        `actual`,
+        `v`,
+        `w`,
+        `x`,
+        `medium`,
+        `medium1`,
+        `conclusion`,
+        `speed`,
+        `personal`,
+        `userid`
+        )
+        VALUES <foreach collection="flow" item="item" separator=",">
+        (#{item.GName}, #{item.Name}, #{item.Mpa}, #{item.Temperature}, #{item.Out},
+        #{item.Width},#{item.Volume}, #{item.Weight}, #{item.P},
+        #{item.T}, #{item.Actual}, #{item.V},
+        #{item.W},
+        #{item.X},
+        #{item.Medium},
+        #{item.Medium1},
+        #{item.Conclusion},
+        #{item.Speed},
+        #{personal},
+        #{userId})
+    </foreach>
+    </insert>
+
+
+    <select id="selectTemporary" resultType="java.util.Map">
+        select * from  temporary where userid=#{userId}  and type=#{type}
+    </select>
+
+    <insert id="insertTemporary">
+        INSERT INTO temporary (
+            `data`,
+            `type`,
+            `userid`,
+            `updatetime`
+        )
+        VALUES
+            (#{data}, #{type}, #{userId},now())
+
+    </insert>
+
+
+    <insert id="updateTemporary">
+        UPDATE temporary SET data=#{data},updatetime=now()
+        WHERE userid=#{userId} and type=#{type}
+    </insert>
+
+</mapper>

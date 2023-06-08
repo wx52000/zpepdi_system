@@ -13,6 +13,7 @@ public class Userpiping {
 //    序号
     private String xuhao;
 //    管道名
+    private String gdsortid;
     private String gdname;
 //    标准
     private String radio;
@@ -32,8 +33,10 @@ public class Userpiping {
     private String recommend2;
 //    工作温度
     private String wendu;
+    private String wenduUnit;
 //    工作压力
     private String yali;
+    private String yaliUnit;
 //    质量流量
     private String pipingG;
 //    容积流量
@@ -48,10 +51,13 @@ public class Userpiping {
     private String dhneijing;
 //    设计温度
     private String sjwendu;
+    private String sjwenduUnit;
 //    设计压力
     private String sjyali;
+    private String sjyaliUnit;
 //    许用应力
     private String yingli;
+    private String isyingliinput;
 //    修正系数
     private String pipingY;
 //    许用应力修正系数
@@ -76,6 +82,7 @@ public class Userpiping {
     private String endnj;
 //    流速
     private String endls;
+    private String bihouZheng;
     //是否外径管
     private String defstr1;
     private Integer defstr2;
@@ -439,6 +446,62 @@ public class Userpiping {
         this.defstr8 = defstr8;
     }
 
+    public String getWenduUnit() {
+        return wenduUnit;
+    }
+
+    public void setWenduUnit(String wenduUnit) {
+        this.wenduUnit = wenduUnit;
+    }
+
+    public String getYaliUnit() {
+        return yaliUnit;
+    }
+
+    public void setYaliUnit(String yaliUnit) {
+        this.yaliUnit = yaliUnit;
+    }
+
+    public String getSjwenduUnit() {
+        return sjwenduUnit;
+    }
+
+    public void setSjwenduUnit(String sjwenduUnit) {
+        this.sjwenduUnit = sjwenduUnit;
+    }
+
+    public String getSjyaliUnit() {
+        return sjyaliUnit;
+    }
+
+    public void setSjyaliUnit(String sjyaliUnit) {
+        this.sjyaliUnit = sjyaliUnit;
+    }
+
+    public String getIsyingliinput() {
+        return isyingliinput;
+    }
+
+    public void setIsyingliinput(String isyingliinput) {
+        this.isyingliinput = isyingliinput;
+    }
+
+    public String getBihouZheng() {
+        return bihouZheng;
+    }
+
+    public void setBihouZheng(String bihouZheng) {
+        this.bihouZheng = bihouZheng;
+    }
+
+    public String getGdsortid() {
+        return gdsortid;
+    }
+
+    public void setGdsortid(String gdsortid) {
+        this.gdsortid = gdsortid;
+    }
+
     @Override
     public String toString() {
         return "Userpiping{" +
@@ -446,6 +509,7 @@ public class Userpiping {
                 ", username='" + username + '\'' +
                 ", name='" + name + '\'' +
                 ", xuhao='" + xuhao + '\'' +
+                ", gdsortid='" + gdsortid + '\'' +
                 ", gdname='" + gdname + '\'' +
                 ", radio='" + radio + '\'' +
                 ", radio2='" + radio2 + '\'' +
@@ -456,7 +520,9 @@ public class Userpiping {
                 ", recommend='" + recommend + '\'' +
                 ", recommend2='" + recommend2 + '\'' +
                 ", wendu='" + wendu + '\'' +
+                ", wenduUnit='" + wenduUnit + '\'' +
                 ", yali='" + yali + '\'' +
+                ", yaliUnit='" + yaliUnit + '\'' +
                 ", pipingG='" + pipingG + '\'' +
                 ", pipingQ='" + pipingQ + '\'' +
                 ", birong='" + birong + '\'' +
@@ -464,8 +530,11 @@ public class Userpiping {
                 ", pipingDo='" + pipingDo + '\'' +
                 ", dhneijing='" + dhneijing + '\'' +
                 ", sjwendu='" + sjwendu + '\'' +
+                ", sjwenduUnit='" + sjwenduUnit + '\'' +
                 ", sjyali='" + sjyali + '\'' +
+                ", sjyaliUnit='" + sjyaliUnit + '\'' +
                 ", yingli='" + yingli + '\'' +
+                ", isyingliinput='" + isyingliinput + '\'' +
                 ", pipingY='" + pipingY + '\'' +
                 ", pipingyingliY='" + pipingyingliY + '\'' +
                 ", pipingC='" + pipingC + '\'' +
@@ -478,6 +547,7 @@ public class Userpiping {
                 ", dhbihou='" + dhbihou + '\'' +
                 ", endnj='" + endnj + '\'' +
                 ", endls='" + endls + '\'' +
+                ", bihouZheng='" + bihouZheng + '\'' +
                 ", defstr1='" + defstr1 + '\'' +
                 ", defstr2=" + defstr2 +
                 ", defstr3='" + defstr3 + '\'' +

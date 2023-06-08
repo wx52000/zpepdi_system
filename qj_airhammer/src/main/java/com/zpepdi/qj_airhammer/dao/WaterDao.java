@@ -10,7 +10,7 @@ import java.util.Map;
 @Repository
 public interface WaterDao {
 
-    void save(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
+
 
     void doInsert(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);
     void doUpdate(@Param("userId") Integer userId, @Param("map") Map<String,Object> map);

@@ -31,6 +31,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.poi.hssf.record.cf.BorderFormatting.BORDER_THIN;
 
@@ -1381,6 +1383,154 @@ public class ProjectServiceImpl implements ProjectService {
                         lastRow.createCell(8).setCellValue(tecinfo.get(k).get("designer")!= null ? tecinfo.get(k).get("designer").toString() : "");
                         lastRow.createCell(9).setCellValue(tecinfo.get(k).get("checker")!= null ? tecinfo.get(k).get("checker").toString() : "");
                         lastRow.createCell(10).setCellValue(tecinfo.get(k).get("headman")!= null ? tecinfo.get(k).get("headman").toString() : "");
+                    }
+                }
+            }
+            //列宽自适应
+            for (int columnNum = 0; columnNum <= max; columnNum++) {
+                int columnWidth = sheet1.getColumnWidth(columnNum) / 256;
+                for (int rowNum = 0; rowNum < sheet1.getLastRowNum(); rowNum++) {
+                    HSSFRow currentRow;
+                    if (sheet1.getRow(rowNum) == null) {
+                        currentRow = sheet1.createRow(rowNum);
+                    } else {
+                        currentRow = sheet1.getRow(rowNum);
+                    }
+                    if (currentRow.getCell(columnNum) != null) {
+                        HSSFCell currentCell = currentRow.getCell(columnNum);
+                        if (currentCell.getCellType() == HSSFCell.CELL_TYPE_STRING) {
+                            int length = currentCell.getStringCellValue().getBytes().length;
+                            if (columnWidth < length) {
+                                columnWidth = length;
+                            }
+                        }
+                    }
+                }
+                sheet1.setColumnWidth(columnNum, columnWidth * 256);
+            }
+            response.setContentType("application/vnd.ms-excel;charset:utf-8");
+            OutputStream os = response.getOutputStream();
+            //这里进行设置了一个文件名，其实也可以不要设置了，
+            //在前端进行下载的时候需要重新给定一个文件名进行下载
+            response.setHeader("Content-disposition","attachment;filename=="+ URLEncoder.encode(fileName,"UTF-8"));
+            workbook.write(os);
+            os.flush();
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+
+    @Override
+    public HttpServletResponse downExcel(HttpServletResponse response, Integer userId,Map<String, Object> map) {
+
+        map.put("userId",userId);
+        List<Map<String, Object>> datemap = projectDao.projectProgressById(map);
+        List<String> list1 = null;
+        List<String> tec = new ArrayList<>();
+        try {
+//            info=projectDao.downInfo(map);
+            //使用poi下载文件
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            String fileName="详细信息";
+            //创建sheet
+            HSSFSheet sheet1 = workbook.createSheet("详细信息");
+            //创建row信息
+            HSSFRow row = sheet1.createRow(0);
+            //创建单元格头标
+            ArrayList<String> title = new ArrayList<>();
+            title.add("专业名称");
+            title.add("零版图数量");
+            title.add("零版图完成数量");
+            title.add("升级图完成数量");
+            title.add("未完成零版图");
+            title.add("完成比例");
+            title.add("本月零版图完成");
+            title.add("本月零版图计划完成");
+            title.add("本月升级图完成");
+            title.add("本月升级图计划完成");
+            title.add("本月完成数量");
+
+            HSSFCell cell;
+            for(int i = 0 ;i<title.size();i++){
+                cell = row.createCell(i);
+                cell.setCellValue(title.get(i));
+            }
+            int max=0;
+            max=title.size();
+            List<String> headerList = Stream.of("tec", "allZero", "completeZero","completeUp",
+                                                "incompleteZero","completeRatio","zeroNowComplete",
+                                                "plan0","upNowComplete","plan1","allNowComplete")
+                    .collect(Collectors.toList());
+            //创建列
+            if (datemap != null && datemap.size() > 0) {
+                for (int i=0;i<datemap.size(); i++) {
+                    row = sheet1.createRow(i + 1);
+                    for(int j=0;j<headerList.size();j++){
+                        cell = row.createCell(j);
+                        if(datemap.get(i).get(headerList.get(j)) != null){
+                            if(j == 0){
+                                tec.add(datemap.get(i).get(headerList.get(j)).toString());
+                            }
+                            cell.setCellValue(datemap.get(i).get(headerList.get(j)).toString());
+                        }
+                    }
+                }
+            }
+            //分专业创建sheet
+
+//            List<Map<String, Object>> tecinfo = new ArrayList<>();
+            Map<String, Object> tecmap = new HashMap<>();
+            tecmap.put("type",Integer.valueOf(1));
+            tecmap.put("date",map.get("date"));
+            tecmap.put("id",map.get("id"));
+            tecmap.put("nowMonth",DateUtils.getDateMonth());
+            for(int i=0;i<tec.size();i++){
+                HSSFSheet sheet = workbook.createSheet(tec.get(i));
+                HSSFRow row1 = sheet.createRow(0);
+                //创建单元格头标
+                row1.createCell(0).setCellValue("卷册号");//number
+                row1.createCell(1).setCellValue("卷册名");//name
+                row1.createCell(2).setCellValue("状态");//state
+                row1.createCell(3).setCellValue("工时");//workday
+                row1.createCell(4).setCellValue("开始时间");//start_date
+                row1.createCell(5).setCellValue("计划出版时间");//planned_publication_date
+                row1.createCell(6).setCellValue("出版时间");//publicDateList
+                row1.createCell(7).setCellValue("备注");//remark
+                row1.createCell(8).setCellValue("设计");//designer
+                row1.createCell(9).setCellValue("校核");//checker
+                row1.createCell(10).setCellValue("主设");//principal
+                row1.createCell(11).setCellValue("条件确认人员");//confirm_user
+                row1.createCell(12).setCellValue("条件确认日期");//confirm_time
+                row1.createCell(13).setCellValue("是否申报过");//check_state
+                row1.createCell(14).setCellValue("重点卷册");//important
+                row1.createCell(15).setCellValue("条件/延期");//plan_confirm
+
+                tecmap.put("tec",tec.get(i));
+                List<Map<String, Object>> tecinfo = projectDao.planVolume(tecmap);
+
+                if (tecinfo != null && tecinfo.size() != 0) {
+                    for (int k=0;k<tecinfo.size();k++) {
+                        int lastRowNum = sheet.getLastRowNum();
+                        HSSFRow lastRow = sheet.createRow(lastRowNum + 1);
+                        lastRow.createCell(0).setCellValue(tecinfo.get(k).get("number").toString());
+                        lastRow.createCell(1).setCellValue(tecinfo.get(k).get("name").toString());
+                        lastRow.createCell(2).setCellValue(tecinfo.get(k).get("state")!= null ? tecinfo.get(k).get("state").toString() : "");
+                        lastRow.createCell(3).setCellValue(tecinfo.get(k).get("workday")!= null ? tecinfo.get(k).get("workday").toString():"");
+                        lastRow.createCell(4).setCellValue(tecinfo.get(k).get("start_date") != null ? tecinfo.get(k).get("start_date").toString() : "");
+                        lastRow.createCell(5).setCellValue(tecinfo.get(k).get("planned_publication_date")!= null ? tecinfo.get(k).get("planned_publication_date").toString() : "");
+                        lastRow.createCell(6).setCellValue(tecinfo.get(k).get("publicDateList")!= null ? tecinfo.get(k).get("publicDateList").toString() : "");
+                        lastRow.createCell(7).setCellValue(tecinfo.get(k).get("remark")!= null ? tecinfo.get(k).get("remark").toString() : "");
+                        lastRow.createCell(8).setCellValue(tecinfo.get(k).get("designer")!= null ? tecinfo.get(k).get("designer").toString() : "");
+                        lastRow.createCell(9).setCellValue(tecinfo.get(k).get("checker")!= null ? tecinfo.get(k).get("checker").toString() : "");
+                        lastRow.createCell(10).setCellValue(tecinfo.get(k).get("principal")!= null ? tecinfo.get(k).get("principal").toString() : "");
+                        lastRow.createCell(11).setCellValue(tecinfo.get(k).get("confirm_user")!= null ? tecinfo.get(k).get("confirm_user").toString() : "");
+                        lastRow.createCell(12).setCellValue(tecinfo.get(k).get("confirm_time")!= null ? tecinfo.get(k).get("confirm_time").toString() : "");
+                        lastRow.createCell(13).setCellValue(tecinfo.get(k).get("check_state")!= null ? "1".equals(tecinfo.get(k).get("check_state").toString())?"是":"否" : "");
+                        lastRow.createCell(14).setCellValue(tecinfo.get(k).get("important")!= null ? "1".equals(tecinfo.get(k).get("important").toString())?"是":"否" : "");
+                        lastRow.createCell(15).setCellValue(tecinfo.get(k).get("plan_confirm")!= null ? "1".equals(tecinfo.get(k).get("plan_confirm").toString())?"已确认":"未确认" : "");
                     }
                 }
             }

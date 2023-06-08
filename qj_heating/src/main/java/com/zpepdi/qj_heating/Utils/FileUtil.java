@@ -339,6 +339,7 @@ public class FileUtil {
 
         for(Userpiping gd:pipingList){
             Map<String,Object> map1 = new HashMap<>();
+            map1.put("gdsortid",gd.getGdsortid());
             map1.put("gdname",gd.getGdname());
             map1.put("ggtype",gd.getValue1());
             map1.put("cailiao",gd.getValue2());
@@ -359,15 +360,20 @@ public class FileUtil {
                 map1.put("wornzhi",gd.getPipingDo());
                 map1.put("bhimage",Pictures.ofLocal(templateFilePath+"img\\waibh.png").size(200,50).create());
                 map1.put("norw","内");
+                map1.put("endnorw",gd.getEndnj());
             }else {
                 map1.put("worn","内");
                 map1.put("wornzhi",gd.getDhneijing());
                 map1.put("bhimage",Pictures.ofLocal(templateFilePath+"img\\neibh.png").size(200,50).create());
                 map1.put("norw","外");
+                map1.put("endnorw",gd.getPipingDo());
             }
             map1.put("sjyali",gd.getSjyali());
             map1.put("sjwendu",gd.getSjwendu());
             map1.put("yingli",gd.getYingli());
+            if("false".equals(gd.getIsyingliinput())){
+                map1.put("isyingliinput","此许用应力为手工输入值");
+            }
             map1.put("y",gd.getPipingY());
             map1.put("yingliy",gd.getPipingyingliY());
             map1.put("fujiahd",gd.getPipingC());
@@ -375,9 +381,11 @@ public class FileUtil {
             Double m = Double.valueOf(gd.getPipingC1());
             map1.put("a",String.format("%.3f",(m*100)/(100-(m*100))));
             map1.put("c",gd.getEndC1());
+            if("wan".equals(gd.getRadio2())){
+                map1.put("wguan",gd.getDefstr8()+"倍弯曲半径");
+            }
             map1.put("sc",gd.getPipingSc());
             map1.put("sn",gd.getDhbihou());
-            map1.put("endnorw",gd.getEndnj());
             map1.put("endls",gd.getEndls());
 
             maps.add(map1);
