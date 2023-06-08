@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zpepdi.system.dao.fd.ChartsDataDao">
+    <select id="contractMoneyChart" resultType="java.util.Map">
+        SELECT
+            SUM( money ) AS `value`,
+            ct.`name`
+        FROM
+            contract c,
+            contract_type ct
+        WHERE
+            kind = 0
+          AND c.type = ct.`name`
+        and sign_date &gt; #{start}
+        and sign_date &lt; ADDDATE(#{end},INTERVAL 1 month)
+        GROUP BY
+            ct.`name`
+    </select>
+    <select id="contractContrastChart" resultType="java.util.Map">
+        SELECT
+        ct.`name`,
+        IFNULL(SUM( r.money ),0) AS receive,
+        IFNULL(SUM( i.money ),0) AS invoice,
+        IFNULL(SUM( ibm.money ),0) AS budget
+        FROM
+        contract_type ct,
+        contract c
+        LEFT JOIN ( SELECT sum( money ) AS money, contract_id FROM receive WHERE `date` &gt; #{start} AND `date` &lt; #{end} GROUP BY contract_id ) r ON c.id = r.contract_id
+        LEFT JOIN (
+        SELECT
+        SUM( charge + added_value ) AS money,
+        contract_id
+        FROM
+        invoice i,
+        invoice_information ii
+        WHERE
+        i.`out_date` &gt; #{start}
+        AND i.`out_date` &lt; #{end}
+        AND i.invoice_information_id = ii.id
+        GROUP BY
+        ii.contract_id
+        ) i ON c.id = i.contract_id
+        LEFT JOIN (
+        SELECT
+        SUM( budget ) AS money,
+        contract_id
+        FROM
+        invoice_budget_month
+        WHERE
+        `year` &gt;=  YEAR ( #{start} )
+        AND `year` &lt;= YEAR ( #{end} ) AND `month` &gt;=  MONTH ( #{start} )
+        AND `month` &lt;= MONTH ( #{end} )
+        GROUP BY
+        contract_id
+        ) ibm ON c.id = ibm.contract_id
+        WHERE
+        c.kind = 0
+        AND c.type = ct.`name`
+        GROUP BY ct.`name`
+    </select>
+    <select id="contractSingleChart" resultType="java.util.Map">
+        SELECT
+        IF
+        ( parent_id = 0, c.id, c.parent_id ) AS id,
+        c.number,
+        c.`name`,
+        SUM( d.budget ) AS budget,
+        SUM( d.invoice ) AS invoice,
+        SUM( d.receive ) AS receive
+        FROM
+            contract c left join
+        (
+        SELECT
+        contract_id,
+        MAX( budget ) AS budget,
+        max( invoice ) AS invoice,
+        MAX( receive ) AS receive
+        FROM
+        (
+        SELECT
+        0 AS budget,
+        0 AS invoice,
+        sum( money ) AS receive,
+        contract_id
+        FROM
+        receive
+        WHERE
+        `date` &gt; #{start}
+        AND `date` &lt; #{end}
+        GROUP BY
+        contract_id UNION
+        SELECT
+        0 AS budget,
+        SUM( charge + added_value ) AS invoice,
+        0 AS receive,
+        contract_id
+        FROM
+        invoice i,
+        invoice_information ii
+        WHERE
+        i.`out_date` &gt; #{start}
+        AND i.`out_date` &lt; #{end}
+        AND i.invoice_information_id = ii.id
+        GROUP BY
+        ii.contract_id UNION
+        SELECT
+        SUM( budget ) AS budget,
+        0 AS invoice,
+        0 AS receive,
+        contract_id
+        FROM
+        invoice_budget_month
+        WHERE
+        `year` &gt;= YEAR ( #{start} )
+        AND `year` &lt;= YEAR ( #{end} ) AND `month` &gt;= MONTH ( #{start} )
+        AND `month` &lt;= MONTH ( #{end} )
+        GROUP BY
+        contract_id
+        ) AS d
+        GROUP BY
+        contract_id
+        ) d on         d.contract_id = c.id
+        WHERE
+        c.important = 1
+        GROUP BY
+        id
+    </select>
+</mapper>
