@@ -209,14 +209,15 @@
         `date` = values(`date`)
     </insert>
     <insert id="setWorkday" parameterType="hashmap">
-        insert into volume_workday(volume_id,`volume_number`, `state`, workday,
+        insert into volume_workday(volume_id,`tec`, `volume_number`, `state`, workday,
                                    designer_workday, checker_workday,
                                    principal_workday,headman_workday,
                                    `type`, `date`, `time`, handler)
-        values (#{map.taskId},#{map.number}, #{map.state}, #{map.workday},
+        values (#{map.taskId},#{map.tec},#{map.number}, #{map.state}, #{map.workday},
                 #{map.designer},#{map.checker}, #{map.principal},#{map.headman},
                 #{map.typeId}, #{map.date}, now(), #{id})
         ON DUPLICATE KEY UPDATE
+        tec = values(tec),
         workday = values(workday),
         designer_workday = values(designer_workday),
         checker_workday = values(checker_workday),
@@ -4577,11 +4578,10 @@
     <select id="queryConfirmTec" resultMap="queryConfirmNotCheck">
         SELECT
             t.project_id AS id,
-            IF
-                ( m.big_name IS NULL, t.volume_tec, m.small_name ) AS tec, #{date} as date
+            t.volume_tec AS tec,
+            #{date} as `date`
         FROM
-            workday_tec t
-                LEFT JOIN major_contrast_technology m ON t.volume_tec = m.big_name,
+            workday_tec t,
             workday_tec_principal tp
         WHERE
             t.id = tp.workday_tec_id
@@ -4597,10 +4597,11 @@
                 where pv.volume_id = v.id
                 and pv.check_month = #{date}) as selected
         FROM
-            volume v
+            volume v left join
+            major_contrast_technology m on v.tec = m.small_name
         WHERE
             project_id = #{id}
-          and tec = #{tec}
+          and ifnull(m.big_name,tec) = #{tec}
           AND plan_confirm = 1
           AND `state` IN (
                           '尚未确定',

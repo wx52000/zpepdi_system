@@ -84,7 +84,27 @@
             inv.invoice11,
             inv.invoice12
         FROM
-            contract c
+            contract c,
+                (
+                 SELECT
+                     contract_id as id
+                FROM
+                    invoice_budget_year
+                WHERE
+                    `year` = #{year} UNION
+                     SELECT
+                     contract_id as id
+                     FROM
+                     invoice_budget_quarter
+                     WHERE
+                     `year` = #{year} UNION
+                     SELECT
+                     contract_id as id
+                     FROM
+                     invoice_budget_month
+                     WHERE
+                     `year` = #{year}
+                    ) as cnow
                 left join
                 (SELECT
                      parent_id,
@@ -93,7 +113,7 @@
                      contract
                  WHERE
                      parent_id &lt;&gt; 0
-                 GROUP BY parent_id) as cc on c.id = cc.parent_id
+                 GROUP BY parent_id) as cc on cnow.id = cc.parent_id
                 left join (
                 SELECT
                     contract_id,
@@ -108,7 +128,7 @@
                     state = 1
                 GROUP BY
                     contract_id
-            ) as n on  c.id = n.contract_id
+            ) as n on  cnow.id = n.contract_id
                 LEFT JOIN (
                 SELECT
                     SUM( i.charge + added_value ) AS money,
@@ -120,7 +140,7 @@
                     i.invoice_information_id = ii.id
                 GROUP BY
                     ii.contract_id
-            ) AS total ON c.id = total.contract_id
+            ) AS total ON cnow.id = total.contract_id
                 LEFT JOIN (
                 SELECT
                     SUM( i.charge + added_value ) AS money,
@@ -134,8 +154,8 @@
                   AND i.out_date &lt; concat(#{year}+1, "-01-01")
                 GROUP BY
                     ii.contract_id
-            ) AS tYear ON c.id = tYear.contract_id
-                LEFT JOIN invoice_budget_year iby ON c.id = iby.contract_id
+            ) AS tYear ON cnow.id = tYear.contract_id
+                LEFT JOIN invoice_budget_year iby ON cnow.id = iby.contract_id
                 AND iby.`year` = 3
                 LEFT JOIN (
                 SELECT
@@ -218,7 +238,7 @@
                     `year` = #{year} and type = 0
                 GROUP BY
                     contract_id
-            ) AS invoiceb ON c.id = invoiceb.contract_id
+            ) AS invoiceb ON cnow.id = invoiceb.contract_id
                 LEFT JOIN (
                 SELECT
                     contract_id,
@@ -264,7 +284,7 @@
                     `year` = #{year} and type = 0
                 GROUP BY
                     contract_id
-            ) AS incomeb ON c.id = incomeb.contract_id
+            ) AS incomeb ON cnow.id = incomeb.contract_id
                 LEFT JOIN (
                 SELECT
                     contract_id,
@@ -310,7 +330,7 @@
                     DATE_FORMAT(`date`,'%Y')
                 GROUP BY
                     contract_id
-            ) AS inc ON c.id = inc.contract_id
+            ) AS inc ON cnow.id = inc.contract_id
                 LEFT JOIN (
                 SELECT
                     contract_id,
@@ -358,8 +378,9 @@
                   AND i.invoice_information_id = ii.id
                 GROUP BY
                     ii.contract_id
-            ) AS inv ON c.id = inv.contract_id
-            where kind = 0
+            ) AS inv ON cnow.id = inv.contract_id
+            where c.kind = 0
+            and c.id = cnow.id
     </select>
     <select id="queryZCBMonth" resultType="java.util.Map">
         SELECT
@@ -796,10 +817,165 @@
                         LEFT JOIN project_budget_year pby ON pby.project_id = p.id
                         AND pby.`year` = #{year}
                         LEFT JOIN project_budget_month pbm ON pbm.project_id = p.id
-                        AND pbm.`year` = #{year}
+                        AND pbm.`year` = #{year} and type = 0
                         AND p.`month` = pbm.`month`
             ) AS t
         GROUP BY
             t.id
+    </select>
+    <select id="queryPlanQuarter" resultType="java.util.Map">
+        SELECT
+            c.`name`,
+            c.number,
+            c.state,
+            c.first_party,
+            ifnull( c.money, 0 ) + ifnull( cc.money, 0 ) AS money,
+            c.business_manage,
+            n.`index` AS nodeIndex,
+            n.money AS nodeMoney,
+            n.details AS nodeDetails,
+            cast(
+                    n.`date` AS CHAR ( 10 )) AS nodeDate,
+            total.money AS total,
+            c.money - total.money AS totalNot,
+            tYear.quarter1_invoice,
+            tYear.quarter2_invoice,
+            tYear.quarter3_invoice,
+            tYear.quarter4_invoice,
+            iby.year_budget,
+            iby.quarter1_budget,
+            iby.quarter2_budget,
+            iby.quarter3_budget,
+            iby.quarter4_budget,
+            ibq.quarter_budget,
+            ibq.month1_budget,
+            ibq.month2_budget,
+            ibq.month3_budget,
+            invoiceb.invoiceb1,
+            invoiceb.invoiceb2,
+            invoiceb.invoiceb3,
+            invoiceb.remark1,
+            invoiceb.remark2,
+            invoiceb.remark3
+        FROM
+            contract c,
+            (
+                SELECT
+                    contract_id AS id
+                FROM
+                    invoice_budget_quarter
+                WHERE
+                    `quarter` = #{quarter} UNION
+                SELECT
+                    contract_id AS id
+                FROM
+                    invoice_budget_month
+                WHERE
+                    `quarter` = #{quarter}
+            ) AS cnow
+                LEFT JOIN ( SELECT parent_id, sum( money ) AS money FROM contract WHERE parent_id &lt;&gt; 0 GROUP BY parent_id ) AS cc ON cnow.id = cc.parent_id
+                LEFT JOIN (
+                SELECT
+                    contract_id,
+                    GROUP_CONCAT( CONCAT( '节点', `index`, ':', details ) SEPARATOR ';' ) AS `index`,
+                    SUM( money ) AS money,
+                    GROUP_CONCAT( details ) AS details,
+                    GROUP_CONCAT( DISTINCT DATE_FORMAT( date, '%Y-%m' ) ) AS `date`
+                FROM
+                    `contract_node`
+                WHERE
+                    state = 1
+                GROUP BY
+                    contract_id
+            ) AS n ON cnow.id = n.contract_id
+                LEFT JOIN (
+                SELECT
+                    SUM( i.charge + added_value ) AS money,
+                    ii.contract_id
+                FROM
+                    invoice i,
+                    invoice_information ii
+                WHERE
+                    i.invoice_information_id = ii.id
+                  AND i.out_date &lt; concat( #{year}, "-01-01" )
+                GROUP BY
+                    ii.contract_id
+            ) AS total ON cnow.id = total.contract_id
+                LEFT JOIN (
+                SELECT
+                    contract_id,
+                    MAX(
+                            IF
+                                ( `quarter` = 1, money, 0 )) AS quarter1_invoice,
+                    MAX(
+                            IF
+                                ( `quarter` = 2, money, 0 )) AS quarter2_invoice,
+                    MAX(
+                            IF
+                                ( `quarter` = 3, money, 0 )) AS quarter3_invoice,
+                    MAX(
+                            IF
+                                ( `quarter` = 4, money, 0 )) AS quarter4_invoice
+                FROM
+                    (
+                        SELECT
+                            SUM( i.charge + added_value ) AS money,
+                            ii.contract_id,
+                            CEIL( MONTH ( i.out_date )/ 3 ) AS `quarter`
+                        FROM
+                            invoice i,
+                            invoice_information ii
+                        WHERE
+                            i.invoice_information_id = ii.id
+                          AND i.out_date &gt;= concat( #{year}, "-01-01" )
+                          AND i.out_date &lt; concat( #{year}+1, "-01-01" )
+                        GROUP BY
+                            ii.contract_id,
+                            `quarter`
+                    ) AS t
+                GROUP BY
+                    contract_id
+            ) AS tYear ON cnow.id = tYear.contract_id
+                LEFT JOIN invoice_budget_year iby ON cnow.id = iby.contract_id
+                AND iby.`year` = #{year}
+                LEFT JOIN invoice_budget_quarter ibq ON cnow.id = ibq.contract_id
+                AND iby.`year` = #{year}
+                AND `quarter` = #{quarter}
+                LEFT JOIN (
+                SELECT
+                    contract_id,
+                    MAX(
+                            IF
+                                ( `month` % `quarter` = 1, budget, 0 )) AS invoiceb1,
+                    MAX(
+                            IF
+                                ( `month` % `quarter` = 2, budget, 0 )) AS invoiceb2,
+                    MAX(
+                            IF
+                                ( `month` % `quarter` = 0, budget, 0 )) AS invoiceb3,
+                    MAX(
+                            IF
+                                ( `month` % `quarter` = 1, remark, NULL )) AS remark1,
+                    MAX(
+                            IF
+                                ( `month` % `quarter` = 2, remark, NULL )) AS remark2,
+                    MAX(
+                            IF
+                                ( `month` % `quarter` = 0, remark, NULL )) AS remark3
+                FROM
+                    invoice_budget_month
+                WHERE
+                    `year` = #{year}
+                  AND `quarter` = #{quarter}
+                  AND type = 0
+                GROUP BY
+                    contract_id
+            ) AS invoiceb ON cnow.id = invoiceb.contract_id
+        WHERE
+            c.kind = 0
+          AND c.id = cnow.id
+    </select>
+    <select id="queryPlanMonth" resultType="java.util.Map">
+
     </select>
 </mapper>

@@ -164,6 +164,7 @@ public interface ProjectDao {
     List<Map<String,Object>> projectProgressById(Map<String,Object> map);
 
     List<Map<String,Object>> planVolume(Map<String,Object> map);
+    List<Map<String,Object>> planVolumeNotTec(Map<String,Object> map);
 
     List<Map<String,Object>> progressVolume(Map<String,Object> map);
 

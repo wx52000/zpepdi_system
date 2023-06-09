@@ -955,6 +955,7 @@ public class ProjectServiceImpl implements ProjectService {
 
   @Override
   public Result queryTaskByUser(Integer userId, Map<String,String> map) {
+//        1 管理员 2设总 3经理 4主设
         int role = projectDao.queryProjectRole(userId, Integer.valueOf(map.get("id")));
         List<Map<String,Object>> list = new ArrayList<>();
         if (role ==1 || role  == 2 || role == 3){
@@ -1428,7 +1429,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         map.put("userId",userId);
         List<Map<String, Object>> datemap = projectDao.projectProgressById(map);
-        List<String> list1 = null;
         List<String> tec = new ArrayList<>();
         try {
 //            info=projectDao.downInfo(map);
@@ -1487,6 +1487,7 @@ public class ProjectServiceImpl implements ProjectService {
             tecmap.put("date",map.get("date"));
             tecmap.put("id",map.get("id"));
             tecmap.put("nowMonth",DateUtils.getDateMonth());
+            List<Map<String, Object>> tecinfo = projectDao.planVolumeNotTec(tecmap);
             for(int i=0;i<tec.size();i++){
                 HSSFSheet sheet = workbook.createSheet(tec.get(i));
                 HSSFRow row1 = sheet.createRow(0);
@@ -1508,30 +1509,29 @@ public class ProjectServiceImpl implements ProjectService {
                 row1.createCell(14).setCellValue("重点卷册");//important
                 row1.createCell(15).setCellValue("条件/延期");//plan_confirm
 
-                tecmap.put("tec",tec.get(i));
-                List<Map<String, Object>> tecinfo = projectDao.planVolume(tecmap);
-
                 if (tecinfo != null && tecinfo.size() != 0) {
                     for (int k=0;k<tecinfo.size();k++) {
-                        int lastRowNum = sheet.getLastRowNum();
-                        HSSFRow lastRow = sheet.createRow(lastRowNum + 1);
-                        lastRow.createCell(0).setCellValue(tecinfo.get(k).get("number").toString());
-                        lastRow.createCell(1).setCellValue(tecinfo.get(k).get("name").toString());
-                        lastRow.createCell(2).setCellValue(tecinfo.get(k).get("state")!= null ? tecinfo.get(k).get("state").toString() : "");
-                        lastRow.createCell(3).setCellValue(tecinfo.get(k).get("workday")!= null ? tecinfo.get(k).get("workday").toString():"");
-                        lastRow.createCell(4).setCellValue(tecinfo.get(k).get("start_date") != null ? tecinfo.get(k).get("start_date").toString() : "");
-                        lastRow.createCell(5).setCellValue(tecinfo.get(k).get("planned_publication_date")!= null ? tecinfo.get(k).get("planned_publication_date").toString() : "");
-                        lastRow.createCell(6).setCellValue(tecinfo.get(k).get("publicDateList")!= null ? tecinfo.get(k).get("publicDateList").toString() : "");
-                        lastRow.createCell(7).setCellValue(tecinfo.get(k).get("remark")!= null ? tecinfo.get(k).get("remark").toString() : "");
-                        lastRow.createCell(8).setCellValue(tecinfo.get(k).get("designer")!= null ? tecinfo.get(k).get("designer").toString() : "");
-                        lastRow.createCell(9).setCellValue(tecinfo.get(k).get("checker")!= null ? tecinfo.get(k).get("checker").toString() : "");
-                        lastRow.createCell(10).setCellValue(tecinfo.get(k).get("principal")!= null ? tecinfo.get(k).get("principal").toString() : "");
-                        lastRow.createCell(11).setCellValue(tecinfo.get(k).get("confirm_user")!= null ? tecinfo.get(k).get("confirm_user").toString() : "");
-                        lastRow.createCell(12).setCellValue(tecinfo.get(k).get("confirm_time")!= null ? tecinfo.get(k).get("confirm_time").toString() : "");
-                        lastRow.createCell(13).setCellValue(tecinfo.get(k).get("check_state")!= null ? "1".equals(tecinfo.get(k).get("check_state").toString())?"是":"否" : "");
-                        lastRow.createCell(14).setCellValue(tecinfo.get(k).get("important")!= null ? "1".equals(tecinfo.get(k).get("important").toString())?"是":"否" : "");
-                        lastRow.createCell(15).setCellValue(tecinfo.get(k).get("plan_confirm")!= null ? "1".equals(tecinfo.get(k).get("plan_confirm").toString())?"已确认":"未确认" : "");
-                    }
+                        if(tecinfo.get(k).get("tec").toString().indexOf(tec.get(i))!=-1){
+                            int lastRowNum = sheet.getLastRowNum();
+                            HSSFRow lastRow = sheet.createRow(lastRowNum + 1);
+                            lastRow.createCell(0).setCellValue(tecinfo.get(k).get("number").toString());
+                            lastRow.createCell(1).setCellValue(tecinfo.get(k).get("name").toString());
+                            lastRow.createCell(2).setCellValue(tecinfo.get(k).get("state")!= null ? tecinfo.get(k).get("state").toString() : "");
+                            lastRow.createCell(3).setCellValue(tecinfo.get(k).get("workday")!= null ? tecinfo.get(k).get("workday").toString():"");
+                            lastRow.createCell(4).setCellValue(tecinfo.get(k).get("start_date") != null ? tecinfo.get(k).get("start_date").toString() : "");
+                            lastRow.createCell(5).setCellValue(tecinfo.get(k).get("planned_publication_date")!= null ? tecinfo.get(k).get("planned_publication_date").toString() : "");
+                            lastRow.createCell(6).setCellValue(tecinfo.get(k).get("publicDateList")!= null ? tecinfo.get(k).get("publicDateList").toString() : "");
+                            lastRow.createCell(7).setCellValue(tecinfo.get(k).get("remark")!= null ? tecinfo.get(k).get("remark").toString() : "");
+                            lastRow.createCell(8).setCellValue(tecinfo.get(k).get("designer")!= null ? tecinfo.get(k).get("designer").toString() : "");
+                            lastRow.createCell(9).setCellValue(tecinfo.get(k).get("checker")!= null ? tecinfo.get(k).get("checker").toString() : "");
+                            lastRow.createCell(10).setCellValue(tecinfo.get(k).get("principal")!= null ? tecinfo.get(k).get("principal").toString() : "");
+                            lastRow.createCell(11).setCellValue(tecinfo.get(k).get("confirm_user")!= null ? tecinfo.get(k).get("confirm_user").toString() : "");
+                            lastRow.createCell(12).setCellValue(tecinfo.get(k).get("confirm_time")!= null ? tecinfo.get(k).get("confirm_time").toString() : "");
+                            lastRow.createCell(13).setCellValue(tecinfo.get(k).get("check_state")!= null ? "1".equals(tecinfo.get(k).get("check_state").toString())?"是":"否" : "");
+                            lastRow.createCell(14).setCellValue(tecinfo.get(k).get("important")!= null ? "1".equals(tecinfo.get(k).get("important").toString())?"是":"否" : "");
+                            lastRow.createCell(15).setCellValue(tecinfo.get(k).get("plan_confirm")!= null ? "1".equals(tecinfo.get(k).get("plan_confirm").toString())?"已确认":"未确认" : "");
+                          }
+                        }
                 }
             }
             //列宽自适应

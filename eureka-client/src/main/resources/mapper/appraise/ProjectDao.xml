@@ -1824,8 +1824,8 @@
                    AND u.id = p.generalId
              ) AS tab
                  LEFT JOIN (
-            SELECT DISTINCT wt.volume_tec
-            FROM workday_tec wt,
+            SELECT DISTINCT if( m.big_name is null, wt.volume_tec, m.small_name) as volume_tec
+            FROM workday_tec wt left join  major_contrast_technology m on wt.volume_tec = m.big_name,
                  workday_tec_principal wtp
             WHERE wt.project_id = #{map.id}
               AND wtp.user_id = #{id}
@@ -1981,12 +1981,13 @@
                                    LEFT JOIN volume_workday_high h ON v.id = h.volume_id
                               AND h.submit = 2
                                    LEFT JOIN volume_reason s ON v.id = s.volume_id,
-                               workday_tec wt,
+                               workday_tec wt
+                                   LEFT JOIN major_contrast_technology m1 ON t.volume_tec = m1.big_name,
                                workday_tec_principal wtp
                           WHERE v.project_id = #{map.id}
                             AND wtp.user_id = #{id}
                             AND wtp.workday_tec_id = wt.id
-                            AND wt.volume_tec = v.tec
+                            AND  v.tec = IF( m1.big_name is null , t.volume_tec , m1.small_name)
                           GROUP BY v.id
                           UNION
                           SELECT DISTINCT v.project_id,
@@ -2709,8 +2710,8 @@
                                                                        GROUP BY tec
                                                                    ) AS t
                                                                        LEFT JOIN volume v ON v.project_id = t.project_id
-                                                                  AND v.tec = t.tec
                                                                        LEFT JOIN volume_workday w ON w.volume_id = v.id
+                                                                                                         and w.tec = t.tec
                                                                   AND w.type = 0
                                                               GROUP BY t.tec
                                                           ) AS t
@@ -2766,7 +2767,7 @@
         SELECT DISTINCT p.mold,
                         p.number,
                         p.name,
-                        p.id as projectId,
+                        p.id                                                 as projectId,
                         IFNULL(v.manage, 0) - IFNULL(deduct.manageDeduct, 0) AS manage,
                         IFNULL(v.volume, 0) - IFNULL(deduct.volumeDeduct, 0) AS volume,
                         v.amount - IFNULL(deduct.manageDeduct, 0) - IFNULL(deduct.volumeDeduct, 0) -
@@ -2779,97 +2780,104 @@
                         IFNULL(v.volumeUsed, 0)                              AS volumeUsed,
                         manageUsed,
                         `check`
-        FROM (
-                 SELECT DISTINCT v.project_id,
-                                 IFNULL(v.manage, 0) AS manage,
-                                 IFNULL(v.volume, 0) AS volume,
-                                 v.amount,
-                                 v.tec,
-                                 v.volumeUsed        AS volumeUsed,
-                                 v.backupUsed,
-                                 SUM(
-                                             IFNULL(t.designer_workday, 0) + IFNULL(t.principal_workday, 0) +
-                                             IFNULL(t.checker_workday, 0) + IFNULL(t.headman_workday, 0)
-                                     )               AS manageUsed,
-                                 `check`
-                 FROM (
-                          SELECT v.project_id,
-                                 v.tec,
-                                 t.manage,
-                                 t.volume,
-                                 (
-                                         ifnull(b.workday, 0) + ifnull(wt.amount, 0) +
-                                         ifnull(SUM(ta.amount), 0)) AS amount,
-                                 v.volumeUsed,
-                                 v.backupUsed,
-                                 ifnull(t.`check`, FALSE)           AS `check`
-                          FROM (
-                                   SELECT t.project_id,
-                                          t.tec,
-                                          IFNULL(SUM(w.workday), 0) AS volumeUsed,
-                                          IFNULL(bw.backupUsed, 0)  AS backupUsed
-                                   FROM (
-                                            SELECT DISTINCT t.project_id,
-                                                            t.volume_tec AS tec
-                                            FROM workday_tec t
-                                            WHERE t.project_id = #{map.id}
-                                              AND t.volume_tec = #{map.tec}
-                                            GROUP BY t.volume_tec
-                                        ) AS t
-                                            LEFT JOIN volume v ON v.project_id = t.project_id
-                                       AND v.tec = t.tec
-                                            LEFT JOIN volume_workday w ON w.volume_id = v.id
-                                       AND w.type = 0
-                                            LEFT JOIN (
-                                       SELECT v.tec,
-                                              SUM(w.workday) AS backupUsed
-                                       FROM volume v
-                                                LEFT JOIN volume_workday w ON w.volume_id = v.id
-                                           AND w.type = 1
-                                       WHERE v.project_id = #{map.id}
-                                         AND v.tec = #{map.tec}
-                                   ) AS bw ON bw.tec = t.tec
-                               ) AS v
-                                   LEFT JOIN workday_tec wt ON v.project_id = wt.project_id
-                              AND v.tec = wt.volume_tec
-                                   LEFT JOIN workday_tec_distribute t ON v.project_id = t.project_id
-                              AND t.tec = v.tec
-                                   LEFT JOIN (SELECT sum(workday) AS workday, project_id
-                                              FROM project_workday_backup
-                                              WHERE project_id = #{map.id}
-                                                AND tec = #{map.tec}
-                                                AND `check` = 1) AS b ON b.project_id = v.project_id
-                                   LEFT JOIN project_workday_add a ON a.project_id = v.project_id
-                              AND a.`check` = 1
-                                   LEFT JOIN workday_tec_add ta ON ta.add_id = a.id
-                              AND ta.volume_tec = v.tec
-                      ) AS v
-                          LEFT JOIN project_task t ON t.project_id = v.project_id
-                     AND t.tec = v.tec
-                     AND t.type = 0
-                     AND t.project_id = v.project_id
-             ) AS v
+        FROM (SELECT DISTINCT v.project_id,
+                              IFNULL(v.manage, 0) AS manage,
+                              IFNULL(v.volume, 0) AS volume,
+                              v.amount,
+                              v.tec,
+                              v.volumeUsed        AS volumeUsed,
+                              v.backupUsed,
+                              SUM(
+                                          IFNULL(t.designer_workday, 0) + IFNULL(t.principal_workday, 0) +
+                                          IFNULL(t.checker_workday, 0) + IFNULL(t.headman_workday, 0)
+                                  )               AS manageUsed,
+                              `check`
+              FROM (SELECT v.project_id,
+                           v.tec,
+                           t.manage,
+                           t.volume,
+                           (
+                                   ifnull(b.workday, 0) + ifnull(wt.amount, 0) +
+                                   ifnull(SUM(ta.amount), 0)) AS amount,
+                           v.volumeUsed,
+                           v.backupUsed,
+                           ifnull(t.`check`, FALSE)           AS `check`
+                    FROM (SELECT t.project_id,
+                                 t.tec,
+                                 IFNULL(SUM(w.workday), 0) AS volumeUsed,
+                                 IFNULL(bw.backupUsed, 0)  AS backupUsed
+                          FROM (select project_id,
+                                       tec
+                                from (SELECT DISTINCT t.project_id,
+                                                      t.volume_tec AS tec
+                                      FROM workday_tec t,
+                                           workday_tec_principal tp
+                                      WHERE t.project_id = #{map.id}
+                                        AND t.volume_tec = #{map.tec}
+                                        and t.id = tp.workday_tec_id
+                                        and tp.user_id = #{userId}
+                                      GROUP BY t.volume_tec
+                                      union
+                                      SELECT DISTINCT t.project_id,
+                                                      t.volume_tec AS tec
+                                      FROM workday_tec t,
+                                           major_contrast_technology m,
+                                           workday_tec_principal tp
+                                      WHERE t.project_id = #{map.id}
+                                        AND m.small_name = #{map.tec}
+                                        and t.volume_tec = m.big_name
+                                        and t.id = tp.workday_tec_id
+                                        and tp.user_id = #{userId})t
+                                limit 1
+                                ) AS t
+                                   LEFT JOIN volume v ON v.project_id = t.project_id
+                                   LEFT JOIN volume_workday w ON w.volume_id = v.id
+                                                                     and w.tec = t.tec
+                              AND w.type = 0
+                                   LEFT JOIN (SELECT v.tec,
+                                                     SUM(w.workday) AS backupUsed
+                                              FROM volume v
+                                                       LEFT JOIN volume_workday w ON w.volume_id = v.id
+                                                  AND w.type = 1
+                                              WHERE v.project_id = #{map.id}
+                                                AND v.tec = #{map.tec}) AS bw ON bw.tec = t.tec) AS v
+                             LEFT JOIN workday_tec wt ON v.project_id = wt.project_id
+                        AND v.tec = wt.volume_tec
+                             LEFT JOIN workday_tec_distribute t ON v.project_id = t.project_id
+                        AND t.tec = v.tec
+                             LEFT JOIN (SELECT sum(workday) AS workday, project_id
+                                        FROM project_workday_backup
+                                        WHERE project_id = #{map.id}
+                                          AND tec = #{map.tec}
+                                          AND `check` = 1) AS b ON b.project_id = v.project_id
+                             LEFT JOIN project_workday_add a ON a.project_id = v.project_id
+                        AND a.`check` = 1
+                             LEFT JOIN workday_tec_add ta ON ta.add_id = a.id
+                        AND ta.volume_tec = v.tec) AS v
+                       LEFT JOIN project_task t ON t.project_id = v.project_id
+                  AND t.tec = v.tec
+                  AND t.type = 0
+                  AND t.project_id = v.project_id) AS v
                  LEFT JOIN project_task t1 ON t1.project_id = v.project_id
             AND t1.tec = v.tec
             AND t1.type = 1
             AND t1.project_id = v.project_id
-                 LEFT JOIN (
-            SELECT project_id,
-                   tec,
-                   IFNULL(SUM(manage), 0)   AS manageDeduct,
-                   IFNULL(SUM(volume), 0)   AS volumeDeduct,
-                   IFNULL(SUM(`backup`), 0) AS backupDeduct
-            FROM workday_tec_deduct
-            WHERE project_id = #{map.id}
-              AND tec = #{map.tec}
-        ) AS deduct ON deduct.project_id = v.project_id
+                 LEFT JOIN (SELECT project_id,
+                                   tec,
+                                   IFNULL(SUM(manage), 0)   AS manageDeduct,
+                                   IFNULL(SUM(volume), 0)   AS volumeDeduct,
+                                   IFNULL(SUM(`backup`), 0) AS backupDeduct
+                            FROM workday_tec_deduct
+                            WHERE project_id = #{map.id}
+                              AND tec = #{map.tec}) AS deduct ON deduct.project_id = v.project_id
             AND deduct.tec = v.tec,
              project p
         where p.id = v.project_id
         GROUP BY v.tec
     </select>
     <select id="queryByVolumeId" resultType="java.util.Map">
-        SELECT IFNULL(w.workday, 0)               AS workday,
+        SELECT w.tec,
+            IFNULL(w.workday, 0)               AS workday,
                IFNULL(vr.designer, tr.designer)   AS designer,
                IFNULL(vr.checker, tr.checker)     AS checker,
                IFNULL(vr.principal, tr.principal) AS principal,
@@ -3905,13 +3913,19 @@
                                  p.`name`,
                                  p.control,
                                  IFNULL(m.big_name,v.tec) as tec,
-                                 c.`check`,
+                                 EXISTS (
+                                         SELECT
+                                             1
+                                         FROM
+                                             check_plan cp
+                                         WHERE
+                                             cp.project_id = p.id
+                                           AND cp.plan_month = #{date}
+                                           AND cp.tec = IFNULL( m.big_name, v.tec )) as `check`,
                                  m.id  as mid,
                                  0 as principalRole
                           FROM project p,
                                volume v
-                                   left join check_plan c on v.tec = c.tec
-                                   and v.project_id = c.project_id and c.plan_month = #{date}
                                    LEFT JOIN major_contrast_technology m on v.tec = m.small_name
                           WHERE p.id = v.project_id
                             AND p.id = #{id}
@@ -3936,7 +3950,15 @@
                               p.`name`,
                               p.control,
                               IFNULL( m.big_name, v.tec ) AS tec,
-                              c.`check`,
+                              EXISTS (
+                                      SELECT
+                                          1
+                                      FROM
+                                          check_plan cp
+                                      WHERE
+                                          cp.project_id = p.id
+                                        AND cp.plan_month = #{date}
+                                        AND cp.tec = IFNULL( m.big_name, v.tec )) as `check`,
                               m.id AS mid,
                               0 AS principalRole
                           FROM
@@ -3944,9 +3966,6 @@
                               technology t,
                               `user` u ,
                               volume v
-                                  LEFT JOIN check_plan c ON v.tec = c.tec
-                                  AND v.project_id = c.project_id
-                                  AND c.plan_month = #{date}
                                   LEFT JOIN major_contrast_technology m ON v.tec = m.small_name
                           WHERE
                               p.id = v.project_id
@@ -3964,28 +3983,38 @@
                           GROUP BY
                               v.tec
                         union
-                          SELECT p.id,
-                                 p.number,
-                                 p.`name`,
-                                 p.control,
-                                 IFNULL(m.big_name,v.tec) as tec,
-                                 c.`check`,
-                                 m.id  as mid,
-                                 1 as principalRole
-                          FROM project p,
-                               volume v
-                                   left join check_plan c on v.tec = c.tec
-                                                                 and v.project_id = c.project_id
-                                   AND c.plan_month = #{date}
-                                   LEFT JOIN major_contrast_technology m on v.tec = m.small_name,
-                               workday_tec t,
-                               workday_tec_principal tp
-                          WHERE p.id = v.project_id
-                            AND p.id = #{id}
-                            and t.id = tp.workday_tec_id
-                            and tp.user_id = #{userId}
-                            AND v.tec = t.volume_tec
-                          GROUP BY v.tec
+                          SELECT
+                              p.id,
+                              p.number,
+                              p.`name`,
+                              p.control,
+                              IFNULL( m.big_name, v.tec ) AS tec,
+                              EXISTS (
+                                      SELECT
+                                          1
+                                      FROM
+                                          check_plan cp
+                                      WHERE
+                                          cp.project_id = p.id
+                                        AND cp.plan_month = #{date}
+                                        AND cp.tec = IFNULL( m.big_name, v.tec )) as `check`,
+                              m.id AS mid,
+                              1 AS principalRole
+                          FROM
+                              project p,
+                              ( SELECT tec FROM volume WHERE project_id = #{id} GROUP BY tec ) AS v
+                                  LEFT JOIN major_contrast_technology m ON v.tec = m.small_name,
+                              workday_tec t
+                                  LEFT JOIN major_contrast_technology m1 ON t.volume_tec = m1.small_name,
+                              workday_tec_principal tp
+                          WHERE
+                              p.id = #{id}
+                            AND t.project_id = p.id
+                            AND t.id = tp.workday_tec_id
+                            AND tp.user_id = #{userId}
+                            AND IFNULL( m.big_name, v.tec ) = IFNULL(
+                                  m1.big_name,
+                                  t.volume_tec)
                       ) AS p
                  GROUP BY p.tec
              ) AS p
@@ -4397,6 +4426,90 @@
         <if test="tec != '' and tec != '合计'">
             and v.tec like CONCAT("%",#{tec},"%")
         </if>
+    </select>
+    <select id="planVolumeNotTec" resultType="java.util.Map">
+        SELECT
+            v.id,
+            v.number,
+            v.tec,
+            v.`name`,
+            v.state,
+            v.designer,
+            v.headman,
+            v.actual_principal AS principal,
+            v.checker,
+            v.start_date,
+            v.planned_publication_date,
+            v.actual_publication_date,
+            v.wfInstId,
+            v.plan_confirm,
+            w.workday,
+            v.remark,
+            v.important,
+            EXISTS ( SELECT 1 FROM check_plan_volume WHERE volume_id = v.id ) AS check_state,
+            (
+                SELECT
+                    IFNULL(
+                                max( check_month ) = #{nowMonth}, FALSE ) FROM check_plan_volume WHERE volume_id = v.id ) AS check_month,
+            u.NAME AS confirm_user,
+            cast(
+                    v.confirm_time AS CHAR ( 10 )) confirm_time
+        FROM
+            `volume` v
+                LEFT JOIN volume_workday w ON v.id = w.volume_id
+                LEFT JOIN `user` u ON u.id = v.confirm_user
+        WHERE
+            (
+                        v.project_id = #{id}
+
+                    AND DATE_FORMAT( planned_publication_date, '%Y-%m' ) = #{date}
+
+                    AND v.number NOT LIKE "%+%"
+                    AND v.tec NOT IN (
+                    SELECT DISTINCT
+                        v.tec
+                    FROM
+                        `volume` v
+                            LEFT JOIN volume_workday w ON v.id = w.volume_id
+                            LEFT JOIN `user` u ON u.id = v.confirm_user
+                    WHERE
+                        v.project_id = #{id}
+
+                      AND EXISTS (
+                            SELECT
+                                1
+                            FROM
+                                check_plan_volume pv
+                            WHERE
+                                pv.project_id = #{id}
+
+                              AND pv.check_month = #{date}
+
+                              AND v.id = pv.volume_id
+                              AND pv.delay IN (- 1, 2 )
+                        )
+                      AND v.number NOT LIKE "%+%"
+                )
+                )
+           OR (
+                    v.project_id = #{id}
+
+                AND EXISTS (
+                            SELECT
+                                1
+                            FROM
+                                check_plan_volume pv
+                            WHERE
+                                pv.project_id = #{id}
+
+                              AND pv.check_month = #{date}
+
+                              AND v.id = pv.volume_id
+                              AND pv.delay IN (- 1, 2 )
+                        )
+                AND v.number NOT LIKE "%+%"
+
+            )
     </select>
     <select id="queryUser" resultType="java.util.Map">
         SELECT

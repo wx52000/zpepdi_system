@@ -155,7 +155,9 @@ public class VolumeServiceImpl implements VolumeService {
         //判断卷册
         if (map.get("spider").equals(1)) {
             Map<String,Object> oldMap = projectDao.queryByVolumeId(Integer.valueOf(map.get("taskId").toString()));
-            old = Double.parseDouble(oldMap.get("workday").toString());
+            if (oldMap.get("tec") != null && oldMap.get("tec").toString().equals(map1.get("tec").toString())){
+                old = Double.parseDouble(oldMap.get("workday").toString());
+            }
             if (num >= (used + Double.parseDouble(map.get("workday").toString()) - old)) {
                 String[] s = {"待送出版", "正在出版", "代送业主", "已完成", "院交出"};
                 new Thread(() -> volumeDao.setWorkdayLog(userId, map)).start();
@@ -174,6 +176,7 @@ public class VolumeServiceImpl implements VolumeService {
                 map.put("checker",checker);
                 map.put("principal",principal);
                 map.put("headman",headman);
+                map.put("tec",map1.get("tec"));
                 volumeDao.setWorkday(userId, map);
                 map1.put("workday",workday);
                 map1.put("designer",String.format("%.1f",designer));
@@ -190,7 +193,7 @@ public class VolumeServiceImpl implements VolumeService {
 
                 Map<String,Object> user = new HashMap<>();
                 user.put("projectId",map.get("id"));
-                user.put("tec",map.get("tec"));
+                user.put("tec",map1.get("tec"));
                 user = checkerDao.queryByProjectAndTec(userId,user);
                 auditMap.put("auditor_id", user.get("id"));
                 auditMap.put("auditor_username", user.get("username"));
