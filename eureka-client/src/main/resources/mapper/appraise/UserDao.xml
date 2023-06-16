@@ -22,8 +22,8 @@
                 column="id=id,vid= vid" select="getGroup1"/>
   </resultMap>
     <insert id="add" parameterType="map" useGeneratedKeys="true" keyProperty="userId" keyColumn="id">
-        insert into user(pid , did , tid , `name` , username , paw , grade)
-        values (#{pid} , #{did} , #{tid} , #{name} , #{username} ,AES_ENCRYPT("1234",'zpepdi') , 0)
+        insert into user(pid , did , tid , `name` , username , paw , grade, office_id)
+        values (#{pid} , #{did} , #{tid} , #{name} , #{username} ,AES_ENCRYPT("1234",'zpepdi') , 0, #{office_id})
             ON DUPLICATE KEY UPDATE
             alive = 1
     </insert>

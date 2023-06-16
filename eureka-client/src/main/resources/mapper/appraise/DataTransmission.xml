@@ -2,48 +2,53 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zpepdi.eureka_client.dao.appraise.DataTransmissionDao">
     <insert id="insertData">
+        UPDATE volume v
+        SET v.alive = 0
+        WHERE v.project_id = #{id}
+        and v.state in ('尚未开展','尚未确定');
         INSERT INTO `volume` (
-            `project_id`,
-            `number`,
-            `name`,
-            `rollId`,
-            `tec`,
-            `dep`,
-            `state`,
-            `principal`,
-            `chief`,
-            `designer`,
-            `checker`,
-            `headman`,
-            `planned_start_date`,
-            `start_date`,
-            `planned_publication_date`,
-            `actual_publication_date`,
-            `planned_shot_date`,
-            `shot_date`,
-            `proofreading_date`,
-            `complete_time`,
-            `formId`,
-            `wfInstId`,
-            `actual_principal`,
-            `tips`,
-            `alive`,
-            plan_confirm
+        id,
+        `project_id`,
+        `number`,
+        `name`,
+        `rollId`,
+        `tec`,
+        `dep`,
+        `state`,
+        `principal`,
+        `chief`,
+        `designer`,
+        `checker`,
+        `headman`,
+        `planned_start_date`,
+        `start_date`,
+        `planned_publication_date`,
+        `actual_publication_date`,
+        `planned_shot_date`,
+        `shot_date`,
+        `proofreading_date`,
+        `complete_time`,
+        `formId`,
+        `wfInstId`,
+        `actual_principal`,
+        `tips`,
+        `alive`,
+        plan_confirm
         )
-        VALUES <foreach collection="list" item="item" separator=",">
-        (#{id}, #{item.RollCode}, #{item.RollName}, #{item.RollID}, #{item.SpecialtyName},
-         #{item.DelongDeptName},#{item.state}, #{item.MasterDesignerName}, #{item.MasterEngineerName},
-         #{item.RollOwnerName}, #{item.checker}, #{item.headman},
-         DATE_FORMAT(#{item.PlanStartDate},'%Y-%m-%d'),
-         DATE_FORMAT(#{item.FactStartDate},'%Y-%m-%d'),
-         DATE_FORMAT(#{item.PlanToPublishDate},'%Y-%m-%d'),
-         DATE_FORMAT(#{item.ToPublishDate},'%Y-%m-%d'),
-         DATE_FORMAT(#{item.PlanDesignedDate},'%Y-%m-%d'),
-         DATE_FORMAT(#{item.FactDesignedDate},'%Y-%m-%d'),
-         DATE_FORMAT(#{item.MutualVerifyDate},'%Y-%m-%d'),
-         DATE_FORMAT(#{item.FactOutOfCollegeDate},'%Y-%m-%d'), 85,#{item.wfInst}, #{item.principal},0, 1,0)
-             </foreach>
-         on duplicate key update
+        VALUE <foreach collection="list" item="item" separator=",">
+        ( #{item.RollID}, #{id}, #{item.RollCode}, #{item.RollName}, #{item.RollID}, #{item.SpecialtyName},
+        #{item.DelongDeptName},#{item.state}, #{item.MasterDesignerName}, #{item.MasterEngineerName},
+        #{item.RollOwnerName}, #{item.checker}, #{item.headman},
+        DATE_FORMAT(#{item.PlanStartDate},'%Y-%m-%d'),
+        DATE_FORMAT(#{item.FactStartDate},'%Y-%m-%d'),
+        DATE_FORMAT(#{item.PlanToPublishDate},'%Y-%m-%d'),
+        DATE_FORMAT(#{item.ToPublishDate},'%Y-%m-%d'),
+        DATE_FORMAT(#{item.PlanDesignedDate},'%Y-%m-%d'),
+        DATE_FORMAT(#{item.FactDesignedDate},'%Y-%m-%d'),
+        DATE_FORMAT(#{item.MutualVerifyDate},'%Y-%m-%d'),
+        DATE_FORMAT(#{item.FactOutOfCollegeDate},'%Y-%m-%d'), 85,#{item.wfInst}, #{item.principal},0, 1,0)
+    </foreach>
+        on duplicate key update
         `name` = values(`name`),
         `tec` = values(`tec`),
         `state` = values(`state`),
@@ -62,7 +67,10 @@
         `wfInstId` = values(`wfInstId`),
         `actual_principal` = values(`actual_principal`),
         `tips` = 1,
-        `alive` = 1
+        `alive` = 1;
+        delete
+        from volume
+        where  alive = 0;
     </insert>
     <insert id="insertIncome">
         <foreach collection="list" item="item" separator=";" >
@@ -156,15 +164,6 @@
         on duplicate key update
         `state` = 1
     </insert>
-    <update id="setAlive">
-        UPDATE volume v,
-            project p
-        SET v.alive = 0
-        WHERE
-            p.id = v.project_id
-          and p.close = 0
-          and v.state in ('尚未开展','尚未确定')
-    </update>
     <update id="reSetUser">
         INSERT INTO volume_user (project_id, volume_id, designer, checker, principal, headman )
         SELECT
@@ -203,6 +202,9 @@
         where id = #{id}
     </update>
     <update id="setFrozenExistNotWorkdayTec">
+        UPDATE workday_tec
+        SET frozen = 0
+        WHERE frozen_reason = "存在工时数量为0卷册,调整工时后重新审核解冻";
         UPDATE workday_tec wt,
         project p
         SET wt.frozen = 1, wt.frozen_reason = "存在工时数量为0卷册,调整工时后重新审核解冻"
@@ -249,11 +251,6 @@
         AND wt.project_id = p.id
         AND p.control = 1
     </update>
-    <delete id="delNotAlive">
-        delete
-        from volume
-        where  alive = 0
-    </delete>
     <delete id="delIncome">
         delete
         from income_information

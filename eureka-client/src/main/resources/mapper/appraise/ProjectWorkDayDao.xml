@@ -1187,5 +1187,31 @@
     )  y
     GROUP BY y.office_id
   </select>
+  <select id="IsInsert" resultType="java.lang.Boolean">
+    SELECT EXISTS
+             (
+                   SELECT
+                     1
+                   FROM
+                     workday_tec wt,
+                     major_contrast_technology mt
+                   WHERE
+                     project_id = #{map.projectId}
+                     AND mt.big_name = #{map.tec}
+                     AND wt.volume_tec = mt.small_name
+                     AND mt.big_name != mt.small_name
+        UNION
+                  SELECT
+                      1
+                  FROM
+                      workday_tec wt,
+                      major_contrast_technology mt
+                  WHERE
+                      project_id = #{map.projectId}
+                      AND mt.small_name = #{map.tec}
+                      AND wt.volume_tec = mt.big_name
+                  AND mt.small_name != #{map.tec}
+	)
+  </select>
 
 </mapper>

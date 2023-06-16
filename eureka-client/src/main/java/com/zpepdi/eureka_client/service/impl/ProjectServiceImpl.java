@@ -1567,7 +1567,6 @@ public class ProjectServiceImpl implements ProjectService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return response;
     }
 

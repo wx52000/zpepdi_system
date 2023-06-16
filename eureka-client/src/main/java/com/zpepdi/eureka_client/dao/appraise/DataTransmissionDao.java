@@ -14,12 +14,9 @@ public interface DataTransmissionDao {
     void setProject(@Param("id")Integer id,
                     @Param("map") Map<String,Object> map);
 
-    void setAlive();
-
-    void delNotAlive();
-
     void insertData(@Param("id")String id,
                     @Param("list") List<Map<String,Object>> list);
+
 
     void reSetUser();
 

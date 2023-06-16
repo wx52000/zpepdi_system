@@ -46,6 +46,9 @@ public interface ProjectWorkdayDao {
   //修改项目分配工时
   void setProWorkday(Map map);
 
+  //判断是否可以新增此专业
+  boolean IsInsert(Map<String,Object> map);
+
   void setTec(@Param("id") Integer id, @Param("map") Map<String,Object> map);
 
   void setPrincipal(@Param("id") Integer id, @Param("map") Map<String,Object> map);

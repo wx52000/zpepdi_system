@@ -127,6 +127,9 @@ public class ProjectWorkdayServiceImpl implements ProjectWorkdayService {
   @Override
   public Result setPrincipal(Integer id, Map<String,Object> map){
     if (map.get("principal") != null && map.get("principal") != "") {
+      if (proWorkdayDao.IsInsert(map)){
+        return Result.build(784,"部分专业不可同时选择");
+      }
       proWorkdayDao.setTec(id, map);
       if (map.get("wtId") == null || map.get("wtId").toString().equals("")) {
         map.put("wtId", proWorkdayDao.queryWorkdayTecId(map));

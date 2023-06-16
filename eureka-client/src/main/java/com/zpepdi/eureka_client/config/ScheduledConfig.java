@@ -61,8 +61,8 @@ public class ScheduledConfig implements SchedulingConfigurer {
 //    public void resetPlanDate(){
 //        volumeService.resetPlanDate();
 //    }
-////
-////
+//////
+//////
 //    @Scheduled(cron = "0 0 0/2 * * ?")
 ////    @PostConstruct
 //    public void dataTransmission(){

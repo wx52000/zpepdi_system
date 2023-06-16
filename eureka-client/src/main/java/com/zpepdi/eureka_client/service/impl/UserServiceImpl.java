@@ -67,7 +67,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void add(Map<String,Object> map) {
         userDao.add(map);
-        userInformationDao.insert(map);
+        if (map.get("sex") != null && map.get("birthday") != null
+                && map.get("hiredate") != null) {
+            userInformationDao.insert(map);
+        }
     }
 
     @Override

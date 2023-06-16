@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.zpepdi.eureka_client.entity.User;
 import com.zpepdi.eureka_client.result.Result;
 import com.zpepdi.eureka_client.service.DataTransmissionService;
+import com.zpepdi.eureka_client.service.ProjectService;
+import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.OAuth2ClientProperties;
@@ -21,7 +23,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
+import java.util.Map;
+
 /*
 登录接口，转接到oauth 上获取jwt
  */
@@ -37,6 +42,8 @@ public class LoginController {
 
     @Autowired()
     private TokenStore tokenStore;
+    @Autowired
+    private ProjectService projectService;
 
 
     @RequestMapping("login")
@@ -72,6 +79,12 @@ public class LoginController {
         String url = accessTokenUrl + "?grant_type=refresh_token&refresh_token="+refreshToken;
         HttpEntity<HashMap<String,Object>> request = new HttpEntity<>(headers);
         return restTemplate.postForObject(url,request, JSONObject.class);
+    }
+
+    @RequestMapping("test")
+    public HttpServletResponse test(HttpServletResponse response, @RequestBody Map<String,Object> map){
+        projectService.downExcel(response,737,map);
+        return response;
     }
 
 }

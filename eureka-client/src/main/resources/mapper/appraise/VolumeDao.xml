@@ -3362,7 +3362,13 @@
         <if test="type == 1">
             and v.number LIKE "%+%"
         </if>
-          and v.tec like concat("%",#{tec},"%")
+          and v.tec in (
+        select m.small_name
+        from major_contrast_technology m
+        where big_name = #{tec}
+        union
+        select #{tec}
+        )
         <if test="type == 0">
             and v.number not LIKE "%+%"
         </if>
@@ -4327,7 +4333,13 @@
         <if test="type == 1">
             and v.number LIKE "%+%"
         </if>
-        and v.tec like concat("%",#{tec},"%")
+        and v.tec in (
+        select m.small_name
+        from major_contrast_technology m
+        where big_name = #{tec}
+        union
+        select #{tec}
+        )
         <if test="type == 0">
             and v.number not LIKE "%+%"
         </if>
