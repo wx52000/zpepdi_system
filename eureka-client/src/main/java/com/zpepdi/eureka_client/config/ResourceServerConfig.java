@@ -79,6 +79,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers("/produceDataTransmit").permitAll()
                 .antMatchers("/druid").permitAll()
                 .antMatchers("/error").permitAll()
+                .antMatchers("/down_load/*").permitAll()
                 .and()
                 .authorizeRequests()
                 .anyRequest().authenticated()

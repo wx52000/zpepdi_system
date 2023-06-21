@@ -82,9 +82,9 @@ public class LoginController {
     }
 
     @RequestMapping("test")
-    public HttpServletResponse test(HttpServletResponse response, @RequestBody Map<String,Object> map){
-        projectService.downExcel(response,737,map);
-        return response;
+    public Result test(HttpServletResponse response, @RequestBody Map<String,Object> map){
+//        projectService.downExcel(response,737,map);
+        return Result.ok("down_load/test.zip");
     }
 
 }

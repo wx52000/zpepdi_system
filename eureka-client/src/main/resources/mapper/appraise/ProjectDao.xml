@@ -1982,12 +1982,12 @@
                               AND h.submit = 2
                                    LEFT JOIN volume_reason s ON v.id = s.volume_id,
                                workday_tec wt
-                                   LEFT JOIN major_contrast_technology m1 ON t.volume_tec = m1.big_name,
+                                   LEFT JOIN major_contrast_technology m1 ON wt.volume_tec = m1.big_name,
                                workday_tec_principal wtp
                           WHERE v.project_id = #{map.id}
                             AND wtp.user_id = #{id}
                             AND wtp.workday_tec_id = wt.id
-                            AND  v.tec = IF( m1.big_name is null , t.volume_tec , m1.small_name)
+                            AND  v.tec = IF( m1.big_name is null , wt.volume_tec , m1.small_name)
                           GROUP BY v.id
                           UNION
                           SELECT DISTINCT v.project_id,

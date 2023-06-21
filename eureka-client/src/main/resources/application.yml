@@ -1,9 +1,9 @@
 #开发
-eurekaIp : localhost
-sqlIp : 10.136.238.23
+#eurekaIp : localhost
+#sqlIp : 10.136.238.23
 #生产
-#sqlIp : 10.136.238.28
-#eurekaIp : 10.136.238.28
+sqlIp : 10.136.238.28
+eurekaIp : 10.136.238.28
 
 
 spring:
@@ -18,7 +18,10 @@ spring:
       max-file-size: 20MB
       max-request-size: 20MB
 
-    static-path-pattern: /excel/**
+#    static-path-pattern: /down_load/**
+
+#  resources:
+  #    static-locations: file:D://excel/, file:D://down_test/
   redis:
     database: 0
     host: ${sqlIp}
@@ -41,8 +44,6 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
-  resources:
-    static-locations: file:D://excel/
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:

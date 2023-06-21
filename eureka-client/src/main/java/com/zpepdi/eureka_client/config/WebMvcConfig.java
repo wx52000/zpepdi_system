@@ -7,7 +7,9 @@ import com.zpepdi.eureka_client.interceptor.AuthInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import java.util.List;
@@ -44,15 +46,16 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         registry.addInterceptor(userIdInterceptor())
                 .addPathPatterns("/**")
                 .excludePathPatterns("/login","/refresh","/down/down360","/myLogout",
-                        "/error","/test","/produceDataTransmit"," /druid/*");
+                        "/error","/test","/produceDataTransmit","/druid/*","/down_load/*");
         super.addInterceptors(registry);
     }
 
-//    @Override
-//    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
-//        super.addResourceHandlers(registry);
-//    }
+    @Override
+    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/**").addResourceLocations("classpath:static/");
+        registry.addResourceHandler("/down_load/**").addResourceLocations("file:D://down_test/");
+        super.addResourceHandlers(registry);
+    }
 
 
 

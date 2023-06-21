@@ -295,14 +295,14 @@
     and volume_tec = #{tec}
   </update>
   <update id="setVolumeWorkday">
-    insert into volume_workday(volume_id,volume_number, `state`, `type`, workday,
+    insert into volume_workday(volume_id, tec, volume_number, `state`, `type`, workday,
                                designer_workday,checker_workday,
                                principal_workday,headman_workday,`date`, `check`, `time`, handler)
     values
     <foreach collection="map.list" item="item" separator=",">
       <choose>
         <when test="item.submit != 1 and item.submit != 2 and item.workday != null and item.workday != '' or item.workday == 0">
-          (#{item.id},#{item.number}, 0, 0, #{item.workday},
+          (#{item.id},#{map.tec}, #{item.number}, 0, 0, #{item.workday},
            #{item.workday} * #{map.designer} /100,
           #{item.workday} * #{map.checker} /100,
           #{item.workday} * #{map.principal} /100,
@@ -313,6 +313,7 @@
   </foreach>
     on duplicate key update
     `state` = values(`state`),
+    `tec` = values(`tec`),
     workday = values(workday),
     designer_workday = values(designer_workday),
     checker_workday = values(checker_workday),

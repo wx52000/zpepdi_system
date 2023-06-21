@@ -24,8 +24,8 @@ spring:
             allowedOrigins: '*'
       httpclient: #http连接设置
 #        全局超时
-        connect-timeout: 3000
-        response-timeout: 5000
+        connect-timeout: 8000
+        response-timeout: 10000
         pool:
           max-connections: 5000 #最大连接数
           #       max-life-time: 45000 #最大连接时间
